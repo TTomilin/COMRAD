@@ -1,0 +1,57 @@
+name: Test Gymnasium wrapper
+
+on:
+  push:
+    paths:
+      - '.github/workflows/test-gymnasium-wrapper.yml'
+      - 'gymnasium_wrapper/**'
+      - 'tests/**'
+      - 'CMakeLists.txt'
+      - 'setup.py'
+      - 'pyproject.toml'
+    branches: [master]
+  pull_request:
+    paths:
+      - '.github/workflows/test-gymnasium-wrapper.yml'
+      - 'gymnasium_wrapper/**'
+      - 'tests/**'
+      - 'CMakeLists.txt'
+      - 'setup.py'
+      - 'pyproject.toml'
+    branches: [master]
+
+jobs:
+  test_gymnasium_wrapper:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies on Ubuntu
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt update
+        sudo apt install -y cmake git libboost-all-dev libsdl2-dev libopenal-dev
+
+    - name: Apt report
+      if: runner.os == 'Linux'
+      run: apt list --installed
+
+    - name: Set up Python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+
+    - name: Python environment report
+      run: python -c "import sys; print(sys.version)"
+
+    - name: Pip install
+      run: pip install .[test]
+
+    - name: Import check
+      run: python -c "import vizdoom"
+
+    - name: Run tests
+      run: pytest tests/test_gymnasium_wrapper.py
