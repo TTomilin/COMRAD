@@ -66,6 +66,7 @@ requires-python = ">=3.10"
 dependencies = [
     "opencv-python>=4.12.0.88",
     "pettingzoo>=1.25.0",
+    "psutil>=7.1.0",
     "torch>=2.8.0",
     "torchrl>=0.10.0",
     "torchvision>=0.23.0",
