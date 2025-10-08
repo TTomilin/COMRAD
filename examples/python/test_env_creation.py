@@ -10,6 +10,10 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from pettingzoo_wrapper import make
 
+import warnings
+# SUppress pkg_resources deprecated API warning
+warnings.filterwarnings("ignore", category=UserWarning, module="pkg_resources")
+
 def clean():
     try:
         subprocess.run(['pkill', '-9', 'vizdoom'], capture_output=True, timeout=5)
