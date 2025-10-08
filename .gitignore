@@ -119,3 +119,4 @@ src/vizdoom/zlib/CTestTestfile.cmake
 
 # CLion & PyCharm
 **/.idea
+no_benchmarl_test.py
