@@ -1,0 +1,522 @@
+#!/usr/bin/env python3
+
+"""
+This is bases on train_multi_agent.py, but:
++ Supports mps for metal gpu,
++ Has more logging/debugging
++ Clean lingering processes and ports before running
++ Signal timeout when creating experiment
+"""
+
+# TODO: stable baseline3 env_checker to validate env (?)
+
+import argparse
+import multiprocessing as mp
+import os
+import socket
+from dataclasses import fields
+from pathlib import Path
+from typing import Dict, Any, Optional
+import time
+import random
+
+import torch
+import torch.nn.functional as F
+from benchmarl.algorithms import MappoConfig, QmixConfig, MasacConfig
+from benchmarl.environments import TaskClass
+from benchmarl.experiment import Experiment, ExperimentConfig
+from benchmarl.models import CnnConfig
+from tensordict import TensorDictBase
+from torch import nn
+from torchrl.data import Composite
+from torchrl.data.tensor_specs import UnboundedContinuous
+from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs
+from torchrl.envs import TransformedEnv, Compose
+from torchrl.envs.libs.pettingzoo import MarlGroupMapType, PettingZooWrapper
+from torchrl.envs.transforms import ObservationTransform
+from torchrl.envs.transforms import SelectTransform
+from torchrl.envs.transforms.utils import _set_missing_tolerance
+import wandb
+import threading
+import json
+import signal
+import datetime
+
+# Add to Python path as pettingzoo_wrapper in root
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+from pettingzoo_wrapper import make
+
+def clean():
+    try:
+        import subprocess
+        import signal
+        import time
+
+        kill_proc = [
+            "vizdoom",
+            "train_multi_agent",
+            "python.*vizdoom",
+            "python.*train_multi_agent"
+        ]
+
+        # Kill process
+        for proc in kill_proc:
+            try:
+                subprocess.run(['pkill', '-9', '-f', proc], capture_output=True, timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+            except Exception:
+                pass
+
+        # Kill port used
+        # Starts from 5029
+        for port in range(5028, 5100):
+            try:
+                result = subprocess.run(['lsof', '-ti', f':{port}'], capture_output=True, text=True, timeout=2)
+                if result.returncode == 0 and result.stdout.strip():
+                    pids = result.stdout.strip().split('\n')
+                    for pid in pids:
+                        try:
+                            os.kill(int(pid), signal.SIGKILL)
+                        except (OSError, ValueError):
+                            pass
+            except Exception:
+                pass
+
+        time.sleep(2) # Wait for all process to die
+
+        # Cleanup again because I feel like it
+        try:
+            subprocess.run(['pkill', '-9', '-f', 'vizdoom'], capture_output=True, timeout=2)
+        except:
+            pass
+
+    except Exception as e:
+        print(f"Cleanup failed: {e}")
+        pass
+
+def available_cpu_count() -> int:
+    try:
+        return len(os.sched_getaffinity(0))
+    except Exception:
+        return mp.cpu_count() or 1
+
+# Prevent oversubscribing cpu cores, but might reduce performance
+# os.environ.setdefault("OMP_NUM_THREADS", "1")
+# os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+# os.environ.setdefault("MKL_NUM_THREADS", "1")
+# try:
+#     torch.set_num_threads(1)
+# except Exception:
+#     pass
+
+# mps fallback for mac
+if torch.backends.mps.is_available():
+    os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+
+class AHWCToTensorResize(ObservationTransform):
+    """
+    Keep AHWC layout, convert to float tensor, optional /255, then resize (H,W).
+    In/out: (A,H,W,C) -> (A,h,w,C)
+    """
+
+    def __init__(
+            self,
+            key=("agent", "observation"),
+            h: int = 72,
+            w: int = 96,
+            from_int: bool | None = None,  # True: /255, False: no, None: auto if not float
+            dtype: torch.dtype | None = None,
+            mode: str = "bilinear",
+            antialias: bool = True,
+    ):
+        super().__init__(in_keys=[key], out_keys=[key])
+        self.key = key
+        self.h, self.w = int(h), int(w)
+        self.from_int = from_int
+        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.mode = mode
+        self.antialias = antialias
+
+    def _apply_transform(self, obs: torch.Tensor) -> torch.Tensor:
+        # obs is the leaf tensor for self.key; we expect (A,H,W,C)
+        if not isinstance(obs, torch.Tensor):
+            obs = torch.as_tensor(obs)
+
+        # normalize to [0, 1]
+        obs = obs.div(255).to(self.dtype)
+
+        if obs.ndim != 4:
+            raise ValueError(f"{self.key} must be 4D AHWC, got {tuple(obs.shape)}")
+
+        # Resize through NCHW path for interpolate, then back to AHWC
+        x = obs.permute(0, 3, 1, 2)  # A,C,H,W
+        align = dict(align_corners=False) if self.mode in ("bilinear", "bicubic") else {}
+        x = F.interpolate(x, size=(self.h, self.w), mode=self.mode, antialias=self.antialias, **align)
+        x = x.permute(0, 2, 3, 1).contiguous()  # A,h,w,C
+        return x
+
+    def transform_observation_spec(self, obs_spec: Composite) -> Composite:
+        leaf = obs_spec[self.key]
+        A, H, W, C = leaf.shape
+        obs_spec[self.key] = UnboundedContinuous(
+            shape=torch.Size([A, self.h, self.w, C]),
+            device=leaf.device,
+            dtype=self.dtype,
+        )
+        return obs_spec
+
+    def _reset(self, tensordict: TensorDictBase, tensordict_reset: TensorDictBase) -> TensorDictBase:
+        with _set_missing_tolerance(self, True):
+            tensordict_reset = self._call(tensordict_reset)
+        return tensordict_reset
+
+
+class VizdoomTask(TaskClass):
+    def __init__(self, config: Dict[str, Any]):
+        super().__init__("doom", config)
+        # Build a prototype env ONCE to fetch specs
+        proto_env = self.env_creator(seed=config.get("seed", 0))()
+        try:
+            self._action_spec = proto_env.action_spec
+            self._observation_spec = proto_env.observation_spec
+            self._action_mask_spec = getattr(proto_env, "action_mask_spec", None)
+            self._info_spec = getattr(proto_env, "info_spec", None)
+            self._state_spec = getattr(proto_env, "state_spec", None)
+            self._has_render = True
+        finally:
+            proto_env.close()
+
+    @staticmethod
+    def env_name() -> str:
+        return "vizdoom"
+
+    def env_creator(self, seed: int):
+        # returns an EnvCreator (TorchRL) that builds the env when called
+        def _make():
+            cfg = self.config
+            host_address = cfg.get("host_address", "127.0.0.1")
+
+            def _pick_free_port() -> int:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.bind((host_address, 0))  # 0 = ask OS for a free port
+                    return s.getsockname()[1]
+
+            # ensure each env instance gets its own port
+            port = _pick_free_port()
+
+            pz_env = make(
+                scenario=cfg["scenario"],
+                num_agents=int(cfg.get("num_agents", 2)),
+                resolution=str(cfg.get("resolution", "160x120")),
+                skip_frames=cfg.get("skip_frames", 4),
+                async_mode=bool(cfg.get("async_mode", True)),
+                host_address=str(host_address),
+                port=port,
+                netmode=int(cfg.get("netmode", 1)),
+                ticrate=int(cfg.get("ticrate", 35)),
+                use_multi_binary_action_space=False,
+                seed=seed,
+                enable_video=bool(cfg.get("enable_video", True)),
+                record_every=int(cfg.get("record_every", 50)),
+                video_fps=int(cfg.get("video_fps", 35)),
+            )
+            env = PettingZooWrapper(
+                env=pz_env,
+            )
+            env = TransformedEnv(env, Compose(
+                SelectTransform(("agent", "observation"), ("agent", "info")),
+                AHWCToTensorResize(key=("agent", "observation"), h=72, w=96, mode="bilinear"),
+                RemoveEmptySpecs(),
+            ))
+            env = env.to(cfg.get("device", "cpu"))
+            return env
+
+        return EnvCreator(_make)
+
+    def get_env_fun(self, num_envs: int, continuous_actions: bool, seed: int | None, device=None):
+        make_single = self.env_creator(seed)
+        # return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
+        return make_single
+
+    def action_spec(self, env: EnvBase) -> Composite:
+        return self._action_spec
+
+    def observation_spec(self, env: EnvBase) -> Composite:
+        return self._observation_spec
+
+    def action_mask_spec(self, env: EnvBase) -> Optional[Composite]:
+        return self._action_mask_spec
+
+    def info_spec(self, env: EnvBase) -> Optional[Composite]:
+        return self._info_spec
+
+    def state_spec(self, env: EnvBase) -> Optional[Composite]:
+        return None
+
+    def group_map(self, env=None):
+        """
+        Return a dict group_map (group_name -> [agent_names]).
+        BenchMARL calls this with the env; use its computed map if available.
+        Fallback to ONE_GROUP_PER_AGENT using known agent names.
+        """
+        # Try to use the env's own group_map (already a dict on PettingZooWrapper)
+        if env is not None:
+            gm = getattr(env, "group_map", None)
+            if isinstance(gm, dict) and gm:
+                return gm
+            # Fallback: build one-group-per-agent from possible_agents if present
+            agents = getattr(env, "possible_agents", None)
+            if agents:
+                return MarlGroupMapType.ONE_GROUP_PER_AGENT.get_group_map(list(agents))
+
+        # Last-resort fallback using config’s num_agents
+        n = int(self.config.get("num_agents", 2))
+        agents = [f"agent_{i}" for i in range(n)]
+        return MarlGroupMapType.ONE_GROUP_PER_AGENT.get_group_map(agents)
+
+    def has_render(self, env: EnvBase) -> bool:
+        return self._has_render
+
+    def max_steps(self, env: EnvBase) -> int:
+        return int(self.config.get("timeout", 1000))
+
+    def supports_continuous_actions(self) -> bool:
+        return False
+
+    def supports_discrete_actions(self) -> bool:
+        return True
+
+
+# ----------------- Script entry -----------------
+ALGOS: Dict[str, Any] = {
+    "mappo": MappoConfig,
+    "qmix": QmixConfig,
+    "masac": MasacConfig,
+}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    # Env args
+    ap.add_argument("--scenario", type=str, default="pitfall")
+    # ap.add_argument("--scenario", type=str, default="multi_duel")
+    ap.add_argument("--num_agents", type=int, default=2)
+    ap.add_argument("--resolution", type=str, default="160x120")
+    ap.add_argument("--skip_frames", type=int, default=4)
+    ap.add_argument("--async_mode", type=int, default=1)
+    ap.add_argument("--host_address", type=str, default="127.0.0.1")
+    ap.add_argument("--port", type=int, default=5029)
+    ap.add_argument("--netmode", type=int, default=1)
+    ap.add_argument("--ticrate", type=int, default=35)
+    ap.add_argument("--verbose", action='store_true', default=False)
+
+    # Train args
+    ap.add_argument("--algo", type=str, default="mappo", choices=list(ALGOS))
+    ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--total_steps", type=float, default=1e6)
+    # MPS support for metal gpu
+    gpu = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+    ap.add_argument("--device", type=str, default=gpu)
+    ap.add_argument("--rollout_steps", type=int, default=256)
+    ap.add_argument("--batch_size", type=int, default=6000)
+    ap.add_argument("--lr", type=float, default=5e-5)
+    ap.add_argument("--gamma", type=float, default=0.99)
+    ap.add_argument("--gae_lambda", type=float, default=0.9)
+    ap.add_argument("--clip_eps", type=float, default=0.2)
+    ap.add_argument("--entropy_coef", type=float, default=0.01)
+    ap.add_argument("--vf_coef", type=float, default=1.0)
+    ap.add_argument("--num_minibatches", type=int, default=15)
+    ap.add_argument("--num_epochs", type=int, default=45)
+    ap.add_argument("--num_envs", type=int, default=2) # Set to 2 to test performance with deadlock patch
+
+    # Video recording
+    ap.add_argument("--enable_video", type=bool, default=True)
+    ap.add_argument("--record_every", type=int, default=50)
+    ap.add_argument("--video_fps", type=int, default=35)
+    ap.add_argument("--render_mode", type=str, default=None, choices=(None, "human", "offscreen"))
+    
+    ap.add_argument("--small", action="store_true")
+    ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--debug_env", action="store_true")
+
+    args = ap.parse_args()
+
+    # Quick setting for testing
+    if args.small:
+        args.rollout_steps = max(args.rollout_steps, 128)
+        args.batch_size = min(args.batch_size, 2000)
+        args.num_epochs = min(args.num_epochs, 10)
+        args.num_minibatches = min(args.num_minibatches, 5)
+        args.ticrate = 70
+        args.skip_frames = 8
+
+    # Clean lingering processes
+    clean()
+
+    root_path = Path(__file__).parent.parent.parent
+    checkpoints_path = root_path / "checkpoints"
+    Path(checkpoints_path).mkdir(parents=True, exist_ok=True)
+
+    if args.algo == "mappo":
+        # Required ctor args for your MAPPO version
+        algo_cfg = MappoConfig(
+            share_param_critic=True,  # share critic across agents
+            clip_epsilon=args.clip_eps,  # PPO clip
+            entropy_coef=args.entropy_coef,  # entropy bonus
+            critic_coef=args.vf_coef,  # value loss coef
+            loss_critic_type="l2",  # or "smooth_l1" (Huber)
+            lmbda=args.gae_lambda,  # GAE lambda
+            scale_mapping="biased_softplus_1.0",  # softplus
+            use_tanh_normal=True,  # use tanh Gaussian here
+            minibatch_advantage=False,  # compute adv per minibatch
+        )
+    else:
+        raise NotImplementedError(
+            f"Only --algo mappo is wired without YAML in this script right now. Got: {args.algo}"
+        )
+
+    # Nature-style front end + 512 MLP head
+    cnn_num_cells = [32, 64, 64]
+    cnn_kernel_sizes = [8, 4, 3]
+    cnn_strides = [4, 2, 1]
+    cnn_paddings = [0, 0, 0]
+    cnn_activation_class = nn.ReLU
+    mlp_num_cells = [512]
+    mlp_layer_class = nn.Linear
+    mlp_activation_class = nn.ReLU
+
+    model_cfg = CnnConfig(
+        cnn_num_cells=cnn_num_cells,
+        cnn_kernel_sizes=cnn_kernel_sizes,
+        cnn_strides=cnn_strides,
+        cnn_paddings=cnn_paddings,
+        cnn_activation_class=cnn_activation_class,
+        mlp_num_cells=mlp_num_cells,
+        mlp_layer_class=mlp_layer_class,
+        mlp_activation_class=mlp_activation_class,
+    )
+
+    critic_cfg = CnnConfig(
+        cnn_num_cells=cnn_num_cells,
+        cnn_kernel_sizes=cnn_kernel_sizes,
+        cnn_strides=cnn_strides,
+        cnn_paddings=cnn_paddings,
+        cnn_activation_class=cnn_activation_class,
+        mlp_num_cells=mlp_num_cells,
+        mlp_layer_class=mlp_layer_class,
+        mlp_activation_class=mlp_activation_class,
+    )
+
+    exp_cfg = ExperimentConfig.get_from_yaml()
+
+    # compute any derived values first
+    on_policy_minibatch_size = max(1, args.batch_size // max(1, args.num_minibatches))
+
+    # only the fields you want to control from CLI
+    overrides = {
+        "sampling_device": args.device,
+        "train_device": args.device,
+        "buffer_device": args.device,
+        "share_policy_params": True,
+        "parallel_collection": False,
+        "max_n_frames": int(args.total_steps),
+        "lr": args.lr,
+
+        # on-policy collection
+        "on_policy_collected_frames_per_batch": args.rollout_steps,
+        "on_policy_n_envs_per_worker": args.num_envs,
+        "on_policy_n_minibatch_iters": args.num_epochs,
+        "on_policy_minibatch_size": on_policy_minibatch_size,
+
+        # eval / logging / ckpts
+        "evaluation": True,
+        "render": False,
+        "evaluation_interval": args.rollout_steps * 25,
+        "evaluation_episodes": 5,
+        "loggers": ["wandb"],
+        "project_name": "benchmarl-vizdoom",
+        "save_folder": str(checkpoints_path),
+        "checkpoint_interval": args.rollout_steps * 100,
+        "checkpoint_at_end": True,
+    }
+
+    # apply safely (only set known fields; skip Nones)
+    valid = {f.name for f in fields(ExperimentConfig)}
+    for k, v in overrides.items():
+        if v is not None and k in valid:
+            setattr(exp_cfg, k, v)
+
+    # keep eval interval aligned with horizon (collector-friendly)
+    h = exp_cfg.on_policy_collected_frames_per_batch
+    if h and exp_cfg.evaluation_interval % h != 0:
+        exp_cfg.evaluation_interval = ((exp_cfg.evaluation_interval + h - 1) // h) * h
+
+    task_cfg = {
+        "scenario": args.scenario,
+        "num_agents": args.num_agents,
+        "resolution": args.resolution,
+        "skip_frames": args.skip_frames,
+        "async_mode": bool(args.async_mode),
+        "host_address": args.host_address,
+        "port": args.port,
+        "netmode": args.netmode,
+        "ticrate": args.ticrate,
+        "enable_video": args.enable_video,
+        "render_mode": args.render_mode,
+        "record_every": args.record_every,
+        "video_fps": args.video_fps,
+        "device": args.device,
+        "seed": args.seed,
+        "verbose": args.verbose,
+        "debug_env": args.debug_env,
+    }
+
+    print("\nCreate task)
+    task = VizdoomTask(task_cfg)
+
+    # Add timeout to check if it's stuck
+    print("\nCreate experiment")
+    import signal
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Experiment timeout")
+    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(120)
+
+    try:
+        experiment = Experiment(
+            task=task,
+            algorithm_config=algo_cfg,
+            model_config=model_cfg,
+            critic_model_config=critic_cfg,
+            seed=args.seed,
+            config=exp_cfg,
+        )
+        signal.alarm(0)  # Cancel timeout
+    except TimeoutError:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+        return
+    except Exception as e:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+        raise e
+
+    # Go back to OG handler
+    signal.signal(signal.SIGALRM, old_handler)
+    
+    Path(exp_cfg.save_folder).mkdir(parents=True, exist_ok=True)
+    
+    try:
+        experiment.run()
+    except Exception as e:
+        print(f"\nTraining failed: {e}")
+        import traceback
+        traceback.print_exc()
+    finally:
+        experiment.close()
+
+
+if __name__ == "__main__":
+    main()
