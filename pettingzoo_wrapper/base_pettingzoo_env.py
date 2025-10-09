@@ -634,16 +634,37 @@ class VizdoomParallelEnv(ParallelEnv):
 
     def close(self):
         # tell children to close
-        for i, pipe in enumerate(self._pipes_parent):
+        for i, (pipe, proc) in enumerate(zip(self._pipes_parent, self._procs)):
+            if pipe is None or pipe.closed:
+                continue
+
+            # If the process is already gone then dpnt send anything
+            if proc is not None and not proc.is_alive():
+                try:
+                    pipe.close()
+                except Exception:
+                    pass
+                self._pipes_parent[i] = None
+                continue
+
             try:
-                if pipe.poll(timeout=0.1):  # Clear pending msg
+                # Drain pending msgs
+                while pipe.poll(timeout=0.05):
                     try:
                         pipe.recv()
-                    except:
-                        pass
+                    except (EOFError, BrokenPipeError, OSError):
+                        break
+
                 pipe.send(("close", None))
+            except (BrokenPipeError, EOFError, OSError):
+                # Check if child exited after finishing last cmd
+                try:
+                    pipe.close()
+                except Exception:
+                    pass
+                self._pipes_parent[i] = None
             except Exception as e:
-                print(f"Send close to agent {i} failed: {e}") # Most of the time broken pipe
+                print(f"Send close to agent {i} failed: {e}")
         
         time.sleep(0.5) # Should sleep here, else sometimes crash
         
@@ -659,6 +680,16 @@ class VizdoomParallelEnv(ParallelEnv):
                         p.kill() # Kill if can't terminate
             except Exception as e:
                 print(f"Join agent {i} failed: {e}")
+
+        # Close parent pipe
+        for i, pipe in enumerate(self._pipes_parent):
+            if pipe is None:
+                continue
+            try:
+                pipe.close()
+            except Exception:
+                pass
+            self._pipes_parent[i] = None
         
         # pygame
         if self._screen is not None:

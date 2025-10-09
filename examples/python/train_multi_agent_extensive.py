@@ -386,8 +386,8 @@ def main():
         algo_cfg = MappoConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
-            entropy_coeff=args.entropy_coef,  # entropy bonus
-            critic_coeff=args.vf_coef,  # value loss coef
+            entropy_coef=args.entropy_coef,  # entropy bonus
+            critic_coef=args.vf_coef,  # value loss coef
             loss_critic_type="l2",  # or "smooth_l1" (Huber)
             lmbda=args.gae_lambda,  # GAE lambda
             scale_mapping="biased_softplus_1.0",  # softplus
@@ -438,9 +438,9 @@ def main():
 
     # only the fields you want to control from CLI
     overrides = {
-        "sampling_device": args.sampling_device,  # cpu for mps gpu
+        "sampling_device": args.sampling_device, # cpu for mps gpu
         "train_device": args.device, # Train on mps
-        "buffer_device": args.device,
+        "buffer_device": args.sampling_device, # cpu for buffer
         "share_policy_params": True,
         "parallel_collection": False,
         "max_n_frames": int(args.total_steps),
