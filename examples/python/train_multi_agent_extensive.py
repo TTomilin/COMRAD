@@ -217,6 +217,7 @@ class VizdoomTask(TaskClass):
                 scenario=cfg["scenario"],
                 num_agents=int(cfg.get("num_agents", 2)),
                 resolution=str(cfg.get("resolution", "160x120")),
+                render_mode=cfg["render_mode"],
                 skip_frames=cfg.get("skip_frames", 4),
                 async_mode=bool(cfg.get("async_mode", True)),
                 host_address=str(host_address),
@@ -346,7 +347,7 @@ def main():
     ap.add_argument("--enable_video", type=bool, default=True)
     ap.add_argument("--record_every", type=int, default=50)
     ap.add_argument("--video_fps", type=int, default=35)
-    ap.add_argument("--render_mode", type=str, default=None, choices=(None, "human", "offscreen"))
+    ap.add_argument("--render_mode", type=str, default=None)
     
     ap.add_argument("--small", action="store_true")
     ap.add_argument("--logging", action="store_true")
@@ -454,8 +455,8 @@ def main():
 
         # eval / logging / ckpts
         "evaluation": True,
-        "render": False,
-        "evaluation_interval": args.rollout_steps * 25,
+        "render": True if args.render_mode == "human" else False,
+        "evaluation_interval": args.rollout_steps * (1 if args.render_mode == "human" else 25),
         "evaluation_episodes": 5,
         "loggers": ["wandb"],
         "project_name": "benchmarl-vizdoom",
@@ -529,7 +530,7 @@ def main():
     # Go back to OG handler
     signal.signal(signal.SIGALRM, old_handler)
     
-    Path(exp_cfg.save_folder).mkdir(parents=True, exist_ok=True)
+    Path(str(exp_cfg.save_folder)).mkdir(parents=True, exist_ok=True)
     
     try:
         experiment.run()

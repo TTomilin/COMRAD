@@ -264,8 +264,8 @@ def main():
         algo_cfg = MappoConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
-            entropy_coeff=args.entropy_coef,  # entropy bonus
-            critic_coeff=args.vf_coef,  # value loss coef
+            entropy_coef=args.entropy_coef,  # entropy bonus
+            critic_coef=args.vf_coef,  # value loss coef
             loss_critic_type="l2",  # or "smooth_l1" (Huber)
             lmbda=args.gae_lambda,  # GAE lambda
             scale_mapping="biased_softplus_1.0",  # softplus
