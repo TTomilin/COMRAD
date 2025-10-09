@@ -6,6 +6,7 @@ This is bases on train_multi_agent.py, but:
 + Has more logging/debugging
 + Clean lingering processes and ports before running
 + Signal timeout when creating experiment
++ Use CPU for sampling, and GPU (mps) for training
 """
 
 # TODO: stable baseline3 env_checker to validate env (?)
@@ -103,17 +104,22 @@ def available_cpu_count() -> int:
         return mp.cpu_count() or 1
 
 # Prevent oversubscribing cpu cores, but might reduce performance
-# os.environ.setdefault("OMP_NUM_THREADS", "1")
-# os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
-# os.environ.setdefault("MKL_NUM_THREADS", "1")
-# try:
-#     torch.set_num_threads(1)
-# except Exception:
-#     pass
+# ONLY disable when using 1 env process
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+try:
+    torch.set_num_threads(1)
+except Exception:
+    pass
+
+# Force this so all tensors default to float32
+torch.set_default_dtype(torch.float32)
 
 # mps fallback for mac
 if torch.backends.mps.is_available():
     os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+    # torch.set_default_dtype(torch.float32)
 
 class AHWCToTensorResize(ObservationTransform):
     """
@@ -135,7 +141,8 @@ class AHWCToTensorResize(ObservationTransform):
         self.key = key
         self.h, self.w = int(h), int(w)
         self.from_int = from_int
-        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        # Force float32 for mps becuase it doesn't support float64 convolutions
+        self.dtype = dtype if dtype is not None else torch.float32 # or torch.get_default_type()
         self.mode = mode
         self.antialias = antialias
 
@@ -230,7 +237,8 @@ class VizdoomTask(TaskClass):
                 AHWCToTensorResize(key=("agent", "observation"), h=72, w=96, mode="bilinear"),
                 RemoveEmptySpecs(),
             ))
-            env = env.to(cfg.get("device", "cpu"))
+            # Use sampling_device instead of device for env as we must use cpu here
+            env = env.to(cfg.get("sampling_device", "cpu"))
             return env
 
         return EnvCreator(_make)
@@ -317,8 +325,11 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--total_steps", type=float, default=1e6)
     # MPS support for metal gpu
+    # NOTE: MPS has indexing issue in torchrl env wrappers
+    # So we must sampling on CPU, and MPS for training only
     gpu = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
     ap.add_argument("--device", type=str, default=gpu)
+    ap.add_argument("--sampling_device", type=str, default=None) # Set to "cpu" or "cuda" depends on gpu below
     ap.add_argument("--rollout_steps", type=int, default=256)
     ap.add_argument("--batch_size", type=int, default=6000)
     ap.add_argument("--lr", type=float, default=5e-5)
@@ -338,10 +349,21 @@ def main():
     ap.add_argument("--render_mode", type=str, default=None, choices=(None, "human", "offscreen"))
     
     ap.add_argument("--small", action="store_true")
-    ap.add_argument("--verbose", action="store_true")
+    ap.add_argument("--logging", action="store_true")
     ap.add_argument("--debug_env", action="store_true")
 
     args = ap.parse_args()
+
+    # When env.to("mps") is called, observation tensors move to mps
+    # But torchrl contorl tensors still stay on cpu
+    # Thus, during reset, the code tries done_val[~reset_value]
+    # And since done_val is on cpu while ~reset_value is on mps, it causes runtime error
+    # So we must keep sampling on CPU
+    if args.sampling_device is None:
+        if args.device == "mps":
+            args.sampling_device = "cpu"
+        else:
+            args.sampling_device = args.device
 
     # Quick setting for testing
     if args.small:
@@ -364,8 +386,8 @@ def main():
         algo_cfg = MappoConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
-            entropy_coef=args.entropy_coef,  # entropy bonus
-            critic_coef=args.vf_coef,  # value loss coef
+            entropy_coeff=args.entropy_coef,  # entropy bonus
+            critic_coeff=args.vf_coef,  # value loss coef
             loss_critic_type="l2",  # or "smooth_l1" (Huber)
             lmbda=args.gae_lambda,  # GAE lambda
             scale_mapping="biased_softplus_1.0",  # softplus
@@ -416,8 +438,8 @@ def main():
 
     # only the fields you want to control from CLI
     overrides = {
-        "sampling_device": args.device,
-        "train_device": args.device,
+        "sampling_device": args.sampling_device,  # cpu for mps gpu
+        "train_device": args.device, # Train on mps
         "buffer_device": args.device,
         "share_policy_params": True,
         "parallel_collection": False,
@@ -467,13 +489,14 @@ def main():
         "render_mode": args.render_mode,
         "record_every": args.record_every,
         "video_fps": args.video_fps,
-        "device": args.device,
+        "device": args.sampling_device,  # cpu for env creation
+        "sampling_device": args.sampling_device,  # Then pass it through to env creator
         "seed": args.seed,
-        "verbose": args.verbose,
+        "verbose": args.logging,
         "debug_env": args.debug_env,
     }
 
-    print("\nCreate task)
+    print("\nCreate task")
     task = VizdoomTask(task_cfg)
 
     # Add timeout to check if it's stuck
