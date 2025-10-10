@@ -9,6 +9,7 @@ This is bases on train_multi_agent.py, but:
 + Use CPU for sampling, and GPU (mps) for training
 """
 
+# TODO: Case to resume when crashed: https://benchmarl.readthedocs.io/en/latest/concepts/features.html#reloading
 # TODO: stable baseline3 env_checker to validate env (?)
 
 import argparse
@@ -310,13 +311,11 @@ def main():
     ap = argparse.ArgumentParser()
     # Env args
     ap.add_argument("--scenario", type=str, default="pitfall")
-    # ap.add_argument("--scenario", type=str, default="multi_duel")
     ap.add_argument("--num_agents", type=int, default=2)
     ap.add_argument("--resolution", type=str, default="160x120")
     ap.add_argument("--skip_frames", type=int, default=4)
     ap.add_argument("--async_mode", type=int, default=1)
     ap.add_argument("--host_address", type=str, default="127.0.0.1")
-    ap.add_argument("--port", type=int, default=5029)
     ap.add_argument("--netmode", type=int, default=1)
     ap.add_argument("--ticrate", type=int, default=35)
     ap.add_argument("--verbose", action='store_true', default=False)
@@ -348,10 +347,6 @@ def main():
     ap.add_argument("--record_every", type=int, default=50)
     ap.add_argument("--video_fps", type=int, default=35)
     ap.add_argument("--render_mode", type=str, default=None)
-    
-    ap.add_argument("--small", action="store_true")
-    ap.add_argument("--logging", action="store_true")
-    ap.add_argument("--debug_env", action="store_true")
 
     args = ap.parse_args()
 
@@ -365,15 +360,6 @@ def main():
             args.sampling_device = "cpu"
         else:
             args.sampling_device = args.device
-
-    # Quick setting for testing
-    if args.small:
-        args.rollout_steps = max(args.rollout_steps, 128)
-        args.batch_size = min(args.batch_size, 2000)
-        args.num_epochs = min(args.num_epochs, 10)
-        args.num_minibatches = min(args.num_minibatches, 5)
-        args.ticrate = 70
-        args.skip_frames = 8
 
     # Clean lingering processes
     clean()
@@ -455,8 +441,8 @@ def main():
 
         # eval / logging / ckpts
         "evaluation": True,
-        "render": True if args.render_mode == "human" else False,
-        "evaluation_interval": args.rollout_steps * (1 if args.render_mode == "human" else 25),
+        "render": False,
+        "evaluation_interval": args.rollout_steps * 25,
         "evaluation_episodes": 5,
         "loggers": ["wandb"],
         "project_name": "benchmarl-vizdoom",
@@ -480,21 +466,16 @@ def main():
         "scenario": args.scenario,
         "num_agents": args.num_agents,
         "resolution": args.resolution,
+        "render_mode": args.render_mode,
         "skip_frames": args.skip_frames,
         "async_mode": bool(args.async_mode),
         "host_address": args.host_address,
-        "port": args.port,
         "netmode": args.netmode,
         "ticrate": args.ticrate,
         "enable_video": args.enable_video,
-        "render_mode": args.render_mode,
         "record_every": args.record_every,
         "video_fps": args.video_fps,
-        "device": args.sampling_device,  # cpu for env creation
-        "sampling_device": args.sampling_device,  # Then pass it through to env creator
-        "seed": args.seed,
-        "verbose": args.logging,
-        "debug_env": args.debug_env,
+        "sampling_device": args.sampling_device,
     }
 
     print("\nCreate task")
@@ -502,33 +483,14 @@ def main():
 
     # Add timeout to check if it's stuck
     print("\nCreate experiment")
-    import signal
-    def timeout_handler(signum, frame):
-        raise TimeoutError("Experiment timeout")
-    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(120)
-
-    try:
-        experiment = Experiment(
-            task=task,
-            algorithm_config=algo_cfg,
-            model_config=model_cfg,
-            critic_model_config=critic_cfg,
-            seed=args.seed,
-            config=exp_cfg,
-        )
-        signal.alarm(0)  # Cancel timeout
-    except TimeoutError:
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
-        return
-    except Exception as e:
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
-        raise e
-
-    # Go back to OG handler
-    signal.signal(signal.SIGALRM, old_handler)
+    experiment = Experiment(
+        task=task,
+        algorithm_config=algo_cfg,
+        model_config=model_cfg,
+        critic_model_config=critic_cfg,
+        seed=args.seed,
+        config=exp_cfg,
+    )
     
     Path(str(exp_cfg.save_folder)).mkdir(parents=True, exist_ok=True)
     
