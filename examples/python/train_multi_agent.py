@@ -8,7 +8,8 @@ from typing import Dict, Any, Optional
 
 import torch
 import torch.nn.functional as F
-from benchmarl.algorithms import MappoConfig, QmixConfig, MasacConfig
+from benchmarl.algorithms import QmixConfig, MasacConfig
+from benchmarl.algorithms.mappo import Mappo, MappoConfig
 from benchmarl.environments import TaskClass
 from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models import CnnConfig
@@ -16,16 +17,13 @@ from tensordict import TensorDictBase
 from torch import nn
 from torchrl.data import Composite
 from torchrl.data.tensor_specs import UnboundedContinuous
-from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs
+from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs, ParallelEnv
 from torchrl.envs import TransformedEnv, Compose
 from torchrl.envs.libs.pettingzoo import MarlGroupMapType, PettingZooWrapper
 from torchrl.envs.transforms import ObservationTransform
 from torchrl.envs.transforms import SelectTransform
 from torchrl.envs.transforms.utils import _set_missing_tolerance
 
-# Add to Python path as pettingzoo_wrapper in root
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from pettingzoo_wrapper import make
 
 
@@ -34,6 +32,52 @@ def available_cpu_count() -> int:
         return len(os.sched_getaffinity(0))
     except Exception:
         return mp.cpu_count() or 1
+
+
+class MappoOnDevice(Mappo):
+    def process_batch(self, group: str, batch: TensorDictBase) -> TensorDictBase:
+        keys = list(batch.keys(True, True))
+        group_shape = batch.get(group).shape
+
+        nested_done_key = ("next", group, "done")
+        nested_terminated_key = ("next", group, "terminated")
+        nested_reward_key = ("next", group, "reward")
+
+        if nested_done_key not in keys:
+            batch.set(nested_done_key, batch.get(("next", "done")).unsqueeze(-1).expand((*group_shape, 1)))
+        if nested_terminated_key not in keys:
+            batch.set(nested_terminated_key, batch.get(("next", "terminated")).unsqueeze(-1).expand((*group_shape, 1)))
+        if nested_reward_key not in keys:
+            batch.set(nested_reward_key, batch.get(("next", "reward")).unsqueeze(-1).expand((*group_shape, 1)))
+
+        loss = self.get_loss_and_updater(group)[0]
+        if self.minibatch_advantage:
+            increment = -(-self.experiment.config.train_minibatch_size(self.on_policy) // batch.shape[1])
+        else:
+            increment = batch.batch_size[0] + 1
+        last_start_index = 0
+        start_index = increment
+        minibatches = []
+        while last_start_index < batch.shape[0]:
+            minibatch = batch[last_start_index:start_index]
+            minibatch = minibatch.to(self.device, non_blocking=True)  # Move the minibatch to device
+            minibatches.append(minibatch)
+            with torch.no_grad():
+                loss.value_estimator(
+                    minibatch,
+                    params=loss.critic_network_params,
+                    target_params=loss.target_critic_network_params,
+                )
+            last_start_index = start_index
+            start_index += increment
+
+        return torch.cat(minibatches, dim=0)
+
+
+class MappoOnDeviceConfig(MappoConfig):
+    @staticmethod
+    def associated_class():
+        return MappoOnDevice
 
 
 class AHWCToTensorResize(ObservationTransform):
@@ -56,7 +100,7 @@ class AHWCToTensorResize(ObservationTransform):
         self.key = key
         self.h, self.w = int(h), int(w)
         self.from_int = from_int
-        self.dtype = dtype if dtype is not None else torch.get_default_dtype()
+        self.dtype = dtype if dtype is not None else torch.float32
         self.mode = mode
         self.antialias = antialias
 
@@ -133,6 +177,7 @@ class VizdoomTask(TaskClass):
                 resolution=str(cfg.get("resolution", "160x120")),
                 skip_frames=cfg.get("skip_frames", 4),
                 async_mode=bool(cfg.get("async_mode", True)),
+                render_mode=str(cfg.get("render_mode", "rgb_array")),
                 host_address=str(host_address),
                 port=port,
                 netmode=int(cfg.get("netmode", 1)),
@@ -151,15 +196,14 @@ class VizdoomTask(TaskClass):
                 AHWCToTensorResize(key=("agent", "observation"), h=72, w=96, mode="bilinear"),
                 RemoveEmptySpecs(),
             ))
-            env = env.to(cfg.get("device", "cpu"))
+            env = env.to(cfg.get("sampling_device", "cpu"))
             return env
 
         return EnvCreator(_make)
 
     def get_env_fun(self, num_envs: int, continuous_actions: bool, seed: int | None, device=None):
         make_single = self.env_creator(seed)
-        # return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
-        return make_single
+        return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
 
     def action_spec(self, env: EnvBase) -> Composite:
         return self._action_spec
@@ -235,7 +279,9 @@ def main():
     ap.add_argument("--algo", type=str, default="mappo", choices=list(ALGOS))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--total_steps", type=float, default=1e6)
-    ap.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--train_device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--sampling_device", type=str, default="cpu")
+    ap.add_argument("--buffer_device", type=str, default="cpu")
     ap.add_argument("--rollout_steps", type=int, default=256)
     ap.add_argument("--batch_size", type=int, default=6000)
     ap.add_argument("--lr", type=float, default=5e-5)
@@ -261,7 +307,7 @@ def main():
 
     if args.algo == "mappo":
         # Required ctor args for your MAPPO version
-        algo_cfg = MappoConfig(
+        algo_cfg = MappoOnDeviceConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
             entropy_coef=args.entropy_coef,  # entropy bonus
@@ -316,9 +362,9 @@ def main():
 
     # only the fields you want to control from CLI
     overrides = {
-        "sampling_device": args.device,
-        "train_device": args.device,
-        "buffer_device": args.device,
+        "sampling_device": args.sampling_device,
+        "train_device": args.train_device,
+        "buffer_device": args.buffer_device,
         "share_policy_params": True,
         "parallel_collection": False,
         "max_n_frames": int(args.total_steps),
@@ -334,7 +380,7 @@ def main():
         "evaluation": True,
         "render": False,
         "evaluation_interval": args.rollout_steps * 25,
-        "evaluation_episodes": 5,
+        "evaluation_episodes": 1,
         "loggers": ["wandb"],
         "project_name": "benchmarl-vizdoom",
         "save_folder": str(checkpoints_path),
@@ -365,6 +411,8 @@ def main():
         "enable_video": args.enable_video,
         "record_every": args.record_every,
         "video_fps": args.video_fps,
+        "train_device": args.train_device,
+        "sampling_device": args.sampling_device,
     }
     task = VizdoomTask(task_cfg)
 
@@ -376,6 +424,7 @@ def main():
         seed=args.seed,
         config=exp_cfg,
     )
+
     Path(exp_cfg.save_folder).mkdir(parents=True, exist_ok=True)
     experiment.run()
     experiment.close()
