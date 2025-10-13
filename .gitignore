@@ -120,8 +120,5 @@ src/vizdoom/zlib/CTestTestfile.cmake
 # CLion & PyCharm
 **/.idea
 
-# My small implementation with no RL
-no_benchmarl_test.py
-
 # Checkpoint folder
 checkpoints/
