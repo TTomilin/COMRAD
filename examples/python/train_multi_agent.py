@@ -411,7 +411,6 @@ def main():
         "enable_video": args.enable_video,
         "record_every": args.record_every,
         "video_fps": args.video_fps,
-        "train_device": args.train_device,
         "sampling_device": args.sampling_device,
     }
     task = VizdoomTask(task_cfg)

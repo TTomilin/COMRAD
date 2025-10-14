@@ -1,17 +1,3 @@
-#!/usr/bin/env python3
-
-"""
-This is bases on train_multi_agent.py, but:
-+ Supports mps for metal gpu,
-+ Has more logging/debugging
-+ Clean lingering processes and ports before running
-+ Signal timeout when creating experiment
-+ Use CPU for sampling, and GPU (mps) for training
-"""
-
-# TODO: Case to resume when crashed: https://benchmarl.readthedocs.io/en/latest/concepts/features.html#reloading
-# TODO: stable baseline3 env_checker to validate env (?)
-
 import argparse
 import multiprocessing as mp
 import os
@@ -19,12 +5,11 @@ import socket
 from dataclasses import fields
 from pathlib import Path
 from typing import Dict, Any, Optional
-import time
-import random
 
 import torch
 import torch.nn.functional as F
-from benchmarl.algorithms import MappoConfig, QmixConfig, MasacConfig
+from benchmarl.algorithms import QmixConfig, MasacConfig
+from benchmarl.algorithms.mappo import Mappo, MappoConfig
 from benchmarl.environments import TaskClass
 from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models import CnnConfig
@@ -32,71 +17,15 @@ from tensordict import TensorDictBase
 from torch import nn
 from torchrl.data import Composite
 from torchrl.data.tensor_specs import UnboundedContinuous
-from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs
+from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs, ParallelEnv
 from torchrl.envs import TransformedEnv, Compose
 from torchrl.envs.libs.pettingzoo import MarlGroupMapType, PettingZooWrapper
 from torchrl.envs.transforms import ObservationTransform
 from torchrl.envs.transforms import SelectTransform
 from torchrl.envs.transforms.utils import _set_missing_tolerance
-import wandb
-import threading
-import json
-import signal
-import datetime
 
-# Add to Python path as pettingzoo_wrapper in root
-import sys
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from pettingzoo_wrapper import make
 
-def clean():
-    try:
-        import subprocess
-        import signal
-        import time
-
-        kill_proc = [
-            "vizdoom",
-            "train_multi_agent",
-            "python.*vizdoom",
-            "python.*train_multi_agent"
-        ]
-
-        # Kill process
-        for proc in kill_proc:
-            try:
-                subprocess.run(['pkill', '-9', '-f', proc], capture_output=True, timeout=5)
-            except subprocess.TimeoutExpired:
-                pass
-            except Exception:
-                pass
-
-        # Kill port used
-        # Starts from 5029
-        for port in range(5028, 5100):
-            try:
-                result = subprocess.run(['lsof', '-ti', f':{port}'], capture_output=True, text=True, timeout=2)
-                if result.returncode == 0 and result.stdout.strip():
-                    pids = result.stdout.strip().split('\n')
-                    for pid in pids:
-                        try:
-                            os.kill(int(pid), signal.SIGKILL)
-                        except (OSError, ValueError):
-                            pass
-            except Exception:
-                pass
-
-        time.sleep(2) # Wait for all process to die
-
-        # Cleanup again because I feel like it
-        try:
-            subprocess.run(['pkill', '-9', '-f', 'vizdoom'], capture_output=True, timeout=2)
-        except:
-            pass
-
-    except Exception as e:
-        print(f"Cleanup failed: {e}")
-        pass
 
 def available_cpu_count() -> int:
     try:
@@ -105,22 +34,65 @@ def available_cpu_count() -> int:
         return mp.cpu_count() or 1
 
 # Prevent oversubscribing cpu cores, but might reduce performance
-# ONLY disable when using 1 env process
-os.environ.setdefault("OMP_NUM_THREADS", "1")
-os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
-os.environ.setdefault("MKL_NUM_THREADS", "1")
-try:
-    torch.set_num_threads(1)
-except Exception:
-    pass
+# Only disable when using 1 env process
+# cpu_threads = int(os.getenv("CPU_THREADS", "8"))
+# os.environ["OMP_NUM_THREADS"] = str(cpu_threads)
+# os.environ["OPENBLAS_NUM_THREADS"] = str(cpu_threads)
+# os.environ["MKL_NUM_THREADS"] = str(cpu_threads)
+# torch.set_num_threads(cpu_threads)
 
 # Force this so all tensors default to float32
 torch.set_default_dtype(torch.float32)
 
-# mps fallback for mac
+# mps fallback for mac (to fallback to CPU if a kernel is not supported on mps)
 if torch.backends.mps.is_available():
     os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
-    # torch.set_default_dtype(torch.float32)
+
+class MappoOnDevice(Mappo):
+    def process_batch(self, group: str, batch: TensorDictBase) -> TensorDictBase:
+        keys = list(batch.keys(True, True))
+        group_shape = batch.get(group).shape
+
+        nested_done_key = ("next", group, "done")
+        nested_terminated_key = ("next", group, "terminated")
+        nested_reward_key = ("next", group, "reward")
+
+        if nested_done_key not in keys:
+            batch.set(nested_done_key, batch.get(("next", "done")).unsqueeze(-1).expand((*group_shape, 1)))
+        if nested_terminated_key not in keys:
+            batch.set(nested_terminated_key, batch.get(("next", "terminated")).unsqueeze(-1).expand((*group_shape, 1)))
+        if nested_reward_key not in keys:
+            batch.set(nested_reward_key, batch.get(("next", "reward")).unsqueeze(-1).expand((*group_shape, 1)))
+
+        loss = self.get_loss_and_updater(group)[0]
+        if self.minibatch_advantage:
+            increment = -(-self.experiment.config.train_minibatch_size(self.on_policy) // batch.shape[1])
+        else:
+            increment = batch.batch_size[0] + 1
+        last_start_index = 0
+        start_index = increment
+        minibatches = []
+        while last_start_index < batch.shape[0]:
+            minibatch = batch[last_start_index:start_index]
+            minibatch = minibatch.to(self.device, non_blocking=True)  # Move the minibatch to device
+            minibatches.append(minibatch)
+            with torch.no_grad():
+                loss.value_estimator(
+                    minibatch,
+                    params=loss.critic_network_params,
+                    target_params=loss.target_critic_network_params,
+                )
+            last_start_index = start_index
+            start_index += increment
+
+        return torch.cat(minibatches, dim=0)
+
+
+class MappoOnDeviceConfig(MappoConfig):
+    @staticmethod
+    def associated_class():
+        return MappoOnDevice
+
 
 class AHWCToTensorResize(ObservationTransform):
     """
@@ -142,8 +114,7 @@ class AHWCToTensorResize(ObservationTransform):
         self.key = key
         self.h, self.w = int(h), int(w)
         self.from_int = from_int
-        # Force float32 for mps becuase it doesn't support float64 convolutions
-        self.dtype = dtype if dtype is not None else torch.float32 # or torch.get_default_type()
+        self.dtype = dtype if dtype is not None else torch.float32
         self.mode = mode
         self.antialias = antialias
 
@@ -218,9 +189,9 @@ class VizdoomTask(TaskClass):
                 scenario=cfg["scenario"],
                 num_agents=int(cfg.get("num_agents", 2)),
                 resolution=str(cfg.get("resolution", "160x120")),
-                render_mode=cfg["render_mode"],
                 skip_frames=cfg.get("skip_frames", 4),
                 async_mode=bool(cfg.get("async_mode", True)),
+                render_mode=str(cfg.get("render_mode", "rgb_array")),
                 host_address=str(host_address),
                 port=port,
                 netmode=int(cfg.get("netmode", 1)),
@@ -239,7 +210,6 @@ class VizdoomTask(TaskClass):
                 AHWCToTensorResize(key=("agent", "observation"), h=72, w=96, mode="bilinear"),
                 RemoveEmptySpecs(),
             ))
-            # Use sampling_device instead of device for env as we must use cpu here
             env = env.to(cfg.get("sampling_device", "cpu"))
             return env
 
@@ -247,8 +217,7 @@ class VizdoomTask(TaskClass):
 
     def get_env_fun(self, num_envs: int, continuous_actions: bool, seed: int | None, device=None):
         make_single = self.env_creator(seed)
-        # return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
-        return make_single
+        return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
 
     def action_spec(self, env: EnvBase) -> Composite:
         return self._action_spec
@@ -324,12 +293,9 @@ def main():
     ap.add_argument("--algo", type=str, default="mappo", choices=list(ALGOS))
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--total_steps", type=float, default=1e6)
-    # MPS support for metal gpu
-    # NOTE: MPS has indexing issue in torchrl env wrappers
-    # So we must sampling on CPU, and MPS for training only
-    gpu = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
-    ap.add_argument("--device", type=str, default=gpu)
-    ap.add_argument("--sampling_device", type=str, default=None) # Set to "cpu" or "cuda" depends on gpu below
+    ap.add_argument("--train_device", type=str, default="cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu"))
+    ap.add_argument("--sampling_device", type=str, default="cpu")
+    ap.add_argument("--buffer_device", type=str, default="cpu")
     ap.add_argument("--rollout_steps", type=int, default=256)
     ap.add_argument("--batch_size", type=int, default=6000)
     ap.add_argument("--lr", type=float, default=5e-5)
@@ -340,29 +306,14 @@ def main():
     ap.add_argument("--vf_coef", type=float, default=1.0)
     ap.add_argument("--num_minibatches", type=int, default=15)
     ap.add_argument("--num_epochs", type=int, default=45)
-    ap.add_argument("--num_envs", type=int, default=2) # Set to 2 to test performance with deadlock patch
+    ap.add_argument("--num_envs", type=int, default=1)
 
     # Video recording
     ap.add_argument("--enable_video", type=bool, default=True)
     ap.add_argument("--record_every", type=int, default=50)
     ap.add_argument("--video_fps", type=int, default=35)
-    ap.add_argument("--render_mode", type=str, default=None)
 
     args = ap.parse_args()
-
-    # When env.to("mps") is called, observation tensors move to mps
-    # But torchrl contorl tensors still stay on cpu
-    # Thus, during reset, the code tries done_val[~reset_value]
-    # And since done_val is on cpu while ~reset_value is on mps, it causes runtime error
-    # So we must keep sampling on CPU
-    if args.sampling_device is None:
-        if args.device == "mps":
-            args.sampling_device = "cpu"
-        else:
-            args.sampling_device = args.device
-
-    # Clean lingering processes
-    clean()
 
     root_path = Path(__file__).parent.parent.parent
     checkpoints_path = root_path / "checkpoints"
@@ -370,7 +321,7 @@ def main():
 
     if args.algo == "mappo":
         # Required ctor args for your MAPPO version
-        algo_cfg = MappoConfig(
+        algo_cfg = MappoOnDeviceConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
             entropy_coef=args.entropy_coef,  # entropy bonus
@@ -425,9 +376,9 @@ def main():
 
     # only the fields you want to control from CLI
     overrides = {
-        "sampling_device": args.sampling_device, # cpu for mps gpu
-        "train_device": args.device, # Train on mps
-        "buffer_device": args.sampling_device, # cpu for buffer
+        "sampling_device": args.sampling_device,
+        "train_device": args.train_device,
+        "buffer_device": args.buffer_device,
         "share_policy_params": True,
         "parallel_collection": False,
         "max_n_frames": int(args.total_steps),
@@ -443,7 +394,7 @@ def main():
         "evaluation": True,
         "render": False,
         "evaluation_interval": args.rollout_steps * 25,
-        "evaluation_episodes": 5,
+        "evaluation_episodes": 1,
         "loggers": ["wandb"],
         "project_name": "benchmarl-vizdoom",
         "save_folder": str(checkpoints_path),
@@ -466,7 +417,6 @@ def main():
         "scenario": args.scenario,
         "num_agents": args.num_agents,
         "resolution": args.resolution,
-        "render_mode": args.render_mode,
         "skip_frames": args.skip_frames,
         "async_mode": bool(args.async_mode),
         "host_address": args.host_address,
@@ -477,12 +427,8 @@ def main():
         "video_fps": args.video_fps,
         "sampling_device": args.sampling_device,
     }
-
-    print("\nCreate task")
     task = VizdoomTask(task_cfg)
 
-    # Add timeout to check if it's stuck
-    print("\nCreate experiment")
     experiment = Experiment(
         task=task,
         algorithm_config=algo_cfg,
@@ -491,17 +437,10 @@ def main():
         seed=args.seed,
         config=exp_cfg,
     )
-    
+
     Path(str(exp_cfg.save_folder)).mkdir(parents=True, exist_ok=True)
-    
-    try:
-        experiment.run()
-    except Exception as e:
-        print(f"\nTraining failed: {e}")
-        import traceback
-        traceback.print_exc()
-    finally:
-        experiment.close()
+    experiment.run()
+    experiment.close()
 
 
 if __name__ == "__main__":
