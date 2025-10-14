@@ -104,8 +104,7 @@ def _agent_process(
         if not is_host:
             # Host has bit extra time to init,and peers random delay so doesn't go at once
             import random
-            delay = 2.0 + random.uniform(0.5, 2.0)  # 2.5-4 seconds
-            # 1.5s interval, so prob they connect at once is 0 becuase continuous distributionw
+            delay = 0.5 + random.uniform(0.5, 1.0)
             time.sleep(delay)
         
         # Connection timeout 45s to prevents game.init() from hanging indefinitely
