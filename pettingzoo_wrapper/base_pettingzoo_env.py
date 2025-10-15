@@ -336,7 +336,7 @@ class VizdoomParallelEnv(ParallelEnv):
                     seed=(None if seed is None else int(seed) + i),
                     verbose=verbose,
                 ),
-                daemon=True,
+                daemon=False, # Should also set process.daemon = False in torchrl/envs/batched_envs.py
             )
             p.start()
             self._pipes_parent.append(parent_end)
@@ -438,6 +438,12 @@ class VizdoomParallelEnv(ParallelEnv):
 
         # Give children a moment to init networking
         # time.sleep(1.0) # TODO: Might not necessary, need to check
+        
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            pass
 
     # ------------- space helpers -------------
     def _discover_buttons(self, cfg: str) -> Tuple[int, int]:

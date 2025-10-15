@@ -17,7 +17,7 @@ from tensordict import TensorDictBase
 from torch import nn
 from torchrl.data import Composite
 from torchrl.data.tensor_specs import UnboundedContinuous
-from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs, ParallelEnv
+from torchrl.envs import EnvCreator, EnvBase, RemoveEmptySpecs, ParallelEnv, SerialEnv
 from torchrl.envs import TransformedEnv, Compose
 from torchrl.envs.libs.pettingzoo import MarlGroupMapType, PettingZooWrapper
 from torchrl.envs.transforms import ObservationTransform
@@ -216,8 +216,8 @@ class VizdoomTask(TaskClass):
         return EnvCreator(_make)
 
     def get_env_fun(self, num_envs: int, continuous_actions: bool, seed: int | None, device=None):
-        make_single = self.env_creator(seed)
-        return make_single if num_envs == 1 else EnvCreator(lambda: ParallelEnv(available_cpu_count(), make_single))
+        # Return non-vec env, avoid vizdoom processes + env vectorization double parallelising
+        return self.env_creator(seed if seed is not None else 0)
 
     def action_spec(self, env: EnvBase) -> Composite:
         return self._action_spec
@@ -321,7 +321,7 @@ def main():
 
     if args.algo == "mappo":
         # Required ctor args for your MAPPO version
-        algo_cfg = MappoOnDeviceConfig(
+        algo_cfg = MappoConfig(
             share_param_critic=True,  # share critic across agents
             clip_epsilon=args.clip_eps,  # PPO clip
             entropy_coef=args.entropy_coef,  # entropy bonus
@@ -380,7 +380,7 @@ def main():
         "train_device": args.train_device,
         "buffer_device": args.buffer_device,
         "share_policy_params": True,
-        "parallel_collection": False,
+        "parallel_collection": True,
         "max_n_frames": int(args.total_steps),
         "lr": args.lr,
 
