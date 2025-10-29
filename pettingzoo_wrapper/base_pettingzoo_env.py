@@ -336,7 +336,7 @@ class VizdoomParallelEnv(ParallelEnv):
                     seed=(None if seed is None else int(seed) + i),
                     verbose=verbose,
                 ),
-                daemon=False, # Should also set process.daemon = False in torchrl/envs/batched_envs.py
+                daemon=True,
             )
             p.start()
             self._pipes_parent.append(parent_end)
