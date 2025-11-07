@@ -1,0 +1,49 @@
+## Install and run
+Install sample factory 2.1.3 with (last pypi pkg released was 2 years ago, which was 2.1.1):
+```
+pip install git+https://github.com/alex-petrenko/sample-factory.git
+```
+
+Run locally with
+```
+python -m sf.train --env=doom_pitfall --train_for_env_steps=10000 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=4 --num_envs_per_worker=4 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --experiment=pitfall_0 --with_wandb=True --wandb_dir=. --wandb_record_every=10
+```
+
+Run on hpc with
+```
+python -m sf.train --env=doom_pitfall --train_for_seconds=1800 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=16 --num_envs_per_worker=8 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --experiment=pitfall_0 --with_wandb=True --wandb_dir=. --wandb_record_every=10
+```
+
+Note: If dont have cuda then add `--device=cpu` flag
+
+## Runs
++ 7 cores 16gb 2gpu
++ Four runs with 4 configurations
+
+### 1. Force respawn on (Agents respawn immediately after they die), reset episode on time limit/batch
++ Finished map but agent runs back after reaching the end of the tunnel as no termination condition at the end
++ To recreate this assignment, add the flag `forcerespawn` to coop agents in `doom_multiagent.py`, and remove the use of `wipe_when_one_die` in `doom_multiagent_wrapper.py`
++ Link: https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_0_20251105_191320_788324
+
+### 2. Force respawn off, terminates when one agent dies (to make it more 'cooperative')
++ Train much slower than 1, training stopped because there was 1h time limit
++ Didn't finish map
++ I used this setting as a more realistic scenario to see how it performs, but no credit assignment so......
++ Link: https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_10_20251106_190442_448800
+
+### 3. Run (2) with credit assignment, reward when all alive but dont punish all agents when one die
++ Finishes map in like 10 mins
++ Agent might learn to sacrifice for exploration I think
++ If we punish all agents when one die, it runs much much slower ([run with this config](https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_100_20251107_162500_027035)). To enable this, edit `pitfall_reward_shaping.py`
++ Finished in 13m: https://wandb.ai/khoi-eindhoven-university-of-technology/temp/runs/pitfall_hpc_10_20251106_190442_448800
++ Secondary link: https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_1000_20251107_162846_064626
+
+## Maybe useful notes
++ obs is (3, 72, 128)
++ Add more scenarios in `doom_utils.py`, this is where most important stuffs gets called
++ `wrappers` folder is for reward shaping
++ `reward_shaping.py` is quite for competitive tasks
++ `doom_multiagent.py` inits the player, so there you changes zdoom flags/configs
++ `doom_multiagent_wrapper.py` wraps the agent in a game instance
++ We can use `--record_to` flag, built-in from sample factory, but it outputs frames (png). Read `train.py` comments for guide to use it
++ To prevent nested wandb folders, set `--wandb_dir` to root dir or change `sample_factory/cfg/cfg.py` to default `os.getcwd()`

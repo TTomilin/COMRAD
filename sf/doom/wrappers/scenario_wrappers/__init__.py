@@ -1,0 +1,2 @@
+from sf.doom.wrappers.scenario_wrappers.gathering_reward_shaping import DoomGatheringRewardShaping
+from sf.doom.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfallRewardShaping

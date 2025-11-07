@@ -1,0 +1,85 @@
+import functools
+import sys
+import wandb
+
+from sample_factory.algo.utils.context import global_model_factory
+from sample_factory.algo.utils.misc import ExperimentStatus
+from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
+from sample_factory.envs.env_utils import register_env
+from sample_factory.train import make_runner, run_rl
+
+from sf.doom.doom_model import make_vizdoom_encoder
+from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
+from sf.doom.doom_utils import DOOM_ENVS, make_doom_env_from_spec
+from sf.doom.video_uploader import upload_video
+
+
+def register_vizdoom_envs():
+    for env_spec in DOOM_ENVS:
+        make_env_func = functools.partial(make_doom_env_from_spec, env_spec)
+        register_env(env_spec.name, make_env_func)
+
+
+def register_vizdoom_models():
+    global_model_factory().register_encoder_factory(make_vizdoom_encoder)
+
+
+def register_vizdoom_components():
+    register_vizdoom_envs()
+    register_vizdoom_models()
+
+
+def parse_args(argv=None, evaluation=False):
+    parser, partial_cfg = parse_sf_args(argv=argv, evaluation=evaluation)
+    add_doom_env_args(parser)
+    
+    # This is the record_to param, it saves as pngs with an action.json
+    # Use ffmpeg to transform into mp4 vid
+    # ffmpeg -i %05d.png -c:v libx264 -pix_fmt yuv420p -movflags +faststart -f mp4 vid.mp4
+    # It's possible to use this only and run ffmpeg after each episode then upload to wandb but that's more overhead
+    # especially for many envs
+    add_doom_env_eval_args(parser)
+    
+    # Log videos to wandb
+    add_wandb_args(parser)
+    
+    doom_override_defaults(parser)
+    final_cfg = parse_full_cfg(parser, argv)
+    return final_cfg
+
+
+def main():
+    register_vizdoom_components()
+    cfg = parse_args()
+    cfg, runner = make_runner(cfg)
+
+    if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):
+        upload_video(runner, cfg)
+
+    status = runner.init()
+    if status == ExperimentStatus.SUCCESS:
+        status = runner.run()
+
+    # status = run_rl(cfg)
+    return status
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+
+# import sys
+# sys.argv = sys.argv[:1]
+# import json
+# from sample_factory.utils.attr_dict import AttrDict
+# from sf.doom.doom_utils import make_doom_env
+# cfg_dict=json.load(open('train_dir/pitfall_10/config.json'))
+# cfg=AttrDict(cfg_dict)
+# env_config=AttrDict({'worker_index':0, 'vector_index':0, 'safe_init':False})
+# env=make_doom_env('doom_pitfall', cfg, env_config)
+# obs, infos=env.reset()
+# print('obs:', [type(o) for o in obs], [o.shape if hasattr(o, 'shape') else len(o) for o in obs])
+# num_agents = env.unwrapped.num_agents
+# for _ in range(2):
+#     actions = [env.action_space.sample() for _ in range(num_agents)]
+#     obs, rewards, terms, truncs, infos = env.step(actions)
+# print('obs:', [type(o) for o in obs], [o.shape if hasattr(o, 'shape') else len(o) for o in obs], 'rewards:', rewards, 'terms truncs:', terms, truncs, 'info:', infos)

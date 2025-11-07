@@ -122,3 +122,9 @@ src/vizdoom/zlib/CTestTestfile.cmake
 
 # Checkpoint folder
 checkpoints/
+train_dir/
+wandb/
+*/.env
+sf/jobs
+sf/templates
+sf/send.sh
