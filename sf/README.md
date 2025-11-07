@@ -16,6 +16,14 @@ python -m sf.train --env=doom_pitfall --train_for_seconds=1800 --algo=APPO --env
 
 Note: If dont have cuda then add `--device=cpu` flag
 
+## Run with launcher
+
+```
+python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4  --pause_between=1
+```
+
+This will run multiple experiments with defined seeds in parallel. Might cause issue if run locally and without enough resources, but it parallelizes multiple experiments.
+
 ## Runs
 + 7 cores 16gb 2gpu
 + Four runs with 4 configurations
