@@ -39,8 +39,8 @@ This will run multiple experiments with defined seeds in parallel. Might cause i
 + I used this setting as a more realistic scenario to see how it performs, but no credit assignment so......
 + Link: https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_10_20251106_190442_448800
 
-### 3. Run (2) with credit assignment, reward when all alive but dont punish all agents when one die
-+ Finishes map in like 10 mins
+### 3. Run (2) but reward when all alive, not punish all agents when one die
++ Finishes map in like 13 mins
 + Agent might learn to sacrifice for exploration I think
 + If we punish all agents when one die, it runs much much slower ([run with this config](https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/runs/pitfall_hpc_100_20251107_162500_027035)). To enable this, edit `pitfall_reward_shaping.py`
 + Finished in 13m: https://wandb.ai/khoi-eindhoven-university-of-technology/temp/runs/pitfall_hpc_10_20251106_190442_448800
