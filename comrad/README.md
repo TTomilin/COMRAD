@@ -2,6 +2,9 @@
 Install sample factory 2.1.3 with (last pypi pkg released was 2 years ago, which was 2.1.1):
 ```
 pip install git+https://github.com/alex-petrenko/sample-factory.git
+
+# or at specific commit
+pip install git+https://github.com/alex-petrenko/sample-factory.git@8008921cd8823f4c53f68afea5b9e9da040d0e4a
 ```
 
 Run locally with
