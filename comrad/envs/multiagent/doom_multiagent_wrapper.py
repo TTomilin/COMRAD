@@ -158,7 +158,7 @@ class MultiAgentEnvWorker:
 
             results = None
             if task_type == TaskType.RESET:
-                results = env.reset()
+                results = env.reset(**data) if data else env.reset()
             elif task_type == TaskType.INFO:
                 results = self._get_info(env)
             elif task_type == TaskType.STEP or task_type == TaskType.STEP_UPDATE:
@@ -343,9 +343,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
     @retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=False)
     def reset(self, **kwargs):
         self._ensure_initialized()
-        # not passing the kwargs as of now... not sure if it's okay
-        # TODO: pass kwargs to propagate seed, to env.reset() and await_tasks calls
-        observation, info = self.await_tasks(None, TaskType.RESET, timeout=2.0)
+        observation, info = self.await_tasks([kwargs] * self.num_agents, TaskType.RESET, timeout=2.0)
         return observation, info
 
     @retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=True)
@@ -364,7 +362,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             info["num_frames"] = self.skip_frames
 
         if all(dones):
-            obs, reset_infos = self.await_tasks(None, TaskType.RESET, timeout=2.0)
+            obs, reset_infos = self.await_tasks([{}] * self.num_agents, TaskType.RESET, timeout=2.0)
             for i, reset_info in enumerate(reset_infos):
                 infos[i]["reset_info"] = reset_info
 
