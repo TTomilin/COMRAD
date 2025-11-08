@@ -273,6 +273,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             worker.task_queue.put((data[i], task_type))
 
         result_lists = None
+        # TODO: Try asynchronous collection with select() or asyncio
         for i, worker in enumerate(self.workers):
             results = safe_get(
                 worker.result_queue,
