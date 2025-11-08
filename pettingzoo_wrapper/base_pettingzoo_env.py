@@ -9,7 +9,7 @@ Usage:
     env = VizdoomParallelEnv(
         scenario="health_gathering",
         num_agents=2,
-        resolution="160x120",
+        resolution="160X120",
         skip_frames=4,
         async_mode=True,
         host_address="127.0.0.1",
@@ -34,14 +34,15 @@ ctx = mp.get_context("spawn")
 import time
 
 from pettingzoo import ParallelEnv
-from pettingzoo_wrapper.utils import screen_res, parse_hw, get_flat_game_vars, read_frame
-from typing import Any, Dict, List, Optional, Tuple
+from pettingzoo_wrapper.utils import get_screen_resolution, parse_hw, get_flat_game_vars, read_frame, discover_buttons, \
+    sync_agent_init
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 from gymnasium import spaces
 
 import vizdoom as vzd
-from vizdoom import Mode
+from vizdoom import Mode, GameVariable
 import pygame
 import cv2
 
@@ -70,11 +71,7 @@ def _agent_process(
     game.load_config(config_path)
 
     # headless
-    game.set_window_visible(False)
-    game.set_sound_enabled(False)
-    game.set_console_enabled(False)
-    game.set_render_hud(True)
-    game.set_screen_resolution(screen_res(resolution))
+    game.set_screen_resolution(get_screen_resolution(resolution))
     game.set_ticrate(ticrate)
     game.set_mode(Mode.ASYNC_PLAYER if async_mode else Mode.PLAYER)
 
@@ -96,25 +93,24 @@ def _agent_process(
     game.add_game_args(f"+name Player{agent_idx} +colorset {agent_idx}")
     game.add_game_args(f"+playernumber {agent_idx}")
 
-    # Signal to parent that child is about to init before blocking network call
+    # Signal to parent that child is about to init before blocking the network call
     pipe_end.send({"status": "initializing", "agent": agent})
-    
+
     try:
         # For peers, add connection timeout and retry logic
         if not is_host:
-            # Host has bit extra time to init,and peers random delay so doesn't go at once
+            # Grant the host a bit of extra time to init by giving peers a random delay
             import random
             delay = 0.5 + random.uniform(0.5, 1.0)
             time.sleep(delay)
-        
-        # Connection timeout 45s to prevents game.init() from hanging indefinitely
+
+        # Set the connection timeout to 45s to prevents game.init() from hanging indefinitely
         if not is_host:
-            # Default is 60s
-            game.add_game_args("+viz_connect_timeout 45")
-        
+            game.add_game_args("+viz_connect_timeout 45")  # Default is 60s
         game.init()
+
         game.send_game_command("viz_respawn_delay 0")
-        
+
     except Exception as e:
         try: # Send when pipe closed too
             pipe_end.send({"status": "init_failed", "error": str(e), "agent": agent})
@@ -128,6 +124,10 @@ def _agent_process(
     except (BrokenPipeError, EOFError):
         # Parent kill child during init so return
         return
+
+    max_players = int(game.get_game_variable(GameVariable.USER1))
+    if num_agents > max_players:
+        raise ValueError(f"Scenario supports {max_players} players, but you requested {num_agents}.")
 
     # Get available game variables for mapping indices to names
     available_game_vars = game.get_available_game_variables()
@@ -143,7 +143,7 @@ def _agent_process(
             except (EOFError, BrokenPipeError):
                 # Parent closed the pipe
                 break
-            
+
             if cmd == "reset":
                 game.new_episode()
                 game.respawn_player()
@@ -153,7 +153,7 @@ def _agent_process(
 
                 info = {
                     "num_frames": frames_per_step,
-                    "player_died": False,
+                    "player_dead": False,
                     "just_died": False,
                     "step": steps
                 }
@@ -186,7 +186,7 @@ def _agent_process(
 
                 info = {
                     "num_frames": frames_per_step,
-                    "player_died": is_dead,
+                    "player_dead": is_dead,
                     "just_died": just_died,
                     "step": steps
                 }
@@ -225,7 +225,7 @@ def _agent_process(
 
                 info = {
                     "num_frames": frames_per_step,
-                    "player_died": is_dead,
+                    "player_dead": is_dead,
                     "just_died": False,  # Can't die during respawn
                     "step": steps
                 }
@@ -246,7 +246,9 @@ def _agent_process(
 
             else:
                 # ignore unknown
-                pipe_end.send({"obs": read_frame(), "reward": 0.0, "terminated": False, "info": {}})
+                h, w = parse_hw(resolution)
+                zero_frame = np.zeros((h, w, 3), dtype=np.uint8)
+                pipe_end.send({"obs": zero_frame, "reward": 0.0, "terminated": False, "info": {}})
     finally:
         try:
             game.close()
@@ -261,14 +263,13 @@ def _agent_process(
 # -------------------------- main PettingZoo env ---------------------------
 
 class VizdoomParallelEnv(ParallelEnv):
-    metadata = {"name": "vizdoom_pz_parallel", "render_modes": ["human", "rgb_array"], "render_fps": 35}
 
     def __init__(
             self,
             *,
             config_file: str,
             num_agents: int = 2,
-            resolution: str = "160x120",
+            resolution: str = "160X120",
             timeout: Optional[int] = None,
             skip_frames: Optional[int] = 1,
             async_mode: bool = True,
@@ -281,6 +282,7 @@ class VizdoomParallelEnv(ParallelEnv):
             simple_discrete: bool = True,
             seed: Optional[int] = None,
             verbose: bool = False,
+            daemon: bool = True,
     ) -> None:
         assert num_agents >= 1
         self.config_file = config_file
@@ -301,7 +303,7 @@ class VizdoomParallelEnv(ParallelEnv):
         self.agents: List[str] = self.possible_agents[:]
 
         # Discover spaces (no net init needed)
-        self._delta_count, self._binary_count = self._discover_buttons(config_file)
+        self._delta_count, self._binary_count = discover_buttons(config_file)
         self._simple_n = (3 ** self._delta_count) * (2 ** self._binary_count)
         self._act_len = self._delta_count + self._binary_count
         self._action_space = self._build_action_space()
@@ -336,90 +338,16 @@ class VizdoomParallelEnv(ParallelEnv):
                     seed=(None if seed is None else int(seed) + i),
                     verbose=verbose,
                 ),
-                daemon=True,
+                daemon=daemon, # terminate child if parent dies
             )
             p.start()
             self._pipes_parent.append(parent_end)
             self._procs.append(p)
 
-        # We should wait for children until they say they ready to avoid deadlock
-        # If we dont, they will try to communicate before everyone initialized and thus deadlock
-        # 90s = 45s connection timeout + 30s buffer + max 15s init
-        # Might increase if more agent
-        def wait_for_child_init(idx: int, pipe, timeout_sec: float = 90.0):
-            start_time = time.time()
-            status_msgs = []
-            last_msg_time_start = start_time
-            
-            while True:
-                elapsed = time.time() - start_time
-                last_msg_time_end = time.time() - last_msg_time_start
-                
-                # Warn if no progress
-                if elapsed > timeout_sec:
-                    raise TimeoutError(
-                        f"Agent {idx} init timeout after {timeout_sec}s"
-                        f"Status msg: {status_msgs}"
-                        f"Last message {last_msg_time_end:.1f}s ago"
-                    )
 
-                # Log progress
-                if elapsed > 30 and elapsed % 10 < 1.1:
-                    print(f"Agent {idx} still init (took {elapsed:.0f}s so far)")
-                
-                # Avoid recv() block, let data arrive, wait up to 1s for data
-                if pipe.poll(timeout=1.0): 
-                    try:
-                        msg = pipe.recv()
-                        status_msgs.append(msg)
-                        last_msg_time_start = time.time()
-                        
-                        if msg.get("status") == "ready":
-                            return True
-                        elif msg.get("status") == "init_failed":
-                            raise RuntimeError(
-                                f"Agent {idx} init failed: {msg.get('error', 'unknown')}"
-                            )
-                    except (EOFError, BrokenPipeError) as e:
-                        # Child process died
-                        raise RuntimeError(
-                            f"Agent {idx} process died init"
-                            f"Status msg: {status_msgs}"
-                        ) from e
-                    except Exception as e:
-                        raise RuntimeError(f"error from {idx}: {e}")
-        
-        # Host first then wait for all children sequentially
-        for i, pipe in enumerate(self._pipes_parent):
-            try:
-                role = "host" if i == 0 else f"peer {i}"
-                print(f"Waiting for agent {i} ({role}) to init")
-                wait_for_child_init(i, pipe, timeout_sec=90.0)
-                print(f"Agent {i} ({role}) ready")
-            except Exception as e:
-                print(f"Agent {i} init failed: {e}")
-                # Cleanup cus failed
-                for j, p in enumerate(self._procs):
-                    if p.is_alive():
-                        try:
-                            p.terminate()
-                        except:
-                            pass
-                
-                time.sleep(0.5) # Wait for termination
-                
-                for j, p in enumerate(self._procs):
-                    if p.is_alive():
-                        try:
-                            p.kill()
-                        except:
-                            pass
-                    try:
-                        p.join(timeout=1.0)
-                    except:
-                        pass
-
-                raise RuntimeError(".") from e
+        # We should wait for children to report being ready to avoid a deadlock
+        # Otherwise, they might try to communicate before everyone has been initialized and thus we reach a deadlock
+        sync_agent_init(self._pipes_parent, self._procs)
 
         # timeout / PZ bookkeeping
         self._frames_advanced = 0
@@ -436,27 +364,7 @@ class VizdoomParallelEnv(ParallelEnv):
         # Rendering surface
         self._screen: Optional[pygame.Surface] = None
 
-        # Give children a moment to init networking
-        # time.sleep(1.0) # TODO: Might not necessary, need to check
-        
-    def __del__(self):
-        try:
-            self.close()
-        except Exception:
-            pass
-
     # ------------- space helpers -------------
-    def _discover_buttons(self, cfg: str) -> Tuple[int, int]:
-        game = vzd.DoomGame()
-        game.load_config(cfg)
-        game.set_window_visible(False)
-        delta, binary = [], []
-        for b in game.get_available_buttons():
-            if vzd.is_delta_button(b) and b not in delta:
-                delta.append(b)
-            else:
-                binary.append(b)
-        return len(delta), len(binary)
 
     def _build_action_space(self) -> spaces.Space:
         if self.simple_discrete:
@@ -503,9 +411,9 @@ class VizdoomParallelEnv(ParallelEnv):
         # broadcast reset, collect results
         for pipe in self._pipes_parent:
             pipe.send(("reset", None))
-        
+
         # Add timeout to check for deadlocks
-        # If deadlock results might block data forever
+        # In case of deadlock, the results might keep blocking data forever
         results = []
         for i, pipe in enumerate(self._pipes_parent):
             if pipe.poll(timeout=30.0):
@@ -547,7 +455,7 @@ class VizdoomParallelEnv(ParallelEnv):
             self._pipes_parent[i].send((cmd, flat_actions[i]))
 
         # 2) recv
-        # Check reset() for reason to use poll (check deadlocks)
+        # Use poll to check for deadlocks
         results = []
         for i, pipe in enumerate(self._pipes_parent):
             if pipe.poll(timeout=30.0):
@@ -588,7 +496,7 @@ class VizdoomParallelEnv(ParallelEnv):
 
         # Track newly dead agents (but don't respawn them until next step)
         for i, agent in enumerate(self.agents):
-            if infos[agent].get("player_died", False) and agent not in self._dead_agents:
+            if infos[agent].get("player_dead", False) and agent not in self._dead_agents:
                 self._dead_agents.add(agent)
 
         # 3) time-limit truncation (assume same num_frames for all)
@@ -617,12 +525,12 @@ class VizdoomParallelEnv(ParallelEnv):
         return observations, rewards, terminations, truncations, infos
 
     def close(self):
-        # tell children to close
+        # Tell the children to close
         for i, (pipe, proc) in enumerate(zip(self._pipes_parent, self._procs)):
             if pipe is None or pipe.closed:
                 continue
 
-            # If the process is already gone then dpnt send anything
+            # If the process is already dead then don't send anything
             if proc is not None and not proc.is_alive():
                 try:
                     pipe.close()
@@ -632,7 +540,7 @@ class VizdoomParallelEnv(ParallelEnv):
                 continue
 
             try:
-                # Drain pending msgs
+                # Drain pending messages
                 while pipe.poll(timeout=0.05):
                     try:
                         pipe.recv()
@@ -641,7 +549,7 @@ class VizdoomParallelEnv(ParallelEnv):
 
                 pipe.send(("close", None))
             except (BrokenPipeError, EOFError, OSError):
-                # Check if child exited after finishing last cmd
+                # Check if the child has terminated after finishing the last command
                 try:
                     pipe.close()
                 except Exception:
@@ -649,23 +557,23 @@ class VizdoomParallelEnv(ParallelEnv):
                 self._pipes_parent[i] = None
             except Exception as e:
                 print(f"Send close to agent {i} failed: {e}")
-        
-        time.sleep(0.5) # Should sleep here, else sometimes crash
-        
+
+        time.sleep(0.5) # Short sleep to avoid occasional crashes
+
         # join but with timeout, then terminate if needed, then if not work then kill
         for i, p in enumerate(self._procs):
             try:
                 p.join(timeout=2.0)
                 if p.is_alive():
-                    print(f"Oh noo! Agent {i} didn't exit, terminate {i} now.")
+                    print(f"Agent {i} didn't exit, terminating agent {i} now.")
                     p.terminate()
                     p.join(timeout=1.0)
                     if p.is_alive():
-                        p.kill() # Kill if can't terminate
+                        p.kill() # Kill if unable terminate
             except Exception as e:
                 print(f"Join agent {i} failed: {e}")
 
-        # Close parent pipe
+        # Close the parent pipe
         for i, pipe in enumerate(self._pipes_parent):
             if pipe is None:
                 continue
@@ -674,7 +582,7 @@ class VizdoomParallelEnv(ParallelEnv):
             except Exception:
                 pass
             self._pipes_parent[i] = None
-        
+
         # pygame
         if self._screen is not None:
             try:
@@ -801,3 +709,5 @@ class VizdoomParallelEnv(ParallelEnv):
                 x, y = col * sw, row * sh
                 canvas[y: y + sh, x: x + sw] = frame[: sh, : sw]
             return canvas
+
+

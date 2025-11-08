@@ -1,5 +1,6 @@
 import functools
 import sys
+import datetime
 import wandb
 
 from sample_factory.algo.utils.context import global_model_factory
@@ -45,6 +46,11 @@ def parse_args(argv=None, evaluation=False):
     
     doom_override_defaults(parser)
     final_cfg = parse_full_cfg(parser, argv)
+    
+    # auto add experiment name if not provided
+    if '--experiment' not in sys.argv:
+        final_cfg.experiment = f"{final_cfg.env}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    
     return final_cfg
 
 

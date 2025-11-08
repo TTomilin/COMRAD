@@ -1,10 +1,10 @@
 # public factory
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from .base_pettingzoo_env import VizdoomParallelEnv
-from .reward_wrappers import PitfallRewardWrapper
+from .reward_wrappers import PitfallRewardWrapper, HealthGatheringRewardWrapper
 from .video_recorder import VideoLoggerParallelWrapper
 
 # where the scenario .cfg files live
@@ -12,7 +12,8 @@ _SCENARIO_DIR = os.path.join(Path(__file__).parent.parent, "scenarios")
 
 # scenario-specific wrappers
 _WRAPPERS = {
-    "pitfall": PitfallRewardWrapper,
+    "pitfall_multi_agent": PitfallRewardWrapper,
+    "health_gathering_multi_agent": HealthGatheringRewardWrapper,
 }
 
 
@@ -22,7 +23,7 @@ def make(
         config_file: Optional[str] = None,
         # env kwargs
         num_agents: int = 2,
-        resolution: str = "160x120",
+        resolution: str = "160X120",
         timeout: Optional[int] = None,
         skip_frames: Optional[int] = 1,
         async_mode: bool = True,
@@ -35,8 +36,9 @@ def make(
         seed: Optional[int] = None,
         # video logging
         enable_video: bool = True,
-        record_every: int = 50,  # every N episodes
+        record_every: int = 100,  # every N episodes
         video_fps: int = 35,
+        daemon: bool = True,
 ):
     scenario = scenario.lower()
     cfg = config_file if config_file is not None else f"{_SCENARIO_DIR}/{scenario}.cfg"
@@ -55,6 +57,7 @@ def make(
         render_mode=render_mode,
         use_multi_binary_action_space=use_multi_binary_action_space,
         seed=seed,
+        daemon=daemon,
     )
 
     if enable_video:
