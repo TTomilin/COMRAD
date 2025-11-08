@@ -14,27 +14,14 @@ from sample_factory.envs.env_wrappers import (
 )
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
-    doom_action_space,
-    doom_action_space_basic,
-    doom_action_space_discretized_no_weap,
-    doom_action_space_extended,
-    doom_action_space_full_discretized,
     doom_action_space_pitfall,
-    doom_turn_and_attack_only,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.reward_shaping import (
-    REWARD_SHAPING_BATTLE,
-    REWARD_SHAPING_DEATHMATCH_V0,
-    REWARD_SHAPING_DEATHMATCH_V1,
-    DoomRewardShapingWrapper,
-    true_objective_frags,
-    true_objective_winning_the_game,
-)
-from sf.doom.wrappers.scenario_wrappers import DoomGatheringRewardShaping, DoomPitfallRewardShaping
+# from sf.doom.wrappers.reward_shaping import
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 
@@ -76,157 +63,9 @@ class DoomSpec:
 
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
-BATTLE_REWARD_SHAPING = (
-    DoomRewardShapingWrapper,
-    dict(reward_shaping_scheme=REWARD_SHAPING_BATTLE, true_objective_func=None),
-)  # "true" reward None means just the env reward (monster kills)
-BOTS_REWARD_SHAPING = (
-    DoomRewardShapingWrapper,
-    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V0, true_objective_func=true_objective_frags),
-)
-DEATHMATCH_REWARD_SHAPING = (
-    DoomRewardShapingWrapper,
-    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V1, true_objective_func=true_objective_winning_the_game),
-)
 
 
-DOOM_ENVS = [
-    DoomSpec(
-        "doom_basic",
-        "basic.cfg",
-        Discrete(1 + 3),  # idle, left, right, attack
-        reward_scaling=0.01,
-        default_timeout=300,
-    ),
-    DoomSpec(
-        "doom_two_colors_easy",
-        "two_colors_easy.cfg",
-        doom_action_space_basic(),
-        extra_wrappers=[(DoomGatheringRewardShaping, {})],  # same as https://arxiv.org/pdf/1904.01806.pdf
-    ),
-    DoomSpec(
-        "doom_two_colors_hard",
-        "two_colors_hard.cfg",
-        doom_action_space_basic(),
-        extra_wrappers=[(DoomGatheringRewardShaping, {})],
-    ),
-    DoomSpec(
-        "doom_dm",
-        "cig.cfg",
-        doom_action_space(),
-        1.0,
-        int(1e9),
-        num_agents=8,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
-        gamemode="deathmatch",
-        is_coop=False,
-    ),
-    DoomSpec(
-        "doom_dwango5",
-        "dwango5_dm.cfg",
-        doom_action_space(),
-        1.0,
-        int(1e9),
-        num_agents=8,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
-        gamemode="deathmatch",
-        is_coop=False,
-    ),
-    # <==== Environments used in the paper ====>
-    # this is for comparison with other frameworks (wall-time test)
-    DoomSpec("doom_my_way_home_flat_actions", "my_way_home.cfg", Discrete(1 + 4), 1.0),
-    DoomSpec("doom_defend_the_center_flat_actions", "defend_the_center.cfg", Discrete(1 + 3), 1.0),
-    # "basic" single-player envs
-    DoomSpec("doom_my_way_home", "my_way_home.cfg", doom_action_space_basic(), 1.0),
-    DoomSpec("doom_deadly_corridor", "deadly_corridor.cfg", doom_action_space_extended(), 0.01),
-    DoomSpec("doom_defend_the_center", "defend_the_center.cfg", doom_turn_and_attack_only(), 1.0),
-    DoomSpec("doom_defend_the_line", "defend_the_line.cfg", doom_turn_and_attack_only(), 1.0),
-    DoomSpec(
-        "doom_health_gathering",
-        "health_gathering.cfg",
-        Discrete(1 + 4),
-        1.0,
-        extra_wrappers=[(DoomGatheringRewardShaping, {})],  # same as https://arxiv.org/pdf/1904.01806.pdf
-    ),
-    DoomSpec(
-        "doom_health_gathering_supreme",
-        "health_gathering_supreme.cfg",
-        Discrete(1 + 4),
-        1.0,
-        extra_wrappers=[(DoomGatheringRewardShaping, {})],  # same as https://arxiv.org/pdf/1904.01806.pdf
-    ),
-    # "challenging" single-player envs
-    DoomSpec(
-        "doom_battle",
-        "battle_continuous_turning.cfg",
-        doom_action_space_discretized_no_weap(),
-        1.0,
-        2100,
-        extra_wrappers=[ADDITIONAL_INPUT, BATTLE_REWARD_SHAPING],
-    ),
-    DoomSpec(
-        "doom_battle2",
-        "battle2_continuous_turning.cfg",
-        doom_action_space_discretized_no_weap(),
-        1.0,
-        2100,
-        extra_wrappers=[ADDITIONAL_INPUT, BATTLE_REWARD_SHAPING],
-    ),
-    # multi-player envs with bots as opponents (still only one agent)
-    DoomSpec(
-        "doom_duel_bots",
-        "ssl2.cfg",
-        doom_action_space_full_discretized(with_use=True),
-        1.0,
-        int(1e9),
-        num_agents=1,
-        num_bots=1,
-        respawn_delay=2,
-        extra_wrappers=[ADDITIONAL_INPUT, BOTS_REWARD_SHAPING],
-    ),
-    DoomSpec(
-        "doom_deathmatch_bots",
-        "dwango5_dm_continuous_weap.cfg",
-        doom_action_space_full_discretized(),
-        1.0,
-        int(1e9),
-        num_agents=1,
-        num_bots=7,
-        extra_wrappers=[ADDITIONAL_INPUT, BOTS_REWARD_SHAPING],
-    ),
-    # full multiplayer environments for self-play and PBT experiments
-    DoomSpec(
-        "doom_duel",
-        "ssl2.cfg",
-        doom_action_space_full_discretized(with_use=True),
-        1.0,
-        int(1e9),
-        num_agents=2,
-        num_bots=0,
-        respawn_delay=2,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
-        gamemode="deathmatch",
-        is_coop=False,
-    ),
-    DoomSpec(
-        "doom_deathmatch_full",
-        "freedm.cfg",
-        doom_action_space_full_discretized(with_use=True),
-        1.0,
-        int(1e9),
-        num_agents=4,
-        num_bots=4,
-        respawn_delay=2,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
-        gamemode="deathmatch",
-        is_coop=False,
-    ),
-    # benchmark environment, this is the same doom_battle that we're using in the paper, but without extra input spaces
-    # for measurements, and with a more simple action space, just so it is easier to use with other codebases
-    # we measure throughput with 128x72 input resolution, 4-frameskip and original game resolution of 160x120
-    # (no widescreen)
-    DoomSpec("doom_benchmark", "battle.cfg", Discrete(1 + 8), 1.0, 2100),
-    
+DOOM_ENVS = [    
     DoomSpec(
         "doom_pitfall",
         "pitfall.cfg",
