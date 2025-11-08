@@ -289,6 +289,28 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
             for j, r in enumerate(results):
                 result_lists[j].append(r)
+                
+        # This only improves notably for more agents
+        # Comparison runs with 4 agents (check the tag: non_parallel vs parallel collection):
+        # https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/table
+        # Sync: fps=2.608,0653061224
+        # Async: fps=3.305,1611185087
+        # async def _collect():
+        #     a = asyncio.get_running_loop()
+        #     tasks = [
+        #         a.run_in_executor(None, safe_get, worker.result_queue,
+        #             0.2 if timeout is None else timeout,
+        #             f"Takes a surprisingly long time to process task {task_type}, retry...",
+        #         ) for worker in self.workers]
+        #     return await asyncio.gather(*tasks)
+        # results = asyncio.run(_collect())
+        # for r in results:
+        #     if not isinstance(r, (tuple, list)):
+        #         r = [r]
+        #     if result_lists is None:
+        #         result_lists = tuple([] for _ in r)
+        #     for j, r in enumerate(r):
+        #         result_lists[j].append(r)
 
         return result_lists
 
