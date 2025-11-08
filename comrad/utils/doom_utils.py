@@ -15,6 +15,7 @@ from sample_factory.envs.env_wrappers import (
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
     doom_action_space_pitfall,
+    doom_action_space_mwh,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
@@ -77,6 +78,15 @@ DOOM_ENVS = [
         gamemode="coop",
         is_coop=True,
     ),
+    
+    DoomSpec(
+        "doom_mwh",
+        "my_way_home_multi_easy.cfg",
+        doom_action_space_mwh(),
+        num_agents=2,
+        gamemode="coop",
+        is_coop=True,
+    )
 ]
 
 

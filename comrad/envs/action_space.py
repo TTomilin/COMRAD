@@ -59,6 +59,23 @@ def doom_action_space_pitfall():
             Discrete(2),
         )
     )
+    
+def doom_action_space_mwh():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD 
+    MOVE_LEFT
+    MOVE_RIGHT
+    """
+    
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, forward
+            Discrete(3),  # noop, move left, move right
+        )
+    )
 
 
 def doom_action_space_extended():
