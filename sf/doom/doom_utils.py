@@ -22,7 +22,7 @@ from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
 # from sf.doom.wrappers.reward_shaping import
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 
@@ -81,9 +81,10 @@ DOOM_ENVS = [
     
     DoomSpec(
         "doom_mwh",
-        "my_way_home_multi_easy.cfg",
-        doom_action_space_mwh(),
-        num_agents=2,
+        "my_way_home_multi.cfg",
+        doom_action_space_pitfall(),
+        num_agents=2, # reward shaping is set only for 2 agents, dont increase
+        extra_wrappers=[(DoomMWHRewardShaping, {})],
         gamemode="coop",
         is_coop=True,
     )
