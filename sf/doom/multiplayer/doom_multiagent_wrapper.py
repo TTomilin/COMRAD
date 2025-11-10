@@ -273,6 +273,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             worker.task_queue.put((data[i], task_type))
 
         result_lists = None
+        # env.step() mostly in C++ and I/O, which releases GIL, so technically those workers run in parallel even though they are threads
+        # So the main bottleneck here is main thread waiting for each worker's result in .get()
+        # This is sequential, so might make it async so main thread waits for all at once
         # TODO: Try asynchronous collection with select() or asyncio
         for i, worker in enumerate(self.workers):
             results = safe_get(
