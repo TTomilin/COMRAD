@@ -14,17 +14,29 @@ from sample_factory.envs.env_wrappers import (
 )
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
+    doom_action_space_basic,
     doom_action_space_pitfall,
     doom_action_space_mwh,
+    doom_action_space_full_discretized,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
 # from sf.doom.wrappers.reward_shaping import
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, DoomGatheringRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
+# For doom_duel
+from sf_examples.vizdoom.doom.wrappers.reward_shaping import (
+    REWARD_SHAPING_DEATHMATCH_V1,
+    DoomRewardShapingWrapper,
+    true_objective_winning_the_game,
+)
+DEATHMATCH_REWARD_SHAPING = (
+    DoomRewardShapingWrapper,
+    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V1, true_objective_func=true_objective_winning_the_game),
+)
 
 class DoomSpec:
     def __init__(
@@ -87,7 +99,34 @@ DOOM_ENVS = [
         extra_wrappers=[(DoomMWHRewardShaping, {})],
         gamemode="coop",
         is_coop=True,
-    )
+    ),
+    
+    DoomSpec(
+        "doom_basic",
+        "basic.cfg",
+        Discrete(1 + 3),  # idle, left, right, attack
+        reward_scaling=0.01,
+        default_timeout=300,
+    ),
+    
+    DoomSpec(
+        "doom_two_colors_easy",
+        "two_colors_easy.cfg",
+        doom_action_space_basic(),
+        extra_wrappers=[(DoomGatheringRewardShaping, {})],  # same as https://arxiv.org/pdf/1904.01806.pdf
+    ),
+    
+    DoomSpec(
+        "doom_duel",
+        "ssl2.cfg",
+        doom_action_space_full_discretized(with_use=True),
+        1.0,
+        int(1e9),
+        num_agents=2,
+        num_bots=0,
+        respawn_delay=2,
+        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
+    ),
 ]
 
 
@@ -168,6 +207,7 @@ def make_doom_env_impl(
     resolution = custom_resolution
     if resolution is None:
         resolution = "256x144" if cfg.wide_aspect_ratio else "160x120"
+        # resolution = "640x480" # Custom resolution
 
     assert resolution in resolutions
     env = SetResolutionWrapper(env, resolution)  # default (wide aspect ratio)
