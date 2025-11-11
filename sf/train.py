@@ -48,7 +48,9 @@ def parse_args(argv=None, evaluation=False):
     final_cfg = parse_full_cfg(parser, argv)
     
     # auto add experiment name if not provided
-    if '--experiment' not in sys.argv:
+    # Only rename experiment for training script, to avoid conflict for enjoy script
+    # But currently train.py is hardcoded into if statement
+    if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
         final_cfg.experiment = f"{final_cfg.env}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
     
     return final_cfg
