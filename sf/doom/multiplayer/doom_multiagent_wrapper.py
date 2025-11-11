@@ -406,11 +406,16 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         if self.render_mode is None:
             return
         elif self.render_mode == "human":
-            obs_display = [o["obs"] for o in self.last_obs]
+            # for o in self.last_obs: print(o)
+            # For MUTLI-AGENT scenarios with ADDITIONAL_INPUT in extra_wrappers, obs is wrapped in a dictionary
+            # with format like {"obs": array([[[...]]]), 'measurements': array([...])}
+            # But then for multiagent scenarios like pitfall, we dont need extra game variables, so we dont pass that,
+            # thus observations remains the plain np arrays, so here we have to check if it's dict or array here
+            obs_display = [o["obs"] if isinstance(o, dict) else o for o in self.last_obs]
             obs_grid = concat_grid(obs_display, self.render_mode)
             cv2.imshow("vizdoom", obs_grid)
         elif self.render_mode == "rgb_array":
-            obs_display = [o["obs"] for o in self.last_obs]
+            obs_display = [o["obs"] if isinstance(o, dict) else o for o in self.last_obs]
             obs_grid = concat_grid(obs_display, self.render_mode)
             return obs_grid
         else:
