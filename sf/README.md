@@ -1,10 +1,15 @@
 ## Install and run
-Install sample factory 2.1.3 with (last pypi pkg released was 2 years ago, which was 2.1.1):
+<!-- Install sample factory 2.1.3 with (last pypi pkg released was 2 years ago, which was 2.1.1):
 ```
 pip install git+https://github.com/alex-petrenko/sample-factory.git
 
 # or at specific commit
 pip install git+https://github.com/alex-petrenko/sample-factory.git@8008921cd8823f4c53f68afea5b9e9da040d0e4a
+``` -->
+
+We need to modify SF's codebase to adapt MAPPO, which is rather inconvenient with monkey patch. Thus, sample_factory is cloned directly (similar to HASARD's approach). Install all dependencies required by SF with (These will be in pyproject.toml and setup.py when we get our own independent repo):
+```
+pip install pyglet "tensorboard>=1.15.0" "tensorboardx>=2.0" "psutil>=5.7.0" "threadpoolctl>=2.0.0" colorlog "signal-slot-mp>=1.0.3,<2.0" filelock "huggingface-hub>=0.10.0,<1.0" pandas opencv-python "pettingzoo[classic]" onnx onnxruntime pip install "gymnasium[classic_control]>=0.27,<1.0"
 ```
 
 Run locally with
