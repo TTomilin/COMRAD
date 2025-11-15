@@ -14,6 +14,18 @@ def add_doom_env_args(parser):
         type=int,
         help="Allows to set number of agents less than number of players, to allow humans to join the match. Default value (-1) means default number defined by the environment",
     )
+    p.add_argument(
+        '--use_mappo',
+        action='store_true',
+        default=False,
+        help='Use MAPPO instead of IPPO for multi-agent training'
+    )
+    p.add_argument(
+        '--share_policy', 
+        action='store_true', 
+        default=True,
+        help='Decides if agents share policy parameters'
+    )
     p.add_argument("--num_humans", default=0, type=int, help="Meatbags want to play?")
     p.add_argument(
         "--num_bots",

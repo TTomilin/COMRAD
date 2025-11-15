@@ -7,12 +7,13 @@ from sample_factory.algo.utils.context import global_model_factory
 from sample_factory.algo.utils.misc import ExperimentStatus
 from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
 from sample_factory.envs.env_utils import register_env
-from sample_factory.train import make_runner, run_rl
+from sample_factory.train import make_runner
 
 from sf.doom.doom_model import make_vizdoom_encoder
 from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
 from sf.doom.doom_utils import DOOM_ENVS, make_doom_env_from_spec
 from sf.doom.video_uploader import upload_video
+from sf.doom.multi_agent_model import make_mappo_actor_critic
 
 
 def register_vizdoom_envs():
@@ -51,7 +52,8 @@ def parse_args(argv=None, evaluation=False):
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
-        final_cfg.experiment = f"{final_cfg.env}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO" if final_cfg.num_agents > 1 else "PPO"
+        final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
     
     return final_cfg
 
@@ -59,6 +61,13 @@ def parse_args(argv=None, evaluation=False):
 def main():
     register_vizdoom_components()
     cfg = parse_args()
+    
+    if cfg.num_agents > 1:
+        print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
+        global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
+    else:
+        print("Single-agent training with PPO")
+    
     cfg, runner = make_runner(cfg)
 
     if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):
