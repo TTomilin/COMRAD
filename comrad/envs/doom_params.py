@@ -20,12 +20,6 @@ def add_doom_env_args(parser):
         default=False,
         help='Use MAPPO instead of IPPO for multi-agent training'
     )
-    p.add_argument(
-        '--share_policy', 
-        action='store_true', 
-        default=True,
-        help='Decides if agents share policy parameters'
-    )
     p.add_argument("--num_humans", default=0, type=int, help="Meatbags want to play?")
     p.add_argument(
         "--num_bots",
