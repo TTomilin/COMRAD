@@ -5,9 +5,11 @@ This gives example of how signal-slot system works, kind of similar to TCP. Refe
 1: Runner creates components:
 - RolloutWorker (simulates environments)
 - Batcher (collects trajectories for training)
+
 2: Each component defines slots :
 - RolloutWorker has a method that can emit a signal called `"p0_trajectories"`
 - Batcher has a slot method called `on_new_trajectories()`
+
 3: Runner connects them:
 ```python
 rollout_worker.signal("p0_trajectories").connect(batcher.on_new_trajectories)
