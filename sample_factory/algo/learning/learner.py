@@ -779,6 +779,21 @@ class Learner(Configurable):
 
                     loss.backward()
 
+                    # Only for --actor_critic_share_weights=False else do 1 loss
+                    # Use this to debug the grad of separate weight actor-critic
+                    # print("==============+++++Critic")
+                    # critic_loss.backward()
+                    # for name, p in self.actor_critic.named_parameters():
+                    #     g = 0.0 if p.grad is None else p.grad.norm().item()
+                    #     print(name, g)
+                    # for p in self.actor_critic.parameters():
+                    #     p.grad = None
+                    # print("==============+++++Actor")
+                    # actor_loss.backward()
+                    # for name, p in self.actor_critic.named_parameters():
+                    #     g = 0.0 if p.grad is None else p.grad.norm().item()
+                    #     print(name, g)
+
                     if self.cfg.max_grad_norm > 0.0:
                         with timing.add_time("clip"):
                             torch.nn.utils.clip_grad_norm_(self.actor_critic.parameters(), self.cfg.max_grad_norm)
