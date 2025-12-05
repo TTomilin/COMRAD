@@ -27,17 +27,6 @@ from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
 from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, DoomGatheringRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
-# For doom_duel
-from sf_examples.vizdoom.doom.wrappers.reward_shaping import (
-    REWARD_SHAPING_DEATHMATCH_V1,
-    DoomRewardShapingWrapper,
-    true_objective_winning_the_game,
-)
-DEATHMATCH_REWARD_SHAPING = (
-    DoomRewardShapingWrapper,
-    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V1, true_objective_func=true_objective_winning_the_game),
-)
-
 class DoomSpec:
     def __init__(
         self,
@@ -78,7 +67,7 @@ class DoomSpec:
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 
 
-DOOM_ENVS = [    
+DOOM_ENVS = [
     DoomSpec(
         "doom_pitfall",
         "pitfall.cfg",
@@ -90,7 +79,7 @@ DOOM_ENVS = [
         gamemode="coop",
         is_coop=True,
     ),
-    
+
     DoomSpec(
         "doom_mwh",
         "my_way_home_multi.cfg",
@@ -99,33 +88,6 @@ DOOM_ENVS = [
         extra_wrappers=[(DoomMWHRewardShaping, {})],
         gamemode="coop",
         is_coop=True,
-    ),
-    
-    DoomSpec(
-        "doom_basic",
-        "basic.cfg",
-        Discrete(1 + 3),  # idle, left, right, attack
-        reward_scaling=0.01,
-        default_timeout=300,
-    ),
-    
-    DoomSpec(
-        "doom_two_colors_easy",
-        "two_colors_easy.cfg",
-        doom_action_space_basic(),
-        extra_wrappers=[(DoomGatheringRewardShaping, {})],  # same as https://arxiv.org/pdf/1904.01806.pdf
-    ),
-    
-    DoomSpec(
-        "doom_duel",
-        "ssl2.cfg",
-        doom_action_space_full_discretized(with_use=True),
-        1.0,
-        int(1e9),
-        num_agents=2,
-        num_bots=0,
-        respawn_delay=2,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
     ),
 ]
 
