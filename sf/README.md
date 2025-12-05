@@ -17,7 +17,7 @@ Run locally with
 python -m sf.train --env=doom_pitfall --train_for_env_steps=10000 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=4 --num_envs_per_worker=4 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --experiment=pitfall_0 --with_wandb=True --wandb_dir=. --wandb_record_every=10
 ```
 
-Run locally with MAPPO with `--use_mappo`:
+Run locally with MAPPO with `--use_mappo` and `--num_agents`:
 ```
 python -m sf.train --env=doom_pitfall --train_for_env_steps=5000 --algo=APPO --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --num_workers=4 --num_envs_per_worker=2 --num_policies=1 --device=cpu --with_wandb=True --wandb_dir=. --wandb_record_every=5 --use_mappo --num_agents=2
 
