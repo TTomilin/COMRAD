@@ -16,7 +16,6 @@ from sf.doom.action_space import (
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
-from sf.doom.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
 from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
@@ -34,8 +33,6 @@ class DoomSpec:
         respawn_delay=0,
         timelimit=4.0,
         extra_wrappers=None,
-        gamemode="deathmatch", # keep deathmatch for now to enable def flags for single player scenarios
-        is_coop=False, # Same reason as above, changes to True later for fully coop tasks
     ):
         self.name = name
         self.env_spec_file = env_spec_file
@@ -54,13 +51,7 @@ class DoomSpec:
         # expect list of tuples (wrapper_cls, wrapper_kwargs)
         self.extra_wrappers = extra_wrappers
 
-        self.gamemode = gamemode
-        self.is_coop = is_coop # whether add custom stats MultiplayerStatsWrapper(env) or not
-
-
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
-
-
 DOOM_ENVS = [
     DoomSpec(
         "doom_pitfall",
@@ -70,8 +61,6 @@ DOOM_ENVS = [
         1000,
         num_agents=2,
         extra_wrappers=[(DoomPitfallRewardShaping, {})],
-        gamemode="coop",
-        is_coop=True,
     ),
 
     DoomSpec(
@@ -80,8 +69,6 @@ DOOM_ENVS = [
         doom_action_space_pitfall(),
         num_agents=2, # reward shaping is set only for 2 agents, dont increase
         extra_wrappers=[(DoomMWHRewardShaping, {})],
-        gamemode="coop",
-        is_coop=True,
     ),
 
     DoomSpec(
@@ -92,8 +79,6 @@ DOOM_ENVS = [
         1200,
         num_agents=2,
         extra_wrappers=[(ParallelReward, {})],
-        gamemode="coop",
-        is_coop=True,
     )
 ]
 
@@ -104,6 +89,9 @@ def doom_env_by_name(name):
             return cfg
     raise RuntimeError("Unknown Doom env")
 
+def get_num_agents(cfg, env_name):
+    spec = doom_env_by_name(env_name)
+    return spec.num_agents if cfg.num_agents <= 0 else cfg.num_agents
 
 # noinspection PyUnusedLocal
 def make_doom_env_impl(
@@ -152,7 +140,6 @@ def make_doom_env_impl(
             respawn_delay=doom_spec.respawn_delay,
             timelimit=timelimit,
             render_mode=render_mode,
-            gamemode=doom_spec.gamemode,
         )
 
     record_to = cfg.record_to if "record_to" in cfg else None
@@ -164,10 +151,6 @@ def make_doom_env_impl(
 
     if record_to is not None and should_record:
         env = RecordingWrapper(env, record_to, player_id)
-
-    # TODO: Add custom stats for coop tasks with shooting etc.
-    if not getattr(doom_spec, "is_coop", False):
-        env = MultiplayerStatsWrapper(env)
 
     resolution = custom_resolution
     if resolution is None:
