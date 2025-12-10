@@ -3,8 +3,6 @@ import os
 from os.path import join
 from typing import Optional
 
-from gymnasium.spaces import Discrete
-
 from sample_factory.envs.env_wrappers import (
     PixelFormatChwWrapper,
     RecordingWrapper,
@@ -14,17 +12,13 @@ from sample_factory.envs.env_wrappers import (
 )
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
-    doom_action_space_basic,
     doom_action_space_pitfall,
-    doom_action_space_mwh,
-    doom_action_space_full_discretized,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-# from sf.doom.wrappers.reward_shaping import
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, DoomGatheringRewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -89,6 +83,18 @@ DOOM_ENVS = [
         gamemode="coop",
         is_coop=True,
     ),
+
+    DoomSpec(
+        "parallel",
+        "prot_beta_long.cfg",
+        doom_action_space_pitfall(),
+        1.0,
+        1200,
+        num_agents=2,
+        extra_wrappers=[(ParallelReward, {})],
+        gamemode="coop",
+        is_coop=True,
+    )
 ]
 
 
