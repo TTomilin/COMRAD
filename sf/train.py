@@ -62,9 +62,11 @@ def main():
     register_vizdoom_components()
     cfg = parse_args()
 
-    from sf.doom.doom_utils import get_num_agents
-    n_agents = get_num_agents(cfg, cfg.env)
-    cfg.num_agents = n_agents
+    if cfg.num_agents < 1:
+        from sf.doom.doom_utils import get_num_agents
+        n_agents = get_num_agents(cfg, cfg.env)
+        cfg.num_agents = n_agents
+
     if cfg.num_agents > 1:
         print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
         global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
