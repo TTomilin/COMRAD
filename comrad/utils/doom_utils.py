@@ -120,6 +120,8 @@ def make_doom_env_impl(
     render_mode: Optional[str] = None,
     **kwargs,
 ):
+    assert cfg is not None
+
     skip_frames = skip_frames if skip_frames is not None else cfg.env_frameskip
 
     fps = cfg.fps if "fps" in cfg else None
@@ -167,11 +169,6 @@ def make_doom_env_impl(
     if not getattr(doom_spec, "is_coop", False):
         env = MultiplayerStatsWrapper(env)
 
-    # # BotDifficultyWrapper no longer in use
-    # if num_bots > 0:
-    #     bot_difficulty = cfg.start_bot_difficulty if "start_bot_difficulty" in cfg else None
-    #     env = BotDifficultyWrapper(env, bot_difficulty)
-
     resolution = custom_resolution
     if resolution is None:
         resolution = "256x144" if cfg.wide_aspect_ratio else "160x120"
@@ -180,6 +177,7 @@ def make_doom_env_impl(
     assert resolution in resolutions
     env = SetResolutionWrapper(env, resolution)  # default (wide aspect ratio)
 
+    assert env.observation_space.shape is not None
     h, w, channels = env.observation_space.shape
     if w != cfg.res_w or h != cfg.res_h:
         env = ResizeWrapper(env, cfg.res_w, cfg.res_h, grayscale=False)
@@ -225,6 +223,8 @@ def make_doom_env_impl(
 
 
 def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode: Optional[str] = None, **kwargs):
+    assert cfg is not None
+
     skip_frames = cfg.env_frameskip
 
     if cfg.num_bots < 0:
