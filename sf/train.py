@@ -34,40 +34,43 @@ def register_vizdoom_components():
 def parse_args(argv=None, evaluation=False):
     parser, partial_cfg = parse_sf_args(argv=argv, evaluation=evaluation)
     add_doom_env_args(parser)
-    
+
     # This is the record_to param, it saves as pngs with an action.json
     # Use ffmpeg to transform into mp4 vid
     # ffmpeg -i %05d.png -c:v libx264 -pix_fmt yuv420p -movflags +faststart -f mp4 vid.mp4
     # It's possible to use this only and run ffmpeg after each episode then upload to wandb but that's more overhead
     # especially for many envs
     add_doom_env_eval_args(parser)
-    
+
     # Log videos to wandb
     add_wandb_args(parser)
-    
+
     doom_override_defaults(parser)
     final_cfg = parse_full_cfg(parser, argv)
-    
+
     # auto add experiment name if not provided
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
         algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO" if final_cfg.num_agents > 1 else "PPO"
         final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-    
+
     return final_cfg
 
 
 def main():
     register_vizdoom_components()
     cfg = parse_args()
-    
+
+    from sf.doom.doom_utils import get_num_agents
+    n_agents = get_num_agents(cfg, cfg.env)
+    cfg.num_agents = n_agents
     if cfg.num_agents > 1:
         print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
         global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
     else:
         print("Single-agent training with PPO")
-    
+
     cfg, runner = make_runner(cfg)
 
     if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):

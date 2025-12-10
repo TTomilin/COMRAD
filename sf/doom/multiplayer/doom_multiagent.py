@@ -40,7 +40,6 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         timelimit=0.0,
         record_to=None,
         render_mode: Optional[str] = None,
-        gamemode: str = "coop",
     ):
         super().__init__(
             action_space,
@@ -60,24 +59,6 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         self.num_bots = num_bots
         self.timestep = 0
         self.update_state = True
-
-        self.gamemode = gamemode # deathmatch or cooperative (or team deathmatch)
-
-        # # Removed bot curriculum learning in favor of randomly generated bots
-        # # hardcode bot names for consistency if needed
-        # self.bot_names = [
-        #     "Blazkowicz",
-        #     "PerfectBlue",
-        #     "PerfectRed",
-        #     "PerfectGreen",
-        #     "PerfectPurple",
-        #     "PerfectYellow",
-        #     "PerfectWhite",
-        #     "PerfectLtGreen",
-        # ]
-        # self.bot_difficulty_mean = self.bot_difficulty_std = None
-        # self.hardest_bot = 100
-        # self.easiest_bot = 10
 
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
@@ -106,7 +87,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
             # start the game when everyone is connected.
             game_args_list = [
                 f"-host {self.max_num_players}",
-                f"-port {port}",        
+                f"-port {port}",
                 f"+timelimit {self.timelimit}",  # The game (episode) will end after this many minutes have elapsed.
                 "+sv_noautoaim 1",  # Autoaim is disabled for all players.
                 "+sv_nocrouch 1",  # Disables crouching.
@@ -114,18 +95,6 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 f"+viz_respawn_delay {self.respawn_delay}",  # Sets delay between respanws (in seconds).
                 f"+viz_connect_timeout {vizdoom_env_timeout}",
             ]
-
-            if self.gamemode == "coop":
-                game_args_list += []
-            else:
-                if self.gamemode == "deathmatch":
-                    game_args_list += ["-deathmatch",  # Deathmatch rules are used for the game.
-                                        "+sv_forcerespawn 1",  # Players will respawn automatically after they die.
-                                        "+sv_spawnfarthest 1",  # Players will be spawned as far as possible from any other players.
-                                        "+sv_respawnprotect 1",  # Players will be invulnerable for two second after spawning.
-                                        "+sv_nojump 1",  # Disables jumping.
-                                        "+sv_noexit 1",  # Prevents players from exiting the level in deathmatch before timelimit is hit.
-                                        ]
 
             self.game.add_game_args(" ".join(game_args_list))
 
@@ -163,14 +132,6 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         log.info("Initialized w:%d v:%d player:%d", self.worker_index, self.vector_index, self.player_id)
         self.initialized = True
 
-    # def _random_bot(self, difficulty, used_bots):
-    #     while True:
-    #         idx = self.rng.integers(0, self.num_bots)
-    #         bot_name = f"BOT_{difficulty}_{idx}"
-    #         if bot_name not in used_bots:
-    #             used_bots.append(bot_name)
-    #             return bot_name
-
     def reset(self, **kwargs):
         obs, info = super().reset(**kwargs)
 
@@ -179,29 +140,6 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
 
             for _ in range(self.num_bots):
                 self.game.send_game_command("addbot")
-
-            # # No longer use curriculum learning
-            # bot_names = copy.deepcopy(self.bot_names)
-            # self.rng.shuffle(bot_names)
-            # used_bots = []
-            # for i in range(self.num_bots):
-            #     if self.bot_difficulty_mean is None:
-            #         # add named bots from the list
-            #         if i < len(bot_names):
-            #             bot_name = " " + bot_names[i]
-            #         else:
-            #             bot_name = ""
-            #         # log.info('Adding bot %d %s', i, bot_name)
-            #         self.game.send_game_command(f"addbot{bot_name}")
-            #     else:
-            #         # add random bots according to the desired difficulty
-            #         diff = self.rng.normal(self.bot_difficulty_mean, self.bot_difficulty_std)
-            #         diff = int(round(diff, -1))
-            #         diff = max(self.easiest_bot, diff)
-            #         diff = min(self.hardest_bot, diff)
-            #         bot_name = self._random_bot(diff, used_bots)
-            #         # log.info('Adding bot %d %s', i, bot_name)
-            #         self.game.send_game_command(f"addbot {bot_name}")
 
         self.timestep = 0
         self.update_state = True
