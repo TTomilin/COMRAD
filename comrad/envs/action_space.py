@@ -78,6 +78,32 @@ def doom_action_space_mwh():
     )
 
 
+def doom_action_space_armory_siege():
+    """
+    MOVE_FORWARD 
+    MOVE_BACKWARD 
+    MOVE_RIGHT 
+    MOVE_LEFT 
+    TURN_LEFT 
+    TURN_RIGHT 
+    ATTACK 
+    SELECT_WEAPON1
+    SELECT_WEAPON2
+    SELECT_WEAPON3
+    SELECT_WEAPON4
+    SELECT_WEAPON5
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, attack
+            Discrete(4),  # noop, select weapon 2, select weapon 3, select weapon 5
+        )
+    )
+
+
 def doom_action_space_extended():
     """
     This function assumes the following list of available buttons:

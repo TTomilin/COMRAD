@@ -350,7 +350,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                             time.sleep(0.05)
 
                     for i, worker in enumerate(self.workers):
-                        worker.result_queue.get(timeout=20)
+                        worker.result_queue.get(timeout=70)
 
             except filelock.Timeout:
                 continue

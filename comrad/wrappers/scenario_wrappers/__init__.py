@@ -2,3 +2,4 @@ from sf.doom.wrappers.scenario_wrappers.gathering_reward_shaping import DoomGath
 from sf.doom.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfallRewardShaping
 from sf.doom.wrappers.scenario_wrappers.mwh_reward_shaping import DoomMWHRewardShaping
 from sf.doom.wrappers.scenario_wrappers.parallel import ParallelReward
+from sf.doom.wrappers.scenario_wrappers.armory_siege import ArmorySiegeRewardShaping
