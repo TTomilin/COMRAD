@@ -13,11 +13,12 @@ from sample_factory.envs.env_wrappers import (
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
     doom_action_space_pitfall,
+    doom_action_space_armory_siege,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -79,7 +80,18 @@ DOOM_ENVS = [
         1200,
         num_agents=2,
         extra_wrappers=[(ParallelReward, {})],
-    )
+    ),
+
+    DoomSpec(
+        "armory_siege",
+        "armory_siege.cfg",
+        doom_action_space_armory_siege(),
+        1.0,
+        2100,
+        num_agents=3,
+        respawn_delay=1,
+        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+    ),
 ]
 
 

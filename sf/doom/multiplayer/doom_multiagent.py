@@ -13,7 +13,7 @@ DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
 try:
     vizdoom_env_timeout = int(os.environ["TRAVIS_VIZDOOM_ENV_TIMEOUT"])
 except KeyError:
-    vizdoom_env_timeout = 4
+    vizdoom_env_timeout = 60
 
 
 def find_available_port(start_port, increment=1000):
@@ -92,6 +92,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 "+sv_noautoaim 1",  # Autoaim is disabled for all players.
                 "+sv_nocrouch 1",  # Disables crouching.
                 "+sv_nofreelook 1",  # Disables free look with a mouse (only keyboard).
+                "+sv_forcerespawn 1",  # Players will respawn automatically after they die.
                 f"+viz_respawn_delay {self.respawn_delay}",  # Sets delay between respanws (in seconds).
                 f"+viz_connect_timeout {vizdoom_env_timeout}",
             ]
