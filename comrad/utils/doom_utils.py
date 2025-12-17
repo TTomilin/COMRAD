@@ -14,11 +14,12 @@ from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, exp
 from sf.doom.action_space import (
     doom_action_space_pitfall,
     doom_action_space_armory_siege,
+    doom_action_space_safe_ground2,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, DoomSafeGround2RewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -54,6 +55,16 @@ class DoomSpec:
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 DOOM_ENVS = [
+    DoomSpec(
+        "safe_ground2",
+        "safe_ground2.cfg",
+        doom_action_space_safe_ground2(),
+        1.0,
+        1000,
+        num_agents=2,
+        extra_wrappers=[(DoomSafeGround2RewardShaping, {})],
+    ),
+
     DoomSpec(
         "doom_pitfall",
         "pitfall.cfg",
