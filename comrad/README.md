@@ -9,34 +9,80 @@ pip install git+https://github.com/alex-petrenko/sample-factory.git@8008921cd882
 
 We need to modify SF's codebase to adapt MAPPO, which is rather inconvenient with monkey patch. Thus, sample_factory is cloned directly (similar to HASARD's approach). Install all dependencies required by SF with (These will be in pyproject.toml and setup.py when we get our own independent repo):
 ```
-pip install pyglet "tensorboard>=1.15.0" "tensorboardx>=2.0" "psutil>=5.7.0" "threadpoolctl>=2.0.0" colorlog "signal-slot-mp>=1.0.3,<2.0" filelock "huggingface-hub>=0.10.0,<1.0" pandas opencv-python "pettingzoo[classic]" onnx onnxruntime pip install "gymnasium[classic_control]>=0.27,<1.0"
+pip install pyglet "tensorboard>=1.15.0" "tensorboardx>=2.0" "psutil>=5.7.0" "threadpoolctl>=2.0.0" colorlog "signal-slot-mp>=1.0.3,<2.0" filelock "huggingface-hub>=0.10.0,<1.0" pandas opencv-python "pettingzoo[classic]" onnx onnxruntime "gymnasium[classic_control]>=0.27,<1.0"
 ```
 
-Run locally with
-```
-python -m sf.train --env=doom_pitfall --train_for_env_steps=10000 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=4 --num_envs_per_worker=4 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --experiment=pitfall_0 --with_wandb=True --wandb_dir=. --wandb_record_every=10
+## Training Commands
+
+### Run locally with IPPO
+```bash
+python -m sf.train \
+  --env=doom_pitfall \
+  --algo=APPO \
+  --train_for_env_steps=10000 \
+  --env_frameskip=4 \
+  --use_rnn=True \
+  --num_workers=4 \
+  --num_envs_per_worker=4 \
+  --num_policies=1 \
+  --batch_size=1024 \
+  --wide_aspect_ratio=False \
+  --experiment=pitfall_0 \
+  --with_wandb=True \
+  --wandb_dir=. \
+  --wandb_record_every=1
 ```
 
-Run locally with MAPPO with `--use_mappo` and `--num_agents`:
+### Run locally with MAPPO
+Add `--use_mappo` (and you can add `--num_agents=...` to config more agents):
+```bash
+python -m sf.train \
+  --env=doom_pitfall \
+  --algo=APPO \
+  --train_for_env_steps=5000 \
+  --env_frameskip=4 \
+  --use_rnn=True \
+  --num_workers=4 \
+  --num_envs_per_worker=2 \
+  --num_policies=1 \
+  --wide_aspect_ratio=False \
+  --use_mappo \
+  --with_wandb=True \
+  --wandb_dir=. \
+  --wandb_record_every=1
 ```
-python -m sf.train --env=doom_pitfall --train_for_env_steps=5000 --algo=APPO --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --num_workers=4 --num_envs_per_worker=2 --num_policies=1 --device=cpu --with_wandb=True --wandb_dir=. --wandb_record_every=5 --use_mappo --num_agents=2
 
+### Run on HPC
+Use `--train_for_seconds` instead of `--train_for_env_steps` and increase workers:
+
+```bash
+python -m sf.train \
+  --env=doom_pitfall \
+  --algo=APPO \
+  --train_for_seconds=1800 \
+  --env_frameskip=4 \
+  --use_rnn=True \
+  --num_workers=16 \
+  --num_envs_per_worker=8 \
+  --num_policies=1 \
+  --batch_size=1024 \
+  --wide_aspect_ratio=False \
+  --use_mappo \
+  --with_wandb=True \
+  --wandb_dir=. \
+  --wandb_record_every=10 \
+  --experiment=pitfall_0 <-- You can change or remove this flag
 ```
 
-Run on hpc with
-```
-python -m sf.train --env=doom_pitfall --train_for_seconds=1800 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=16 --num_envs_per_worker=8 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --experiment=pitfall_0 --with_wandb=True --wandb_dir=. --wandb_record_every=10
-```
-
-Note: If dont have cuda then add `--device=cpu` flag
+> **Note:** If you don't have CUDA, add `--device=cpu` flag.
 
 ## Run with launcher
 
-```
-python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4  --pause_between=1
+```bash
+python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4 --pause_between=1
 ```
 
-This will run multiple experiments with defined seeds in parallel. Might cause issue if run locally and without enough resources, but it parallelizes multiple experiments.
+This will run multiple experiments with defined seeds in parallel. Might cause issues if run locally without enough resources, but it parallelizes multiple experiments.
 
 ## Runs
 + 7 cores 16gb 2gpu
