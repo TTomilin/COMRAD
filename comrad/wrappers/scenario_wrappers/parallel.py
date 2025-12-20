@@ -15,10 +15,10 @@ class ParallelReward(gym.Wrapper):
         back_zone: float = -1.0,
         rush_pen: float = -2.0,
 
-        press_plate: float = 10.0,
+        press_plate: float = 5.0,
         hold_plate: float = 0.02,
-        leave_plate_early: float = -7.0,
-        partner_next_zone: float = 10.0,
+        leave_plate_early: float = -10.0,
+        partner_next_zone: float = 15.0,
 
         done: float = 50.0,
         timeout: float = -5.0,
