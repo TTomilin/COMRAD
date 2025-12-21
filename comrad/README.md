@@ -74,6 +74,8 @@ python -m sf.train \
   --experiment=pitfall_0 <-- You can change or remove this flag
 ```
 
+System recommendation for hpc: 64gb RAM (32gb runs out in 4-5h)
+
 > **Note:** If you don't have CUDA, add `--device=cpu` flag.
 
 ## Run with launcher
