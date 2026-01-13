@@ -36,6 +36,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         num_bots,
         skip_frames,
         async_mode=False,
+        forcerespawn=1,
         respawn_delay=0,
         timelimit=0.0,
         record_to=None,
@@ -60,6 +61,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         self.timestep = 0
         self.update_state = True
 
+        self.forcerespawn = forcerespawn
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
 
@@ -92,7 +94,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 "+sv_noautoaim 1",  # Autoaim is disabled for all players.
                 "+sv_nocrouch 1",  # Disables crouching.
                 "+sv_nofreelook 1",  # Disables free look with a mouse (only keyboard).
-                "+sv_forcerespawn 1",  # Players will respawn automatically after they die.
+                f"+sv_forcerespawn {self.forcerespawn}",  # Players will respawn automatically after they die.
                 f"+viz_respawn_delay {self.respawn_delay}",  # Sets delay between respanws (in seconds).
                 f"+viz_connect_timeout {vizdoom_env_timeout}",
             ]
