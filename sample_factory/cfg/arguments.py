@@ -10,6 +10,7 @@ from sample_factory.algo.utils.rl_utils import total_num_agents
 from sample_factory.cfg.cfg import (
     add_basic_cli_args,
     add_default_env_args,
+    add_dqn_args,
     add_eval_args,
     add_model_args,
     add_pbt_args,
@@ -44,6 +45,7 @@ def parse_sf_args(
     add_default_env_args(p)
     add_wandb_args(p)
     add_pbt_args(p)
+    add_dqn_args(p)
 
     if evaluation:
         add_eval_args(p)

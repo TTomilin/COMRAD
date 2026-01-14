@@ -490,6 +490,52 @@ def add_rl_args(p: ArgumentParser):
     p.add_argument("--benchmark", default=False, type=str2bool, help="Benchmark mode")
 
 
+def add_dqn_args(p: ArgumentParser):
+    """DQN arguments"""
+    p.add_argument(
+        "--replay_buffer_size",
+        default=1000000,
+        type=int,
+        help="Size of the replay buffer in transitions",
+    )
+    p.add_argument(
+        "--learning_starts",
+        default=10000,
+        type=int,
+        help="How many transitions to collect before starting training"
+    )
+    p.add_argument(
+        "--target_update_interval",
+        default=1000,
+        type=int,
+        help="How many each learning steps to update the target network",
+    )
+    p.add_argument(
+        "--target_update_tau",
+        default=1.0,
+        type=float,
+        help="Update coefficient for target network, 1 is copying weight"
+    )
+    p.add_argument(
+        "--epsilon_start",
+        default=1.0,
+        type=float,
+        help="For epsilon-greedy exploration",
+    )
+    p.add_argument(
+        "--epsilon_end",
+        default=0.01,
+        type=float,
+        help="For epsilon-greedy exploration after annealing",
+    )
+    p.add_argument(
+        "--epsilon_decay_steps",
+        default=100000,
+        type=int,
+        help="Number of env steps over to anneal epsilon from epsilon_start to epsilon_end",
+    )
+
+
 def add_model_args(p: ArgumentParser):
     """
     Policy size, configuration, etc.
