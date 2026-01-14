@@ -151,8 +151,19 @@ class DQNLearner(Learner):
                 next_q_target = target_result["action_logits"]
                 next_q_target_splits = torch.split(next_q_target, action_sizes, dim=1)
 
-                next_q_list = [q.max(dim=1)[0] for q in next_q_target_splits]
-                next_q = torch.stack(next_q_list, dim=1).sum(dim=1)
+                if self.cfg.double_dqn:
+                    online_result = self.actor_critic(normalized_next_obs, rnn_states, values_only=False)
+                    next_q_online = online_result["action_logits"]
+                    next_q_online_splits = torch.split(next_q_online, action_sizes, dim=1)
+
+                    next_q_list = []
+                    for q_online, q_target in zip(next_q_online_splits, next_q_target_splits):
+                        next_actions = q_online.argmax(dim=1, keepdim=True)
+                        next_q_list.append(q_target.gather(1, next_actions).squeeze(1))
+                    next_q = torch.stack(next_q_list, dim=1).sum(dim=1)
+                else:
+                    next_q_list = [q.max(dim=1)[0] for q in next_q_target_splits]
+                    next_q = torch.stack(next_q_list, dim=1).sum(dim=1)
 
                 # r + gamma * Q_target(s', a') * (1 - done)
                 # https://stackoverflow.com/questions/58559415/setting-up-target-values-for-deep-q-learning
