@@ -534,6 +534,18 @@ def add_dqn_args(p: ArgumentParser):
         type=int,
         help="Number of env steps over to anneal epsilon from epsilon_start to epsilon_end",
     )
+    p.add_argument(
+        "--double_dqn",
+        default=True,
+        type=str2bool,
+        help="Use Double DQN",
+    )
+    p.add_argument(
+        "--train_frequency",
+        default=4,
+        type=int,
+        help="How often to update training. Dont set to 0.",
+    )
 
 
 def add_model_args(p: ArgumentParser):

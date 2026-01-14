@@ -43,6 +43,7 @@ class DQNLearner(Learner):
 
         self.total_env_steps_for_training = 0
         self.last_target_update_step = 0
+        self.last_train_env_steps = 0
 
     def init(self) -> InitModelData:
         init_data = super().init()
@@ -233,11 +234,15 @@ class DQNLearner(Learner):
         if (self.replay_buffer is None or len(self.replay_buffer) < self.cfg.learning_starts):
             return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
 
+        steps_since_last_train = self.env_steps - self.last_train_env_steps
+        should_train = steps_since_last_train >= self.cfg.train_frequency
         train_stats = None
-        with self.timing.add_time("train"):
-            sampled_batch = self.replay_buffer.sample(self.cfg.batch_size, str(self.device))
-            if sampled_batch is not None:
-                train_stats = self._train_on_batch(sampled_batch)
+        if should_train:
+            with self.timing.add_time("train"):
+                sampled_batch = self.replay_buffer.sample(self.cfg.batch_size, str(self.device))
+                if sampled_batch is not None:
+                    train_stats = self._train_on_batch(sampled_batch)
+                    self.last_train_env_steps = self.env_steps
 
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
@@ -252,6 +257,7 @@ class DQNLearner(Learner):
             checkpoint["target_network"] = self.target_network.state_dict()
         if self.replay_buffer is not None:
             checkpoint["replay_buffer_size"] = len(self.replay_buffer)
+        checkpoint["last_train_env_steps"] = self.last_train_env_steps
         return checkpoint
 
     def _load_state(self, checkpoint_dict, load_progress=True):
@@ -259,3 +265,5 @@ class DQNLearner(Learner):
         if "target_network" in checkpoint_dict and self.target_network is not None:
             self.target_network.load_state_dict(checkpoint_dict["target_network"])
             log.info("Loaded target network from checkpoint")
+        if load_progress and "last_train_env_steps" in checkpoint_dict:
+            self.last_train_env_steps = checkpoint_dict["last_train_env_steps"]
