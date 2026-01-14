@@ -68,10 +68,10 @@ def main():
         cfg.num_agents = n_agents
 
     if cfg.num_agents > 1:
-        print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
+        # print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
         global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
-    else:
-        print("Single-agent training with PPO")
+    # else:
+        # print("Single-agent training with PPO")
 
     cfg, runner = make_runner(cfg)
 
