@@ -617,7 +617,7 @@ def add_dqn_args(p: ArgumentParser):
 
     p.add_argument(
         "--per",
-        default=False,
+        default=True,
         type=str2bool,
         help="Use Prioritized experience replay",
     )
