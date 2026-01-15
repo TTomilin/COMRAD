@@ -310,9 +310,16 @@ class DQNLearner(Learner):
             return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
 
         new_steps = transitions["rewards"].shape[0]
-        steps_per_update = self.cfg.train_frequency
-        num_updates = int(new_steps / steps_per_update)
-        if num_updates == 0: num_updates = 1
+        steps_per_update = int(getattr(self.cfg, "train_frequency", 1))
+        if steps_per_update <= 0:
+            log.warning("DQN: train_frequency <= 0")
+            steps_per_update = 1
+
+        self.total_env_steps_for_training += new_steps
+        num_updates = self.total_env_steps_for_training // steps_per_update
+        if num_updates == 0:
+            return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
+        self.total_env_steps_for_training -= num_updates * steps_per_update
 
         max_updates = getattr(self.cfg, "dqn_max_updates_per_batch", 0)
         if max_updates > 0:
@@ -345,6 +352,9 @@ class DQNLearner(Learner):
 
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
+            train_stats.dqn_num_updates = num_updates
+            train_stats.dqn_steps_per_update = steps_per_update
+            train_stats.dqn_pending_steps = self.total_env_steps_for_training
             train_stats.policy_lag_valid_frac = self.last_valid_ratio
             train_stats.policy_lag_dropped = self.last_valid_dropped
             train_stats.policy_lag_total = self.last_valid_total
