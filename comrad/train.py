@@ -52,7 +52,7 @@ def parse_args(argv=None, evaluation=False):
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
-        algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO" if final_cfg.num_agents > 1 else "PPO"
+        algo_name = "MAPPO" if final_cfg.use_mappo else final_cfg.algo
         final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
     return final_cfg
