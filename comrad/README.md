@@ -22,6 +22,8 @@ python -m sf.train \
     --train_for_env_steps=5000 
 ```
 
+---
+
 #### MAPPO
 
 ```bash
@@ -31,6 +33,8 @@ python -m sf.train \
     --use_mappo \
     --train_for_env_steps=5000
 ```
+
+---
 
 #### IDQN (Independent DQN)
 
@@ -43,10 +47,20 @@ python -m sf.train \
 
 Some important DQN flags (also in `cfg.py`):
 - `--replay_buffer_size`: Size of the replay buffer in transitions (default: `1000000`)
+- `--learning_starts`: Start training after this many transitions are collected (default: `10000`)
 - `--epsilon_start` / `--epsilon_end`: Exploration rate range (default: `1.0` -> `0.01`)
 - `--epsilon_decay_steps`: Steps to anneal epsilon (default: `100000`)
 - `--target_update_interval`: How many each learning steps to update the target network (default: `1000` steps)
 - `--double_dqn`: Use Double DQN (default: `True`)
+
+Note:
+- Learner is the main bottleneck
+- `--dqn_max_updates_per_batch=1` (default) is the best as learner is main bottleneck
+- You should use `--learning_starts=0` for samll local tests so learner work immediately
+- Avoid setting `--replay_buffer_size` too large for less memory allocation overhead
+- `--train_frequency` is how many env steps per update, so increasing it decreases learner work but dont increase too much
+
+---
 
 ### Some other important flags
 - `--num_agents=N`: Override number of agents
