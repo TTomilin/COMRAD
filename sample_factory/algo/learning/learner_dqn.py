@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import copy
-from typing import Optional
-
+from typing import Dict, Optional, Tuple, Union
+import numpy as np
 import torch
 from torch import Tensor
 from torch.nn import functional as F
@@ -17,7 +17,10 @@ from sample_factory.algo.utils.misc import (
     memory_stats,
 )
 from sample_factory.algo.utils.model_sharing import ParameterServer
-from sample_factory.algo.utils.replay_buffer import ReplayBuffer
+from sample_factory.algo.utils.replay_buffer import (
+    PrioritizedReplayBuffer,
+    ReplayBuffer,
+)
 from sample_factory.algo.utils.rl_utils import prepare_and_normalize_obs
 from sample_factory.algo.utils.tensor_dict import TensorDict, shallow_recursive_copy
 from sample_factory.algo.utils.torch_utils import synchronize, to_scalar
@@ -39,11 +42,15 @@ class DQNLearner(Learner):
         super().__init__(cfg, env_info, policy_versions_tensor, policy_id, param_server)
 
         self.target_network = None
-        self.replay_buffer: Optional[ReplayBuffer] = None
+        self.replay_buffer: Optional[Union[ReplayBuffer, PrioritizedReplayBuffer]] = None
 
         self.total_env_steps_for_training = 0
         self.last_target_update_step = 0
         self.last_train_env_steps = 0
+
+        self.use_per = getattr(cfg, "per", False)
+        self.per_beta_start = getattr(cfg, "per_beta_start", 0.4)
+        self.per_beta_frames = getattr(cfg, "per_beta_frames", 100000)
 
     def init(self) -> InitModelData:
         init_data = super().init()
@@ -52,13 +59,25 @@ class DQNLearner(Learner):
         self.target_network.eval()
         # No requires_grad=False for target network bcus torch.no_grad() always used when computing target Q-values
 
-        self.replay_buffer = ReplayBuffer(
-            capacity=self.cfg.replay_buffer_size,
-            obs_space=self.env_info.obs_space,
-            action_space=self.env_info.action_space,
-            device="cpu",
-            share_memory=not self.cfg.serial_mode,
-        )
+        if self.use_per:
+            self.replay_buffer = PrioritizedReplayBuffer(
+                capacity=self.cfg.replay_buffer_size,
+                obs_space=self.env_info.obs_space,
+                action_space=self.env_info.action_space,
+                omega=getattr(self.cfg, "per_omega", 0.6),
+                beta_start=self.per_beta_start,
+                device="cpu",
+                share_memory=not self.cfg.serial_mode,
+            )
+            log.info(f"DQN using PER (omega={self.cfg.per_omega})")
+        else:
+            self.replay_buffer = ReplayBuffer(
+                capacity=self.cfg.replay_buffer_size,
+                obs_space=self.env_info.obs_space,
+                action_space=self.env_info.action_space,
+                device="cpu",
+                share_memory=not self.cfg.serial_mode,
+            )
         return init_data
 
     def _update_target_network(self, tau: float = 1.0) -> None:
@@ -90,7 +109,7 @@ class DQNLearner(Learner):
             transitions["obs"] = TensorDict()
             for key, value in obs.items():
                 current_obs = value[:, :-1]
-                transitions["obs"][key] = current_obs.reshape((num_traj * rollout_len,) + current_obs.shape[2:])
+                transitions["obs"][key] = current_obs.reshape((num_traj * (rollout_len-1),) + current_obs.shape[2:])
 
             transitions["next_obs"] = TensorDict()
             for key, value in obs.items():
@@ -103,9 +122,9 @@ class DQNLearner(Learner):
 
             return transitions
 
-    def _calculate_dqn_loss(self, batch: TensorDict) -> Tensor:
+    def _calculate_dqn_loss(self, batch: TensorDict, weights: Optional[Tensor] = None) -> Tensor:
         """
-        Can use Double DQN
+        Can use Double DQN and PER
         """
         if self.actor_critic is None or self.target_network is None:
             raise RuntimeError("Networks not initialized")
@@ -120,6 +139,7 @@ class DQNLearner(Learner):
 
         # Current q
         batch_size = actions.shape[0]
+        # Note: Every transition is independent, adapt in QMIX
         rnn_states = torch.zeros(
             batch_size,
             self.actor_critic.core.get_out_size()
@@ -188,17 +208,29 @@ class DQNLearner(Learner):
 
                 target_q = rewards + self.cfg.gamma * next_q * (1.0 - dones)
 
-        # Huber loss (https://github.com/DLR-RM/stable-baselines3/blob/master/stable_baselines3/dqn/dqn.py)
-        loss = F.smooth_l1_loss(current_q, target_q)
-        return loss
+        # Element-wise TD errors
+        td_errors = torch.abs(current_q - target_q).detach()
 
-    def _train_on_batch(self, batch: TensorDict) -> Optional[AttrDict]:
+        # Huber loss (https://github.com/DLR-RM/stable-baselines3/blob/master/stable_baselines3/dqn/dqn.py)
+        elementwise_loss = F.smooth_l1_loss(current_q, target_q, reduction="none")
+
+        # Importance sampling weights
+        if weights is not None:
+            if weights.shape != elementwise_loss.shape:
+                weights = weights.view_as(elementwise_loss)
+            elementwise_loss *= weights
+
+        loss = elementwise_loss.mean()
+
+        return loss, td_errors
+
+    def _train_on_batch(self, batch: TensorDict, weights: Optional[Tensor] = None, indices: Optional[Tensor] = None):
         if self.actor_critic is None or self.optimizer is None:
-            return None
+            return None, None
 
         self.actor_critic.train()
 
-        loss = self._calculate_dqn_loss(batch)
+        loss, td_errors = self._calculate_dqn_loss(batch, weights)
 
         for p in self.actor_critic.parameters():
             p.grad = None
@@ -222,7 +254,7 @@ class DQNLearner(Learner):
         stats = AttrDict()
         stats.loss = to_scalar(loss)
         stats.lr = self.curr_lr
-        return stats
+        return stats, td_errors
 
     def train(self, batch: TensorDict) -> Optional[Dict]:
         with self.timing.add_time("misc"):
@@ -245,15 +277,35 @@ class DQNLearner(Learner):
         if (self.replay_buffer is None or len(self.replay_buffer) < self.cfg.learning_starts):
             return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
 
-        steps_since_last_train = self.env_steps - self.last_train_env_steps
-        should_train = steps_since_last_train >= self.cfg.train_frequency
+        new_steps = transitions["rewards"].shape[0]
+        steps_per_update = self.cfg.train_frequency
+        num_updates = int(new_steps / steps_per_update)
+        if num_updates == 0: num_updates = 1
+
         train_stats = None
-        if should_train:
-            with self.timing.add_time("train"):
-                sampled_batch = self.replay_buffer.sample(self.cfg.batch_size, str(self.device))
-                if sampled_batch is not None:
-                    train_stats = self._train_on_batch(sampled_batch)
-                    self.last_train_env_steps = self.env_steps
+        with self.timing.add_time("train"):
+            for _ in range(num_updates):
+                # Anneal PER beta linearly towards 1.0
+                if self.use_per and isinstance(self.replay_buffer, PrioritizedReplayBuffer):
+                    if self.per_beta_frames <= 0:
+                        beta = 1.0
+                    else:
+                        progress = min(1.0, float(self.env_steps) / float(self.per_beta_frames))
+                        beta = self.per_beta_start + progress * (1.0 - self.per_beta_start)
+                    self.replay_buffer.set_beta(beta)
+
+                sampled = self.replay_buffer.sample(self.cfg.batch_size, str(self.device))
+                if sampled is not None:
+                    if self.use_per and isinstance(self.replay_buffer, PrioritizedReplayBuffer):
+                        sampled_batch, weights, indices = sampled
+                        train_stats, td_errors = self._train_on_batch(sampled_batch, weights=weights, indices=indices)
+                        if td_errors is not None:
+                            self.replay_buffer.update_priorities(indices, td_errors)
+                    else:
+                        sampled_batch = sampled
+                        train_stats, _ = self._train_on_batch(sampled_batch)
+
+        self.last_train_env_steps = self.env_steps
 
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
