@@ -596,14 +596,14 @@ def add_dqn_args(p: ArgumentParser):
     )
     p.add_argument(
         "--train_frequency",
-        default=4,
+        default=32,
         type=int,
         help="How often to update training. Dont set to 0.",
     )
 
     p.add_argument(
         "--per",
-        default=False,
+        default=True,
         type=str2bool,
         help="Use Prioritized experience replay",
     )
