@@ -358,11 +358,12 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
             if self.epsilon_schedule is not None and self.action_space_d is not None:
                 with timing.add_time("epsilon_greedy"):
                     epsilon = self.epsilon_schedule.step(num_samples)
-                    mask = torch.rand(num_samples) < epsilon
+                    actions = policy_outputs["actions"]
+                    device = actions.device
+                    mask = torch.rand(num_samples, device=device) < epsilon
                     if mask.any():
-                        actions = policy_outputs["actions"]
                         if len(self.action_space_d) == 1: # Single
-                            rand_actions = torch.randint(0, self.action_space_d[0], (num_samples,))
+                            rand_actions = torch.randint(0, self.action_space_d[0], (num_samples,), device=device)
                             if actions.dim() > 1:
                                 rand_actions = rand_actions.unsqueeze(-1)
                                 mask_expanded = mask.unsqueeze(-1)
@@ -372,7 +373,7 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                         else: # Multi
                             actions_lst = []
                             for n_actions in self.action_space_d:
-                                actions_lst.append(torch.randint(0, n_actions, (num_samples,)))
+                                actions_lst.append(torch.randint(0, n_actions, (num_samples,), device=device))
                             rand_actions = torch.stack(actions_lst, dim=1)
                             mask_expanded = mask.unsqueeze(-1)
                             policy_outputs["actions"] = torch.where(mask_expanded, rand_actions, actions)
