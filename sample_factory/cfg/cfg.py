@@ -556,7 +556,7 @@ def add_dqn_args(p: ArgumentParser):
         "--learning_starts",
         default=10000,
         type=int,
-        help="How many transitions to collect before starting training. 0 means default"
+        help="How many transitions to collect before starting training."
     )
     p.add_argument(
         "--target_update_interval",

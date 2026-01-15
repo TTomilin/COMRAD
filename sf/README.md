@@ -57,7 +57,7 @@ Some important DQN flags (also in `cfg.py`):
 Note:
 - Learner is the main bottleneck
 - `--dqn_max_updates_per_batch=1` (default) is the best as learner is main bottleneck
-- You should use `--learning_starts=0` for samll local tests so learner work immediately
+- You should use `--learning_starts=0` for small local tests so learner work immediately
 - Avoid setting `--replay_buffer_size` too large for less memory allocation overhead
 - `--train_frequency` is how many env steps per update, so increasing it decreases learner work but dont increase too much
 
