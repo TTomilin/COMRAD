@@ -596,7 +596,7 @@ def add_dqn_args(p: ArgumentParser):
     )
     p.add_argument(
         "--train_frequency",
-        default=1,
+        default=4,
         type=int,
         help="How often to update training. Dont set to 0.",
     )
