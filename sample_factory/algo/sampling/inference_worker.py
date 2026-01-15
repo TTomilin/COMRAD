@@ -351,8 +351,28 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                 rnn_states = ensure_torch_tensor(rnn_states).to(self.device).float()
 
             with timing.add_time("forward"):
-                policy_outputs = actor_critic(normalized_obs, rnn_states, action_mask=action_mask)
+                sample_actions = self.epsilon_schedule is None
+                policy_outputs = actor_critic(
+                    normalized_obs,
+                    rnn_states,
+                    action_mask=action_mask,
+                    sample_actions=sample_actions,
+                )
                 policy_outputs["policy_version"] = torch.empty([num_samples]).fill_(self.param_client.policy_version)
+
+                if not sample_actions:
+                    action_logits = policy_outputs["action_logits"]
+                    if self.action_space_d is None:
+                        raise RuntimeError("action_space_d is None for DQN griddy action")
+
+                    if len(self.action_space_d) == 1:
+                        actions = action_logits.argmax(dim=1)
+                    else:
+                        action_logits_splits = torch.split(action_logits, self.action_space_d, dim=1)
+                        actions = torch.stack([q.argmax(dim=1) for q in action_logits_splits], dim=1)
+
+                    policy_outputs["actions"] = actions
+                    policy_outputs["log_prob_actions"] = torch.zeros(num_samples, device=self.device)
 
             # Random actions for epsilon-greddy
             if self.epsilon_schedule is not None and self.action_space_d is not None:
