@@ -42,6 +42,7 @@ python -m sf.train \
 python -m sf.train \
     --env=doom_pitfall \
     --algo=DQN \
+    --use_rnn=False \
     --train_for_env_steps=5000
 ```
 
