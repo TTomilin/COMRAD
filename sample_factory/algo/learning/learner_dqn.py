@@ -27,7 +27,7 @@ from sample_factory.algo.utils.torch_utils import synchronize, to_scalar
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import Config, InitModelData, PolicyID
-from sample_factory.utils.utils import log
+from sample_factory.utils.utils import debug_log_every_n, log
 
 
 class DQNLearner(Learner):
@@ -47,6 +47,10 @@ class DQNLearner(Learner):
         self.total_env_steps_for_training = 0
         self.last_target_update_step = 0
         self.last_train_env_steps = 0
+
+        self.last_valid_ratio = 1.0
+        self.last_valid_dropped = 0
+        self.last_valid_total = 0
 
         self.use_per = getattr(cfg, "per", False)
         self.per_beta_start = getattr(cfg, "per_beta_start", 0.4)
@@ -78,7 +82,12 @@ class DQNLearner(Learner):
                 device="cpu",
                 share_memory=not self.cfg.serial_mode,
             )
+        log.info(f"DQN replay batch size: {self._dqn_batch_size()}")
         return init_data
+
+    def _dqn_batch_size(self) -> int:
+        dqn_batch_size = getattr(self.cfg, "dqn_batch_size", 0)
+        return dqn_batch_size if dqn_batch_size > 0 else self.cfg.batch_size
 
     def _update_target_network(self, tau: float = 1.0) -> None:
         if (self.train_step - self.last_target_update_step >= self.cfg.target_update_interval):
@@ -125,6 +134,15 @@ class DQNLearner(Learner):
             valids &= curr_policy_version - buff["policy_version"] < self.cfg.max_policy_lag
             valids = valids.reshape(-1)
 
+            # This is to filter invalid transitions from 
+            num_total = valids.numel()
+            num_valid = int(valids.sum().item())
+            self.last_valid_total = num_total
+            self.last_valid_dropped = num_total - num_valid
+            self.last_valid_ratio = num_valid / max(1, num_total)
+            if self.last_valid_dropped > 0:
+                debug_log_every_n(50, f"DQN policy lag filtered {self.last_valid_dropped}/{num_total} transitions ({(1 - self.last_valid_ratio) * 100:.2f}%)")
+
             if not torch.all(valids).item():
                 for key, value in transitions["obs"].items():
                     transitions["obs"][key] = value[valids]
@@ -161,7 +179,7 @@ class DQNLearner(Learner):
             else 1,
             device=self.device,
         )
-        result = self.actor_critic(normalized_obs, rnn_states, values_only=False)
+        result = self.actor_critic(normalized_obs, rnn_states, values_only=False, sample_actions=False)
         q_values = result["action_logits"] # [batch, total_num_actions]
 
         action_space = self.env_info.action_space
@@ -181,12 +199,12 @@ class DQNLearner(Learner):
 
             with torch.no_grad():
                 # Get next Q-values from target network
-                target_result = self.target_network(normalized_next_obs, rnn_states, values_only=False)
+                target_result = self.target_network(normalized_next_obs, rnn_states, values_only=False, sample_actions=False)
                 next_q_target = target_result["action_logits"]
                 next_q_target_splits = torch.split(next_q_target, action_sizes, dim=1)
 
                 if self.cfg.double_dqn:
-                    online_result = self.actor_critic(normalized_next_obs, rnn_states, values_only=False)
+                    online_result = self.actor_critic(normalized_next_obs, rnn_states, values_only=False, sample_actions=False)
                     next_q_online = online_result["action_logits"]
                     next_q_online_splits = torch.split(next_q_online, action_sizes, dim=1)
 
@@ -209,11 +227,11 @@ class DQNLearner(Learner):
             current_q = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
 
             with torch.no_grad():
-                target_result = self.target_network(normalized_next_obs, rnn_states, values_only=False)
+                target_result = self.target_network(normalized_next_obs, rnn_states, values_only=False, sample_actions=False)
                 next_q_target = target_result["action_logits"]
 
                 if self.cfg.double_dqn:
-                    online_result = self.actor_critic(normalized_next_obs, rnn_states, values_only=False)
+                    online_result = self.actor_critic(normalized_next_obs, rnn_states, values_only=False, sample_actions=False)
                     next_q_online = online_result["action_logits"]
                     next_actions = next_q_online.argmax(dim=1, keepdim=True)
                     next_q = next_q_target.gather(1, next_actions).squeeze(1)
@@ -296,6 +314,10 @@ class DQNLearner(Learner):
         num_updates = int(new_steps / steps_per_update)
         if num_updates == 0: num_updates = 1
 
+        max_updates = getattr(self.cfg, "dqn_max_updates_per_batch", 0)
+        if max_updates > 0:
+            num_updates = min(num_updates, max_updates)
+
         train_stats = None
         with self.timing.add_time("train"):
             for _ in range(num_updates):
@@ -308,7 +330,7 @@ class DQNLearner(Learner):
                         beta = self.per_beta_start + progress * (1.0 - self.per_beta_start)
                     self.replay_buffer.set_beta(beta)
 
-                sampled = self.replay_buffer.sample(self.cfg.batch_size, str(self.device))
+                sampled = self.replay_buffer.sample(self._dqn_batch_size(), str(self.device))
                 if sampled is not None:
                     if self.use_per and isinstance(self.replay_buffer, PrioritizedReplayBuffer):
                         sampled_batch, weights, indices = sampled
@@ -323,6 +345,9 @@ class DQNLearner(Learner):
 
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
+            train_stats.policy_lag_valid_frac = self.last_valid_ratio
+            train_stats.policy_lag_dropped = self.last_valid_dropped
+            train_stats.policy_lag_total = self.last_valid_total
             stats[TRAIN_STATS] = train_stats
             stats[STATS_KEY] = memory_stats("learner", self.device)
 

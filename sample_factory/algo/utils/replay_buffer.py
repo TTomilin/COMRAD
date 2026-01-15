@@ -8,6 +8,7 @@ from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.utils.typing import Device
 from sample_factory.utils.utils import log
 
+# https://github.com/Kaixhin/Rainbow/
 class SumSegmentTree:
     def __init__(self, capacity: int):
         self._capacity = 1

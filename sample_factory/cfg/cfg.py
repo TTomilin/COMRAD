@@ -548,7 +548,7 @@ def add_dqn_args(p: ArgumentParser):
     """DQN arguments"""
     p.add_argument(
         "--replay_buffer_size",
-        default=1000000,
+        default=1000000, # Also change in arguments.py if change this
         type=int,
         help="Size of the replay buffer in transitions",
     )
@@ -596,14 +596,28 @@ def add_dqn_args(p: ArgumentParser):
     )
     p.add_argument(
         "--train_frequency",
-        default=32,
+        default=1,
         type=int,
         help="How often to update training. Dont set to 0.",
     )
 
     p.add_argument(
+        "--dqn_max_updates_per_batch",
+        default=1,
+        type=int,
+        help="Cap the number of DQNLearner updates per batch. 0 is no cap",
+    )
+
+    p.add_argument(
+        "--dqn_batch_size",
+        default=0,
+        type=int,
+        help="Replay sampling batch size for DQN. 0 uses --batch_size",
+    )
+
+    p.add_argument(
         "--per",
-        default=True,
+        default=False,
         type=str2bool,
         help="Use Prioritized experience replay",
     )
