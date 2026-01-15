@@ -120,6 +120,20 @@ class DQNLearner(Learner):
             transitions["rewards"] = buff["rewards"].reshape(-1)
             transitions["dones"] = buff["dones"].reshape(-1).float()
 
+            valids = buff["policy_id"] == self.policy_id
+            curr_policy_version: int = self.train_step
+            valids &= curr_policy_version - buff["policy_version"] < self.cfg.max_policy_lag
+            valids = valids.reshape(-1)
+
+            if not torch.all(valids).item():
+                for key, value in transitions["obs"].items():
+                    transitions["obs"][key] = value[valids]
+                for key, value in transitions["next_obs"].items():
+                    transitions["next_obs"][key] = value[valids]
+                transitions["actions"] = transitions["actions"][valids]
+                transitions["rewards"] = transitions["rewards"][valids]
+                transitions["dones"] = transitions["dones"][valids]
+
             return transitions
 
     def _calculate_dqn_loss(self, batch: TensorDict, weights: Optional[Tensor] = None) -> Tensor:
