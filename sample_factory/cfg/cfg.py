@@ -625,7 +625,7 @@ def add_dqn_args(p: ArgumentParser):
         "--per_omega",
         default=0.6,
         type=float,
-        help="Hyper-parameter that determines the shape of the distributio",
+        help="Hyper-parameter that determines the shape of the distribution",
     )
     p.add_argument(
         "--per_beta_start",
