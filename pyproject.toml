@@ -1,57 +1,46 @@
 [build-system]
-requires = ["cmake>=3.12.0", "setuptools>=65", "wheel", "pybind11-stubgen"]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.black]
-safe = true
+[project]
+name = "COMRAD"
+version = "0.1.0"
+description = "comrad"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26.4,<2.0",
+    "gymnasium>=0.29.1",
+    "pettingzoo>=1.25.0",
+    "vizdoom>=1.2.4",
+    "opencv-python>=4.11.0",
+    "pygame>=2.6.1",
+]
 
-[tool.isort]
-atomic = true
-profile = "black"
-src_paths = ["examples/python", "gymnasium_wrapper", "pettingzoo_wrapper", "tests"]
-indent = 4
-lines_after_imports = 2
-multi_line_output = 3
-known_first_party = ['vizdoom']
+[project.optional-dependencies]
+sample-factory = [
+    "torch>=2.9.0",
+    "wandb>=0.22.1",
+    "tensorboard>=2.20.0",
+    "colorlog>=6.10.1",
+    "signal-slot-mp>=1.0.5",
+    "faster-fifo>=1.5.2",
+    "filelock>=3.19.1",
+    "psutil>=7.1.0",
+    "huggingface_hub>=0.36.0",
+    "scipy>=1.16.3",
+]
 
-[tool.pyright]
-include = ["examples/python/**", "gymnasium_wrapper", "pettingzoo_wrapper", "tests/**"]
-exclude = ["**/__pycache__"]
-strict = []
+[dependency-groups]
+dev = [
+    "ruff>=0.14.13",
+]
 
-typeCheckingMode = "basic"
-pythonVersion = "3.9"
-pythonPlatform = "All"
-typeshedPath = "typeshed"
-enableTypeIgnoreComments = true
+[tool.setuptools]
+include-package-data = true
 
-# This is required as the CI pre-commit does not download the module
-#   Therefore, we have to ignore missing imports
-reportMissingImports = "none"
-reportGeneralTypeIssues = "none"
-reportPrivateUsage = "warning"
-reportPrivateImportUsage = "warning"
-reportAttributeAccessIssue = "warning"
+[tool.setuptools.packages.find]
+include = ["sf*", "sample_factory*"]
 
-[tool.cibuildwheel]
-# We need to build for the following Python versions:
-build = "cp{39,310,311,312,313}-*"
-
-[tool.cibuildwheel.linux]
-# Only manylinux is supported (no musl)
-build = "cp{39,310,311,312,313}-manylinux*"
-repair-wheel-command = "auditwheel show {wheel} && auditwheel repair -w {dest_dir} {wheel}"
-
-# For manylinux_2_28 we need to install the following dependencies using yum:
-before-all = "yum install -y cmake git boost-devel SDL2-devel openal-soft-devel"
-
-# Only build for x86_64 and aarch64 are officially supported
-archs = "x86_64 aarch64"
-manylinux-x86_64-image = "manylinux_2_28"
-manylinux-aarch64-image = "manylinux_2_28"
-
-[tool.cibuildwheel.macos]
-before-all = "brew install cmake boost sdl2 openal-soft"
-repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
-
-# In addition, MACOSX_DEPLOYMENT_TARGET maybe needed to be set depending on the version of macOS
-environment = {"HOMEBREW_NO_AUTO_UPDATE" = "1", "HOMEBREW_NO_INSTALL_CLEANUP" = "1"}
+[tool.ruff]
+line-length = 120

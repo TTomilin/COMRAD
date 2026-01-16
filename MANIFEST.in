@@ -1,0 +1,5 @@
+include README.md
+recursive-include sf/doom/scenarios *.cfg *.wad
+recursive-include sf/docs *.md
+recursive-include sf/experiments *.md
+recursive-include sf/templates *.sh
