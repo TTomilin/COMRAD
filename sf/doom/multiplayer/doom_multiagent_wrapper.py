@@ -5,20 +5,19 @@ from functools import wraps
 from multiprocessing import Process
 from queue import Empty, Queue
 from time import sleep
-from typing import Any, Union, cast
+from typing import Union
 
 import cv2
 import faster_fifo
 import filelock
 import gymnasium as gym
-import numpy as np
 from filelock import FileLock
 
 from sample_factory.algo.utils.rl_utils import make_dones
 from sample_factory.envs.env_utils import RewardShapingInterface, get_default_reward_shaping
 from sample_factory.utils.utils import log
 from sf.doom.doom_gym import doom_lock_file
-from sf.doom.doom_render import concat_grid, cvt_doom_obs
+from sf.doom.doom_render import concat_grid
 from sf.doom.multiplayer.doom_multiagent import DEFAULT_UDP_PORT, find_available_port
 
 

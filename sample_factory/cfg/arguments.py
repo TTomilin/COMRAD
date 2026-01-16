@@ -109,7 +109,7 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             cfg.dqn_batch_size = min(cfg.batch_size, 256)
             log.info(f"DQN: Use batch_size {cfg.dqn_batch_size}")
         if cfg.dqn_batch_size < cfg.rollout:
-            log.warning(f"DQN: Set dqn_batch_size to rollout")
+            log.warning("DQN: Set dqn_batch_size to rollout")
             cfg.dqn_batch_size = cfg.rollout
         if cfg.dqn_batch_size % cfg.rollout != 0:
             adjusted = max(cfg.rollout, (cfg.dqn_batch_size // cfg.rollout) * cfg.rollout)

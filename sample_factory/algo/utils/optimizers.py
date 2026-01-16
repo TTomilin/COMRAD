@@ -5,7 +5,6 @@ See section 3.4 in https://arxiv.org/pdf/2103.07013.pdf
 """
 
 import math
-from typing import Callable, Optional, Tuple
 
 import torch
 from torch.optim import Optimizer
