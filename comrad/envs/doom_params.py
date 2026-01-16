@@ -1,5 +1,3 @@
-import os
-from os.path import join
 
 from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
 from sample_factory.utils.utils import str2bool

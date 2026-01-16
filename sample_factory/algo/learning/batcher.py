@@ -12,7 +12,7 @@ from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import Device, PolicyID
-from sample_factory.utils.utils import debug_log_every_n, log
+from sample_factory.utils.utils import debug_log_every_n
 
 
 def slice_len(s: slice) -> int:

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 import copy
-from typing import Dict, Optional, Tuple, Union
-import numpy as np
+from typing import Dict, Optional, Union
 import torch
 from torch import Tensor
 from torch.nn import functional as F
@@ -25,7 +24,6 @@ from sample_factory.algo.utils.rl_utils import prepare_and_normalize_obs
 from sample_factory.algo.utils.tensor_dict import TensorDict, shallow_recursive_copy
 from sample_factory.algo.utils.torch_utils import synchronize, to_scalar
 from sample_factory.utils.attr_dict import AttrDict
-from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import Config, InitModelData, PolicyID
 from sample_factory.utils.utils import debug_log_every_n, log
 
