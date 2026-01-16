@@ -15,6 +15,7 @@ dependencies = [
     "vizdoom>=1.2.4",
     "opencv-python>=4.11.0",
     "pygame>=2.6.1",
+    "pre-commit>=4.5.1",
 ]
 
 [project.optional-dependencies]
