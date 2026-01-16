@@ -2,6 +2,8 @@
 
 Install dependencies:
 ```bash
+pip install vizdoom --pre
+
 pip install pyglet "tensorboard>=1.15.0" "tensorboardx>=2.0" "psutil>=5.7.0" "threadpoolctl>=2.0.0" colorlog "signal-slot-mp>=1.0.3,<2.0" filelock "huggingface-hub>=0.10.0,<1.0" pandas opencv-python "pettingzoo[classic]" onnx onnxruntime "gymnasium[classic_control]>=0.27,<1.0"
 ```
 
