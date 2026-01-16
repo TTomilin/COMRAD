@@ -1,5 +1,12 @@
 ## 1. Installation
 
+Setup pre-commit:
+```bash
+# If dont have pre-commit, install first: `pip install pre-commit`
+
+pre-commit install
+```
+
 Install dependencies:
 ```bash
 pip install vizdoom --pre
@@ -21,7 +28,7 @@ The primary training script is `sf.train`.
 python -m sf.train \
     --env=doom_pitfall \
     --algo=APPO \
-    --train_for_env_steps=5000 
+    --train_for_env_steps=5000
 ```
 
 ---
