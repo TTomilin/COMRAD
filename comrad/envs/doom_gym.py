@@ -646,7 +646,7 @@ class VizdoomEnv(gym.Env):
                         info = doom.get_info()
                         print(
                             "Health:",
-                            info["HEALTH"],
+                            info.get("HEALTH", "N/A"),
                             # 'Weapon:', info['SELECTED_WEAPON'],
                             # 'ready:', info['ATTACK_READY'],
                             # 'ammo:', info['SELECTED_WEAPON_AMMO'],
