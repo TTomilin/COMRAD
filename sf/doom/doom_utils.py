@@ -13,6 +13,7 @@ from sample_factory.envs.env_wrappers import (
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from sf.doom.action_space import (
     doom_action_space_pitfall,
+    doom_action_space_parallel,
     doom_action_space_armory_siege,
     doom_action_space_safe_ground2,
 )
@@ -80,7 +81,7 @@ DOOM_ENVS = [
     DoomSpec(
         "doom_mwh",
         "my_way_home_multi.cfg",
-        doom_action_space_pitfall(),
+        doom_action_space_parallel(),
         num_agents=2, # reward shaping is set only for 2 agents, dont increase
         extra_wrappers=[(DoomMWHRewardShaping, {})],
     ),
@@ -88,7 +89,7 @@ DOOM_ENVS = [
     DoomSpec(
         "parallel",
         "prot_beta_long.cfg",
-        doom_action_space_pitfall(),
+        doom_action_space_parallel(),
         1.0,
         1200,
         num_agents=2,
