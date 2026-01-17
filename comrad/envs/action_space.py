@@ -51,6 +51,22 @@ def doom_action_space_pitfall():
     TURN_LEFT
     TURN_RIGHT
     MOVE_FORWARD
+    JUMP
+    """
+
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),
+            Discrete(2),
+            Discrete(2),
+        )
+    )
+
+def doom_action_space_parallel():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD
     """
 
     return gym.spaces.Tuple(
@@ -69,7 +85,7 @@ def doom_action_space_safe_ground2():
     MOVE_LEFT
     MOVE_RIGHT
     ATTACK
-    
+
 
     Action encoding (per step):
     - turn:     0 = noop, 1 = turn left, 2 = turn right
@@ -87,16 +103,16 @@ def doom_action_space_safe_ground2():
     )
 
     return space
-    
+
 def doom_action_space_mwh():
     """
     TURN_LEFT
     TURN_RIGHT
-    MOVE_FORWARD 
+    MOVE_FORWARD
     MOVE_LEFT
     MOVE_RIGHT
     """
-    
+
     return gym.spaces.Tuple(
         (
             Discrete(3),  # noop, turn left, turn right
@@ -108,13 +124,13 @@ def doom_action_space_mwh():
 
 def doom_action_space_armory_siege():
     """
-    MOVE_FORWARD 
-    MOVE_BACKWARD 
-    MOVE_RIGHT 
-    MOVE_LEFT 
-    TURN_LEFT 
-    TURN_RIGHT 
-    ATTACK 
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    TURN_LEFT
+    TURN_RIGHT
+    ATTACK
     SELECT_WEAPON1
     SELECT_WEAPON2
     SELECT_WEAPON3
