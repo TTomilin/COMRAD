@@ -85,7 +85,7 @@ def init_multiplayer_env(make_env_func, player_id, env_config, init_info=None):
 
     env.unwrapped.init_info = init_info
 
-    env.seed(env.unwrapped.worker_index * 1000 + env.unwrapped.vector_index * 10 + player_id)
+    env.unwrapped.seed(env.unwrapped.worker_index * 1000 + env.unwrapped.vector_index * 10 + player_id)
     return env
 
 
@@ -219,9 +219,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
     def wipe_when_one_die(self, terminated, truncated, infos):
         """This function is quite specific to pitfall, temrinates when one agent die to make it 'cooperative'
         Goal is to ensure all agents reach the end together"""
-        
+
         lst_dead = [bool(info.get("DEAD", 0)) for info in infos]
-    
+
         if not any(lst_dead):
             return terminated, truncated
 
@@ -365,7 +365,8 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
     def info(self):
         self._ensure_initialized()
         info = self.await_tasks(None, TaskType.INFO)
-        if info is None: return None
+        if info is None:
+            return None
         return info[0]
 
     @retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=False)
