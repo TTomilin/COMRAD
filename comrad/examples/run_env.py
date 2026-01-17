@@ -5,7 +5,7 @@ from sf.doom.doom_params import add_doom_env_args, doom_override_defaults
 from sf.doom.doom_utils import make_doom_env
 
 def main():
-    argv = ["--env=safe_ground2", "--num_agents=2"]
+    argv = ["--env=safe_ground2", "--num_agents=2", "--res_w=1920", "--res_h=1080"]
     parser, _ = parse_sf_args(argv=argv, evaluation=False)
     add_doom_env_args(parser)
     doom_override_defaults(parser)
