@@ -16,6 +16,7 @@ dependencies = [
     "opencv-python>=4.11.0",
     "pygame>=2.6.1",
     "pre-commit>=4.5.1",
+    "pynput>=1.8.1",
 ]
 
 [project.optional-dependencies]
@@ -45,3 +46,4 @@ include = ["sf*", "sample_factory*"]
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["vizdoom.pyi"]
