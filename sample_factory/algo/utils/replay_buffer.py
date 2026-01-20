@@ -26,6 +26,21 @@ class SumSegmentTree:
             idx //= 2
             self._tree[idx] = self._tree[2 * idx] + self._tree[2 * idx + 1]
 
+    def update_batch(self, indices: np.ndarray, values: np.ndarray) -> None:
+        leaf_indices = indices + self._capacity
+        self._tree[leaf_indices] = values
+
+        nodes_to_update = set()
+        for idx in leaf_indices:
+            parent = idx // 2
+            while parent >= 1:
+                nodes_to_update.add(parent)
+                parent //= 2
+
+        # bottom to top
+        for node in sorted(nodes_to_update, reverse=True):
+            self._tree[node] = self._tree[2 * node] + self._tree[2 * node + 1]
+
     def sum(self, start: int = 0, end: Optional[int] = None) -> float:
         if end is None:
             end = self._capacity
@@ -54,7 +69,26 @@ class SumSegmentTree:
                 idx = left + 1
         return idx - self._capacity
 
-    def __getitem__(self, idx: int) -> float:
+    def find_prefixsum_idx_batch(self, prefixsums: np.ndarray) -> np.ndarray:
+        batch_size = len(prefixsums)
+        indices = np.ones(batch_size, dtype=np.int64)
+        remaining = prefixsums.copy()
+
+        while np.any(indices < self._capacity):
+            mask = indices < self._capacity
+            left = 2 * indices
+            left_vals = self._tree[left]
+
+            go_left = left_vals > remaining
+            indices = np.where(mask & go_left, left, indices)
+            remaining = np.where(mask & ~go_left, remaining - left_vals, remaining)
+            indices = np.where(mask & ~go_left, left + 1, indices)
+
+        return indices - self._capacity
+
+    def __getitem__(self, idx) -> float:
+        if isinstance(idx, np.ndarray):
+            return self._tree[idx + self._capacity]
         return self._tree[idx + self._capacity]
 
 
@@ -71,6 +105,20 @@ class MinSegmentTree:
         while idx > 1:
             idx //= 2
             self._tree[idx] = min(self._tree[2 * idx], self._tree[2 * idx + 1])
+
+    def update_batch(self, indices: np.ndarray, values: np.ndarray) -> None:
+        leaf_indices = indices + self._capacity
+        self._tree[leaf_indices] = values
+
+        nodes_to_update = set()
+        for idx in leaf_indices:
+            parent = idx // 2
+            while parent >= 1:
+                nodes_to_update.add(parent)
+                parent //= 2
+
+        for node in sorted(nodes_to_update, reverse=True):
+            self._tree[node] = min(self._tree[2 * node], self._tree[2 * node + 1])
 
     def min(self, start: int = 0, end: Optional[int] = None) -> float:
         if end is None:
@@ -89,7 +137,9 @@ class MinSegmentTree:
             self._query(start, end, 2 * node + 1, mid, node_end),
         )
 
-    def __getitem__(self, idx: int) -> float:
+    def __getitem__(self, idx) -> float:
+        if isinstance(idx, np.ndarray):
+            return self._tree[idx + self._capacity]
         return self._tree[idx + self._capacity]
 
 
@@ -172,7 +222,7 @@ class ReplayBuffer:
             elif isinstance(value, Tensor):
                 return value.shape[0]
         return 0
-    
+
     def _slice_batch(self, batch: TensorDict, start: int, end: int) -> TensorDict:
         """Slice along first dim"""
         result = TensorDict()
@@ -259,7 +309,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
         if self._ptr + batch_size <= self.capacity:
             self._copy_to_storage(batch, self._ptr, self._ptr + batch_size)
-            indices = list(range(start_idx, start_idx + batch_size))
+            indices = np.arange(start_idx, start_idx + batch_size)
         else:
             first_part = self.capacity - self._ptr
             second_part = batch_size - first_part
@@ -268,13 +318,16 @@ class PrioritizedReplayBuffer(ReplayBuffer):
 
             self._copy_to_storage(first_batch, self._ptr, self.capacity)
             self._copy_to_storage(second_batch, 0, second_part)
-            indices = list(range(start_idx, self.capacity)) + list(range(0, second_part))
+            indices = np.concatenate([
+                np.arange(start_idx, self.capacity),
+                np.arange(0, second_part)
+            ])
 
-        # Set max priority = priority^omega
-        priority = self._max_priority**self.omega
-        for idx in indices:
-            self._sum_tree.update(idx, priority)
-            self._min_tree.update(idx, priority)
+        # Batch update priorities
+        priority = self._max_priority ** self.omega
+        priorities = np.full(len(indices), priority, dtype=np.float64)
+        self._sum_tree.update_batch(indices, priorities)
+        self._min_tree.update_batch(indices, priorities)
 
         self._ptr = (self._ptr + batch_size) % self.capacity
         self._size = min(self._size + batch_size, self.capacity)
@@ -287,27 +340,25 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         target_device = device if device is not None else str(self.device)
         indices = self._sample_proportional(batch_size)
         weights = self._compute_is_weights(indices, target_device)
-        indices_tensor = torch.tensor(indices, dtype=torch.long, device="cpu")
+        indices_tensor = torch.from_numpy(indices).long()
         batch = self._index_storage(indices_tensor, target_device)
         return batch, weights, indices_tensor.to(target_device)
 
-    def _sample_proportional(self, batch_size: int) -> list:
-        indices = []
+    def _sample_proportional(self, batch_size: int) -> np.ndarray:
         total_priority = self._sum_tree.sum(0, self._size)
         segment = total_priority / batch_size
 
-        for i in range(batch_size):
-            # Sample in each segment
-            low = segment * i
-            high = segment * (i + 1)
-            prefixsum = np.random.uniform(low, high)
-            idx = self._sum_tree.find_prefixsum_idx(prefixsum)
-            idx = min(idx, self._size - 1)
-            indices.append(idx)
+        # Generate all random samples at once
+        segment_starts = np.arange(batch_size) * segment
+        segment_ends = segment_starts + segment
+        prefixsums = np.random.uniform(segment_starts, segment_ends)
 
+        # Batch find indices
+        indices = self._sum_tree.find_prefixsum_idx_batch(prefixsums)
+        indices = np.clip(indices, 0, self._size - 1)
         return indices
 
-    def _compute_is_weights(self, indices: list, device: Device) -> Tensor:
+    def _compute_is_weights(self, indices: np.ndarray, device: Device) -> Tensor:
         """
         Importance w_i = (N * P(i))^(-beta) / max_j(w_j) = (N * (priority_i / sum(priorities)))^(-beta) / max_j(w_j)
         """
@@ -315,25 +366,25 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         min_priority = self._min_tree.min(0, self._size)
 
         max_weight = (self._size * min_priority / total_priority) ** (-self.beta)
-        weights = []
-        for idx in indices:
-            priority = self._sum_tree[idx]
-            prob = priority / total_priority
-            weight = (self._size * prob) ** (-self.beta)
-            weights.append(weight / max_weight)
-        return torch.tensor(weights, dtype=torch.float32, device=device)
+
+        priorities = self._sum_tree[indices]
+        probs = priorities / total_priority
+        weights = (self._size * probs) ** (-self.beta)
+        weights = weights / max_weight
+
+        return torch.from_numpy(weights.astype(np.float32)).to(device)
 
     def update_priorities(self, indices: Tensor, priorities: Tensor) -> None:
-        indices_np = indices.cpu().numpy()
+        indices_np = indices.cpu().numpy().astype(np.int64)
         priorities_np = priorities.cpu().numpy()
 
-        for idx, priority in zip(indices_np, priorities_np):
-            priority = max(priority + self.epsilon, self.epsilon)
-            self._max_priority = max(self._max_priority, priority)
+        # Vectorized priority computation
+        priorities_np = np.maximum(priorities_np + self.epsilon, self.epsilon)
+        self._max_priority = max(self._max_priority, float(priorities_np.max()))
 
-            priority_omega = priority**self.omega
-            self._sum_tree.update(int(idx), priority_omega)
-            self._min_tree.update(int(idx), priority_omega)
+        priority_omega = priorities_np ** self.omega
+        self._sum_tree.update_batch(indices_np, priority_omega)
+        self._min_tree.update_batch(indices_np, priority_omega)
 
     def set_beta(self, beta: float) -> None:
         self.beta = beta

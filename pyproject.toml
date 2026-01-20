@@ -47,3 +47,6 @@ include = ["sf*", "sample_factory*"]
 [tool.ruff]
 line-length = 120
 extend-exclude = ["vizdoom.pyi"]
+
+[tool.ruff.lint]
+ignore = ["E701"]
