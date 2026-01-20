@@ -103,7 +103,12 @@ class DQNLearner(Learner):
             log.debug(f"Updated target network at step {self.train_step}")
 
     def _prepare_batch_for_buffer(self, batch: TensorDict) -> TensorDict:
-        """Batch shape: [num_trajectories, rollout_length, ...]"""
+        """
+        Batch shape: [num_trajectories, rollout_length, ...]
+        obs: [num_traj, rollout_len + 1, ...]
+        rewards/actions/dones: [num_traj, rollout_len]
+        So at t we get (s_t, a_t, r_t, done_t, s_{t+1})
+        """
         with torch.no_grad():
             buff = shallow_recursive_copy(batch)
 
@@ -116,7 +121,7 @@ class DQNLearner(Learner):
             transitions["obs"] = TensorDict()
             for key, value in obs.items():
                 current_obs = value[:, :-1]
-                transitions["obs"][key] = current_obs.reshape((num_traj * (rollout_len-1),) + current_obs.shape[2:])
+                transitions["obs"][key] = current_obs.reshape((num_traj * rollout_len,) + current_obs.shape[2:])
 
             transitions["next_obs"] = TensorDict()
             for key, value in obs.items():
@@ -132,7 +137,7 @@ class DQNLearner(Learner):
             valids &= curr_policy_version - buff["policy_version"] < self.cfg.max_policy_lag
             valids = valids.reshape(-1)
 
-            # This is to filter invalid transitions from 
+            # This is to filter invalid transitions from
             num_total = valids.numel()
             num_valid = int(valids.sum().item())
             self.last_valid_total = num_total
