@@ -67,12 +67,13 @@ class LearnerWorker(HeartbeatStoppableEventLoopObject, Configurable):
         self.batcher_thread: Optional[Thread] = None
 
         policy_versions_tensor: Tensor = buffer_mgr.policy_versions
+        global_env_steps_tensor: Tensor = buffer_mgr.global_env_steps
         self.param_server = ParameterServer(policy_id, policy_versions_tensor, cfg.serial_mode)
 
         # TODO: Hashmap? As there are other algos
         algo = getattr(cfg, "algo", "APPO").upper()
         if algo == "DQN":
-            self.learner: Learner = DQNLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
+            self.learner: Learner = DQNLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)
         else:
             self.learner = Learner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
 

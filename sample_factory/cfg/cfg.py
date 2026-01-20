@@ -616,6 +616,13 @@ def add_dqn_args(p: ArgumentParser):
     )
 
     p.add_argument(
+        "--dqn_reward_clip",
+        default=0.0,
+        type=float,
+        help="Clip rewards in calculating DQN loss. 0 means disable",
+    )
+
+    p.add_argument(
         "--per",
         default=True,
         type=str2bool,

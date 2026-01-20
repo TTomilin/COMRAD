@@ -137,6 +137,8 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
         # epsilon-greedy exploration for DQN
         self.epsilon_schedule: Optional[EpsilonSchedule] = None
         self.action_space_d: Optional[List] = None
+        # Global env steps tensor for epsilon schedule synchronization
+        self.global_env_steps_tensor = getattr(buffer_mgr, 'global_env_steps', None)
         if getattr(cfg, "algo", "APPO").upper() == "DQN":
             self.epsilon_schedule = EpsilonSchedule(
                 epsilon_start=cfg.epsilon_start,
@@ -374,10 +376,16 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                     policy_outputs["actions"] = actions
                     policy_outputs["log_prob_actions"] = torch.zeros(num_samples, device=self.device)
 
-            # Random actions for epsilon-greddy
+            # Random actions for epsilon-greedy
             if self.epsilon_schedule is not None and self.action_space_d is not None:
                 with timing.add_time("epsilon_greedy"):
-                    epsilon = self.epsilon_schedule.step(num_samples)
+                    # Use global env steps for synchronized epsilon decay across all workers
+                    if self.global_env_steps_tensor is not None:
+                        global_steps = self.global_env_steps_tensor[self.policy_id].item()
+                        epsilon = self.epsilon_schedule.get_epsilon(global_steps)
+                    else:
+                        # Fallback to local step counter if global not available
+                        epsilon = self.epsilon_schedule.step(num_samples)
                     actions = policy_outputs["actions"]
                     device = actions.device
                     mask = torch.rand(num_samples, device=device) < epsilon
