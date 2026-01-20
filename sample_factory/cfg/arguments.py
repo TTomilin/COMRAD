@@ -138,6 +138,12 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
                     log.warning(f"DQN: Cap replay_buffer_size to {max_size}")
                     cfg.replay_buffer_size = max_size
 
+        # learning_starts cant exceed buffer size
+        if cfg.learning_starts > cfg.replay_buffer_size:
+            old_learning_starts = cfg.learning_starts
+            cfg.learning_starts = max(1000, cfg.replay_buffer_size // 2)
+            log.warning(f"DQN: learning_starts ({old_learning_starts}) > replay_buffer_size ({cfg.replay_buffer_size}), capped to {cfg.learning_starts}")
+
     return verify_cfg(cfg, env_info)
 
 
