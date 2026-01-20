@@ -36,11 +36,15 @@ class DQNLearner(Learner):
         policy_versions_tensor: Tensor,
         policy_id: PolicyID,
         param_server: ParameterServer,
+        global_env_steps_tensor: Optional[Tensor] = None,
     ):
         super().__init__(cfg, env_info, policy_versions_tensor, policy_id, param_server)
 
         self.target_network = None
         self.replay_buffer: Optional[Union[ReplayBuffer, PrioritizedReplayBuffer]] = None
+
+        # Shared tensor for global env steps to sync epsilon schedule
+        self.global_env_steps_tensor = global_env_steps_tensor
 
         self.total_env_steps_for_training = 0
         self.last_target_update_step = 0
@@ -50,12 +54,22 @@ class DQNLearner(Learner):
         self.last_valid_dropped = 0
         self.last_valid_total = 0
 
+        self._last_q_mean = 0.0
+        self._last_q_max = 0.0
+        self._last_q_min = 0.0
+        self._last_target_q_mean = 0.0
+        self._last_td_error_mean = 0.0
+
         self.use_per = getattr(cfg, "per", False)
         self.per_beta_start = getattr(cfg, "per_beta_start", 0.4)
         self.per_beta_frames = getattr(cfg, "per_beta_frames", 100000)
 
     def init(self) -> InitModelData:
         init_data = super().init()
+
+        if getattr(self.cfg, "use_rnn", False) or getattr(self.cfg, "recurrence", 1) > 1:
+            log.error("DQN doesnt support RNN without sequence replay. Disable --use_rnn")
+            raise RuntimeError("DQN doesnt support RNN")
 
         self.target_network = copy.deepcopy(self.actor_critic)
         self.target_network.eval()
@@ -88,19 +102,24 @@ class DQNLearner(Learner):
         return dqn_batch_size if dqn_batch_size > 0 else self.cfg.batch_size
 
     def _update_target_network(self, tau: float = 1.0) -> None:
-        if (self.train_step - self.last_target_update_step >= self.cfg.target_update_interval):
-            if self.target_network is None or self.actor_critic is None:
-                return
+        if self.target_network is None or self.actor_critic is None:
+            return
 
-            if tau == 1.0:
-                self.target_network.load_state_dict(self.actor_critic.state_dict())
-            else:
-                # Interpolate the weights
+        # Soft update every step, use Polyak avg-ing
+        if tau < 1.0:
+            with torch.no_grad():
                 for target_param, param in zip(self.target_network.parameters(), self.actor_critic.parameters()):
-                    target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
-
+                    # target_param.data.copy_(tau * param.data + (1.0 - tau) * target_param.data)
+                    target_param.data.mul_(1.0 - tau)
+                    target_param.data.add_(param.data, alpha=tau)
             self.last_target_update_step = self.train_step
-            log.debug(f"Updated target network at step {self.train_step}")
+            return
+
+        # Hard update
+        if (self.train_step - self.last_target_update_step >= self.cfg.target_update_interval):
+            self.target_network.load_state_dict(self.actor_critic.state_dict())
+            self.last_target_update_step = self.train_step
+            log.debug(f"Hard Updated target network at step {self.train_step}")
 
     def _prepare_batch_for_buffer(self, batch: TensorDict) -> TensorDict:
         """
@@ -131,6 +150,8 @@ class DQNLearner(Learner):
             transitions["actions"] = buff["actions"].reshape(-1, *buff["actions"].shape[2:])
             transitions["rewards"] = buff["rewards"].reshape(-1)
             transitions["dones"] = buff["dones"].reshape(-1).float()
+            if "time_outs" in buff:
+                transitions["time_outs"] = buff["time_outs"].reshape(-1).float()
 
             valids = buff["policy_id"] == self.policy_id
             curr_policy_version: int = self.train_step
@@ -154,6 +175,8 @@ class DQNLearner(Learner):
                 transitions["actions"] = transitions["actions"][valids]
                 transitions["rewards"] = transitions["rewards"][valids]
                 transitions["dones"] = transitions["dones"][valids]
+                if "time_outs" in transitions:
+                    transitions["time_outs"] = transitions["time_outs"][valids]
 
             return transitions
 
@@ -171,6 +194,13 @@ class DQNLearner(Learner):
         actions = batch["actions"].long()
         rewards = batch["rewards"]
         dones = batch["dones"]
+        if "time_outs" in batch:
+            dones = dones * (1.0 - batch["time_outs"])
+
+        # Reward already clipped at collection)
+        dqn_reward_clip = getattr(self.cfg, "dqn_reward_clip", 0.0)
+        if dqn_reward_clip > 0:
+            rewards = rewards.clamp(-dqn_reward_clip, dqn_reward_clip)
 
         # Current q
         batch_size = actions.shape[0]
@@ -198,7 +228,7 @@ class DQNLearner(Learner):
                 a_idx = actions[:, i : i + 1] # [batch, 1]
                 current_q_list.append(q_head.gather(1, a_idx).squeeze(1))
 
-            current_q = torch.stack(current_q_list, dim=1).sum(dim=1)
+            current_q_heads = torch.stack(current_q_list, dim=1)
 
             with torch.no_grad():
                 # Get next Q-values from target network
@@ -215,14 +245,19 @@ class DQNLearner(Learner):
                     for q_online, q_target in zip(next_q_online_splits, next_q_target_splits):
                         next_actions = q_online.argmax(dim=1, keepdim=True)
                         next_q_list.append(q_target.gather(1, next_actions).squeeze(1))
-                    next_q = torch.stack(next_q_list, dim=1).sum(dim=1)
+                    next_q = torch.stack(next_q_list, dim=1)
                 else:
                     next_q_list = [q.max(dim=1)[0] for q in next_q_target_splits]
-                    next_q = torch.stack(next_q_list, dim=1).sum(dim=1)
+                    next_q = torch.stack(next_q_list, dim=1)
 
                 # r + gamma * Q_target(s', a') * (1 - done)
                 # https://stackoverflow.com/questions/58559415/setting-up-target-values-for-deep-q-learning
-                target_q = rewards + self.cfg.gamma * next_q * (1.0 - dones)
+                target_q_heads = rewards.unsqueeze(1) + self.cfg.gamma * next_q * (1.0 - dones).unsqueeze(1)
+
+            current_q = current_q_heads.mean(dim=1)
+            target_q = target_q_heads.mean(dim=1)
+            td_errors = torch.abs(current_q_heads - target_q_heads).mean(dim=1).detach()
+            elementwise_loss = F.smooth_l1_loss(current_q_heads, target_q_heads, reduction="none").mean(dim=1)
         else:
             # Single action space
             if actions.dim() > 1:
@@ -243,11 +278,17 @@ class DQNLearner(Learner):
 
                 target_q = rewards + self.cfg.gamma * next_q * (1.0 - dones)
 
-        # Element-wise TD errors
-        td_errors = torch.abs(current_q - target_q).detach()
+            # Element-wise TD errors
+            td_errors = torch.abs(current_q - target_q).detach()
 
-        # Huber loss (https://github.com/DLR-RM/stable-baselines3/blob/master/stable_baselines3/dqn/dqn.py)
-        elementwise_loss = F.smooth_l1_loss(current_q, target_q, reduction="none")
+            # Huber loss (https://github.com/DLR-RM/stable-baselines3/blob/master/stable_baselines3/dqn/dqn.py)
+            elementwise_loss = F.smooth_l1_loss(current_q, target_q, reduction="none")
+
+        self._last_q_mean = current_q.mean().item()
+        self._last_q_max = current_q.max().item()
+        self._last_q_min = current_q.min().item()
+        self._last_target_q_mean = target_q.mean().item()
+        self._last_td_error_mean = td_errors.mean().item()
 
         # Importance sampling weights
         if weights is not None:
@@ -305,6 +346,9 @@ class DQNLearner(Learner):
             else:
                 self.env_steps += num_transitions
 
+            if self.global_env_steps_tensor is not None:
+                self.global_env_steps_tensor[self.policy_id] = self.env_steps
+
         with self.timing.add_time("add_to_buffer"):
             if self.replay_buffer is not None:
                 self.replay_buffer.add(transitions)
@@ -361,6 +405,13 @@ class DQNLearner(Learner):
             train_stats.policy_lag_valid_frac = self.last_valid_ratio
             train_stats.policy_lag_dropped = self.last_valid_dropped
             train_stats.policy_lag_total = self.last_valid_total
+
+            train_stats.dqn_q_mean = self._last_q_mean
+            train_stats.dqn_q_max = self._last_q_max
+            train_stats.dqn_q_min = self._last_q_min
+            train_stats.dqn_target_q_mean = self._last_target_q_mean
+            train_stats.dqn_td_error_mean = self._last_td_error_mean
+
             stats[TRAIN_STATS] = train_stats
             stats[STATS_KEY] = memory_stats("learner", self.device)
 
@@ -373,6 +424,7 @@ class DQNLearner(Learner):
         if self.replay_buffer is not None:
             checkpoint["replay_buffer_size"] = len(self.replay_buffer)
         checkpoint["last_train_env_steps"] = self.last_train_env_steps
+        checkpoint["last_target_update_step"] = self.last_target_update_step
         return checkpoint
 
     def _load_state(self, checkpoint_dict, load_progress=True):
@@ -382,3 +434,5 @@ class DQNLearner(Learner):
             log.info("Loaded target network from checkpoint")
         if load_progress and "last_train_env_steps" in checkpoint_dict:
             self.last_train_env_steps = checkpoint_dict["last_train_env_steps"]
+        if load_progress and "last_target_update_step" in checkpoint_dict:
+            self.last_target_update_step = checkpoint_dict["last_target_update_step"]
