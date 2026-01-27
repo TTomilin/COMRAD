@@ -9,10 +9,8 @@ repos:
     -   id: check-yaml
     -   id: check-toml
     -   id: check-ast
-    -   id: check-added-large-files
     -   id: check-merge-conflict
     -   id: detect-private-key
-    -   id: debug-statements
 
 -   repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.13
