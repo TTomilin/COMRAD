@@ -295,7 +295,7 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             env,
             record_every=getattr(cfg, "wandb_record_every", 0),
             fps=getattr(cfg, "wandb_video_fps", 35),
-            is_multi=True,
+            is_multi=is_multiagent,
             output_dir=dirr,
         )
 

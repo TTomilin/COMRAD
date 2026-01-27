@@ -8,6 +8,15 @@ from typing import Sequence
 import gymnasium as gym
 import numpy as np
 
+def _as_bool_sequence(value):
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    if isinstance(value, np.ndarray):
+        if value.shape == ():
+            return None
+        return value.tolist()
+    return None
+
 def _to_hwc_uint8(arr: np.ndarray) -> np.ndarray:
     if arr.ndim == 3 and arr.shape[0] <= 4 and arr.shape[0] < arr.shape[-1]:
         arr = np.transpose(arr, (1, 2, 0))
@@ -81,7 +90,7 @@ class VideoLoggerWrapper(gym.Wrapper):
         if not self._recording: return
 
         lst: list[np.ndarray] = [] # frames list
-        if self.is_multi:
+        if self.is_multi and isinstance(obs, (list, tuple)):
             wd = []
             for i in obs:
                 o = _select_image(i)
@@ -126,12 +135,18 @@ class VideoLoggerWrapper(gym.Wrapper):
 
     def step(self, action):
         obs, r, term, trunc, info = self.env.step(action)
-        
-        if self.is_multi:
-            ep_done = all(t or tr for t, tr in zip(term, trunc))
+
+        term_list = _as_bool_sequence(term)
+        trunc_list = _as_bool_sequence(trunc)
+        if term_list is not None or trunc_list is not None:
+            if term_list is None:
+                term_list = [bool(term)] * len(trunc_list)
+            if trunc_list is None:
+                trunc_list = [bool(trunc)] * len(term_list)
+            ep_done = all(t or tr for t, tr in zip(term_list, trunc_list))
         else:
-            ep_done = term or trunc
-        
+            ep_done = bool(term) or bool(trunc)
+
         # Check if env reseted itself
         # When the env reset itself, obs is from new ep, so we need to call _maybe_start_ep again
         # But with env didn't auto reset, _maybe_start_ep will be called from next reset()
