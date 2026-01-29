@@ -153,10 +153,13 @@ class DQNLearner(Learner):
             if "time_outs" in buff:
                 transitions["time_outs"] = buff["time_outs"].reshape(-1).float()
 
-            valids = buff["policy_id"] == self.policy_id
-            curr_policy_version: int = self.train_step
-            valids &= curr_policy_version - buff["policy_version"] < self.cfg.max_policy_lag
-            valids = valids.reshape(-1)
+            # This works suprisingly well with slow update: -m sf.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=1024 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=5000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=16 --target_update_tau=0.005 --dqn_reward_clip=1.0 --learning_rate=5e-5
+            # valids = buff["policy_id"] == self.policy_id
+            # valids &= self.train_step - buff["policy_version"] < self.cfg.max_policy_lag
+            # valids = valids.reshape(-1)
+
+            # But we dont filter policy lag, but keep this for PBT or many learners
+            valids = (buff["policy_id"] == self.policy_id).reshape(-1)
 
             # This is to filter invalid transitions from
             num_total = valids.numel()
@@ -165,7 +168,7 @@ class DQNLearner(Learner):
             self.last_valid_dropped = num_total - num_valid
             self.last_valid_ratio = num_valid / max(1, num_total)
             if self.last_valid_dropped > 0:
-                debug_log_every_n(50, f"DQN policy lag filtered {self.last_valid_dropped}/{num_total} transitions ({(1 - self.last_valid_ratio) * 100:.2f}%)")
+                debug_log_every_n(50, f"DQN filtered {self.last_valid_dropped}/{num_total} invalid transitions ({(1 - self.last_valid_ratio) * 100:.2f}%)")
 
             if not torch.all(valids).item():
                 for key, value in transitions["obs"].items():
@@ -363,11 +366,13 @@ class DQNLearner(Learner):
             steps_per_update = 1
 
         self.total_env_steps_for_training += new_steps
+
+        # For async, 1 update every n steps is not possible, so we calculate the number of updates need to be made
+        # minus full debt (num_updates * steps_per_update), then cap the actual work
         num_updates = self.total_env_steps_for_training // steps_per_update
         if num_updates == 0:
             return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         self.total_env_steps_for_training -= num_updates * steps_per_update
-
         max_updates = getattr(self.cfg, "dqn_max_updates_per_batch", 0)
         if max_updates > 0:
             num_updates = min(num_updates, max_updates)

@@ -12,11 +12,11 @@ repos:
     -   id: check-merge-conflict
     -   id: detect-private-key
 
--   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.13
-    hooks:
-    -   id: ruff-check
-        types_or: [ python, pyi ]
-        args: [ --fix ]
-    # -   id: ruff-format
-    #     types_or: [ python, pyi ]
+# -   repo: https://github.com/astral-sh/ruff-pre-commit
+#     rev: v0.14.13
+#     hooks:
+#     -   id: ruff-check
+#         types_or: [ python, pyi ]
+#         args: [ --fix ]
+#     -   id: ruff-format
+#         types_or: [ python, pyi ]

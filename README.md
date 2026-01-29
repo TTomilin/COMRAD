@@ -55,6 +55,14 @@ python -m sf.train \
     --train_for_env_steps=5000
 ```
 
+For training on HPC, I tuned with these parameters (this config technically edges 32GB RAM):
+```bash
+# Single agent
+python -m sf.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=50000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --dqn_reward_clip=1.0 --train_frequency=8
+
+# Multi agent
+```
+
 Some important DQN flags (also in `cfg.py`):
 - `--replay_buffer_size`: Size of the replay buffer in transitions (default: `1000000`)
 - `--learning_starts`: Start training after this many transitions are collected (default: `10000`)
