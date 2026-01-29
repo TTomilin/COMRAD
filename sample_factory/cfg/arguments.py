@@ -118,6 +118,7 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
         # Big replay buffer causes overhead in memory allocation
         # So cap RAM usage to 1GB (1Bil bytes) by how many bytes each observation takes
+        # Only when replay_buffer_size is not passed in cli args
         cli_args = getattr(cfg, "cli_args", {}) # as in config.json
         if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 1000000:
             obs_space = env_info.obs_space
