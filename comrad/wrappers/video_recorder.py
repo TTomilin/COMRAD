@@ -88,6 +88,8 @@ class VideoLoggerWrapper(gym.Wrapper):
 
     def _capture(self, obs):
         if not self._recording: return
+        # Maybe we dont need this as technically not necessary
+        # if len(self._frames) >= self.max_frames: return
 
         lst: list[np.ndarray] = [] # frames list
         if self.is_multi and isinstance(obs, (list, tuple)):
