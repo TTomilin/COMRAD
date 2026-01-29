@@ -61,6 +61,8 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         self.update_state = True
 
         self.forcerespawn = forcerespawn
+        if num_agents == 1: self.forcerespawn = 1 # To overwrite for single agent pitfall
+
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
 

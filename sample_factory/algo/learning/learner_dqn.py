@@ -262,7 +262,7 @@ class DQNLearner(Learner):
             td_errors = torch.abs(current_q_heads - target_q_heads).mean(dim=1).detach()
             elementwise_loss = F.smooth_l1_loss(current_q_heads, target_q_heads, reduction="none").mean(dim=1)
         else:
-            # Single action space
+            # Single action space, not composite_action_space
             if actions.dim() > 1:
                 actions = actions.squeeze(-1)
             current_q = q_values.gather(1, actions.unsqueeze(1)).squeeze(1)
