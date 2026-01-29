@@ -70,7 +70,7 @@ class LearnerWorker(HeartbeatStoppableEventLoopObject, Configurable):
         global_env_steps_tensor: Tensor = buffer_mgr.global_env_steps
         self.param_server = ParameterServer(policy_id, policy_versions_tensor, cfg.serial_mode)
 
-        # TODO: Hashmap? As there are other algos
+        # TODO: Maybe use hashmap to scale up with more algo
         algo = getattr(cfg, "algo", "APPO").upper()
         if algo == "DQN":
             self.learner: Learner = DQNLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)

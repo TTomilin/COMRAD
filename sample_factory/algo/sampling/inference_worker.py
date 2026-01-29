@@ -146,9 +146,9 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                 decay_steps=cfg.epsilon_decay_steps,
             )
             action_space = env_info.action_space
-            if hasattr(action_space, "n"): # Single agent
+            if hasattr(action_space, "n"):
                 self.action_space_d = [action_space.n]
-            elif hasattr(action_space, "spaces"): # Multi-agent
+            elif hasattr(action_space, "spaces"):
                 self.action_space_d = [s.n for s in action_space.spaces if hasattr(s, "n")]
             else:
                 log.warning(f"Invalid action space for DQN epg: {type(action_space)}")
@@ -384,7 +384,7 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                         global_steps = self.global_env_steps_tensor[self.policy_id].item()
                         epsilon = self.epsilon_schedule.get_epsilon(global_steps)
                     else:
-                        # Fallback to local step counter if global not available
+                        # Local step counter if global is none
                         epsilon = self.epsilon_schedule.step(num_samples)
                     actions = policy_outputs["actions"]
                     device = actions.device

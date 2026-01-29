@@ -1,6 +1,7 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import torch
+from gymnasium import spaces
 from torch import Tensor, nn
 
 from sample_factory.algo.utils.torch_utils import calc_num_elements

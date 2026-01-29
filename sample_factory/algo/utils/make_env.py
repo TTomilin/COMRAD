@@ -6,6 +6,7 @@ import gymnasium as gym
 import numpy as np
 import torch
 from gymnasium import Wrapper, spaces
+from gymnasium.core import ActType, ObsType
 from torch import Tensor
 
 from sample_factory.algo.utils.tensor_utils import dict_of_lists_cat
