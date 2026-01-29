@@ -127,7 +127,9 @@ class ActorCritic(nn.Module, Configurable):
     ) -> TensorDict:
         raise NotImplementedError()
 
-    def forward(self, normalized_obs_dict, rnn_states, values_only: bool = False, action_mask: Optional[Tensor] = None, sample_actions: bool = True) -> TensorDict:
+    def forward(
+        self, normalized_obs_dict, rnn_states, values_only: bool = False, action_mask: Optional[Tensor] = None, sample_actions: bool = True
+    ) -> TensorDict:
         raise NotImplementedError()
 
 
@@ -184,7 +186,8 @@ class ActorCriticSharedWeights(ActorCritic):
         return result
 
     def forward(
-        self, normalized_obs_dict, rnn_states, values_only: bool = False, action_mask: Optional[Tensor] = None, sample_actions: bool = True) -> TensorDict:
+        self, normalized_obs_dict, rnn_states, values_only: bool = False, action_mask: Optional[Tensor] = None, sample_actions: bool = True
+    ) -> TensorDict:
         x = self.forward_head(normalized_obs_dict)
         x, new_rnn_states = self.forward_core(x, rnn_states)
         result = self.forward_tail(x, values_only, sample_actions=sample_actions, action_mask=action_mask)

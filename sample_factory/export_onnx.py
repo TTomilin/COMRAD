@@ -7,6 +7,7 @@ import torch.nn as nn
 import torch.onnx
 from torch import Tensor
 
+from sample_factory.algo.learning.learner import Learner
 from sample_factory.algo.sampling.batched_sampling import preprocess_actions
 from sample_factory.algo.utils.action_distributions import argmax_actions
 from sample_factory.algo.utils.env_info import EnvInfo, extract_env_info
@@ -18,6 +19,7 @@ from sample_factory.cfg.arguments import load_from_checkpoint
 from sample_factory.enjoy import load_state_dict, make_env
 from sample_factory.model.actor_critic import ActorCritic, create_actor_critic
 from sample_factory.model.model_utils import get_rnn_size
+from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import Config
 
 

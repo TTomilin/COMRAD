@@ -100,7 +100,8 @@ def check_env_info(env: BatchedVecEnv | NonBatchedVecEnv, env_info: EnvInfo, cfg
         )
         raise ValueError("Env info mismatch. See logs above for details.")
     elif new_env_info.num_agents != env_info.num_agents:
-        # temp env created to extract info may have diff num_agents
+        # temp env created to extract info can have diff num_agents for some reason
+        # May remove this, it was here primarily for debugging
         log.warning(
             f"num_agents mismatch (cached: {env_info.num_agents}, actual: {new_env_info.num_agents}). "
             "Updating env_info.num_agents to actual value."
