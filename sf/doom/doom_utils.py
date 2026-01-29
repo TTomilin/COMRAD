@@ -226,7 +226,7 @@ def make_doom_env_impl(
         env = VideoLoggerWrapper(
             env,
             record_every=getattr(cfg, "wandb_record_every", 0),
-            fps=getattr(cfg, "wandb_video_fps", 35),
+            fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
             is_multi=False,
             output_dir=dirr,
         )
@@ -294,7 +294,7 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
         env = VideoLoggerWrapper(
             env,
             record_every=getattr(cfg, "wandb_record_every", 0),
-            fps=getattr(cfg, "wandb_video_fps", 35),
+            fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
             is_multi=is_multiagent,
             output_dir=dirr,
         )
