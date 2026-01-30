@@ -375,6 +375,8 @@ class Runner(EventLoopObject, Configurable):
         for policy_id, env_steps in self.env_steps.items():
             writer = self.writers[policy_id]
             if policy_id == default_policy:
+                writer.add_scalar("train/env_steps", float(env_steps), env_steps)
+
                 if not math.isnan(fps):
                     writer.add_scalar("perf/_fps", fps, env_steps)
 
