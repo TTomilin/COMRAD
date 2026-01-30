@@ -404,6 +404,8 @@ class DQNLearner(Learner):
 
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
+            train_stats.env_steps = self.env_steps
+
             train_stats.dqn_num_updates = num_updates
             train_stats.dqn_steps_per_update = steps_per_update
             train_stats.dqn_pending_steps = self.total_env_steps_for_training
@@ -416,6 +418,11 @@ class DQNLearner(Learner):
             train_stats.dqn_q_min = self._last_q_min
             train_stats.dqn_target_q_mean = self._last_target_q_mean
             train_stats.dqn_td_error_mean = self._last_td_error_mean
+
+            grad_norm = (
+                sum(p.grad.data.norm(2).item() ** 2 for p in self.actor_critic.parameters() if p.grad is not None) ** 0.5
+            )
+            train_stats.grad_norm = grad_norm
 
             stats[TRAIN_STATS] = train_stats
             stats[STATS_KEY] = memory_stats("learner", self.device)
