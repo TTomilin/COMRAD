@@ -1,5 +1,7 @@
 ## 1. Installation
 
+Note on python version: You should use python 3.11 and wandb 0.22.x, as there are some issues with wandb 0.24.0 (which is not compatible with python 3.11) in syncing between tensorboard and weave dashboard
+
 Setup pre-commit:
 ```bash
 # If dont have pre-commit, install first: `pip install pre-commit`
