@@ -31,6 +31,10 @@ def init_wandb(cfg):
     import wandb
 
     # this can fail occasionally, so we try a couple more times
+    # Find with wandb 0.22.x + python 3.11
+    # But if use python 3.12, the fork start method is deprecated for multithreaded applications,
+    # so must be used with wandb 0.24 if using python 3.12 as wandb 0.24.0 has updated internals to handle Python 3.12's stricter process management
+    # If use python 3.12 with wandb 0.22.x then must use start_method="spawn"
     @retry(3, exceptions=(Exception,))
     def init_wandb_func():
         wandb.init(
