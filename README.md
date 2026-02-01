@@ -75,11 +75,14 @@ Some important DQN flags (also in `cfg.py`):
 - `--double_dqn`: Use Double DQN (default: `True`)
 
 Note:
-- Learner is the main bottleneck
-- `--dqn_max_updates_per_batch=1` (default) is the best as learner is main bottleneck
 - You should use `--learning_starts=0` for small local tests so learner work immediately
 - Avoid setting `--replay_buffer_size` too large for less memory allocation overhead
 - `--train_frequency` is how many env steps per update, so increasing it decreases learner work but dont increase too much
+
+---
+
+#### QMIX
+
 
 ---
 
@@ -127,7 +130,7 @@ python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --m
 - **Wrapper for game instances:** `sf/doom/multiplayer/doom_multiagent_wrapper.py`
 - **Config:** `sample_factory/cfg/cfg.py` + `sf/doom/doom_params.py`
 
-### Notes
+## 6. Side Notes
 - Default obs shape is `(3, 72, 128)`.
 - To avoid nested folders, set `--wandb_dir` to root (`--wandb_dir=.`)
 - Use `--record_to` to output frames
