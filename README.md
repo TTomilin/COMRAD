@@ -2,14 +2,10 @@
 
 Note on python version: You should use python 3.11 and wandb 0.22.x, as there are some issues with wandb 0.24.0 (which is not compatible with python 3.11) in syncing between tensorboard and weave dashboard
 
-Setup pre-commit:
-```bash
-# If dont have pre-commit, install first: `pip install pre-commit`
+### Install dependencies
 
-pre-commit install
-```
+#### conda/venv/pip
 
-Install dependencies:
 ```bash
 pip install vizdoom --pre
 
@@ -17,6 +13,20 @@ pip install pyglet "tensorboard>=1.15.0" "tensorboardx>=2.0" "psutil>=5.7.0" "th
 ```
 
 **Note:** If runs into error, try installing failed dependencies separately.
+
+#### UV
+
+```bash
+uv sync
+```
+
+### Setup pre-commit
+
+```bash
+# If dont have pre-commit, install first: `pip install pre-commit`
+
+pre-commit install
+```
 
 ## 2. Training Commands
 
