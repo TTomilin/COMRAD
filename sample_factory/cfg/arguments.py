@@ -16,6 +16,7 @@ from sample_factory.cfg.cfg import (
     add_eval_args,
     add_model_args,
     add_pbt_args,
+    add_qmix_args,
     add_rl_args,
     add_wandb_args,
 )
@@ -48,6 +49,7 @@ def parse_sf_args(
     add_wandb_args(p)
     add_pbt_args(p)
     add_dqn_args(p)
+    add_qmix_args(p)
 
     if evaluation:
         add_eval_args(p)
@@ -144,6 +146,45 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             old_learning_starts = cfg.learning_starts
             cfg.learning_starts = max(1000, cfg.replay_buffer_size // 2)
             log.warning(f"DQN: learning_starts ({old_learning_starts}) > replay_buffer_size ({cfg.replay_buffer_size}), capped to {cfg.learning_starts}")
+
+    # copy pasting from DQN but modify a bit for qmix/vdn
+    # TODO: refactor merge w DQN
+    algo_upper = str(cfg.algo).upper()
+    if algo_upper in ("QMIX", "VDN"):
+        if algo_upper == "VDN" and getattr(cfg, 'mixer', 'qmix') != 'vdn':
+            cfg.mixer = 'vdn'
+            log.info("VDN algo: Setting mixer=vdn")
+
+        num_agents = getattr(cfg, 'num_agents', 2)
+        cli_args = getattr(cfg, "cli_args", {})
+        if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 1000000:
+            obs_space = env_info.obs_space
+            bytes_per_obs = 0
+            if hasattr(obs_space, "spaces"):
+                for space in obs_space.spaces.values():
+                    if hasattr(space, "shape"):
+                        dtype = np.dtype(space.dtype) if space.dtype is not None else np.float32
+                        bytes_per_obs += int(np.prod(space.shape)) * dtype.itemsize
+            elif hasattr(obs_space, "shape"):
+                dtype = np.dtype(obs_space.dtype) if obs_space.dtype is not None else np.float32
+                bytes_per_obs = int(np.prod(obs_space.shape)) * dtype.itemsize
+
+            # Multiply by num_agents for QMiX as joint transitions are larger
+            bytes_per_transition = bytes_per_obs * 2 * num_agents
+            if bytes_per_transition > 0:
+                max_size = max(1000, int(1_000_000_000 // bytes_per_transition))
+                if max_size < cfg.replay_buffer_size:
+                    log.warning(f"QMIX/VDN: Cap replay_buffer_size to {max_size}")
+                    cfg.replay_buffer_size = max_size
+
+        # learning_starts validation
+        if cfg.learning_starts > cfg.replay_buffer_size:
+            old_starts = cfg.learning_starts
+            cfg.learning_starts = max(1000, cfg.replay_buffer_size // 2)
+            log.warning(f"QMIX/VDN: learning_starts capped from {old_starts} to {cfg.learning_starts}")
+
+        log.info(f"QMIX/VDN: num_agents={num_agents}, mixer={cfg.mixer}, "
+                 f"buffer_size={cfg.replay_buffer_size}")
 
     return verify_cfg(cfg, env_info)
 
