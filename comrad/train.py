@@ -14,6 +14,7 @@ from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_
 from sf.doom.doom_utils import DOOM_ENVS, make_doom_env_from_spec
 from sf.doom.video_uploader import upload_video
 from sf.doom.multi_agent_model import make_mappo_actor_critic
+from sf.doom.qmix_model import make_qmix_actor_critic
 
 
 def register_vizdoom_envs():
@@ -52,7 +53,10 @@ def parse_args(argv=None, evaluation=False):
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
-        algo_name = "MAPPO" if final_cfg.use_mappo else final_cfg.algo
+        if final_cfg.mixer:
+            algo_name = "VDN" if "vdn" in final_cfg.mixer else "QMIX"
+        else:
+            algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO"
         final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
     return final_cfg
@@ -68,8 +72,11 @@ def main():
         cfg.num_agents = n_agents
 
     if cfg.num_agents > 1:
-        # print(f"Multi-agent training: {'MAPPO' if cfg.use_mappo else 'IPPO'} with {cfg.num_agents} agents")
-        global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
+        if cfg.algo in ('QMIX', 'VDN'):
+            global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
+        else:
+            # MAPPO, IPPO
+            global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
     # else:
         # print("Single-agent training with PPO")
 
