@@ -19,17 +19,19 @@ class DoomSafeGround2RewardShaping(gym.Wrapper):
         dead_key: str = "DEAD",
         shooter_idx: int = 0,
         mover_idx: int = 1,
-        ammo_gain_scale: float = 0.1,
+        shooter_ammo_gain_scale: float = 0.3,
+        mover_ammo_gain_scale: float = 0.1, ##distinguish ammo gain reward between shooter and mover
         shooter_death_penalty: float = -3.0,
-        mover_death_penalty: float = -5.0,
-        step_penalty: float = 0.0,
+        mover_death_penalty: float = -5.0, ##this case shooter fails to protect mover, more punishment added
+        step_penalty: float = 0.0, 
     ):
         super().__init__(env)
         self.ammo_key = ammo_key
         self.dead_key = dead_key
         self.shooter_idx = int(shooter_idx)
         self.mover_idx = int(mover_idx)
-        self.ammo_gain_scale = float(ammo_gain_scale)
+        self.shooter_ammo_gain_scale = float(shooter_ammo_gain_scale)
+        self.mover_ammo_gain_scale = float(mover_ammo_gain_scale)
         self.shooter_death_penalty = float(shooter_death_penalty)
         self.mover_death_penalty = float(mover_death_penalty)
         self.step_penalty = float(step_penalty)
@@ -57,6 +59,8 @@ class DoomSafeGround2RewardShaping(gym.Wrapper):
 
         shooter_ammo = self._get_agent_value(info, self.ammo_key, self.shooter_idx)
         self._prev_shooter_ammo = shooter_ammo
+        mover_ammo = self._get_agent_value(info, self.ammo_key, self.mover_idx)
+        self._prev_mover_ammo = mover_ammo
 
         self._prev_dead_shooter = bool(self._get_agent_value(info, self.dead_key, self.shooter_idx) or 0)
         self._prev_dead_mover = bool(self._get_agent_value(info, self.dead_key, self.mover_idx) or 0)
@@ -76,12 +80,19 @@ class DoomSafeGround2RewardShaping(gym.Wrapper):
         if self.step_penalty != 0.0:
             r += self.step_penalty
 
-        # Reward for ammo gain of Shooter (transfer success proxy)
+        ## Reward for ammo gain of Shooter (transfer success proxy)
         shooter_ammo = self._get_agent_value(infos, self.ammo_key, self.shooter_idx)
         if shooter_ammo is not None and self._prev_shooter_ammo is not None:
             delta = float(shooter_ammo) - float(self._prev_shooter_ammo)
             if delta > 0:
-                r += self.ammo_gain_scale * delta
+                r += self.shooter_ammo_gain_scale * delta
+
+        ## Reward for ammo gain of Mover
+        mover_ammo = self._get_agent_value(infos, self.ammo_key, self.mover_idx)
+        if mover_ammo is not None and self._prev_mover_ammo is not None:
+            delta = float(mover_ammo) - float(self._prev_mover_ammo)
+            if delta > 0:
+                r += self.mover_ammo_gain_scale * delta
 
         # Death penalties (use DEAD flag provided by env info)
         dead_shooter = bool(self._get_agent_value(infos, self.dead_key, self.shooter_idx) or 0)
@@ -98,6 +109,7 @@ class DoomSafeGround2RewardShaping(gym.Wrapper):
         # Episode bookkeeping
         self._episode_return += r
         self._prev_shooter_ammo = shooter_ammo
+        self._prev_mover_ammo = mover_ammo
         self._prev_dead_shooter = dead_shooter
         self._prev_dead_mover = dead_mover
 
