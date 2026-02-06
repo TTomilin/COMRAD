@@ -191,6 +191,8 @@ class ActorState:
         self.curr_traj_buffer["rewards"][rollout_step] = float(reward)
         self.curr_traj_buffer["dones"][rollout_step] = done
         self.curr_traj_buffer["time_outs"][rollout_step] = truncated
+        self.curr_traj_buffer["env_idx"][rollout_step] = int(self.global_env_idx)
+        self.curr_traj_buffer["agent_idx"][rollout_step] = int(self.agent_idx)
 
         # -1 policy_id does not match any valid policy on the learner, therefore this will be treated as
         # invalid data coming from a different policy and should be ignored by the learner.

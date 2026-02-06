@@ -138,6 +138,8 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
         self.last_obs = None
         self.last_rnn_state = None
         self.policy_id_buffer = None
+        self.env_idx_buffer = None
+        self.agent_idx_buffer = None
 
         self.curr_traj: Optional[TensorDict] = None
         self.curr_step: Optional[TensorDict] = None
@@ -195,6 +197,30 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
 
         self.policy_id_buffer = torch.empty_like(self.traj_tensors["policy_id"][0 : self.vec_env.num_agents, 0])
         self.policy_id_buffer[:] = self.policy_id
+
+        # To track which env each traj belongs to
+        self.env_idx_buffer = torch.empty_like(self.policy_id_buffer)
+        self.agent_idx_buffer = torch.empty_like(self.policy_id_buffer)
+
+        agents_per_env = max(1, self.env_info.num_agents)
+        if self.vec_env.num_agents % agents_per_env != 0:
+            log.warning(
+                "Cannot derive env_idx/agent_idx mapping for batched sampling: total_agents={self.vec_env.num_agents}, agents_per_env={agents_per_env}"
+            )
+            self.env_idx_buffer.fill_(-1)
+            self.agent_idx_buffer.fill_(-1)
+        else:
+            local_actor_indices = torch.arange(
+                self.vec_env.num_agents,
+                device=self.device,
+                dtype=self.policy_id_buffer.dtype,
+            )
+            local_env_idx = torch.div(local_actor_indices, agents_per_env, rounding_mode="floor")
+            local_agent_idx = torch.remainder(local_actor_indices, agents_per_env)
+            global_env_base = self.worker_idx * self.cfg.num_envs_per_worker + self.split_idx * self.num_envs
+
+            self.env_idx_buffer[:] = local_env_idx + global_env_base
+            self.agent_idx_buffer[:] = local_agent_idx
 
         assert self.rollout_step == 0
 
@@ -326,6 +352,8 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
                 rewards=processed_rewards,
                 dones=dones,
                 time_outs=truncated,  # true only when done is also true, used for value bootstrapping
+                env_idx=self.env_idx_buffer,
+                agent_idx=self.agent_idx_buffer,
                 policy_id=self.policy_id_buffer,
             )
 
