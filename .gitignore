@@ -45,3 +45,6 @@ wandb/
 sf/jobs
 sf/templates
 sf/send.sh
+
+# misc
+asdf.py
