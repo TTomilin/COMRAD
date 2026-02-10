@@ -62,6 +62,22 @@ def doom_action_space_pitfall():
         )
     )
 
+def doom_action_space_lavapit2():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD
+    JUMP
+    """
+
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),
+            Discrete(2),
+            Discrete(2),
+        )
+    )
+
 def doom_action_space_parallel():
     """
     TURN_LEFT
