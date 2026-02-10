@@ -16,11 +16,12 @@ from sf.doom.action_space import (
     doom_action_space_parallel,
     doom_action_space_armory_siege,
     doom_action_space_safe_ground2,
+    doom_action_space_lavapit2,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, DoomSafeGround2RewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, DoomSafeGround2RewardShaping, LavapitRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -77,6 +78,17 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(DoomPitfallRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "lavapit2",
+        "lavapit2.cfg",
+        doom_action_space_lavapit2(),
+        1.0,
+        1000,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(LavapitRewardShaping, {})],
     ),
 
     DoomSpec(
