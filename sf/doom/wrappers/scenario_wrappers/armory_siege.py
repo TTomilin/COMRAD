@@ -10,7 +10,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         death_penalty=-1,         
         weapon_pickup_reward=0.3,
         first_weapon_reward=1,    
-        ammo_pickup_reward=0.002,     
+        ammo_pickup_reward=0.012,     
         core_death_penalty=-7.0,
         kill_reward=3,
         hit_reward=0.1,
