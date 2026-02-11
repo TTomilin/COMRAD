@@ -28,6 +28,22 @@ def doom_turn_and_attack_only():
     return space
 
 
+def doom_action_space_ammo_carrier():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD
+    ATTACK
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, move forward
+            Discrete(2),  # noop, attack
+        )
+    )
+
+
 def doom_action_space_basic():
     """
     TURN_LEFT
@@ -92,33 +108,6 @@ def doom_action_space_parallel():
         )
     )
 
-def doom_action_space_safe_ground2():
-    """
-    TURN_LEFT
-    TURN_RIGHT
-    MOVE_FORWARD
-    MOVE_BACKWARD
-    MOVE_LEFT
-    MOVE_RIGHT
-    ATTACK
-
-
-    Action encoding (per step):
-    - turn:     0 = noop, 1 = turn left, 2 = turn right
-    - move_fb:  0 = noop, 1 = forward, 2 = backward
-    - strafe:   0 = noop, 1 = left, 2 = right
-    - attack:   0 = noop, 1 = attack
-    """
-    space = gym.spaces.Tuple(
-        (
-            Discrete(3),  # turn: noop, left, right
-            Discrete(3),  # move forward/backward
-            Discrete(3),  # strafe left/right
-            Discrete(2),  # attack
-        )
-    )
-
-    return space
 
 def doom_action_space_mwh():
     """

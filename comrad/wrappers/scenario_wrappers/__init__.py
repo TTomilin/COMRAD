@@ -3,5 +3,5 @@ from sf.doom.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfal
 from sf.doom.wrappers.scenario_wrappers.mwh_reward_shaping import DoomMWHRewardShaping
 from sf.doom.wrappers.scenario_wrappers.parallel import ParallelReward
 from sf.doom.wrappers.scenario_wrappers.armory_siege import ArmorySiegeRewardShaping
-from sf.doom.wrappers.scenario_wrappers.safe_ground2_reward_shaping import DoomSafeGround2RewardShaping
 from sf.doom.wrappers.scenario_wrappers.lavapit2_reward_shaping import LavapitRewardShaping
+from sf.doom.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierRewardShaping
