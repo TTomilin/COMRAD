@@ -15,13 +15,13 @@ from sf.doom.action_space import (
     doom_action_space_pitfall,
     doom_action_space_parallel,
     doom_action_space_armory_siege,
-    doom_action_space_safe_ground2,
     doom_action_space_lavapit2,
+    doom_action_space_ammo_carrier,
 )
 from sf.doom.doom_gym import VizdoomEnv
 from sf.doom.wrappers.additional_input import DoomAdditionalInput
 from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, DoomSafeGround2RewardShaping, LavapitRewardShaping
+from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping
 from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -59,15 +59,6 @@ class DoomSpec:
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 DOOM_ENVS = [
-    DoomSpec(
-        "safe_ground2",
-        "safe_ground2.cfg",
-        doom_action_space_safe_ground2(),
-        1.0,
-        1000,
-        num_agents=2,
-        extra_wrappers=[(DoomSafeGround2RewardShaping, {})],
-    ),
 
     DoomSpec(
         "doom_pitfall",
@@ -119,6 +110,17 @@ DOOM_ENVS = [
         num_agents=3,
         respawn_delay=1,
         extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+    ),
+    
+    DoomSpec(
+        "ammo_carrier",
+        "ammo_carrier.cfg",
+        doom_action_space_ammo_carrier(),
+        1.0,
+        2100,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(AmmoCarrierRewardShaping, {})],
     ),
 ]
 
