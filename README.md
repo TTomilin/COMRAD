@@ -91,8 +91,25 @@ Note:
 
 ---
 
-#### QMIX
+#### VDN
+```bash
+python -m sf.train \
+    --env=doom_pitfall \
+    --algo=QMIX \
+    --mixer=vdn \
+    --train_for_env_steps=5000
+```
 
+---
+
+#### QMIX
+```bash
+python -m sf.train \
+    --env=doom_pitfall \
+    --algo=QMIX \
+    --mixer=qmix \
+    --train_for_env_steps=5000
+```
 
 ---
 
@@ -106,6 +123,7 @@ Note:
 
 **Recommended Specs:** 64GB RAM (32GB may run out quite quick for long training).
 
+### MAPPO
 ```bash
 python -m sf.train \
   --env=doom_pitfall \
@@ -123,6 +141,11 @@ python -m sf.train \
   --wandb_dir=. \
   --wandb_record_every=10 \
   --experiment=pitfall_0 <-- You can change or remove this flag
+```
+
+### QMIX
+```bash
+python -m sf.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=3600 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --replay_buffer_size=200000 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8
 ```
 
 ## 4. Run in parallel with launcher
