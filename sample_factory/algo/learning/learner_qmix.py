@@ -119,6 +119,7 @@ class QMixLearner(Learner):
         log.info(f"QMIX: q_clamp={q_clamp}, target_tau={tau}, use_huber={use_huber}")
 
         buffer_capacity = self.cfg.replay_buffer_size // self.num_agents
+        replay_buffer_seed = None if self.cfg.seed is None else int(self.cfg.seed) + int(self.policy_id)
         self.replay_buffer = JointReplayBuffer(
             capacity=buffer_capacity,
             num_agents=self.num_agents,
@@ -129,6 +130,7 @@ class QMixLearner(Learner):
             use_per=self.use_per,
             per_omega=getattr(self.cfg, 'per_omega', 0.6),
             per_beta_start=self.per_beta_start,
+            rng_seed=replay_buffer_seed,
         )
         log.info(f"JointReplayBuffer: capacity={buffer_capacity}, {buffer_capacity * self.num_agents} transitions")
 

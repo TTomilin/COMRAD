@@ -8,7 +8,7 @@ Learner reconstructs joint transitions from traj -> write into joint replay buff
 from __future__ import annotations
 
 import threading
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import torch
@@ -39,6 +39,7 @@ class JointReplayBuffer:
         per_omega: float = 0.6,
         per_beta_start: float = 0.4,
         per_epsilon: float = 1e-6,
+        rng_seed: Optional[int] = None,
     ):
         if capacity <= 0:
             raise ValueError(f"capacity must be positive, got {capacity}")
@@ -51,6 +52,13 @@ class JointReplayBuffer:
         self.action_space = action_space
         self.device = torch.device(device)
         self.share_memory = share_memory
+
+        seed_sequence = np.random.SeedSequence(rng_seed)
+        np_seed_sequence, torch_seed_sequence = seed_sequence.spawn(2)
+        self._np_rng = np.random.default_rng(np_seed_sequence)
+        torch_seed = int(torch_seed_sequence.generate_state(1, dtype=np.uint32)[0])
+        self._torch_rng = torch.Generator(device="cpu")
+        self._torch_rng.manual_seed(torch_seed)
 
         # This pointer points at the next state in circular buffer to update priority
         self._ptr = 0
@@ -197,7 +205,8 @@ class JointReplayBuffer:
     def _sample_uniform(self, batch_size: int, device: Device) -> TensorDict:
         # TODO: Im not sure if the RNG used here is uniform really
         # Each workers is a thread so they might the same RNG state and sample the same indice
-        indices = torch.randint(0, self._size, (batch_size,), device='cpu')
+        # Switch RNG to use cfg.seed should fix this
+        indices = torch.randint(0, self._size, (batch_size,), device="cpu", generator=self._torch_rng)
         return self._gather(indices, device)
 
     def _sample_per(self, batch_size: int, device: Device) -> Tuple[TensorDict, Tensor, Tensor]:
@@ -215,7 +224,7 @@ class JointReplayBuffer:
 
         segment_starts = np.arange(batch_size) * segment
         segment_ends = segment_starts + segment
-        prefixsums = np.random.uniform(segment_starts, segment_ends)
+        prefixsums = self._np_rng.uniform(segment_starts, segment_ends)
 
         indices = self._sum_tree.find_prefixsum_idx_batch(prefixsums)
         indices = np.clip(indices, 0, self._size - 1)
