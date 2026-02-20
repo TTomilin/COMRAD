@@ -134,12 +134,13 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
 
         self.is_initialized = False
 
-        # epsilon-greedy exploration for DQN
+        # epsilon-greedy exploration for DQN, QMIX, VDN
         self.epsilon_schedule: Optional[EpsilonSchedule] = None
         self.action_space_d: Optional[List] = None
         # Global env steps tensor for epsilon schedule synchronization
         self.global_env_steps_tensor = getattr(buffer_mgr, 'global_env_steps', None)
-        if getattr(cfg, "algo", "APPO").upper() == "DQN":
+        algo = getattr(cfg, "algo", "APPO").upper()
+        if algo in ("DQN", "QMIX", "VDN"):
             self.epsilon_schedule = EpsilonSchedule(
                 epsilon_start=cfg.epsilon_start,
                 epsilon_end=cfg.epsilon_end,
@@ -151,12 +152,13 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
             elif hasattr(action_space, "spaces"):
                 self.action_space_d = [s.n for s in action_space.spaces if hasattr(s, "n")]
             else:
-                log.warning(f"Invalid action space for DQN epg: {type(action_space)}")
+                log.warning(f"Invalid action space for {algo} epg: {type(action_space)}")
 
             if self.action_space_d:
                 log.info(
                     f"{self.object_id}: start={cfg.epsilon_start}, end={cfg.epsilon_end}, {cfg.epsilon_decay_steps} steps, action_space_info={self.action_space_d}"
                 )
+            self._last_epsilon_log_bucket = -1
 
     @signal
     def initialized(self): ...
@@ -405,6 +407,26 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                             rand_actions = torch.stack(actions_lst, dim=1)
                             mask_expanded = mask.unsqueeze(-1)
                             policy_outputs["actions"] = torch.where(mask_expanded, rand_actions, actions)
+
+                    # Logging epsilon and action histograms
+                    log_int = getattr(self.cfg, "epsilon_log_interval", 0)
+                    if log_int > 0:
+                        if self.global_env_steps_tensor is not None:
+                            steps = int(global_steps)
+                        else:
+                            steps = int(self.total_num_samples)
+                        bucket = steps // log_int
+                        if bucket != self._last_epsilon_log_bucket:
+                            self._last_epsilon_log_bucket = bucket
+                            actions_cpu = policy_outputs["actions"].detach().cpu()
+                            if actions_cpu.dim() == 1:
+                                counts = torch.bincount(actions_cpu, minlength=self.action_space_d[0]).tolist()
+                            else:
+                                counts = []
+                                for head_idx, n_actions in enumerate(self.action_space_d):
+                                    head_actions = actions_cpu[:, head_idx]
+                                    counts.append(torch.bincount(head_actions, minlength=n_actions).tolist())
+                            log.info(f"{self.object_id}: epsilon={epsilon:.4f}, steps={steps}, action_hist={counts}")
 
             with timing.add_time("prepare_outputs"):
                 signals_to_send = self._prepare_policy_outputs_func(num_samples, policy_outputs, self.requests)
