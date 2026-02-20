@@ -37,36 +37,36 @@ class QMixLearner(Learner):
         global_env_steps_tensor: Optional[Tensor] = None,
     ):
         super().__init__(cfg, env_info, policy_versions_tensor, policy_id, param_server)
-        
+
         self.num_agents = getattr(cfg, 'num_agents', 2)
         if self.num_agents < 2:
             raise ValueError(f"QMIX requires num_agents >= 2, got {self.num_agents}")
 
         self.global_env_steps_tensor = global_env_steps_tensor
         self.replay_buffer = None
-        
+
         # Networks
         self.agent_net = None
         self.target_agent_net = None
         self.mixer = None
         self.target_mixer = None
         self.obs_normalizer = None
-                
+
         # Training
         self.total_env_steps_for_training = 0
         self.last_target_update_step = 0
         self.last_train_env_steps = 0
-        
+
         # PER
         self.use_per = getattr(cfg, 'per', False)
         self.per_beta_start = getattr(cfg, 'per_beta_start', 0.4)
         self.per_beta_frames = getattr(cfg, 'per_beta_frames', 100000)
-        
 
 
 
 
-        
+
+
         # Stats
         self._last_q_tot_mean = 0.0
         self._last_q_tot_max = 0.0
@@ -81,15 +81,15 @@ class QMixLearner(Learner):
         self._last_q_std_across_actions = 0.0
         self._last_done_ratio = 0.0
         self._last_timeout_ratio = 0.0
-    
+
     def init(self) -> InitModelData:
         from sample_factory.algo.utils.shared_buffers import policy_device
         import numpy as np
-        
+
         if self.cfg.seed is not None:
             torch.manual_seed(self.cfg.seed)
             np.random.seed(self.cfg.seed)
-        
+
         self.device = policy_device(self.cfg, self.policy_id)
         log.info(f"QMixLearner device: {self.device}")
         self.actor_critic = QMixActorCritic(
@@ -99,25 +99,25 @@ class QMixLearner(Learner):
             num_agents=self.num_agents,
         )
         self.actor_critic.model_to_device(self.device)
-        
+
         # ref
         self.agent_net = self.actor_critic.agent_net
         self.mixer = self.actor_critic.mixer
         self.obs_normalizer = self.actor_critic.obs_normalizer
-        
+
         # Target net
         self.target_agent_net = copy.deepcopy(self.agent_net)
         self.target_agent_net.eval()
         self.target_mixer = copy.deepcopy(self.mixer)
         self.target_mixer.eval()
-        
+
         self.state_dim = self._calc_state_dim()
         log.info(f"QMIX state_dim={self.state_dim}")
         q_clamp = getattr(self.cfg, 'q_value_clamp', 100.0)
         tau = getattr(self.cfg, 'target_update_tau', 1.0)
         use_huber = getattr(self.cfg, 'use_huber_loss', True)
         log.info(f"QMIX: q_clamp={q_clamp}, target_tau={tau}, use_huber={use_huber}")
-        
+
         buffer_capacity = self.cfg.replay_buffer_size // self.num_agents
         self.replay_buffer = JointReplayBuffer(
             capacity=buffer_capacity,
@@ -131,21 +131,21 @@ class QMixLearner(Learner):
             per_beta_start=self.per_beta_start,
         )
         log.info(f"JointReplayBuffer: capacity={buffer_capacity}, {buffer_capacity * self.num_agents} transitions")
-        
+
         # Adam optimizer
         params = list(self.agent_net.parameters()) + list(self.mixer.parameters())
         self.optimizer = torch.optim.Adam(params, lr=self.cfg.learning_rate)
-        
+
         self.curr_lr = self.cfg.learning_rate
         return self._get_init_model_data()
-    
+
     def _get_init_model_data(self) -> InitModelData:
         # (policy_id, state_dict, device, policy_version)
         return (self.policy_id, None if self.cfg.serial_mode else self.actor_critic.state_dict(), self.device, 0)
-    
+
     def _calc_state_dim(self) -> int:
         return self.agent_net.encoder_out_size * self.num_agents
-    
+
     def _compute_global_state(self, obs: TensorDict) -> Tensor:
         if isinstance(obs, dict):
             sample_tensor = next(iter(obs.values()))
@@ -153,19 +153,19 @@ class QMixLearner(Learner):
             sample_tensor = obs
         batch_size = sample_tensor.shape[0]
         num_agents = sample_tensor.shape[1]
-        
+
         def flatten_dct(d):
             if isinstance(d, dict):
                 return {k: v.flatten(end_dim=1) for k, v in d.items()}
             return d.flatten(end_dim=1)
-        
+
         flat_obs = flatten_dct(obs) # [B, N, ...] -> [B*N, ...]
         with torch.no_grad(): # Encode through agent net
             encoded = self.agent_net.encode(flat_obs) # [B*N, encoder_out]
         encoder_out_size = encoded.shape[-1]
         encoded = encoded.view(batch_size, num_agents, encoder_out_size) # [B*N, encoder_out] -> [B, N, encoder_out]
         return encoded.flatten(start_dim=1) # [B, N, encoder_out] -> [B, N*encoder_out]
-    
+
     def _update_target_networks(self, tau: float = 1.0):
         if tau < 1.0:
             with torch.no_grad():
@@ -179,11 +179,11 @@ class QMixLearner(Learner):
                 self.target_mixer.load_state_dict(self.mixer.state_dict())
                 self.last_target_update_step = self.train_step
                 log.debug(f"Hard updated target networks at step {self.train_step}")
-    
+
     def _vectorized_agent_forward(self, obs: TensorDict, agent_net: QMixAgentNet) -> Tensor:
         """Do vectorized forward pass"""
         batch_size = next(iter(obs.values())).shape[0] if isinstance(obs, dict) else obs.shape[0]
-        
+
         def flatten_td(td):
             result = TensorDict()
             for key, val in td.items():
@@ -191,20 +191,20 @@ class QMixLearner(Learner):
                 else: result[key] = val.flatten(end_dim=1)
             return result
         flat_obs = flatten_td(obs)
-        
+
         # Dummy state
         num_flat = batch_size * self.num_agents
         rnn_states = torch.zeros(
-            num_flat, 
+            num_flat,
             agent_net.core.get_out_size(),
             device=self.device
         )
         q_values, _ = agent_net(flat_obs, rnn_states=rnn_states) # [B*N, num_actions]
         num_actions = q_values.shape[-1]
         q_values = q_values.view(batch_size, self.num_agents, num_actions) # [B*N, A] -> [B, N, A]
-        
+
         return q_values
-    
+
     def _calculate_qmix_loss(self, batch: TensorDict, weights: Optional[Tensor] = None) -> Tuple[Tensor, Tensor]:
         obs = batch['obs'] # [B, N, ...]
         next_obs = batch['next_obs']
@@ -212,10 +212,10 @@ class QMixLearner(Learner):
         team_reward = batch['team_reward'] # [B]
         joint_done = batch['joint_done'] # [B]
         joint_time_out = batch['joint_time_out'] if 'joint_time_out' in batch else None
-        
+
         def normalize_joint_obs(joint_obs):
             if self.obs_normalizer is None: return joint_obs
-            
+
             if isinstance(joint_obs, TensorDict):
                 normalized = TensorDict()
                 for key, val in joint_obs.items():
@@ -224,7 +224,7 @@ class QMixLearner(Learner):
                         # [B, N, ...] -> [B*N, ...]
                         original_shape = val.shape
                         flat = val.flatten(end_dim=1)
-                        
+
                         # Normalize
                         temp_td = TensorDict({key: flat})
                         norm_td = self.obs_normalizer(temp_td)
@@ -236,24 +236,24 @@ class QMixLearner(Learner):
             else:
                 original_shape = joint_obs.shape
                 flat = joint_obs.flatten(end_dim=1)
-                norm = self.obs_normalizer(flat) 
+                norm = self.obs_normalizer(flat)
                 return norm.view(original_shape)
-        
+
         obs = normalize_joint_obs(obs)
         next_obs = normalize_joint_obs(next_obs)
-        
+
         # We recompute instead of storing in buffer
         # otherwise buffer's filled quite quickly -> timeout
         state = self._compute_global_state(obs)
         next_state = self._compute_global_state(next_obs)
-        
+
         all_q = self._vectorized_agent_forward(obs, self.agent_net)  # [B, N, A]
-        
+
         # Get Q values
         # [B, N]
         actions = actions.long()
         if actions.dim() == 2:
-            agent_qs = all_q.gather(2, actions.unsqueeze(-1)).squeeze(-1)  
+            agent_qs = all_q.gather(2, actions.unsqueeze(-1)).squeeze(-1)
         else:
             agent_qs = []
             for i in range(self.num_agents):
@@ -262,12 +262,12 @@ class QMixLearner(Learner):
                 q_val = self.agent_net.get_q_for_actions(agent_q, agent_action)
                 agent_qs.append(q_val)
             agent_qs = torch.stack(agent_qs, dim=1)
-        
+
         if joint_time_out is not None:
             effective_done = joint_done * (1 - joint_time_out)
         else:
             effective_done = joint_done
-        
+
         # Target Q_tot
         q_tot = self.mixer(agent_qs, state) # [B]
         with torch.no_grad():
@@ -291,7 +291,7 @@ class QMixLearner(Learner):
                     )
                     q_values.append(q_val)
                 return torch.stack(q_values, dim=1)
-            
+
             # Double DQN
             if getattr(self.cfg, 'double_dqn', True):
                 all_online_q = self._vectorized_agent_forward(next_obs, self.agent_net)
@@ -307,22 +307,22 @@ class QMixLearner(Learner):
                     target_agent_qs = evaluate_compound_q(all_target_q, greedy_target_actions)
                 else:
                     target_agent_qs = all_target_q.max(dim=-1)[0] # [B, N]
-            
+
             target_q_tot = self.target_mixer(target_agent_qs, next_state)
-            
+
             # same as learner_dqn
             gamma = getattr(self.cfg, 'gamma', 0.99)
             target_before_clamp = team_reward + gamma * (1 - effective_done) * target_q_tot
             target = target_before_clamp
-            
+
             # Clamp target Q val
             q_clamp = getattr(self.cfg, 'q_value_clamp', 100.0)
             if q_clamp > 0: target = target.clamp(-q_clamp, q_clamp)
-        
+
         # This kind of becomes funny if not cloned, I think it got used in shared memory tensors
         # So clone to make sure its correct
         td_error = (target - q_tot).clone()
-        
+
         # Loss
         use_huber = getattr(self.cfg, 'use_huber_loss', True)
         if use_huber:
@@ -330,13 +330,13 @@ class QMixLearner(Learner):
             elementwise_loss = torch.where(abs_td < 1.0, 0.5 * td_error.pow(2), abs_td - 0.5)
         else:
             elementwise_loss = td_error.pow(2)
-        
+
         # PER weights
         if weights is not None:
             elementwise_loss = elementwise_loss * weights
-        
+
         loss = elementwise_loss.mean()
-        
+
         # loss metric from detached td_error
         _td_d = td_error.detach()
         _td_sq = _td_d.pow(2)
@@ -355,13 +355,13 @@ class QMixLearner(Learner):
             self._last_timeout_ratio = joint_time_out.mean().item()
         else:
             self._last_timeout_ratio = 0.0
-        
+
         return loss, td_error.abs().detach()
-    
+
     def _train_on_batch(self, batch: TensorDict, weights: Optional[Tensor] = None, indices: Optional[Tensor] = None):
         self.agent_net.train()
         self.mixer.train()
-        
+
         loss, td_errors = self._calculate_qmix_loss(batch, weights)
         self.optimizer.zero_grad()
         loss.backward()
@@ -377,7 +377,7 @@ class QMixLearner(Learner):
         self._update_target_networks(tau)
         synchronize(self.cfg, self.device)
         self.policy_versions_tensor[self.policy_id] = self.train_step
-        
+
         # Stats
         stats = AttrDict()
         stats.loss = getattr(self, '_last_loss_value', to_scalar(loss))
@@ -394,15 +394,65 @@ class QMixLearner(Learner):
         stats.q_std_across_actions = getattr(self, '_last_q_std_across_actions', 0)
         stats.done_ratio = getattr(self, '_last_done_ratio', 0)
         stats.timeout_ratio = getattr(self, '_last_timeout_ratio', 0)
-        
+
         return stats, td_errors
-    
+
     def _prepare_joint_transitions(self, batch: TensorDict) -> TensorDict:
         with torch.no_grad():
             buff = shallow_recursive_copy(batch)
             num_traj = buff['rewards'].shape[0]
             row_index = None
 
+            if 'env_idx' in buff and 'agent_idx' in buff:
+                traj_env_idx = buff['env_idx'][:, 0].long().cpu()
+                traj_agent_idx = buff['agent_idx'][:, 0].long().cpu()
+                unique_envs = torch.unique(traj_env_idx)
+                expected_agents = torch.arange(self.num_agents, dtype=torch.long)
+                grouped_rows = []
+                metadata_valid = True
+                for env_id in unique_envs.tolist():
+                    if env_id < 0:
+                        metadata_valid = False
+                        break
+                    rows = torch.nonzero(traj_env_idx == env_id, as_tuple=False).squeeze(-1)
+                    if rows.numel() < self.num_agents:
+                        metadata_valid = False
+                        break
+                    rows = rows[torch.argsort(rows)]
+                    agent_to_rows = []
+                    occurrence_count = None
+                    for agent_id in expected_agents.tolist():
+                        agent_rows = rows[traj_agent_idx[rows] == agent_id]
+                        if agent_rows.numel() == 0:
+                            metadata_valid = False
+                            break
+                        if occurrence_count is None:
+                            occurrence_count = agent_rows.numel()
+                        elif occurrence_count != agent_rows.numel():
+                            metadata_valid = False
+                            break
+                        agent_to_rows.append(agent_rows)
+                    if not metadata_valid or occurrence_count is None:
+                        break
+
+                    for occ in range(occurrence_count):
+                        group = torch.tensor(
+                            [agent_to_rows[agent_id][occ].item() for agent_id in expected_agents.tolist()],
+                            dtype=torch.long,
+                        )
+                        group_agents = traj_agent_idx[group]
+                        if not torch.equal(group_agents, expected_agents):
+                            metadata_valid = False
+                            break
+                        grouped_rows.append(group)
+                    if not metadata_valid:
+                        metadata_valid = False
+                        break
+
+                if metadata_valid and grouped_rows:
+                    row_index = torch.stack(grouped_rows, dim=0).to(buff['rewards'].device)
+                else:
+                    log.warning("QMIX: invalid env_idx/agent_idx grouping")
 
             if row_index is None:
                 num_envs = num_traj // self.num_agents
@@ -416,14 +466,14 @@ class QMixLearner(Learner):
                 rest = tensor.shape[2:]
                 if row_index is not None:
                     x = tensor[row_index]# [num_envs, num_agents, T, ...]
-                    perm = [0, 2, 1] + list(range(3, 3 + len(rest))) 
+                    perm = [0, 2, 1] + list(range(3, 3 + len(rest)))
                     x = x.permute(*perm) # [num_envs, T, num_agents, ...]
                     return x.reshape(x.shape[0] * T, self.num_agents, *rest) # [num_envs*T, num_agents, ...]
                 x = tensor[:num_traj].view(num_envs, self.num_agents, T, *rest)
                 perm = [0, 2, 1] + list(range(3, 3 + len(rest)))
                 x = x.permute(*perm)
                 return x.reshape(num_envs * T, self.num_agents, *rest)
-            
+
             # T+1
             joint = TensorDict()
             joint['obs'] = TensorDict()
@@ -433,7 +483,7 @@ class QMixLearner(Learner):
                 next_val = val[:, 1:]# [num_traj, T, ...]
                 joint['obs'][key] = reshape_for_joint(current)
                 joint['next_obs'][key] = reshape_for_joint(next_val)
-            
+
             # T steps
             joint['actions'] = reshape_for_joint(buff['actions'])
             joint['rewards'] = reshape_for_joint(buff['rewards'])
@@ -443,17 +493,17 @@ class QMixLearner(Learner):
             else:
                 joint['time_outs'] = torch.zeros_like(joint['dones'])
             joint['dones'] = joint['dones'] * (1 - joint['time_outs'])
-            
+
             return joint
-    
+
     def _qmix_batch_size(self) -> int:
         return getattr(self.cfg, 'qmix_buffer_batch_size', 32)
-    
+
     def train(self, batch: TensorDict) -> Optional[Dict]:
         with self.timing.add_time('misc'):
             self._maybe_update_cfg()
             self._maybe_load_policy()
-        
+
         with self.timing.add_time('prepare_batch'):
             joint_transitions = self._prepare_joint_transitions(batch)
             num_joint = joint_transitions['rewards'].shape[0]
@@ -464,24 +514,24 @@ class QMixLearner(Learner):
                 self.env_steps += num_agent_transitions
             if self.global_env_steps_tensor is not None:
                 self.global_env_steps_tensor[self.policy_id] = self.env_steps
-        
+
         with self.timing.add_time('add_to_buffer'):
             self.replay_buffer.add_joint_batch(joint_transitions)
-        
+
         learning_starts = getattr(self.cfg, 'learning_starts', 5000) // self.num_agents
         if len(self.replay_buffer) < learning_starts:
             return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
-        
+
         self.total_env_steps_for_training += num_joint
         train_freq = getattr(self.cfg, 'train_frequency', 4)
         num_updates = self.total_env_steps_for_training // train_freq
         if num_updates == 0: return {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         self.total_env_steps_for_training -= num_updates * train_freq
-        
+
         max_updates = getattr(self.cfg, 'dqn_max_updates_per_batch', 4)
         if max_updates > 0:
             num_updates = min(num_updates, max_updates)
-        
+
         train_stats = None
         with self.timing.add_time('train'):
             for _ in range(num_updates):
@@ -493,28 +543,28 @@ class QMixLearner(Learner):
                         progress = min(1.0, self.env_steps / self.per_beta_frames)
                         beta = self.per_beta_start + progress * (1 - self.per_beta_start)
                     self.replay_buffer.set_beta(beta)
-                
+
                 # Sample
                 try:
                     sampled, weights, indices = self.replay_buffer.sample(self._qmix_batch_size(), str(self.device))
                 except RuntimeError as e:
                     log.warning(f"Sampling failed: {e}")
                     continue
-                
+
                 # Train
                 train_stats, td_errors = self._train_on_batch(sampled, weights, indices)
-                
+
                 # Update PER
                 if self.use_per and indices is not None and td_errors is not None:
                     self.replay_buffer.update_priorities(indices, td_errors)
         self.last_train_env_steps = self.env_steps
-        
+
         stats = {LEARNER_ENV_STEPS: self.env_steps, POLICY_ID_KEY: self.policy_id}
         if train_stats is not None:
             train_stats.env_steps = self.env_steps
             train_stats.num_updates = num_updates
             train_stats.buffer_size = len(self.replay_buffer)
-            
+
             # Debug
             log_interval = getattr(self.cfg, 'qmix_log_interval', 100)
             if self.train_step % log_interval == 0:
@@ -525,24 +575,24 @@ class QMixLearner(Learner):
             stats[TRAIN_STATS] = train_stats
             stats[STATS_KEY] = memory_stats(f'learner{self.policy_id}', self.device)
         return stats
-    
+
     def _get_checkpoint_dict(self) -> Dict:
         checkpoint = super()._get_checkpoint_dict()
-        
+
         if self.target_agent_net is not None:
             checkpoint['target_agent_net'] = self.target_agent_net.state_dict()
         if self.target_mixer is not None:
             checkpoint['target_mixer'] = self.target_mixer.state_dict()
-        
+
         checkpoint['last_train_env_steps'] = self.last_train_env_steps
         checkpoint['last_target_update_step'] = self.last_target_update_step
         if self.replay_buffer is not None:
             checkpoint['replay_buffer_size'] = len(self.replay_buffer)
         return checkpoint
-    
+
     def _load_state(self, checkpoint_dict: Dict, load_progress: bool = True) -> None:
         super()._load_state(checkpoint_dict, load_progress)
-        
+
         if 'target_agent_net' in checkpoint_dict and self.target_agent_net is not None:
             self.target_agent_net.load_state_dict(checkpoint_dict['target_agent_net'])
             log.info("Loaded target_agent_net from checkpoint")
