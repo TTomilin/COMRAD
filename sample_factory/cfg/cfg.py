@@ -589,10 +589,28 @@ def add_dqn_args(p: ArgumentParser):
         help="Number of env steps over to anneal epsilon from epsilon_start to epsilon_end",
     )
     p.add_argument(
+        "--epsilon_log_interval",
+        default=100000,
+        type=int,
+        help="Log epsilon and action histograms every N env steps (0 disables)",
+    )
+    p.add_argument(
         "--double_dqn",
         default=True,
         type=str2bool,
         help="Use Double DQN",
+    )
+    p.add_argument(
+        "--q_value_clamp",
+        default=100.0,
+        type=float,
+        help="Clamp target Q-values. 0 disables",
+    )
+    p.add_argument(
+        "--use_huber_loss",
+        default=True,
+        type=str2bool,
+        help="Use Huber loss instead of MSE for more stable grad",
     )
     p.add_argument(
         "--train_frequency",
@@ -645,6 +663,43 @@ def add_dqn_args(p: ArgumentParser):
         default=100000,
         type=int,
         help="Number of frames beta anneals from per_beta_start to 1.0",
+    )
+
+
+def add_qmix_args(p: ArgumentParser):
+    """
+    Additional mixer-specific args
+    """
+    p.add_argument(
+        "--mixer",
+        default="qmix",
+        type=str,
+        choices=["vdn", "qmix"],
+        help="Mixing network",
+    )
+    p.add_argument(
+        "--qmix_embed_dim",
+        default=32,
+        type=int,
+        help="Embedding dimension for mixing network hidden layer",
+    )
+    p.add_argument(
+        "--qmix_hypernet_hidden",
+        default=64,
+        type=int,
+        help="Hidden size for hypernetwork",
+    )
+    p.add_argument(
+        "--qmix_buffer_batch_size",
+        default=32,
+        type=int,
+        help="Batch size for joint transitions in QMIX",
+    )
+    p.add_argument(
+        "--qmix_log_interval",
+        default=100,
+        type=int,
+        help="Log QMIX stats every N env steps",
     )
 
 
