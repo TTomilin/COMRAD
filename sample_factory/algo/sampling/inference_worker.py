@@ -386,8 +386,7 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                         global_steps = self.global_env_steps_tensor[self.policy_id].item()
                         epsilon = self.epsilon_schedule.get_epsilon(global_steps)
                     else:
-                        # Local step counter if global is none
-                        epsilon = self.epsilon_schedule.step(num_samples)
+                        raise RuntimeError("global_env_steps_tensor is None but epsilon schedule requires synchronized global step counter from SharedBuffers")
                     actions = policy_outputs["actions"]
                     device = actions.device
                     mask = torch.rand(num_samples, device=device) < epsilon
