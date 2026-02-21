@@ -111,7 +111,7 @@ DOOM_ENVS = [
         respawn_delay=1,
         extra_wrappers=[(ArmorySiegeRewardShaping, {})],
     ),
-    
+
     DoomSpec(
         "ammo_carrier",
         "ammo_carrier.cfg",
@@ -288,7 +288,6 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             env_config=env_config,
             skip_frames=skip_frames,
             render_mode=render_mode,
-            is_pitfall=doom_spec.name == "doom_pitfall",
         )
     else:
         # if we have only one agent, there's no need for multi-agent wrapper
