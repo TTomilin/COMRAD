@@ -566,7 +566,7 @@ def add_dqn_args(p: ArgumentParser):
     )
     p.add_argument(
         "--target_update_tau",
-        default=1.0,
+        default=0.005,
         type=float,
         help="Update coefficient for target network, 1 is copying weight"
     )
