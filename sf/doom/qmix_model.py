@@ -91,6 +91,8 @@ class QMixAgentNet(nn.Module):
         self.num_heads = len(self.action_sizes)
 
         if self.num_heads == 1:
+            # We dont use this, this is from sample factory, so no harm keeping it here
+            log.warning("QMixAgentNet: this is single-head action space, this benchmark doesn't use it")
             self.q_head = nn.Linear(decoder_out, self.action_sizes[0])
             self.q_heads = None
         else:
@@ -124,18 +126,10 @@ class QMixAgentNet(nn.Module):
         :param rnn_states: [batch, rnn_size]
         :returns: (q_values, new_rnn)
         """
-        # Encoder
-        if isinstance(obs, dict) and "obs" in obs:
-            x = self.encoder(obs["obs"])
-        else:
-            x = self.encoder(obs)
-
-        if self.measurements_head is not None and "measurements" in obs:
-            meas = self.measurements_head(obs["measurements"].float())
-            x = torch.cat([x, meas], dim=-1)
+        x = self.encode(obs)
 
         # Core
-        # x: [batch, total_actions]
+        # x: [batch, core_out_size]
         # new_rnn: [batch, rnn_size] or None
         x, new_rnn = self.core(x, rnn_states)
 
@@ -163,14 +157,16 @@ class QMixAgentNet(nn.Module):
             else: # [batch, num_heads]
                 return q_values.gather(1, actions.view(-1, 1)).squeeze(-1)
         else:
+            if actions.dim() == 1:
+                raise ValueError(
+                    f"Multi-head Q-network received 1D actions (shape {actions.shape}), "
+                    f"expected [batch, {self.num_heads}]"
+                )
             total_q = torch.zeros(q_values.shape[0], device=q_values.device)
             offset = 0
             for head_idx, size in enumerate(self.action_sizes):
                 head_q = q_values[:, offset:offset + size]
-                if actions.dim() == 1:
-                    head_action = actions
-                else:
-                    head_action = actions[:, head_idx]
+                head_action = actions[:, head_idx]
                 total_q = total_q + head_q.gather(1, head_action.unsqueeze(-1)).squeeze(-1)
                 offset += size
             return total_q
@@ -339,17 +335,31 @@ class QMixActorCritic(nn.Module):
         obs: TensorDict,
         rnn_states: Optional[Tensor] = None,
         *,
-        action_mask: Optional[Tensor] = None, # unused
+        action_mask: Optional[Tensor] = None,
         sample_actions: bool = True, # Q-values for argmax if false
         **kwargs,
     ) -> TensorDict:
         q_values, new_rnn = self.agent_net(obs, rnn_states)
         batch_size = q_values.shape[0]
-        values = q_values.max(dim=-1)[0] # not used in QMIX
 
+        # Set masked actions to -inf so argmax avoids them and
+        # QMIXlearner recomputes Q with agent_net.forward() directly instead of reading action_logits from the traj buffer
+        if action_mask is not None:
+            q_values = q_values.clone()
+            q_values[action_mask == 0] = float('-inf')
+
+        # This is not used in QMIX, here for the sake of sample factory
+        # Previously `values = q_values.max(dim=-1)[0]` but I switched to this nicer version for prettier log
+        values = torch.zeros(batch_size, device=q_values.device)
+        offset = 0
+        for s in self.agent_net.action_sizes:
+            values += q_values[:, offset:offset + s].max(dim=-1)[0]
+            offset += s
+
+        num_heads = self.agent_net.num_heads
         # actions/log_prob will be overwritten by inference_worker (epsilon-greedy)
         outputs = TensorDict({
-            'actions': q_values.new_zeros((batch_size, 1), dtype=torch.long),
+            'actions': q_values.new_zeros((batch_size, num_heads), dtype=torch.long),
             'action_logits': q_values,
             'log_prob_actions': q_values.new_zeros(batch_size),
             'values': values,
