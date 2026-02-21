@@ -53,8 +53,8 @@ def parse_args(argv=None, evaluation=False):
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
-        if final_cfg.mixer:
-            algo_name = "VDN" if "vdn" in final_cfg.mixer else "QMIX"
+        if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
+            algo_name = "VDN" if getattr(final_cfg, 'mixer', 'qmix') == 'vdn' else "QMIX"
         else:
             algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO"
         final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -72,7 +72,7 @@ def main():
         cfg.num_agents = n_agents
 
     if cfg.num_agents > 1:
-        if cfg.algo in ('QMIX', 'VDN'):
+        if str(cfg.algo).upper() in ('QMIX', 'VDN'):
             global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
         else:
             # MAPPO, IPPO
