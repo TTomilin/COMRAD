@@ -341,8 +341,7 @@ class QMixLearner(Learner):
 
         # loss metric from detached td_error
         _td_d = td_error.detach()
-        _td_sq = _td_d.pow(2)
-        self._last_loss_value = 0.5 * _td_sq.mean().item() # Huber approx for |td|<1
+        self._last_loss_value = loss.detach().item()
         self._last_q_tot_mean = q_tot.detach().mean().item()
         self._last_q_tot_max = q_tot.detach().max().item()
         self._last_td_error_mean = _td_d.abs().mean().item()
@@ -494,7 +493,6 @@ class QMixLearner(Learner):
                 joint['time_outs'] = reshape_for_joint(buff['time_outs']).float()
             else:
                 joint['time_outs'] = torch.zeros_like(joint['dones'])
-            joint['dones'] = joint['dones'] * (1 - joint['time_outs'])
 
             return joint
 
