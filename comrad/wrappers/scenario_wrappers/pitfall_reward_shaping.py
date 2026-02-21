@@ -29,7 +29,7 @@ class DoomPitfallRewardShaping(gym.Wrapper):
         self._prev_x: float | None = None
         self._best_x: float = self.x_start
         self._goal_given: bool = False
-        
+
         self._prev_dead: bool = True
         self.orig_env_reward: float = 0.0
 
@@ -46,7 +46,7 @@ class DoomPitfallRewardShaping(gym.Wrapper):
         obs, based_rewards, terminations, truncations, infos = self.env.step(action)
 
         if based_rewards is None: return obs, based_rewards, terminations, truncations, infos
-        
+
         r = float(based_rewards)
         x = infos.get(self.pos_key, None)
         xp = self._prev_x
@@ -65,7 +65,7 @@ class DoomPitfallRewardShaping(gym.Wrapper):
 
         dead_now = bool(infos.get(self.dead_key, 0))
         just_died = not self._prev_dead and dead_now
-        
+
         if just_died:
             r += self.death_penalty
             self._best_x = self.x_start
@@ -81,9 +81,9 @@ class DoomPitfallRewardShaping(gym.Wrapper):
         done = terminations | truncations
         if done:
             infos["true_objective"] = self.orig_env_reward
-            if "one_agent_died" not in infos.get("episode_extra_stats", {}) and self._goal_given:
+            if self._goal_given:
                 r += self.team_score_adjust
             # elif "one_agent_died" in infos.get("episode_extra_stats", {}):
             #     r -= self.team_score_adjust
-        
+
         return obs, r, terminations, truncations, infos
