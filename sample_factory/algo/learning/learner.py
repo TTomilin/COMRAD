@@ -739,7 +739,7 @@ class Learner(Configurable):
                     critic_loss = value_loss
                     loss: Tensor = actor_loss + critic_loss
 
-                    epoch_actor_losses[batch_num] = float(actor_loss)
+                    epoch_actor_losses[batch_num] = actor_loss.detach().item()
 
                     high_loss = 30.0
                     if torch.abs(loss) > high_loss:
