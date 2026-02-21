@@ -195,12 +195,13 @@ class JointReplayBuffer:
 
         tdevice = device if device is not None else str(self.device)
 
-        # return (batch, weights, indices)
-        if self.use_per:
-            return self._sample_per(batch_size, tdevice)
-        else:
-            batch = self._sample_uniform(batch_size, tdevice)
-            return batch, None, None
+        with self._lock:
+            # return (batch, weights, indices)
+            if self.use_per:
+                return self._sample_per(batch_size, tdevice)
+            else:
+                batch = self._sample_uniform(batch_size, tdevice)
+                return batch, None, None
 
     def _sample_uniform(self, batch_size: int, device: Device) -> TensorDict:
         # TODO: Im not sure if the RNG used here is uniform really
