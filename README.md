@@ -64,6 +64,7 @@ python -m sf.train \
     --env=doom_pitfall \
     --algo=DQN \
     --use_rnn=False \
+    --target_update_tau=1.0 \
     --train_for_env_steps=5000
 ```
 
@@ -97,6 +98,7 @@ python -m sf.train \
     --env=doom_pitfall \
     --algo=QMIX \
     --mixer=vdn \
+    --use_rnn=False \
     --train_for_env_steps=5000
 ```
 
@@ -108,6 +110,7 @@ python -m sf.train \
     --env=doom_pitfall \
     --algo=QMIX \
     --mixer=qmix \
+    --use_rnn=False \
     --train_for_env_steps=5000
 ```
 
