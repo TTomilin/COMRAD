@@ -175,14 +175,13 @@ class MultiAgentEnvWorker:
 
 
 class MultiAgentEnv(gym.Env, RewardShapingInterface):
-    def __init__(self, num_agents, make_env_func, env_config, skip_frames, render_mode, is_pitfall = False):
+    def __init__(self, num_agents, make_env_func, env_config, skip_frames, render_mode):
         gym.Env.__init__(self)
         RewardShapingInterface.__init__(self)
 
         self.num_agents = num_agents
         log.debug("Multi agent env, num agents: %d", self.num_agents)
         self.skip_frames = skip_frames  # number of frames to skip (1 = no skip)
-        self.is_pitfall = is_pitfall
 
         env = make_env_func(player_id=-1)  # temporary env just to query observation_space and stuff
         self.action_space = env.action_space
@@ -216,25 +215,29 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         self.render_mode = render_mode
 
-    def wipe_when_one_die(self, terminated, truncated, infos):
-        """This function is quite specific to pitfall, temrinates when one agent die to make it 'cooperative'
-        Goal is to ensure all agents reach the end together"""
+    # def wipe_when_one_die(self, terminated, truncated, infos):
+    #     """This function is quite specific to pitfall, temrinates when one agent dies to make it 'cooperative'
+    #     Goal is to ensure all agents reach the end together.
 
-        lst_dead = [bool(info.get("DEAD", 0)) for info in infos]
+    #     Note: DoomPitfallRewardShaping run before this method in step(). When wipe_when_one_die force-terminates surviving
+    #     agents, their wrappers already returned with done=False, so true_objective and team_score_adjust are not applied for
+    #     alive agents on the step.
+    #     """
+    #     lst_dead = [bool(info.get("DEAD", 0)) for info in infos]
 
-        if not any(lst_dead):
-            return terminated, truncated
+    #     if not any(lst_dead):
+    #         return terminated, truncated
 
-        # Terminates when any agent dies to make sure all of them reaches the end together
-        # This doesn't really enough for now as no credit assignment, might uncomment all() for more forgiving
-        # if all(lst_dead):
-        if any(lst_dead):
-            terminated = [True] * self.num_agents
-            truncated = [False] * self.num_agents
-            for info in infos:
-                extra_stats = info.setdefault("episode_extra_stats", {})
-                extra_stats["one_agent_died"] = 1
-        return terminated, truncated
+    #     # Terminates when any agent dies to make sure all of them reaches the end together
+    #     # This doesn't really enough for now as no credit assignment, might uncomment all() for more forgiving
+    #     # if all(lst_dead):
+    #     if any(lst_dead):
+    #         terminated = [True] * self.num_agents
+    #         truncated = [False] * self.num_agents
+    #         for info in infos:
+    #             extra_stats = info.setdefault("episode_extra_stats", {})
+    #             extra_stats["one_agent_died"] = 1
+    #     return terminated, truncated
 
     def get_default_reward_shaping(self):
         return self.default_reward_shaping
@@ -383,8 +386,6 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             self.await_tasks(actions, TaskType.STEP)
 
         obs, rew, terminated, truncated, infos = self.await_tasks(actions, TaskType.STEP_UPDATE)
-        if self.is_pitfall:
-            terminated, truncated = self.wipe_when_one_die(terminated, truncated, infos)
         dones = make_dones(terminated, truncated)
 
         for info in infos:
