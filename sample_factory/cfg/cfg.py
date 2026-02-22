@@ -703,7 +703,7 @@ def add_qmix_args(p: ArgumentParser):
     )
     p.add_argument(
         "--qmix_log_interval",
-        default=100,
+        default=10000,
         type=int,
         help="Log QMIX stats every N env steps",
     )
