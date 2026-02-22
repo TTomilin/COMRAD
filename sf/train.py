@@ -13,7 +13,7 @@ from sf.doom.doom_model import make_vizdoom_encoder
 from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
 from sf.doom.doom_utils import DOOM_ENVS, make_doom_env_from_spec
 from sf.doom.video_uploader import upload_video
-from sf.doom.multi_agent_model import make_mappo_actor_critic
+from sf.doom.mappo_model import make_mappo_actor_critic
 from sf.doom.qmix_model import make_qmix_actor_critic
 
 
