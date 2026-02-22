@@ -280,6 +280,18 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
 
             assert isinstance(infos, (list, tuple)), "Expect infos to be a list or tuple of dicts"
 
+            episode_extra_stats = {}
+            for agent_i in finished.tolist():
+                agent_info = infos[agent_i]
+                if not isinstance(agent_info, dict):
+                    continue
+                agent_extra = agent_info.get("episode_extra_stats")
+                if isinstance(agent_extra, dict):
+                    episode_extra_stats.update(agent_extra)
+
+            if episode_extra_stats:
+                stats["episode_extra_stats"] = episode_extra_stats
+
             # some envs like Atari use a special wrapper to record episode statistics
             stats_rew, stats_len = [], []
             for agent_i in finished.tolist():
@@ -298,6 +310,8 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
         for key, value in stats.items():
             if isinstance(value, Tensor):
                 stats[key] = value.cpu().numpy()
+            elif key == "episode_extra_stats" and isinstance(value, dict):
+                pass
             else:
                 assert isinstance(value, np.ndarray) or isinstance(
                     value, numbers.Number

@@ -2,19 +2,23 @@ import os
 import numpy as np
 import wandb
 from sample_factory.algo.utils.misc import EPISODIC
-        
+
 def upload_video(runner, cfg):
     def upload(_runner, msg, policy_id):
         stats = msg.get(EPISODIC)
-        data = stats.get("episode_extra_stats").pop("wandb_video", None)
-        if data is None: return # for when wandb_mode=offline
-        
+        if not isinstance(stats, dict): return
+        extra_stats = stats.get("episode_extra_stats")
+        if not isinstance(extra_stats, dict): return
+        data = extra_stats.pop("wandb_video", None)
+        if not isinstance(data, dict): return # for when wandb_mode=offline
+
         path = data.get("path")
-        
+        if not path: return
+
         with np.load(path) as p:
             frames = np.asarray(p["frames"])
         os.remove(path)
-        
+
         ep = data.get("episode", 0)
         fps = data.get("fps", getattr(cfg, "wandb_video_fps", 35))
         wandb.log({f"videos/p_{policy_id:02d}_ep_{ep:05d}": wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
