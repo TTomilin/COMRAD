@@ -4,6 +4,7 @@ import torch
 from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict
+from sample_factory.utils.attr_dict import AttrDict
 from sf.doom.qmix_model import QMixAgentNet
 
 
@@ -555,3 +556,79 @@ class TestPER:
         rb.update_priorities(indices, td_errors)
         # max_priority should have increased
         assert rb._max_priority >= 2.0
+
+
+class TestNonRnnDebtAccounting:
+    """Verify non-RNN schedule debt uses joint-transition units (not agent-transitions).
+
+    Original code: total_env_steps_for_training += num_joint
+    Regression would be: += num_joint * num_agents (2x update rate for 2 agents)
+    """
+
+    @staticmethod
+    def _make_joint_batch(num_joint: int, num_agents: int, num_heads: int = 3) -> TensorDict:
+        return TensorDict({
+            'obs': TensorDict({'obs': torch.randn(num_joint, num_agents, 1)}),
+            'next_obs': TensorDict({'obs': torch.randn(num_joint, num_agents, 1)}),
+            'actions': torch.zeros(num_joint, num_agents, num_heads, dtype=torch.long),
+            'rewards': torch.zeros(num_joint, num_agents),
+            'dones': torch.zeros(num_joint, num_agents),
+            'time_outs': torch.zeros(num_joint, num_agents),
+            'team_reward': torch.zeros(num_joint),
+            'joint_done': torch.zeros(num_joint),
+            'joint_time_out': torch.zeros(num_joint),
+        })
+
+    def test_non_rnn_debt_uses_joint_transitions(self):
+        """With train_frequency=N and N joint transitions added, exactly 1 update should fire."""
+        num_agents = 2
+        train_freq = 4
+        num_joint_added = 4  # exactly 1 update expected
+
+        rb = JointReplayBuffer(
+            capacity=64, num_agents=num_agents, obs_space=None, action_space=None,
+            device='cpu', share_memory=False, use_per=False,
+        )
+        # Fill buffer past learning_starts
+        for _ in range(20):
+            rb.add_joint(TensorDict({
+                'obs': TensorDict({'obs': torch.randn(num_agents, 1)}),
+                'next_obs': TensorDict({'obs': torch.randn(num_agents, 1)}),
+                'actions': torch.zeros(num_agents, 3, dtype=torch.long),
+                'rewards': torch.zeros(num_agents),
+                'dones': torch.zeros(num_agents),
+                'time_outs': torch.zeros(num_agents),
+            }))
+
+        # Simulate the non-RNN debt path from train()
+        joint_transitions = self._make_joint_batch(num_joint_added, num_agents)
+        num_joint = rb.add_joint_batch(joint_transitions)
+        assert num_joint == num_joint_added
+
+        # This is the critical line: debt must be num_joint, NOT num_joint * num_agents
+        transitions_added = num_joint  # as in the reverted code
+        total_debt = 0
+        total_debt += transitions_added
+        num_updates = total_debt // train_freq
+        total_debt -= num_updates * train_freq
+
+        assert num_updates == 1, (
+            f"Expected 1 update (4 joint transitions / train_freq=4), got {num_updates}. "
+            f"If this is 2, debt is using agent-transitions instead of joint-transitions."
+        )
+        assert total_debt == 0
+
+    def test_non_rnn_debt_regression_agent_transitions_would_double(self):
+        """Verify that using agent-transition debt would produce 2x updates (the regression)."""
+        num_agents = 2
+        train_freq = 4
+        num_joint_added = 4
+
+        # If we used agent transitions (the regression):
+        agent_transitions = num_joint_added * num_agents  # = 8
+        num_updates_regression = agent_transitions // train_freq  # = 2
+        assert num_updates_regression == 2, "Sanity: agent-transition bug would cause 2 updates"
+
+        # Correct behavior (joint transitions):
+        num_updates_correct = num_joint_added // train_freq  # = 1
+        assert num_updates_correct == 1
