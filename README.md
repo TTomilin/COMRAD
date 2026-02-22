@@ -50,8 +50,7 @@ python -m sf.train \
 ```bash
 python -m sf.train \
     --env=doom_pitfall \
-    --algo=APPO \
-    --use_mappo \
+    --algo=MAPPO \
     --train_for_env_steps=5000
 ```
 
@@ -116,25 +115,12 @@ python -m sf.train \
 
 ---
 
-#### VDN + RNN (GRU)
+#### VDN/QMIX + RNN (GRU)
 ```bash
 python -m sf.train \
     --env=doom_pitfall \
     --algo=QMIX \
-    --mixer=vdn \
-    --use_rnn=True --rnn_type=gru --rnn_size=64 --rollout=16 \
-    --actor_critic_share_weights=True --per=False \
-    --train_for_env_steps=5000
-```
-
----
-
-#### QMIX + RNN (GRU)
-```bash
-python -m sf.train \
-    --env=doom_pitfall \
-    --algo=QMIX \
-    --mixer=qmix \
+    --mixer=vdn/qmix \
     --use_rnn=True --rnn_type=gru --rnn_size=64 --rollout=16 \
     --actor_critic_share_weights=True --per=False \
     --train_for_env_steps=5000

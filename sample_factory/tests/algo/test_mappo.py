@@ -13,7 +13,7 @@ from sf.doom.mappo_model import MAPPOActorCritic, make_mappo_actor_critic
 
 def _make_cfg(
     *,
-    use_mappo: bool = True,
+    algo: str = "MAPPO",
     num_agents: int = 2,
     use_rnn: bool = False,
     rnn_type: str = "gru",
@@ -37,7 +37,7 @@ def _make_cfg(
             "obs_subtract_mean": 0.0,
             "obs_scale": 1.0,
             "num_agents": num_agents,
-            "use_mappo": use_mappo,
+            "algo": algo,
             "adaptive_stddev": True,
             "initial_stddev": 1.0,
             "policy_initialization": "orthogonal",
@@ -53,8 +53,8 @@ def _make_spaces():
     return obs_space, action_space
 
 
-def _make_mappo(*, use_mappo: bool = True, num_agents: int = 2, use_rnn: bool = False, **kw):
-    cfg = _make_cfg(use_mappo=use_mappo, num_agents=num_agents, use_rnn=use_rnn, **kw)
+def _make_mappo(*, algo: str = "MAPPO", num_agents: int = 2, use_rnn: bool = False, **kw):
+    cfg = _make_cfg(algo=algo, num_agents=num_agents, use_rnn=use_rnn, **kw)
     obs_space, action_space = _make_spaces()
     return make_mappo_actor_critic(cfg, obs_space, action_space)
 
@@ -63,31 +63,31 @@ class TestMAPPOConstruction:
     """Validates that MAPPO and IPPO models are constructed correctly."""
 
     def test_mappo_has_centralized_critic(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         assert hasattr(ac, "centralized_critic")
         assert ac.centralized_critic is not None
         assert ac.critic_linear is None
 
     def test_ippo_has_decentralized_critic(self):
-        ac = _make_mappo(use_mappo=False, num_agents=2)
+        ac = _make_mappo(algo="APPO", num_agents=2)
         assert ac.critic_linear is not None
         assert not hasattr(ac, "centralized_critic") or ac.use_centralized_critic is False
 
     def test_mappo_centralized_critic_input_dim(self):
         """Centralized critic input = decoder_out_size * num_agents."""
-        ac = _make_mappo(use_mappo=True, num_agents=3)
+        ac = _make_mappo(num_agents=3)
         decoder_out = ac.decoder.get_out_size()
         first_layer = ac.centralized_critic[0]
         assert first_layer.in_features == decoder_out * 3
 
     def test_mappo_centralized_critic_output_dim(self):
         """Centralized critic outputs one value per agent."""
-        ac = _make_mappo(use_mappo=True, num_agents=3)
+        ac = _make_mappo(num_agents=3)
         last_layer = ac.centralized_critic[-1]
         assert last_layer.out_features == 3
 
     def test_mappo_n_agents_stored(self):
-        ac = _make_mappo(use_mappo=True, num_agents=4)
+        ac = _make_mappo(num_agents=4)
         assert ac.n_agents == 4
 
 
@@ -95,7 +95,7 @@ class TestMAPPOForwardShapes:
     """Validates tensor shapes through the MAPPO forward pass."""
 
     def test_forward_output_keys(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4  # must be divisible by num_agents
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -109,7 +109,7 @@ class TestMAPPOForwardShapes:
 
     def test_values_shape_matches_batch(self):
         """Values should be [batch_size * n_agents] = [batch_size]."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 6
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -119,7 +119,7 @@ class TestMAPPOForwardShapes:
         assert result["values"].shape == (batch,)
 
     def test_action_logits_shape(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -130,7 +130,7 @@ class TestMAPPOForwardShapes:
         assert result["action_logits"].shape == (batch, 4)
 
     def test_actions_shape(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -141,7 +141,7 @@ class TestMAPPOForwardShapes:
 
     @pytest.mark.parametrize("num_agents", [2, 3, 4])
     def test_various_agent_counts(self, num_agents):
-        ac = _make_mappo(use_mappo=True, num_agents=num_agents)
+        ac = _make_mappo(num_agents=num_agents)
         ac.eval()
         batch = num_agents * 2
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -158,7 +158,7 @@ class TestCentralizedCritic:
 
     def test_mappo_values_depend_on_all_agents(self):
         """Changing one agent's observation should affect ALL agents' values in MAPPO."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         obs_a = {"obs": torch.randn(2, 3, 64, 64)}
         obs_b = {"obs": obs_a["obs"].clone()}
@@ -176,7 +176,7 @@ class TestCentralizedCritic:
 
     def test_ippo_values_independent_per_agent(self):
         """In IPPO, each agent's value depends only on its own observation."""
-        ac = _make_mappo(use_mappo=False, num_agents=2)
+        ac = _make_mappo(algo="APPO", num_agents=2)
         ac.eval()
         obs_a = {"obs": torch.randn(2, 3, 64, 64)}
         obs_b = {"obs": obs_a["obs"].clone()}
@@ -194,7 +194,7 @@ class TestCentralizedCritic:
 
     def test_mappo_actions_still_decentralized(self):
         """Even in MAPPO, action logits depend only on the agent's own observation."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         obs_a = {"obs": torch.randn(2, 3, 64, 64)}
         obs_b = {"obs": obs_a["obs"].clone()}
@@ -212,7 +212,7 @@ class TestCentralizedCritic:
 
     def test_values_only_mode(self):
         """forward with values_only=True should only return values."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -226,7 +226,7 @@ class TestMAPPORNN:
     """Validates that MAPPO works with RNN (GRU) enabled."""
 
     def test_rnn_forward_shapes(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2, use_rnn=True)
+        ac = _make_mappo(num_agents=2, use_rnn=True)
         ac.eval()
         batch = 4
         rnn_size = get_rnn_size(ac.cfg)
@@ -239,7 +239,7 @@ class TestMAPPORNN:
 
     def test_rnn_states_change_after_forward(self):
         """RNN hidden states should be updated after a forward pass."""
-        ac = _make_mappo(use_mappo=True, num_agents=2, use_rnn=True)
+        ac = _make_mappo(num_agents=2, use_rnn=True)
         ac.eval()
         batch = 2
         rnn_size = get_rnn_size(ac.cfg)
@@ -253,7 +253,7 @@ class TestMAPPORNN:
 
     def test_rnn_multi_layer(self):
         """Multi-layer GRU should work correctly."""
-        ac = _make_mappo(use_mappo=True, num_agents=2, use_rnn=True, rnn_num_layers=2)
+        ac = _make_mappo(num_agents=2, use_rnn=True, rnn_num_layers=2)
         ac.eval()
         batch = 4
         rnn_size = get_rnn_size(ac.cfg)
@@ -266,7 +266,7 @@ class TestMAPPORNN:
 
     def test_ippo_rnn_forward(self):
         """IPPO with RNN should also work (decentralized critic + RNN)."""
-        ac = _make_mappo(use_mappo=False, num_agents=2, use_rnn=True)
+        ac = _make_mappo(algo="APPO", num_agents=2, use_rnn=True)
         ac.eval()
         batch = 4
         rnn_size = get_rnn_size(ac.cfg)
@@ -283,7 +283,7 @@ class TestMAPPOActionMask:
 
     def test_mask_does_not_change_values(self):
         """Action mask should not affect value computation."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -301,7 +301,7 @@ class TestMAPPOActionMask:
 
     def test_mask_blocks_actions(self):
         """Masked actions should have zero probability in the distribution."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 2
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -321,7 +321,7 @@ class TestMAPPOActionMask:
 
     def test_all_ones_mask_no_effect(self):
         """All-ones mask should produce identical output to no mask."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -339,17 +339,17 @@ class TestMAPPOFactory:
     """Validates the make_mappo_actor_critic factory function."""
 
     def test_factory_returns_correct_type(self):
-        ac = _make_mappo(use_mappo=True)
+        ac = _make_mappo()
         assert isinstance(ac, MAPPOActorCritic)
 
     def test_factory_ippo_returns_correct_type(self):
-        ac = _make_mappo(use_mappo=False)
+        ac = _make_mappo(algo="APPO")
         assert isinstance(ac, MAPPOActorCritic)
         assert ac.use_centralized_critic is False
 
     def test_factory_handles_tuple_action_space(self):
         """Multi-head action space (Tuple of Discrete) should work."""
-        cfg = _make_cfg(use_mappo=True, num_agents=2)
+        cfg = _make_cfg(num_agents=2)
         obs_space = gym.spaces.Dict({"obs": gym.spaces.Box(0, 1, shape=(3, 64, 64))})
         action_space = gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(2)))
         ac = make_mappo_actor_critic(cfg, obs_space, action_space)
@@ -368,7 +368,7 @@ class TestMAPPOGradients:
 
     def test_centralized_critic_receives_gradients(self):
         """Centralized critic parameters should receive gradients from value loss."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
         rnn_states = torch.zeros(batch, get_rnn_size(ac.cfg))
@@ -385,7 +385,7 @@ class TestMAPPOGradients:
 
     def test_encoder_receives_gradients_from_value_loss(self):
         """Encoder should get gradients through centralized critic path."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
         rnn_states = torch.zeros(batch, get_rnn_size(ac.cfg))
@@ -403,7 +403,7 @@ class TestMAPPOGradients:
 
     def test_encoder_receives_gradients_from_policy_loss(self):
         """Encoder should get gradients from action logits (policy loss)."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
         rnn_states = torch.zeros(batch, get_rnn_size(ac.cfg))
@@ -424,7 +424,7 @@ class TestMAPPODeterminism:
     """Validates that the model is deterministic in eval mode."""
 
     def test_same_input_same_output(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -437,7 +437,7 @@ class TestMAPPODeterminism:
 
     def test_centralized_critic_deterministic(self):
         """Centralized critic with same input should give same values."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         batch = 4
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -454,7 +454,7 @@ class TestMAPPOEdgeCases:
 
     def test_single_agent_mappo_falls_back(self):
         """With num_agents=1, MAPPO should still work (though it's equivalent to IPPO)."""
-        ac = _make_mappo(use_mappo=True, num_agents=1)
+        ac = _make_mappo(num_agents=1)
         ac.eval()
         batch = 3
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -465,7 +465,7 @@ class TestMAPPOEdgeCases:
 
     def test_large_agent_count(self):
         """MAPPO should handle larger agent counts."""
-        ac = _make_mappo(use_mappo=True, num_agents=8)
+        ac = _make_mappo(num_agents=8)
         ac.eval()
         batch = 16
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -479,7 +479,7 @@ class TestMAPPOEdgeCases:
 
     def test_batch_size_equals_num_agents(self):
         """Minimum valid batch: exactly num_agents samples."""
-        ac = _make_mappo(use_mappo=True, num_agents=3)
+        ac = _make_mappo(num_agents=3)
         ac.eval()
         batch = 3
         obs = {"obs": torch.randn(batch, 3, 64, 64)}
@@ -493,7 +493,7 @@ class TestForwardTail:
     """Tests forward_tail specifically, bypassing encoder/core."""
 
     def test_mappo_forward_tail_centralized_values(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         core_out_size = ac.core.get_out_size()
         # Simulate core output for 2 agents (batch=1 team)
@@ -504,7 +504,7 @@ class TestForwardTail:
         assert result["action_logits"].shape == (2, 4)
 
     def test_ippo_forward_tail_decentralized_values(self):
-        ac = _make_mappo(use_mappo=False, num_agents=2)
+        ac = _make_mappo(algo="APPO", num_agents=2)
         ac.eval()
         core_out_size = ac.core.get_out_size()
         core_output = torch.randn(4, core_out_size)
@@ -513,7 +513,7 @@ class TestForwardTail:
         assert result["values"].shape == (4,)
 
     def test_values_only_skips_action_logits(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         ac.eval()
         core_output = torch.randn(4, ac.core.get_out_size())
         with torch.no_grad():
@@ -527,7 +527,7 @@ class TestCentralizedCriticMLP:
 
     def test_mlp_layer_count(self):
         """Centralized critic should have 5 layers (3 Linear + 2 Tanh)."""
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         layers = list(ac.centralized_critic.children())
         assert len(layers) == 5
         assert isinstance(layers[0], nn.Linear)
@@ -537,7 +537,7 @@ class TestCentralizedCriticMLP:
         assert isinstance(layers[4], nn.Linear)
 
     def test_mlp_hidden_sizes(self):
-        ac = _make_mappo(use_mappo=True, num_agents=2)
+        ac = _make_mappo(num_agents=2)
         layers = [l for l in ac.centralized_critic.children() if isinstance(l, nn.Linear)]
         assert layers[0].out_features == 512
         assert layers[1].out_features == 256
@@ -546,31 +546,26 @@ class TestCentralizedCriticMLP:
     def test_mlp_adapts_to_agent_count(self):
         """Output dimension should match num_agents."""
         for n in [2, 3, 5]:
-            ac = _make_mappo(use_mappo=True, num_agents=n)
+            ac = _make_mappo(num_agents=n)
             last_linear = [l for l in ac.centralized_critic.children() if isinstance(l, nn.Linear)][-1]
             assert last_linear.out_features == n
 
 
-# ---------------------------------------------------------------------------
-# use_mappo flag gating tests
-# ---------------------------------------------------------------------------
+class TestAlgoFlag:
+    """Validates that the algo flag correctly gates centralized vs decentralized."""
 
-
-class TestUseMAPPOFlag:
-    """Validates that the use_mappo flag correctly gates centralized vs decentralized."""
-
-    def test_flag_true_enables_centralized(self):
-        ac = _make_mappo(use_mappo=True)
+    def test_mappo_enables_centralized(self):
+        ac = _make_mappo()
         assert ac.use_centralized_critic is True
 
-    def test_flag_false_disables_centralized(self):
-        ac = _make_mappo(use_mappo=False)
+    def test_appo_disables_centralized(self):
+        ac = _make_mappo(algo="APPO")
         assert ac.use_centralized_critic is False
 
-    def test_flag_default_is_false(self):
-        """When use_mappo is not in cfg, should default to False."""
-        cfg = _make_cfg(use_mappo=False)
-        del cfg["use_mappo"]
+    def test_algo_default_is_appo(self):
+        """When algo is not in cfg, should default to APPO (decentralized)."""
+        cfg = _make_cfg(algo="APPO")
+        del cfg["algo"]
         obs_space, action_space = _make_spaces()
         ac = make_mappo_actor_critic(cfg, obs_space, action_space)
         assert ac.use_centralized_critic is False
