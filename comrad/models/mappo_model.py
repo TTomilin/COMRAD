@@ -20,7 +20,7 @@ class MAPPOActorCritic(ActorCriticSharedWeights):
 
         self.cfg = cfg
         self.n_agents: int = getattr(cfg, 'num_agents', 1)
-        self.use_centralized_critic: bool = getattr(cfg, 'use_mappo', False)
+        self.use_centralized_critic: bool = str(getattr(cfg, 'algo', 'APPO')).upper() == 'MAPPO'
 
         # Replace the standard critic with centralized one if MAPPO
         if self.use_centralized_critic:

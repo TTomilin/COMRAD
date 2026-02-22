@@ -55,8 +55,10 @@ def parse_args(argv=None, evaluation=False):
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
         if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
             algo_name = "VDN" if getattr(final_cfg, 'mixer', 'qmix') == 'vdn' else "QMIX"
+        elif str(getattr(final_cfg, 'algo', 'APPO')).upper() == 'MAPPO':
+            algo_name = "MAPPO"
         else:
-            algo_name = "MAPPO" if final_cfg.use_mappo else "IPPO"
+            algo_name = "IPPO"
         final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
 
     return final_cfg
