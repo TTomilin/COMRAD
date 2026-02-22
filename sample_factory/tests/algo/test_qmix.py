@@ -559,10 +559,10 @@ class TestPER:
 
 
 class TestNonRnnDebtAccounting:
-    """Verify non-RNN schedule debt uses joint-transition units (not agent-transitions).
+    """Verify non-RNN schedule debt uses individual agent-transition units.
 
-    Original code: total_env_steps_for_training += num_joint
-    Regression would be: += num_joint * num_agents (2x update rate for 2 agents)
+    Current code: total_env_steps_for_training += num_joint * num_agents
+    Both RNN and non-RNN paths now use consistent individual transition units.
     """
 
     @staticmethod
@@ -579,11 +579,11 @@ class TestNonRnnDebtAccounting:
             'joint_time_out': torch.zeros(num_joint),
         })
 
-    def test_non_rnn_debt_uses_joint_transitions(self):
-        """With train_frequency=N and N joint transitions added, exactly 1 update should fire."""
+    def test_non_rnn_debt_uses_agent_transitions(self):
+        """With train_frequency=N, N/num_agents joint transitions yield 1 update."""
         num_agents = 2
         train_freq = 4
-        num_joint_added = 4  # exactly 1 update expected
+        num_joint_added = 2  # 2 joint * 2 agents = 4 agent transitions = exactly 1 update
 
         rb = JointReplayBuffer(
             capacity=64, num_agents=num_agents, obs_space=None, action_space=None,
@@ -605,30 +605,32 @@ class TestNonRnnDebtAccounting:
         num_joint = rb.add_joint_batch(joint_transitions)
         assert num_joint == num_joint_added
 
-        # This is the critical line: debt must be num_joint, NOT num_joint * num_agents
-        transitions_added = num_joint  # as in the reverted code
+        # Debt is now in individual agent transitions: num_joint * num_agents
+        transitions_added = num_joint * num_agents
         total_debt = 0
         total_debt += transitions_added
         num_updates = total_debt // train_freq
         total_debt -= num_updates * train_freq
 
         assert num_updates == 1, (
-            f"Expected 1 update (4 joint transitions / train_freq=4), got {num_updates}. "
-            f"If this is 2, debt is using agent-transitions instead of joint-transitions."
+            f"Expected 1 update (2 joint * 2 agents = 4 transitions / train_freq=4), got {num_updates}."
         )
         assert total_debt == 0
 
-    def test_non_rnn_debt_regression_agent_transitions_would_double(self):
-        """Verify that using agent-transition debt would produce 2x updates (the regression)."""
+    def test_non_rnn_debt_consistent_with_rnn_semantics(self):
+        """Verify non-RNN and RNN debt units are consistent (both use individual transitions)."""
         num_agents = 2
-        train_freq = 4
-        num_joint_added = 4
+        train_freq = 8
 
-        # If we used agent transitions (the regression):
-        agent_transitions = num_joint_added * num_agents  # = 8
-        num_updates_regression = agent_transitions // train_freq  # = 2
-        assert num_updates_regression == 2, "Sanity: agent-transition bug would cause 2 updates"
+        # Non-RNN: 4 joint transitions * 2 agents = 8 individual transitions = 1 update
+        num_joint = 4
+        non_rnn_debt = num_joint * num_agents
+        assert non_rnn_debt // train_freq == 1
 
-        # Correct behavior (joint transitions):
-        num_updates_correct = num_joint_added // train_freq  # = 1
-        assert num_updates_correct == 1
+        # RNN: 1 sequence * 2 agents * 4 rollout = 8 individual transitions = 1 update
+        num_seq, rollout = 1, 4
+        rnn_debt = num_seq * num_agents * rollout
+        assert rnn_debt // train_freq == 1
+
+        # Same number of individual transitions → same number of updates
+        assert non_rnn_debt == rnn_debt

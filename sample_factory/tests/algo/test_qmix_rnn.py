@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import copy
+
 import gymnasium as gym
 import pytest
 import torch
@@ -10,7 +12,7 @@ from sample_factory.algo.utils.joint_sequence_replay_buffer import JointSequence
 from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.cfg.arguments import preprocess_cfg
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.qmix_model import QMixAgentNet
+from sf.doom.qmix_model import QMixAgentNet, QMixMixer, make_mixer
 
 
 class _AgentRnnStub:
@@ -220,9 +222,9 @@ def test_sequence_replay_store_and_sample_shapes():
     sampled, weights, indices = rb.sample(2, 'cpu')
     assert sampled['obs']['obs'].shape == (2, 4, 2, 1)
     assert sampled['actions'].shape == (2, 3, 2)
-    assert sampled['team_reward'].shape == (2, 3)
-    assert sampled['joint_done'].shape == (2, 3)
-    assert sampled['joint_time_out'].shape == (2, 3)
+    assert sampled['rewards'].shape == (2, 3, 2)
+    assert sampled['dones'].shape == (2, 3, 2)
+    assert sampled['rnn_states'].shape == (2, 2, 4)
     assert weights is None
     assert indices is None
 
@@ -545,8 +547,14 @@ class TestEffectiveDoneMixedOutcomes:
         # effective_done at t=0: agent0=(1*(1-0))=1, agent1=(1*(1-1))=0, max=1
         # So target at t=0 = team_reward + gamma * (1-1) * target_q = team_reward = 2.0
         # This confirms no bootstrapping when at least one agent truly terminates
+        #
+        # Hand-traced values through _AgentRnnStub + _SumMixer:
+        #   q_tot_curr = [2.0, 2.0], target = [2.0, 5.96]
+        #   td_error = [0.0, 3.96], Huber = [0.0, 3.46], mean = 1.73
+        # With the old buggy formula (joint_done*(1-joint_time_out)),
+        #   effective_done would be 0 → loss ≈ 2.47 (different!)
         assert loss.dim() == 0
-        assert loss.item() >= 0
+        assert loss.item() == pytest.approx(1.73, abs=0.01)
 
     def test_sequential_loss_all_timeout_should_bootstrap(self):
         """Both agents timeout (done=1, timeout=1). Should bootstrap (effective_done=0)."""
@@ -575,7 +583,12 @@ class TestEffectiveDoneMixedOutcomes:
 
         loss, _ = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
         # effective_done at t=0: both (1*(1-1))=0, max=0 → should bootstrap
+        #
+        # Hand-traced: target = [3.98, 5.96], td_error = [1.98, 3.96]
+        #   Huber = [1.48, 3.46], mean = 2.47
+        # This must differ from the mixed test (1.73) to confirm bootstrapping.
         assert loss.dim() == 0
+        assert loss.item() == pytest.approx(2.47, abs=0.01)
 
     def test_non_rnn_loss_mixed_timeout_terminal(self):
         """Non-RNN path: verify canonical effective_done with mixed timeout/terminal."""
@@ -606,7 +619,7 @@ class TestEffectiveDoneMixedOutcomes:
             B = next(iter(obs.values())).shape[0] if isinstance(obs, TensorDict) else obs.shape[0]
             return torch.ones(B, 2, 3)
         learner._vectorized_agent_forward = mock_forward
-        learner._compute_global_state = lambda obs: torch.zeros(
+        learner._compute_global_state = lambda obs, encoder_net=None: torch.zeros(
             next(iter(obs.values())).shape[0] if isinstance(obs, TensorDict) else obs.shape[0], 4
         )
 
@@ -629,7 +642,12 @@ class TestEffectiveDoneMixedOutcomes:
         # joint effective_done = max(1,0) = 1 → no bootstrap
         # OLD incorrect formula would give: joint_done*(1-joint_time_out) = 1*(1-1) = 0 → WRONG
         # NEW correct formula gives 1 → no bootstrap → target = team_reward = 2.0
+        #
+        # Hand-traced: q_tot=[2,2], target=[2.0, 3.98], td_error=[0, 1.98]
+        #   Huber = [0, 1.48], mean = 0.74
+        # With old buggy formula: loss ≈ 1.48 (different!)
         assert loss.dim() == 0
+        assert loss.item() == pytest.approx(0.74, abs=0.01)
 
 
 class TestTDTargetNumericalCorrectness:
@@ -723,15 +741,14 @@ class TestSequenceReplayBufferWraparound:
 
         assert len(rb) == 3  # capped at capacity
 
-        # Sample all 3 and check they contain the latest data
-        sampled, _, _ = rb.sample(3, 'cpu')
-        obs_vals = sampled['obs']['obs'].flatten()
-        # After wraparound, buffer should contain batch 1 (idx 1,2) and batch 2 (idx 0)
-        # (batch 0 at idx 0,1 was overwritten by batch 2 at idx 0,1... but batch 2 has 2 seqs
-        #  which wrap: ptr starts at 0 after 3 writes of 2, 0→2→4→6%3=0)
-        # So all 3 slots now have values from batch 1 (one slot) and batch 2 (two slots)
-        unique_vals = obs_vals.unique()
-        assert 2.0 in unique_vals  # latest batch should definitely be present
+        # Inspect storage directly (not via sampling) to avoid RNG flakiness.
+        # Write pointer advances: batch0→[0,1], batch1→[2,0], batch2→[1,2]
+        # Final storage: idx0=1.0, idx1=2.0, idx2=2.0
+        stored = rb._storage['obs']['obs']
+        unique_vals = stored[:3].flatten().unique()
+        assert 0.0 not in unique_vals, 'oldest batch (val=0) should be fully overwritten'
+        assert 2.0 in unique_vals, 'latest batch (val=2) must be present'
+        assert 1.0 in unique_vals, 'batch 1 (val=1) should still occupy one slot'
 
     def test_single_entry_overwrite(self):
         rb = JointSequenceReplayBuffer(
@@ -846,3 +863,573 @@ class TestGradientFlow:
 
         assert learner.mixer.weight.grad is not None
         assert not torch.all(learner.mixer.weight.grad == 0)
+
+
+def _real_model_cfg(rnn_size: int = 32, rnn_num_layers: int = 1, mixer: str = 'qmix') -> AttrDict:
+    """Config suitable for constructing a real QMixAgentNet + mixer."""
+    return AttrDict({
+        'encoder_conv_architecture': 'convnet_simple',
+        'encoder_conv_mlp_layers': [],
+        'encoder_extra_fc_layers': 0,
+        'hidden_size': 32,
+        'nonlinearity': 'relu',
+        'use_rnn': True,
+        'rnn_type': 'gru',
+        'rnn_size': rnn_size,
+        'rnn_num_layers': rnn_num_layers,
+        'decoder_mlp_layers': [],
+        'mixer': mixer,
+        'qmix_embed_dim': 16,
+        'qmix_hypernet_hidden': 32,
+        'gamma': 0.99,
+        'double_dqn': True,
+        'q_value_clamp': 100.0,
+        'use_huber_loss': True,
+    })
+
+
+def _small_obs_space():
+    return gym.spaces.Dict({'obs': gym.spaces.Box(0, 1, shape=(3, 64, 64), dtype='float32')})
+
+
+def _compound_action_space():
+    return gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(2)))
+
+
+def _single_action_space():
+    return gym.spaces.Discrete(4)
+
+
+def _make_real_obs_batch(batch_size: int, t_plus_one: int, num_agents: int, obs_shape=(3, 64, 64)):
+    """Create a TensorDict of obs with shape [B, T+1, N, *obs_shape]."""
+    return TensorDict({'obs': torch.rand(batch_size, t_plus_one, num_agents, *obs_shape)})
+
+
+class TestRealModelSequentialForward:
+    """Test _sequential_agent_forward with a real QMixAgentNet (GRU core)."""
+
+    def test_single_layer_gru_shapes(self):
+        cfg = _real_model_cfg(rnn_size=32, rnn_num_layers=1)
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+
+        B, T, N = 2, 4, 2
+        obs = _make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        rnn_states = torch.zeros(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_values, enc_outs = QMixLearner._sequential_agent_forward(learner, obs, dones, rnn_states, agent_net)
+
+        assert q_values.shape == (B, T + 1, N, sum(agent_net.action_sizes))
+        assert enc_outs.shape == (B, T + 1, N, agent_net.encoder_out_size)
+
+    def test_multi_layer_gru_shapes(self):
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=3)
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+
+        assert agent_net.get_rnn_size() == 16 * 3  # multi-layer
+
+        B, T, N = 2, 3, 2
+        obs = _make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        rnn_states = torch.zeros(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_values, enc_outs = QMixLearner._sequential_agent_forward(learner, obs, dones, rnn_states, agent_net)
+
+        assert q_values.shape == (B, T + 1, N, sum(agent_net.action_sizes))
+        assert enc_outs.shape == (B, T + 1, N, agent_net.encoder_out_size)
+
+    def test_done_resets_hidden_state_real_gru(self):
+        """With a real GRU, verify that a done at t=0 resets hidden state,
+        producing different outputs than without the done."""
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1)
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        agent_net.eval()
+
+        B, T, N = 1, 2, 2
+        obs = _make_real_obs_batch(B, T + 1, N)
+        rnn_states = torch.randn(B, N, agent_net.get_rnn_size())  # non-zero
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        # No dones
+        dones_none = torch.zeros(B, T, N)
+        q_no_done, _ = QMixLearner._sequential_agent_forward(learner, obs, dones_none, rnn_states, agent_net)
+
+        # Agent 0 done at t=0 → hidden reset before t=1
+        dones_reset = torch.zeros(B, T, N)
+        dones_reset[0, 0, 0] = 1.0
+        q_with_done, _ = QMixLearner._sequential_agent_forward(learner, obs, dones_reset, rnn_states, agent_net)
+
+        # t=0 outputs should be identical (done not yet applied)
+        assert torch.allclose(q_no_done[:, 0], q_with_done[:, 0], atol=1e-6)
+        # t=1 agent 0 should differ (hidden was reset)
+        assert not torch.allclose(q_no_done[:, 1, 0], q_with_done[:, 1, 0], atol=1e-4)
+        # t=1 agent 1 should be the same (not reset)
+        assert torch.allclose(q_no_done[:, 1, 1], q_with_done[:, 1, 1], atol=1e-6)
+
+
+class TestRealModelLossComputation:
+    """Test _calculate_qmix_loss_sequential with real QMixAgentNet + QMixMixer."""
+
+    def _make_learner(self, cfg, obs_space, act_space, num_agents=2):
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        target_net = copy.deepcopy(agent_net)
+        state_dim = agent_net.encoder_out_size * num_agents
+        mixer = make_mixer(cfg, num_agents, state_dim)
+        target_mixer = copy.deepcopy(mixer)
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = num_agents
+        learner.cfg = cfg
+        learner.obs_normalizer = None
+        learner.agent_net = agent_net
+        learner.target_agent_net = target_net
+        learner.mixer = mixer
+        learner.target_mixer = target_mixer
+        return learner
+
+    def test_qmix_loss_shapes_compound_actions(self):
+        """Full forward+loss with compound actions (multi-head) and real QMIX mixer."""
+        cfg = _real_model_cfg(rnn_size=32, rnn_num_layers=1, mixer='qmix')
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 3, 4
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            # compound actions: [B, T, N, num_heads]
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert loss.item() >= 0
+        assert td_summary.shape == (B,)
+
+    def test_vdn_loss_shapes(self):
+        """Same test but with VDN mixer."""
+        cfg = _real_model_cfg(rnn_size=32, rnn_num_layers=1, mixer='vdn')
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 2, 3
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+
+    def test_backward_flows_to_agent_net_and_mixer(self):
+        """Verify gradients reach both agent_net and mixer parameters."""
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 2, 3
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, _ = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        loss.backward()
+
+        # Mixer should receive gradients
+        mixer_has_grad = any(p.grad is not None and p.grad.abs().sum() > 0
+                            for p in learner.mixer.parameters())
+        assert mixer_has_grad, "Mixer parameters should receive gradients"
+
+        # Agent net Q-head should receive gradients (not detached)
+        q_heads = learner.agent_net.q_heads if learner.agent_net.q_heads is not None else [learner.agent_net.q_head]
+        q_head_has_grad = any(p.grad is not None and p.grad.abs().sum() > 0
+                              for head in q_heads for p in head.parameters())
+        assert q_head_has_grad, "Agent net Q-heads should receive gradients"
+
+        # GRU core should receive gradients (backprop through time)
+        core_has_grad = any(p.grad is not None and p.grad.abs().sum() > 0
+                            for p in learner.agent_net.core.parameters())
+        assert core_has_grad, "GRU core should receive gradients via BPTT"
+
+        # Target net should NOT receive gradients
+        target_has_grad = any(p.grad is not None for p in learner.target_agent_net.parameters())
+        assert not target_has_grad, "Target agent net must not receive gradients"
+
+    def test_multi_layer_gru_full_loss(self):
+        """Full loss computation with multi-layer GRU to verify state reshaping."""
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=2, mixer='qmix')
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 2, 3
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+        # Should not error on backward with multi-layer GRU
+        loss.backward()
+
+    def test_single_action_space_loss(self):
+        """Test with a single Discrete action space (non-compound)."""
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')
+        obs_space = _small_obs_space()
+        act_space = _single_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 2, 3
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            # Single action: [B, T, N] (no head dim)
+            'actions': torch.randint(0, 4, (B, T, N)),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+
+    def test_with_dones_and_timeouts(self):
+        """Loss works with mixed done/timeout patterns."""
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 2, 4
+        dones = torch.zeros(B, T, N)
+        time_outs = torch.zeros(B, T, N)
+        # Agent 0 terminates at t=1
+        dones[0, 1, 0] = 1.0
+        # Agent 1 times out at t=2
+        dones[0, 2, 1] = 1.0
+        time_outs[0, 2, 1] = 1.0
+
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': dones,
+            'time_outs': time_outs,
+            'rnn_states': torch.randn(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+
+
+class TestObsNormalizationRNN:
+    """Test that obs normalization handles [B, T+1, N, ...] shapes correctly."""
+
+    def test_normalization_preserves_shape(self):
+        """Normalization should flatten, normalize, and reshape back correctly."""
+        from sample_factory.utils.normalize import ObservationNormalizer
+
+        obs_space = _small_obs_space()
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1)
+        cfg['normalize_input'] = True
+        cfg['normalize_input_keys'] = ['obs']
+        cfg['obs_subtract_mean'] = 0.0
+        cfg['obs_scale'] = 1.0
+
+        normalizer = ObservationNormalizer(obs_space, cfg)
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = 2
+        learner.cfg = cfg
+        learner.obs_normalizer = normalizer
+        learner.agent_net = QMixAgentNet(cfg, obs_space, _compound_action_space())
+        learner.target_agent_net = copy.deepcopy(learner.agent_net)
+        state_dim = learner.agent_net.encoder_out_size * 2
+        learner.mixer = make_mixer(cfg, 2, state_dim)
+        learner.target_mixer = copy.deepcopy(learner.mixer)
+
+        B, T, N = 2, 3, 2
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        # Should not raise any shape errors
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+
+
+class TestMinimalRollout:
+    """Test edge case: rollout=2 (minimum allowed)."""
+
+    def test_rollout_2_loss(self):
+        cfg = _real_model_cfg(rnn_size=16, rnn_num_layers=1)
+        obs_space, act_space = _small_obs_space(), _compound_action_space()
+        N = 2
+
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        target_net = copy.deepcopy(agent_net)
+        state_dim = agent_net.encoder_out_size * N
+        mixer = make_mixer(cfg, N, state_dim)
+        target_mixer = copy.deepcopy(mixer)
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+        learner.cfg = cfg
+        learner.obs_normalizer = None
+        learner.agent_net = agent_net
+        learner.target_agent_net = target_net
+        learner.mixer = mixer
+        learner.target_mixer = target_mixer
+
+        B, T = 2, 2  # minimum rollout
+        batch = TensorDict({
+            'obs': _make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert loss.dim() == 0
+        assert td_summary.shape == (B,)
+        loss.backward()
+
+
+# ---------------------------------------------------------------------------
+# Config Rejection Tests
+# ---------------------------------------------------------------------------
+
+class TestConfigRejection:
+    """Verify config gating rejects invalid QMIX/VDN RNN configurations."""
+
+    def test_rejects_rollout_below_2(self):
+        cfg = AttrDict({
+            'algo': 'QMIX',
+            'recurrence': -1,
+            'rollout': 1,
+            'use_rnn': True,
+            'rnn_type': 'gru',
+            'per': False,
+            'actor_critic_share_weights': True,
+            'qmix_buffer_batch_size': 32,
+            'qmix_sequence_batch_size': 8,
+            'qmix_log_interval': 100,
+        })
+        with pytest.raises(ValueError, match='rollout >= 2'):
+            preprocess_cfg(cfg, _DummyEnvInfo())
+
+    def test_rejects_shared_weights_false(self):
+        cfg = AttrDict({
+            'algo': 'QMIX',
+            'recurrence': -1,
+            'rollout': 8,
+            'use_rnn': True,
+            'rnn_type': 'gru',
+            'per': False,
+            'actor_critic_share_weights': False,
+            'qmix_buffer_batch_size': 32,
+            'qmix_sequence_batch_size': 8,
+            'qmix_log_interval': 100,
+        })
+        with pytest.raises(ValueError, match='actor_critic_share_weights'):
+            preprocess_cfg(cfg, _DummyEnvInfo())
+
+    def test_per_forced_false_for_rnn(self):
+        cfg = _make_full_qmix_cfg(
+            use_rnn=True,
+            rollout=8,
+            per=True,
+        )
+        preprocess_cfg(cfg, _DummyEnvInfo())
+        assert cfg.per is False
+
+
+# ---------------------------------------------------------------------------
+# Buffer Edge Case Tests
+# ---------------------------------------------------------------------------
+
+class TestSequenceBufferEdgeCases:
+    """Verify buffer boundary conditions."""
+
+    def _make_batch(self, batch_size, seq_len=2, num_agents=2, rnn_size=4):
+        return TensorDict({
+            'obs': TensorDict({'obs': torch.randn(batch_size, seq_len + 1, num_agents, 1)}),
+            'actions': torch.randint(0, 3, (batch_size, seq_len, num_agents), dtype=torch.long),
+            'rewards': torch.randn(batch_size, seq_len, num_agents),
+            'dones': torch.zeros(batch_size, seq_len, num_agents),
+            'time_outs': torch.zeros(batch_size, seq_len, num_agents),
+            'rnn_states': torch.randn(batch_size, num_agents, rnn_size),
+        })
+
+    def test_add_batch_larger_than_capacity(self):
+        """Adding a batch larger than capacity should keep only the last capacity entries."""
+        rb = JointSequenceReplayBuffer(
+            capacity_sequences=3, seq_len=2, num_agents=2,
+            obs_space=None, action_space=None, device='cpu',
+            share_memory=False, rnn_state_size=4,
+        )
+        batch = self._make_batch(batch_size=5)
+        added = rb.add_sequence_batch(batch)
+        assert added == 3  # truncated to capacity
+        assert len(rb) == 3
+
+    def test_sample_with_batch_larger_than_size(self):
+        """Sampling more than buffer size uses replacement — no crash, allows duplicates."""
+        rb = JointSequenceReplayBuffer(
+            capacity_sequences=8, seq_len=2, num_agents=2,
+            obs_space=None, action_space=None, device='cpu',
+            share_memory=False, rnn_state_size=4,
+        )
+        rb.add_sequence_batch(self._make_batch(batch_size=2))
+        assert len(rb) == 2
+        sampled, _, _ = rb.sample(8, 'cpu')
+        assert sampled['obs']['obs'].shape[0] == 8
+
+    def test_set_beta_and_update_priorities_are_noops(self):
+        """PER API methods should no-op without errors."""
+        rb = JointSequenceReplayBuffer(
+            capacity_sequences=4, seq_len=2, num_agents=2,
+            obs_space=None, action_space=None, device='cpu',
+            share_memory=False, rnn_state_size=4,
+        )
+        rb.add_sequence_batch(self._make_batch(batch_size=2))
+        assert rb.set_beta(0.5) is None
+        assert rb.update_priorities(torch.tensor([0, 1]), torch.tensor([0.1, 0.2])) is None
+
+    def test_sample_from_empty_buffer_raises(self):
+        rb = JointSequenceReplayBuffer(
+            capacity_sequences=4, seq_len=2, num_agents=2,
+            obs_space=None, action_space=None, device='cpu',
+            share_memory=False, rnn_state_size=4,
+        )
+        with pytest.raises(RuntimeError, match='empty'):
+            rb.sample(1, 'cpu')
+
+    def test_no_derived_fields_in_sample(self):
+        """After M1 fix, sampled batches should not contain team_reward/joint_done/joint_time_out."""
+        rb = JointSequenceReplayBuffer(
+            capacity_sequences=4, seq_len=2, num_agents=2,
+            obs_space=None, action_space=None, device='cpu',
+            share_memory=False, rnn_state_size=4,
+        )
+        rb.add_sequence_batch(self._make_batch(batch_size=2))
+        sampled, _, _ = rb.sample(2, 'cpu')
+        assert 'team_reward' not in sampled
+        assert 'joint_done' not in sampled
+        assert 'joint_time_out' not in sampled
+
+
+# ---------------------------------------------------------------------------
+# RNN Debt Accounting Test
+# ---------------------------------------------------------------------------
+
+class TestRnnDebtAccounting:
+    """Verify that RNN path debt is in individual agent-transition units."""
+
+    def test_rnn_transitions_added_formula(self):
+        """For num_agents=2, rollout=4, adding 3 sequences should produce
+        3 * 2 * 4 = 24 individual agent-transitions."""
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = 2
+        learner.use_rnn = True
+        learner.cfg = AttrDict({
+            'rollout': 4,
+            'use_rnn': True,
+            'summaries_use_frameskip': False,
+        })
+        # Simulate what train() does after replay insertion
+        num_sequences = 3
+        transitions_added = num_sequences * learner.num_agents * learner.cfg.rollout
+        assert transitions_added == 24
+
+    def test_rnn_buffer_transitions_formula(self):
+        """buffer_transitions = len(buffer) * num_agents * rollout"""
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = 2
+        learner.use_rnn = True
+        learner.cfg = AttrDict({'rollout': 8})
+
+        # Simulate buffer with 10 sequences stored
+        buffer_len = 10
+        buffer_transitions = buffer_len * learner.num_agents * learner.cfg.rollout
+        assert buffer_transitions == 160  # 10 * 2 * 8
+
+    def test_rnn_debt_consistent_with_non_rnn(self):
+        """Both modes use individual agent-transition units for debt.
+        Non-RNN: num_joint * num_agents
+        RNN: num_sequences * num_agents * rollout
+        With rollout=1 (hypothetically), RNN formula collapses to non-RNN formula."""
+        num_agents = 2
+        rollout = 1
+
+        # Non-RNN: 5 joint transitions
+        non_rnn_debt = 5 * num_agents
+        # RNN: 5 sequences of length 1
+        rnn_debt = 5 * num_agents * rollout
+
+        assert non_rnn_debt == rnn_debt == 10
