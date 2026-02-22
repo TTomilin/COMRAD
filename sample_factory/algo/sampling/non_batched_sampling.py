@@ -293,10 +293,14 @@ class ActorState:
             self.reset_rnn_state()
 
     def _episodic_stats(self, info: Dict) -> Dict[str, Any]:
+        episode_extra_stats = info.get("episode_extra_stats")
+        if not isinstance(episode_extra_stats, dict):
+            episode_extra_stats = dict()
+
         stats = dict(
             reward=self.last_episode_reward,
             len=self.last_episode_duration,
-            episode_extra_stats=info.get("episode_extra_stats", dict()),
+            episode_extra_stats=episode_extra_stats,
         )
 
         if (true_objective := info.get("true_objective", self.last_episode_reward)) is not None:
