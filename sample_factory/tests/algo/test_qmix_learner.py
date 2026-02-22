@@ -64,7 +64,7 @@ def _make_actor_critic_multi_head():
     return QMixActorCritic(cfg, obs_space, action_space, num_agents=2)
 
 
-class ValuesGlobalMaxVsSumOfHeadMax:
+class TestValuesGlobalMaxVsSumOfHeadMax:
     """values now uses sum-of-per-head-max."""
 
     def test_values_should_equal_sum_of_per_head_max(self):
@@ -94,7 +94,7 @@ class ValuesGlobalMaxVsSumOfHeadMax:
         )
 
 
-class PlaceholderActionsShape:
+class TestPlaceholderActionsShape:
     """placeholder actions shape is now [B, num_heads]."""
 
     def test_actions_placeholder_should_match_num_heads(self):
@@ -114,7 +114,7 @@ class PlaceholderActionsShape:
         )
 
 
-class ActionMaskNowApplied:
+class TestActionMaskNowApplied:
     """action_mask is now applied to q_values."""
 
     def test_action_mask_should_affect_q_values(self):
@@ -149,7 +149,7 @@ class ActionMaskNowApplied:
         )
 
 
-class EpsilonFallbackRemoved:
+class TestEpsilonFallbackRemoved:
     """Local fallback removed, RuntimeError raised if global_env_steps_tensor is None."""
 
     def test_fallback_code_raises_on_missing_global(self):
@@ -170,7 +170,7 @@ class EpsilonFallbackRemoved:
         )
 
 
-class SampleLock:
+class TestSampleLock:
     """sample() now acquires _lock."""
 
     def test_sample_should_acquire_lock(self):
@@ -217,7 +217,7 @@ class SampleLock:
         )
 
 
-class RewardShapingMissesTeamTermination:
+class TestRewardShapingMissesTeamTermination:
     """
     DoomPitfallRewardShaping runs per-agent BEFORE MultiAgentEnv
     aggregation. When wipe_when_one_die terminates agent B (because agent A
@@ -290,7 +290,7 @@ class RewardShapingMissesTeamTermination:
         )
 
 
-class SingleHeadBranchInactive:
+class TestSingleHeadBranchInactive:
     """
     The single Q-head branch (q_head is not None) in get_q_for_actions
     is inactive for all current Doom environments because they all use

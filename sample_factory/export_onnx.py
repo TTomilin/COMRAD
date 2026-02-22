@@ -1,3 +1,4 @@
+import inspect
 import types
 from typing import List
 
@@ -181,14 +182,21 @@ def export_onnx(cfg: Config, f: str) -> int:
 
     patch_forward(model, input_names)
 
-    torch.onnx.export(
-        model,
-        (args,),
-        f,
+    export_kwargs = dict(
         export_params=True,
         input_names=input_names,
         output_names=output_names,
         dynamic_axes=dynamic_axes,
+    )
+
+    if "dynamo" in inspect.signature(torch.onnx.export).parameters:
+        export_kwargs["dynamo"] = False
+
+    torch.onnx.export(
+        model,
+        (args,),
+        f,
+        **export_kwargs,
     )
 
     return ExperimentStatus.SUCCESS
