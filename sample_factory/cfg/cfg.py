@@ -696,6 +696,12 @@ def add_qmix_args(p: ArgumentParser):
         help="Batch size for joint transitions in QMIX",
     )
     p.add_argument(
+        "--qmix_sequence_batch_size",
+        default=8,
+        type=int,
+        help="Number of sequences sampled per QMIX/VDN update by GRU",
+    )
+    p.add_argument(
         "--qmix_log_interval",
         default=100,
         type=int,

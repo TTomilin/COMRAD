@@ -101,7 +101,9 @@ class QMixAgentNet(nn.Module):
 
     def get_rnn_size(self) -> int:
         if self.use_rnn:
-            return self.core.get_out_size()
+            if getattr(self.cfg, "rnn_type", "gru") != "gru":
+                raise ValueError(f"QMixAgentNet only supports GRU rnn_type, got {self.cfg.rnn_type}")
+            return self.cfg.rnn_size * self.cfg.rnn_num_layers
         return 0
 
     def encode(self, obs: TensorDict) -> Tensor:
@@ -120,28 +122,29 @@ class QMixAgentNet(nn.Module):
 
         return x
 
+    def forward_decomposed(self, obs: TensorDict, rnn_states = None):
+        """Modularize this to use in learner_qmix"""
+        x = self.encode(obs)
+        encoder_out = x
+
+        x, new_rnn = self.core(x, rnn_states)
+
+        x = self.decoder(x)
+
+        if self.q_head is not None:
+            q_values = self.q_head(x)
+        else:
+            q_values = torch.cat([head(x) for head in self.q_heads], dim=-1)
+
+        return q_values, new_rnn, encoder_out
+
     def forward(self, obs: TensorDict, rnn_states: Optional[Tensor] = None) -> Tuple[Tensor, Optional[Tensor]]:
         """
         :param obs: obs dct
         :param rnn_states: [batch, rnn_size]
         :returns: (q_values, new_rnn)
         """
-        x = self.encode(obs)
-
-        # Core
-        # x: [batch, core_out_size]
-        # new_rnn: [batch, rnn_size] or None
-        x, new_rnn = self.core(x, rnn_states)
-
-        # Decoder
-        x = self.decoder(x)
-
-        # Q-value heads
-        if self.q_head is not None:
-            q_values = self.q_head(x) # [batch, num_actions]
-        else:
-            q_values = torch.cat([head(x) for head in self.q_heads], dim=-1)
-
+        q_values, new_rnn, _ = self.forward_decomposed(obs, rnn_states)
         return q_values, new_rnn
 
     def get_q_for_actions(self, q_values: Tensor, actions: Tensor) -> Tensor:
