@@ -148,9 +148,19 @@ class QMixLearner(Learner):
     def _calc_state_dim(self) -> int:
         return self.agent_net.encoder_out_size * self.num_agents
 
-    def _compute_global_state(self, obs: TensorDict) -> Tensor:
+    def _first_tensor(self, td: TensorDict) -> Tensor:
+        """Copy from Joint seq replay buffer"""
+        for _, val in td.items():
+            if isinstance(val, TensorDict):
+                return self._first_tensor(val)
+            return val
+        raise RuntimeError('TensorDict is empty')
+
+    def _compute_global_state(self, obs: TensorDict, encoder_net = None) -> Tensor:
+        if encoder_net is None:
+            encoder_net = self.agent_net
         if isinstance(obs, dict):
-            sample_tensor = next(iter(obs.values()))
+            sample_tensor = self._first_tensor(obs)
         else:
             sample_tensor = obs
         batch_size = sample_tensor.shape[0]
@@ -162,8 +172,8 @@ class QMixLearner(Learner):
             return d.flatten(end_dim=1)
 
         flat_obs = flatten_dct(obs) # [B, N, ...] -> [B*N, ...]
-        with torch.no_grad(): # Encode through agent net
-            encoded = self.agent_net.encode(flat_obs) # [B*N, encoder_out]
+        with torch.no_grad():
+            encoded = encoder_net.encode(flat_obs) # [B*N, encoder_out]
         encoder_out_size = encoded.shape[-1]
         encoded = encoded.view(batch_size, num_agents, encoder_out_size) # [B*N, encoder_out] -> [B, N, encoder_out]
         return encoded.flatten(start_dim=1) # [B, N, encoder_out] -> [B, N*encoder_out]
@@ -247,7 +257,7 @@ class QMixLearner(Learner):
         # We recompute instead of storing in buffer
         # otherwise buffer's filled quite quickly -> timeout
         state = self._compute_global_state(obs)
-        next_state = self._compute_global_state(next_obs)
+        next_state = self._compute_global_state(next_obs, encoder_net=self.target_agent_net)
 
         all_q = self._vectorized_agent_forward(obs, self.agent_net)  # [B, N, A]
 
