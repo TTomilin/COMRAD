@@ -937,11 +937,16 @@ class QMixLearner(Learner):
             train_stats.env_steps = self.env_steps
             train_stats.num_updates = num_updates
             train_stats.buffer_size = len(self.replay_buffer)
+            train_stats.buffer_transitions = buffer_transitions
+            train_stats.pending_transition_debt = self.total_env_steps_for_training
 
             # Debug
-            log_interval = getattr(self.cfg, 'qmix_log_interval', 100)
-            if self.train_step % log_interval == 0:
-                log.info(f"QMIX step={self.train_step}, loss={train_stats.loss:.4f}, q_tot={train_stats.q_tot_mean:.3f}, td_err={train_stats.td_error_mean:.3f}, grad={train_stats.grad_norm:.4f}, buf={train_stats.buffer_size}")
+            # Im logging everything, might not be good practice tho
+            log_interval = int(getattr(self.cfg, 'qmix_log_interval', 100))
+            if log_interval > 0 and self.train_step % log_interval == 0:
+                log.info(f"QMIX step={self.train_step}, loss={train_stats.loss:.4f}, q_tot={train_stats.q_tot_mean:.3f}, ")
+                log.info(f"td_err={train_stats.td_error_mean:.3f}, grad={train_stats.grad_norm:.4f}, buf={train_stats.buffer_size}, ")
+                log.info(f"buf_transitions={train_stats.buffer_transitions}, pending_transition_debt={train_stats.pending_transition_debt}")
                 log.info(f"+ agent_qs: mean={train_stats.agent_qs_mean:.3f}, max={train_stats.agent_qs_max:.3f}, min={train_stats.agent_qs_min:.3f}")
                 log.info(f"+ target: q_tot={train_stats.target_q_tot_mean:.3f}, before_clamp={train_stats.target_before_clamp:.3f}")
                 log.info(f"+ q_std={train_stats.q_std_across_actions:.4f}, done={train_stats.done_ratio:.3f}, timeout={train_stats.timeout_ratio:.3f}")
