@@ -14,6 +14,7 @@ from sample_factory.cfg.cfg import (
     add_default_env_args,
     add_dqn_args,
     add_eval_args,
+    add_happo_args,
     add_model_args,
     add_pbt_args,
     add_qmix_args,
@@ -50,6 +51,7 @@ def parse_sf_args(
     add_pbt_args(p)
     add_dqn_args(p)
     add_qmix_args(p)
+    add_happo_args(p)
 
     if evaluation:
         add_eval_args(p)
@@ -212,6 +214,47 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
         log.info(f"QMIX/VDN: num_agents={num_agents}, mixer={cfg.mixer}, "
                  f"buffer_size={cfg.replay_buffer_size}")
+
+    if algo_upper == "HAPPO":
+        if cfg.lr_schedule in ('kl_adaptive_minibatch', 'kl_adaptive_epoch'):
+            raise ValueError(
+                f"HAPPO does not support --lr_schedule={cfg.lr_schedule}. Use 'constant' or 'linear_decay' instead.")
+        if not cfg.batched_sampling:
+            log.warning("HAPPO requires batched_sampling=True. Enabling it.")
+            cfg.batched_sampling = True
+        if getattr(cfg, 'num_policies', 1) != 1:
+            raise ValueError("HAPPO requires num_policies=1 (all agents share one policy ID)")
+
+        # Hardcode normalize_input_keys to exclude agent_id vectors
+        # these vectors have meaningless mean/std so normalization will make values shift from 0/1 to [-1,+1]
+        cfg.normalize_input_keys = ['obs']
+
+        num_agents = getattr(cfg, 'num_agents', 2)
+        if num_agents >= 2:
+            if cfg.use_rnn:
+                group_size = num_agents * cfg.recurrence
+                if cfg.batch_size % group_size != 0:
+                    adjusted = max(group_size, (cfg.batch_size // group_size) * group_size)
+                    log.warning(
+                        f"HAPPO: batch_size ({cfg.batch_size}) not divisible by n_agents * recurrence ({group_size}). Adjusting to {adjusted}.")
+                    cfg.batch_size = adjusted
+            else:
+                if cfg.batch_size % num_agents != 0:
+                    adjusted = max(num_agents, (cfg.batch_size // num_agents) * num_agents)
+                    log.warning(
+                        f"HAPPO: batch_size ({cfg.batch_size}) not divisible by n_agents ({num_agents}). Adjusting to {adjusted}.")
+                    cfg.batch_size = adjusted
+
+        cli_args = getattr(cfg, "cli_args", {})
+        if "max_policy_lag" not in cli_args:
+            default_lag = cfg.max_policy_lag
+            log.warning(
+                f"HAPPO: max_policy_lag ({cfg.max_policy_lag}) may be too low. "
+                f"HAPPO increases train_step {num_agents + 1} times faster than PPO. "
+                f"Should change --max_policy_lag={default_lag * (num_agents + 1)}."
+            )
+
+        log.info(f"HAPPO: num_agents={num_agents}, batch_size={cfg.batch_size}")
 
     return verify_cfg(cfg, env_info)
 

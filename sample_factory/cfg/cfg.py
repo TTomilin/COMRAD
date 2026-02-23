@@ -335,7 +335,7 @@ def add_rl_args(p: ArgumentParser):
     p.add_argument(
         "--lr_schedule",
         default="constant",
-        choices=["constant", "kl_adaptive_minibatch", "kl_adaptive_epoch"],
+        choices=["constant", "kl_adaptive_minibatch", "kl_adaptive_epoch", "linear_decay"],
         type=str,
         help=(
             "Learning rate schedule to use. Constant keeps constant learning rate throughout training."
@@ -706,6 +706,31 @@ def add_qmix_args(p: ArgumentParser):
         default=10000,
         type=int,
         help="Log QMIX stats every N env steps",
+    )
+
+
+def add_happo_args(p: ArgumentParser):
+    """HAPPO args"""
+    p.add_argument(
+        "--happo_agent_order",
+        default="random",
+        type=str,
+        choices=["random", "fixed"],
+        help="Agent ordering for HAPPO sequential update",
+    )
+    p.add_argument(
+        "--happo_factor_clamp",
+        default=0.0,
+        type=float,
+        help="Optional clamp for post-update ratio in M factor (0=disabled). Prevents M explode with >2 agents."
+        "OG paper doesn't have this, but github implementation does.",
+    )
+    p.add_argument(
+        "--happo_critic_hidden_sizes",
+        default=[512, 256],
+        type=int,
+        nargs="+", # https://docs.python.org/3/library/argparse.html#nargs
+        help="Hidden layer sizes for centralized critic MLP",
     )
 
 

@@ -77,6 +77,9 @@ class LearnerWorker(HeartbeatStoppableEventLoopObject, Configurable):
             self.learner: Learner = DQNLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)
         elif algo in ("QMIX", "VDN"):
             self.learner: Learner = QMixLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)
+        elif algo == "HAPPO":
+            from sf.doom.happo_learner import HAPPOLearner
+            self.learner = HAPPOLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
         else:
             self.learner = Learner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
 

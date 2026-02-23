@@ -55,6 +55,8 @@ def parse_args(argv=None, evaluation=False):
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
         if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
             algo_name = "VDN" if getattr(final_cfg, 'mixer', 'qmix') == 'vdn' else "QMIX"
+        elif str(getattr(final_cfg, 'algo', 'APPO')).upper() == 'HAPPO':
+            algo_name = "HAPPO"
         elif str(getattr(final_cfg, 'algo', 'APPO')).upper() == 'MAPPO':
             algo_name = "MAPPO"
         else:
@@ -76,11 +78,12 @@ def main():
     if cfg.num_agents > 1:
         if str(cfg.algo).upper() in ('QMIX', 'VDN'):
             global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
+        elif str(cfg.algo).upper() == 'HAPPO':
+            from sf.doom.happo_model import make_happo_actor_critic
+            global_model_factory().register_actor_critic_factory(make_happo_actor_critic)
         else:
             # MAPPO, IPPO
             global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
-    # else:
-        # print("Single-agent training with PPO")
 
     cfg, runner = make_runner(cfg)
 
