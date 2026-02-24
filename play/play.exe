@@ -1,0 +1,64 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM cleanup() equivalent
+REM Windows Batch cannot natively 'trap' a window close event like Bash.
+REM However, if you press Ctrl+C, it will ask to terminate.
+REM Below, we utilize a wait loop to simulate the 'wait' command.
+
+REM wads=("scenarios"/*.wad)
+set "i=0"
+for %%f in ("scenarios\*.wad") do (
+    set /a i+=1
+    set "wads[!i!]=%%f"
+    REM printf "%d %s\n"
+    echo !i! %%f
+)
+set "total_wads=!i!"
+
+:while_true
+    REM read -r -p "Select a scenario..."
+    set "choice="
+    set /p "choice=Select a scenario (1-!total_wads!): "
+
+    REM if input is empty, exit 0
+    if "%choice%"=="" (
+        echo.
+        exit /b 0
+    )
+
+    REM Validate if choice is numeric and within range
+    REM (Batch hack to check if variable contains only numbers)
+    for /f "delims=0123456789" %%a in ("!choice!") do goto while_true
+    
+    if !choice! geq 1 (
+        if !choice! leq !total_wads! (
+            REM wad="${wads[$((choice-1))]}"
+            set "wad=!wads[%choice%]!"
+            goto break
+        )
+    )
+    goto while_true
+
+:break
+
+REM ./vizdoom ... -host 2 &
+REM Using 'start' to run in background (equivalent to &)
+start "Host" vizdoom.exe -windowed 1 -iwad freedoom2.wad -file "!wad!" -host 2
+
+REM sleep 0.5
+timeout /t 1 /nobreak >nul
+
+REM ./vizdoom ... -join 127.0.0.1 &
+start "Join" vizdoom.exe -windowed 1 -iwad freedoom2.wad -file "!wad!" -join 127.0.0.1
+
+REM echo PIDs (Not supported natively in Batch 'start', skipping echo)
+
+REM wait $hpid wait $jpid
+REM We loop checking if vizdoom.exe is running to simulate 'wait'
+:wait_loop
+timeout /t 1 /nobreak >nul
+tasklist /FI "IMAGENAME eq vizdoom.exe" 2>NUL | find /I /N "vizdoom.exe">NUL
+if "%ERRORLEVEL%"=="0" goto wait_loop
+
+exit /b 0
