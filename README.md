@@ -56,6 +56,23 @@ python -m sf.train \
 
 ---
 
+#### HAPPO
+
+```bash
+python -m sf.train \
+    --env=doom_pitfall \
+    --algo=HAPPO \
+    --num_agents=N \
+    --max_policy_lag=1000*(N+1) \
+    --lr_schedule=linear_decay \
+    --train_for_env_steps=5000
+```
+
++ HAPPO `train_step` increases N+1 times faster than base MAPPO/IPPO, so you should increase `--max_policy_lag` to `default_max_policy_lag * (num_agents + 1)`
++ For `--lr_schedule`, only `constant` or `linear_decay` allowed as policy is updated sequentially. Using a KL-adaptive learning rate doesnt make sense
+
+---
+
 #### IDQN (Independent DQN)
 
 ```bash
@@ -95,11 +112,12 @@ Note:
 ```bash
 python -m sf.train \
     --env=doom_pitfall \
-    --algo=QMIX \
-    --mixer=vdn \
+    --algo=VDN \
     --use_rnn=False \
     --train_for_env_steps=5000
 ```
+
+This automatically set `--mixer="vdn"`. One can also use `--algo=QMIX --mixer=vdn`. This gives the same result.
 
 ---
 
@@ -108,10 +126,11 @@ python -m sf.train \
 python -m sf.train \
     --env=doom_pitfall \
     --algo=QMIX \
-    --mixer=qmix \
     --use_rnn=False \
     --train_for_env_steps=5000
 ```
+
+This automatically set `--mixer="qmix"` as that's the default value.
 
 ---
 
@@ -120,13 +139,13 @@ python -m sf.train \
 python -m sf.train \
     --env=doom_pitfall \
     --algo=QMIX \
-    --mixer=vdn/qmix \
     --use_rnn=True --rnn_type=gru --rnn_size=64 --rollout=16 \
     --actor_critic_share_weights=True --per=False \
     --train_for_env_steps=5000
 ```
 
-Notes: PER (prioritized replay) is automatically disabled in RNN mode; only uniform sequence sampling is supported
++ actor_critic_share_weights must be set to True
++ PER (prioritized replay) is automatically disabled in RNN mode; only uniform sequence sampling is supported
 
 ---
 
