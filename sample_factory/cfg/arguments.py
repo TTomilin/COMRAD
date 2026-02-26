@@ -225,6 +225,13 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
         if getattr(cfg, 'num_policies', 1) != 1:
             raise ValueError("HAPPO requires num_policies=1 (all agents share one policy ID)")
 
+        # Warn if kl_loss_coeff > 0 since HAPPO's per-agent training does not apply KL loss
+        if getattr(cfg, 'kl_loss_coeff', 0.0) > 0:
+            log.warning(
+                "HAPPO: --kl_loss_coeff > 0 has no effect. "
+                "HAPPO's per-agent policy loss does not include KL penalty. "
+                "Set --kl_loss_coeff=0.0 to suppress this warning.")
+
         # Hardcode normalize_input_keys to exclude agent_id vectors
         # these vectors have meaningless mean/std so normalization will make values shift from 0/1 to [-1,+1]
         cfg.normalize_input_keys = ['obs']
