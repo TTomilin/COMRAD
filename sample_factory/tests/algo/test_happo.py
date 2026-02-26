@@ -458,6 +458,7 @@ class TestGetAgentMinibatches:
     def test_rnn_recurrence_alignment(self, learner_stub):
         """With recurrence > 1, chunks must be recurrence-aligned."""
         learner_stub.cfg.recurrence = 4
+        learner_stub.cfg.rollout = 4  # rollout must be divisible by recurrence
         experience_size = 40
         agent_mask = torch.zeros(experience_size, dtype=torch.bool)
         agent_mask[:20] = True  # 20 samples (divisible by recurrence=4)
