@@ -8,6 +8,8 @@ class AgentIDWrapper(gym.ObservationWrapper):
     """
     Appends observations with agent_id for network routing per agent, in this case HAPPO as ordering is important
     If obs space is Box, wraps it into a dict with key 'obs' first
+
+    This is necessary to determine which agent produced each sample in flattened buffer. The learner uses this to create action_mask to select only agent i's transitions for training
     """
 
     def __init__(self, env: gym.Env, agent_index: int, num_agents: int):
