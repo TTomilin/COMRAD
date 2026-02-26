@@ -24,7 +24,7 @@ class HAPPOActorCritic(ActorCritic):
     HAPPO actor critic
     Separate policy networks (encoder + core + decoder + action_param) each agents
     Independent critic encoder processes all agents' obs, MLP outputs scalar value
-    No RNN yet
+    Only MLP like HARL paper, no RNN for critic. But Actor still supports GRU/LSTM
 
     I dont use ActorCriticSharedWeights because the sharedweights code doesn't have N separate policy netowrks
     """

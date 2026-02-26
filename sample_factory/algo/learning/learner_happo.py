@@ -514,7 +514,7 @@ class HAPPOLearner(Learner):
         device = next(self.actor_critic.centralized_critic.parameters()).device
         critic_enc_out_size = self.actor_critic.critic_encoders[0].get_out_size()
 
-        # critic encoding for each agents, no RNN
+        # critic encoding for each agents, no RNN for critic, only MLP
         critic_features = torch.zeros(agent_idx_mb.shape[0], critic_enc_out_size, device=device)
         for i in range(self.n_agents):
             mask = agent_idx_mb == i
@@ -540,6 +540,7 @@ class HAPPOLearner(Learner):
         # Consider recurrence
         recurrence = self.cfg.recurrence
         if recurrence > 1:
+            assert self.cfg.rollout % recurrence == 0, (f"rollout ({self.cfg.rollout}) must be divisible by recurrence ({recurrence})") # otherwise recurrence chunks span traj boundaries and corrupt RNN seq
             assert n_agent_samples % recurrence == 0, (f"Agent samples ({n_agent_samples}) not divisible by recurrence ({recurrence})")
             n_chunks = n_agent_samples // recurrence
             chunk_starts = np.arange(n_chunks)
