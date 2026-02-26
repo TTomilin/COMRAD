@@ -228,6 +228,14 @@ def make_doom_env_impl(
     if doom_spec.reward_scaling != 1.0:
         env = RewardScalingWrapper(env, doom_spec.reward_scaling)
 
+    # This is for HAPPO. Read agent_id_wrapper.py
+    # Skip temp env (those with player_id=-1) used by MultiAgentEnv.__init__() for obs_space query
+    # Should be fine without it as that setting is only for player testing.
+    if str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO' and player_id is not None and player_id >= 0:
+        from sf.doom.wrappers.agent_id_wrapper import AgentIDWrapper
+        _num_agents = num_agents if num_agents is not None else doom_spec.num_agents
+        env = AgentIDWrapper(env, agent_index=player_id, num_agents=_num_agents)
+
     if getattr(cfg, "wandb_record_every", 0) and getattr(cfg, "with_wandb", False) and player_id is None:
         root = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
         if env_config is not None:
@@ -289,6 +297,16 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             skip_frames=skip_frames,
             render_mode=render_mode,
         )
+
+        # For HAPPO, obs_space with temp env (player_id=-1) doesn't get AgentIDWrapper, so MultiAgentEnv.observation_space is missing 'agent_id'
+        # SF uses this obs_space to create the model, so we augment it manually here
+        # But that setting is only for player testing so shouldn't matter much
+        if str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO':
+            import gymnasium as gym
+            import numpy as np
+            spaces = dict(env.observation_space.spaces) if isinstance(env.observation_space, gym.spaces.Dict) else {'obs': env.observation_space}
+            spaces['agent_id'] = gym.spaces.Box(low=0.0, high=1.0, shape=(num_agents,), dtype=np.float32)
+            env.observation_space = gym.spaces.Dict(spaces)
     else:
         # if we have only one agent, there's no need for multi-agent wrapper
         from sf.doom.multiplayer.doom_multiagent_wrapper import init_multiplayer_env
