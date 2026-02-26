@@ -109,7 +109,7 @@ class HAPPOActorCritic(ActorCritic):
         core_out, new_rnn = self.forward_core(head_out, rnn_states, agent_idx=agent_idx)
 
         # Group bases on position. Should be safe for batched_sampling=True unless race condition, but idk
-        # TODO: Someone check this
+        # In learner, after agent i trains, env_group_idx will be used to multiply all agents in the same transition
         env_group_idx = torch.arange(agent_idx.shape[0], device=agent_idx.device) // self.n_agents
         result = self.forward_tail(
             core_out,
@@ -222,6 +222,7 @@ class HAPPOActorCritic(ActorCritic):
 def _group_by_env(features, agent_idx, env_group_idx, n_agents):
     """
     [B, F] -> [n_transitions, n_agents, F] by env
+    Concat all agents features in a transition to get joint obs
     """
     n_transitions = env_group_idx.max().item() + 1
     # (env_group_idx, agent_idx) pairs shouldnt have dupe
