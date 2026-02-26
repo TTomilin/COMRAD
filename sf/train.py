@@ -32,6 +32,21 @@ def register_vizdoom_components():
     register_vizdoom_models()
 
 
+def register_model_factory(cfg):
+    """
+    model registration facotry
+    """
+    if getattr(cfg, 'num_agents', 1) > 1:
+        if str(getattr(cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
+            global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
+        elif str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO':
+            from sf.doom.happo_model import make_happo_actor_critic
+            global_model_factory().register_actor_critic_factory(make_happo_actor_critic)
+        else:
+            # MAPPO, IPPO
+            global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
+
+
 def parse_args(argv=None, evaluation=False):
     parser, partial_cfg = parse_sf_args(argv=argv, evaluation=evaluation)
     add_doom_env_args(parser)
@@ -76,14 +91,7 @@ def main():
         cfg.num_agents = n_agents
 
     if cfg.num_agents > 1:
-        if str(cfg.algo).upper() in ('QMIX', 'VDN'):
-            global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
-        elif str(cfg.algo).upper() == 'HAPPO':
-            from sf.doom.happo_model import make_happo_actor_critic
-            global_model_factory().register_actor_critic_factory(make_happo_actor_critic)
-        else:
-            # MAPPO, IPPO
-            global_model_factory().register_actor_critic_factory(make_mappo_actor_critic)
+        register_model_factory(cfg)
 
     cfg, runner = make_runner(cfg)
 
