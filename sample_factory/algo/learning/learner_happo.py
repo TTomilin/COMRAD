@@ -565,10 +565,15 @@ class HAPPOLearner(Learner):
         """
         Make minibatches that contain complete transitions with all N agents
         """
-        transition_groups = []
-        for g_id in range(n_transitions):
-            group_indices = [i for i, val in enumerate(env_group_idx) if val == g_id]
-            transition_groups.append(torch.tensor(group_indices))
+        # Ref: "argsort Returns the indices that sort a tensor along a given dimension in ascending order by value."
+        # argsort uses the C++ sort, this uses Introsort (source: I learned from Algo Engineering course:)),
+        # and thus argsort is O(nlogn), its runtime dominate bincount and split
+        # Vectorized grouping via argsort, O(nlogn) is worse than a Python loop O(n)
+        # but faster in practice due to torch's C++/CUDA backend avoid Python interpreter overhead but use a compiled
+        # sorting algorithm.
+        sorted_idx = torch.argsort(env_group_idx)
+        counts = torch.bincount(env_group_idx, minlength=n_transitions)
+        transition_groups = torch.split(sorted_idx, counts.tolist())
 
         # Double check if right agents
         for t, group in enumerate(transition_groups):
