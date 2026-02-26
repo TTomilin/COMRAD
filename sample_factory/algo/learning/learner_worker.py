@@ -13,6 +13,7 @@ from sample_factory.algo.learning.batcher import Batcher
 from sample_factory.algo.learning.learner import Learner
 from sample_factory.algo.learning.learner_dqn import DQNLearner
 from sample_factory.algo.learning.learner_qmix import QMixLearner
+from sample_factory.algo.learning.learner_happo import HAPPOLearner
 from sample_factory.algo.utils.context import SampleFactoryContext, set_global_context
 from sample_factory.algo.utils.env_info import EnvInfo
 from sample_factory.algo.utils.heartbeat import HeartbeatStoppableEventLoopObject
@@ -78,7 +79,6 @@ class LearnerWorker(HeartbeatStoppableEventLoopObject, Configurable):
         elif algo in ("QMIX", "VDN"):
             self.learner: Learner = QMixLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)
         elif algo == "HAPPO":
-            from sf.doom.happo_learner import HAPPOLearner
             self.learner = HAPPOLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
         else:
             self.learner = Learner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server)
