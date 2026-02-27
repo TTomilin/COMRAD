@@ -1592,3 +1592,363 @@ class TestTransitionRNNMinibatches:
             mb_groups = env_group_idx[mb]
             for g in mb_groups.unique():
                 assert (mb_groups == g).sum() == n_agents
+
+
+class TestGetRnnSizeDoubling:
+    """Test get_rnn_size correctly doubles for HAPPO critic RNN."""
+
+    def test_no_change_without_critic_rnn(self):
+        """get_rnn_size should be unchanged when happo_critic_rnn=False."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, rnn_num_layers=1,
+                              rnn_type="gru", happo_critic_rnn=False)
+        assert get_rnn_size(cfg) == 64
+
+    def test_doubles_with_critic_rnn_gru(self):
+        """get_rnn_size should double for GRU with happo_critic_rnn=True."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, rnn_num_layers=1,
+                              rnn_type="gru", happo_critic_rnn=True)
+        assert get_rnn_size(cfg) == 128
+
+    def test_doubles_with_critic_rnn_lstm(self):
+        """LSTM: 64 * 2 (h+c) * 2 (critic) = 256."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, rnn_num_layers=1,
+                              rnn_type="lstm", happo_critic_rnn=True)
+        assert get_rnn_size(cfg) == 256
+
+    def test_doubles_with_multi_layer_rnn(self):
+        """Multi-layer: 64 * 2 (layers) * 2 (critic) = 256."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, rnn_num_layers=2,
+                              rnn_type="gru", happo_critic_rnn=True)
+        assert get_rnn_size(cfg) == 256
+
+    def test_no_doubling_non_happo_algo(self):
+        """Non-HAPPO algo with happo_critic_rnn=True should NOT double (safety guard)."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, happo_critic_rnn=True)
+        cfg.algo = "APPO"  # Override to non-HAPPO
+        assert get_rnn_size(cfg) == 64
+
+    def test_no_doubling_without_rnn(self):
+        """use_rnn=False with happo_critic_rnn=True should NOT double."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=False, happo_critic_rnn=True)
+        assert get_rnn_size(cfg) == 1  # No RNN at all
+
+
+class TestCriticRNNRollout:
+    """Test full rollout-time critic RNN: state splitting, round-trip, and stored states."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def _make_model(self, num_agents=2, rnn_type="gru", rnn_size=64):
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, rnn_type=rnn_type,
+                              rnn_size=rnn_size, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        return make_happo_actor_critic(cfg, obs_space, action_space), cfg
+
+    def test_use_critic_rnn_attribute(self):
+        """Model should have use_critic_rnn=True when happo_critic_rnn=True."""
+        model, _ = self._make_model()
+        assert model.use_critic_rnn is True
+
+    def test_critic_rnn_state_size_gru(self):
+        """critic_rnn_state_size should equal rnn_size for GRU."""
+        model, cfg = self._make_model(rnn_type="gru", rnn_size=64)
+        assert model.critic_rnn_state_size == 64
+
+    def test_critic_rnn_state_size_lstm(self):
+        """critic_rnn_state_size should equal rnn_size*2 for LSTM (h+c)."""
+        model, cfg = self._make_model(rnn_type="lstm", rnn_size=64)
+        assert model.critic_rnn_state_size == 128
+
+    def test_forward_core_receives_actor_only(self):
+        """forward_core should receive actor-only sized states (R, not 2R)."""
+        model, cfg = self._make_model()
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        R = model.critic_rnn_state_size
+
+        # Create non-zero rnn_states to verify correct splitting
+        rnn_states = torch.randn(batch, rnn_size)
+        actor_rnn = rnn_states[:, :R]
+
+        head_out = model.forward_head(obs, agent_idx=obs["agent_id"].argmax(dim=-1))
+        core_out, new_actor_rnn = model.forward_core(head_out, actor_rnn,
+                                                      agent_idx=obs["agent_id"].argmax(dim=-1))
+        # Actor core output should have core out size, not 2*core
+        assert core_out.shape == (batch, model.agent_cores[0].get_out_size())
+        # new_actor_rnn should be actor-sized (R, not 2R)
+        assert new_actor_rnn.shape == (batch, R)
+
+    def test_forward_roundtrip_shapes(self):
+        """Full forward pass should produce new_rnn_states of shape [B, 2R]."""
+        model, cfg = self._make_model()
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        rnn_states = torch.zeros(batch, rnn_size)
+
+        model.eval()
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        assert result['new_rnn_states'].shape == (batch, rnn_size)
+
+    def test_critic_rnn_states_updated_after_forward(self):
+        """Critic half of new_rnn_states should NOT be all zeros after forward (critic cores ran)."""
+        model, cfg = self._make_model()
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        R = model.critic_rnn_state_size
+        rnn_states = torch.zeros(batch, rnn_size)
+
+        model.eval()
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        critic_half = result['new_rnn_states'][:, R:]
+        assert not torch.allclose(critic_half, torch.zeros_like(critic_half)), \
+            "Critic RNN states should be non-zero after forward (critic cores should have processed them)"
+
+    def test_actor_rnn_states_updated_after_forward(self):
+        """Actor half should also be updated."""
+        model, cfg = self._make_model()
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        R = model.critic_rnn_state_size
+        rnn_states = torch.zeros(batch, rnn_size)
+
+        model.eval()
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        actor_half = result['new_rnn_states'][:, :R]
+        assert not torch.allclose(actor_half, torch.zeros_like(actor_half)), \
+            "Actor RNN states should be non-zero after forward"
+
+    def test_forward_tail_raises_without_critic_states(self):
+        """forward_tail should raise ValueError when use_critic_rnn=True but critic_rnn_states=None."""
+        model, cfg = self._make_model()
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        core_output = torch.randn(batch, model.agent_cores[0].get_out_size())
+        obs = _make_obs_batch(batch, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch) // num_agents
+
+        with pytest.raises(ValueError, match="use_critic_rnn=True but critic_rnn_states is None"):
+            model.forward_tail(
+                core_output,
+                agent_idx=agent_idx,
+                env_group_idx=env_group_idx,
+                normalized_obs_dict=obs,
+                values_only=True,
+                critic_rnn_states=None,
+            )
+
+    @pytest.mark.parametrize("rnn_type", ["gru", "lstm"])
+    def test_roundtrip_both_rnn_types(self, rnn_type):
+        """Full forward pass should work for both GRU and LSTM with critic RNN."""
+        model, cfg = self._make_model(rnn_type=rnn_type)
+        num_agents = cfg.num_agents
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        rnn_states = torch.zeros(batch, rnn_size)
+
+        model.eval()
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        assert result['new_rnn_states'].shape == (batch, rnn_size)
+        assert not torch.isnan(result['values']).any()
+
+
+class TestCriticRNNStoredStatesTraining:
+    """Test that _calculate_critic_loss uses stored states from the buffer, not zeros."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def _make_stub(self, num_agents=2, rnn_type="gru"):
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, rnn_type=rnn_type,
+                              rnn_size=32, happo_critic_rnn=True)
+        cfg.recurrence = 4
+        cfg.rollout = 4
+        cfg.ppo_clip_value = 10.0
+        cfg.ppo_clip_ratio = 0.2
+        cfg.value_loss_coeff = 0.5
+        cfg.exploration_loss_coeff = 0.0
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.train()
+
+        stub = object.__new__(HAPPOLearner)
+        stub.cfg = cfg
+        stub.n_agents = num_agents
+        stub.actor_critic = model
+        stub.exploration_loss_func = lambda action_distr, valids, num_invalids: 0.0
+        return stub, model, cfg
+
+    def test_stored_states_affect_critic_output(self):
+        """Critic loss with non-zero stored states should differ from zero states."""
+        stub, model, cfg = self._make_stub()
+        num_agents = cfg.num_agents
+        batch_size = cfg.recurrence * num_agents
+        rnn_size = get_rnn_size(cfg)
+        R = model.critic_rnn_state_size
+
+        obs = _make_obs_batch(batch_size, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // num_agents
+        base_returns = torch.randn(batch_size)
+
+        # Run with zero critic states
+        mb_zero = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": base_returns,
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, rnn_size),
+        })
+        loss_zero = stub._calculate_critic_loss(mb_zero, agent_idx, env_group_idx, num_invalids=0)
+
+        # Run with non-zero critic states  (actor half = zeros, critic half = randn)
+        rnn_with_critic = torch.zeros(batch_size, rnn_size)
+        rnn_with_critic[:, R:] = torch.randn(batch_size, R) * 0.5
+        mb_nonzero = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": base_returns,
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": rnn_with_critic,
+        })
+        loss_nonzero = stub._calculate_critic_loss(mb_nonzero, agent_idx, env_group_idx, num_invalids=0)
+
+        # The losses should differ because the critic RNN states affect the critic output
+        assert not torch.allclose(loss_zero.detach(), loss_nonzero.detach()), \
+            "Critic loss should differ when using non-zero stored states vs zero states"
+
+    def test_actor_policy_loss_slices_actor_half(self):
+        """_calculate_agent_policy_loss should work with 2R-sized rnn_states (slices actor half)."""
+        stub, model, cfg = self._make_stub()
+        num_agents = cfg.num_agents
+        recurrence = cfg.recurrence
+        # Single agent batch
+        batch_size = recurrence
+        rnn_size = get_rnn_size(cfg)
+
+        obs = torch.randn(batch_size, 3, 64, 64)
+        agent_id = torch.zeros(batch_size, num_agents)
+        agent_id[:, 0] = 1.0  # All agent 0
+        obs_dict = {"obs": obs, "agent_id": agent_id}
+
+        model.eval()
+        with torch.no_grad():
+            # Get some action logits for the log_prob_actions
+            head = model.forward_head(obs_dict, agent_idx=agent_id.argmax(dim=-1))
+            core, _ = model.agent_cores[0](head, torch.zeros(batch_size, model.critic_rnn_state_size))
+            dec = model.agent_decoders[0](core)
+            logits, _ = model.agent_action_params[0](dec, None)
+            dist = get_action_distribution(model.action_space, logits)
+            actions = dist.sample()
+            log_probs = dist.log_prob(actions)
+
+        model.train()
+        mb = AttrDict({
+            "normalized_obs": obs_dict,
+            "actions": actions,
+            "log_prob_actions": log_probs,
+            "valids": torch.ones(batch_size, dtype=torch.bool),
+            "dones_cpu": torch.zeros(batch_size, dtype=torch.bool),
+            "rnn_states": torch.randn(batch_size, rnn_size),  # Full 2R size
+        })
+        M_full = torch.ones(batch_size)
+        mb_indices = torch.arange(batch_size)
+
+        # Should NOT crash — should correctly slice actor half
+        policy_loss, exploration_loss = stub._calculate_agent_policy_loss(
+            0, mb, M_full, mb_indices, num_invalids=0
+        )
+        assert not torch.isnan(policy_loss)
+        assert policy_loss.requires_grad
+
+    def test_evaluate_agent_log_probs_slices_actor_half(self):
+        """_evaluate_agent_log_probs should work with 2R-sized rnn_states (slices actor half)."""
+        stub, model, cfg = self._make_stub()
+        num_agents = cfg.num_agents
+        recurrence = cfg.recurrence
+        # Build a buffer-like structure for agent 0
+        batch_size = recurrence * num_agents  # Need both agents for full buffer
+        rnn_size = get_rnn_size(cfg)
+
+        obs = torch.randn(batch_size, 3, 64, 64)
+        agent_id = torch.zeros(batch_size, num_agents)
+        for i in range(batch_size):
+            agent_id[i, i % num_agents] = 1.0
+        obs_dict = {"obs": obs, "agent_id": agent_id}
+
+        # Generate actions
+        model.eval()
+        with torch.no_grad():
+            result = model(obs_dict, torch.zeros(batch_size, rnn_size))
+        actions = result["actions"]
+        if actions.dim() == 1:
+            actions = actions.unsqueeze(-1)
+
+        # Build gpu_buffer-like dict
+        gpu_buffer = {
+            "normalized_obs": obs_dict,
+            "actions": actions,
+            "rnn_states": torch.randn(batch_size, rnn_size),  # Full 2R size
+            "dones_cpu": torch.zeros(batch_size, dtype=torch.bool),
+            "valids": torch.ones(batch_size, dtype=torch.bool),
+        }
+
+        # Agent 0 mask
+        agent_mask = agent_id[:, 0].bool()
+
+        # Should NOT crash — should correctly slice actor half
+        log_probs = stub._evaluate_agent_log_probs(0, gpu_buffer, agent_mask)
+        assert log_probs.shape == (agent_mask.sum(),)
+        assert not torch.isnan(log_probs).any()
+
+    @pytest.mark.parametrize("rnn_type", ["gru", "lstm"])
+    def test_multi_layer_rnn_forward(self, rnn_type):
+        """Full forward pass with multi-layer RNN + critic RNN should produce correct shapes."""
+        num_agents = 2
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, rnn_type=rnn_type,
+                              rnn_size=32, rnn_num_layers=2, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.eval()
+
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_size = get_rnn_size(cfg)
+        rnn_states = torch.zeros(batch, rnn_size)
+
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        assert result['new_rnn_states'].shape == (batch, rnn_size)
+        assert not torch.isnan(result['values']).any()
+        # Verify both halves updated
+        R = model.critic_rnn_state_size
+        assert not torch.allclose(result['new_rnn_states'][:, :R], torch.zeros(batch, R))
+        assert not torch.allclose(result['new_rnn_states'][:, R:], torch.zeros(batch, R))
