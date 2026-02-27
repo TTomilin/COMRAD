@@ -67,7 +67,7 @@ DOOM_ENVS = [
         1.0,
         1000,
         num_agents=2,
-        forcerespawn=0,
+        forcerespawn=1,
         extra_wrappers=[(DoomPitfallRewardShaping, {})],
     ),
 
