@@ -38,6 +38,7 @@ def _make_happo_cfg(
     rnn_num_layers: int = 1,
     hidden_size: int = 32,
     happo_critic_hidden_sizes: list = None,
+    happo_critic_rnn: bool = False,
 ) -> AttrDict:
     if happo_critic_hidden_sizes is None:
         happo_critic_hidden_sizes = [64, 32]
@@ -65,6 +66,7 @@ def _make_happo_cfg(
             "policy_init_gain": 1.0,
             "actor_critic_share_weights": True,
             "happo_critic_hidden_sizes": happo_critic_hidden_sizes,
+            "happo_critic_rnn": happo_critic_rnn,
         }
     )
 
@@ -403,6 +405,42 @@ class TestComputeEnvGroupIdx:
         counts = torch.bincount(group_idx)
         assert (counts == n_agents).all()
 
+    def test_multi_window_same_env(self, learner_stub):
+        """Multiple rollout windows from the same env should get distinct groups."""
+        n_agents = 2
+        rollout = 4
+        # 2 windows from env 0: 4 trajectories total (2 agents × 2 windows)
+        n_traj = 4
+        dataset_size = n_traj * rollout  # 16
+
+        # Layout: [agent0_env0_w1, agent1_env0_w1, agent0_env0_w2, agent1_env0_w2]
+        env_idx = torch.tensor(
+            [0] * rollout + [0] * rollout + [0] * rollout + [0] * rollout,
+            dtype=torch.long,
+        )
+        agent_idx = torch.tensor(
+            [0] * rollout + [1] * rollout + [0] * rollout + [1] * rollout,
+            dtype=torch.long,
+        )
+
+        group_idx = learner_stub._compute_env_group_idx(agent_idx, env_idx, dataset_size)
+
+        assert group_idx.shape == (dataset_size,)
+        # 2 windows × 4 timesteps = 8 unique transition groups
+        n_transitions = group_idx.max().item() + 1
+        assert n_transitions == 2 * rollout
+
+        # Each group should have exactly 2 agent samples
+        counts = torch.bincount(group_idx, minlength=n_transitions)
+        assert (counts == n_agents).all()
+
+        # Window 1 and window 2 should have DISTINCT group indices
+        window1_groups = set(group_idx[:n_agents * rollout].tolist())
+        window2_groups = set(group_idx[n_agents * rollout:].tolist())
+        assert window1_groups.isdisjoint(window2_groups), (
+            "Groups from different rollout windows should not overlap"
+        )
+
     def test_wrong_agent_count_raises(self, learner_stub):
         """Should raise if a transition doesn't have exactly n_agents samples."""
         # 3 samples with env_idx 0 at timestep 0, but n_agents=2
@@ -412,6 +450,26 @@ class TestComputeEnvGroupIdx:
 
         learner_stub.cfg.rollout = 1
         with pytest.raises(RuntimeError, match="wrong agent count"):
+            learner_stub._compute_env_group_idx(agent_idx, env_idx, dataset_size)
+
+    def test_mismatched_env_idx_in_group_raises(self, learner_stub):
+        """Should raise if consecutive trajectories in a group have different env_idx."""
+        rollout = 4
+        n_agents = 2
+        # 2 trajectories but with different env_idx (agent0 from env 0, agent1 from env 1)
+        # This represents a corrupted batcher layout
+        dataset_size = n_agents * rollout  # 8
+
+        env_idx = torch.tensor(
+            [0] * rollout + [1] * rollout,  # mismatched!
+            dtype=torch.long,
+        )
+        agent_idx = torch.tensor(
+            [0] * rollout + [1] * rollout,
+            dtype=torch.long,
+        )
+
+        with pytest.raises(RuntimeError, match="mismatched env_idx"):
             learner_stub._compute_env_group_idx(agent_idx, env_idx, dataset_size)
 
 
@@ -938,6 +996,7 @@ class TestLearnerMethodIntegration:
         stub.n_agents = cfg.num_agents
         stub.actor_critic = model
         stub.exploration_loss_func = lambda d, v, n: 0.0
+        stub.use_critic_rnn = getattr(cfg, 'happo_critic_rnn', False) and cfg.use_rnn
 
         # Create synthetic minibatch
         batch_size = 4
@@ -987,6 +1046,7 @@ class TestLearnerMethodIntegration:
         stub.cfg = cfg
         stub.n_agents = cfg.num_agents
         stub.actor_critic = model
+        stub.use_critic_rnn = getattr(cfg, 'happo_critic_rnn', False) and cfg.use_rnn
 
         # Create synthetic minibatch with 2 complete transitions
         batch_size = cfg.num_agents * 2  # 4 samples = 2 transitions
@@ -999,6 +1059,7 @@ class TestLearnerMethodIntegration:
             "values": torch.zeros(batch_size),
             "returns": torch.ones(batch_size),
             "valids": torch.ones(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
         })
 
         model.train()
@@ -1109,3 +1170,425 @@ class TestApplyLR:
         HAPPOLearner._apply_lr(stub, 0.0001)
 
         assert stub.curr_lr == 0.001  # Unchanged
+
+
+class TestCriticRNNConstruction:
+    """Test critic RNN core construction and model architecture."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def test_critic_cores_created_when_enabled(self):
+        """critic_cores should be created when happo_critic_rnn=True and use_rnn=True."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        assert model.critic_cores is not None
+        assert len(model.critic_cores) == 2
+
+    def test_critic_cores_none_by_default(self):
+        """critic_cores should be None when happo_critic_rnn not set."""
+        model = _make_happo_model(num_agents=2, use_rnn=True)
+        assert model.critic_cores is None
+
+    def test_critic_cores_none_without_rnn(self):
+        """critic_cores should be None when use_rnn=False even if happo_critic_rnn=True."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=False, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        assert model.critic_cores is None
+
+    def test_critic_mlp_input_size_with_rnn(self):
+        """When critic_rnn is enabled, MLP first layer input should be rnn_size * n_agents."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_size=64, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        linears = [m for m in model.centralized_critic if isinstance(m, nn.Linear)]
+        assert linears[0].in_features == 64 * 2  # rnn_size * n_agents
+
+    def test_critic_rnn_runs_at_inference(self):
+        """critic_cores should run at inference when happo_critic_rnn=True."""
+        num_agents = 2
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, rnn_size=64, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.eval()
+        batch = num_agents * 2
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_states = torch.zeros(batch, get_rnn_size(cfg))
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+        assert result['values'].shape == (batch,)
+        assert result['new_rnn_states'].shape == rnn_states.shape
+
+    @pytest.mark.parametrize("rnn_type", ["gru", "lstm"])
+    def test_critic_cores_rnn_type(self, rnn_type):
+        """critic_cores should respect the configured rnn_type."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_type=rnn_type, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        assert model.critic_cores is not None
+        # The core should have rnn_size output
+        assert model.critic_cores[0].get_out_size() == cfg.rnn_size
+
+
+class TestCriticRNNForward:
+    """Test inference-path forward pass with critic RNN enabled."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def test_forward_shapes_with_critic_rnn(self):
+        """Forward pass with critic_rnn=True should produce correct shapes."""
+        num_agents = 2
+        batch = num_agents * 2
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.eval()
+
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_states = torch.zeros(batch, get_rnn_size(cfg))
+
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        assert result["values"].shape == (batch,)
+        assert result["action_logits"].shape[0] == batch
+        assert result["new_rnn_states"].shape == rnn_states.shape
+
+    def test_values_only_with_critic_rnn(self):
+        """values_only mode should work with critic_rnn=True."""
+        num_agents = 2
+        batch = num_agents * 2
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.eval()
+
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_states = torch.zeros(batch, get_rnn_size(cfg))
+
+        with torch.no_grad():
+            result = model(obs, rnn_states, values_only=True)
+
+        assert result["values"].shape == (batch,)
+        assert "action_logits" not in result
+
+    def test_same_transition_same_value_with_critic_rnn(self):
+        """All agents in the same transition should still get the same value."""
+        num_agents = 2
+        batch = num_agents * 2
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.eval()
+
+        obs = _make_obs_batch(batch, num_agents)
+        rnn_states = torch.zeros(batch, get_rnn_size(cfg))
+
+        with torch.no_grad():
+            result = model(obs, rnn_states)
+
+        values = result["values"]
+        torch.testing.assert_close(values[0], values[1])
+        torch.testing.assert_close(values[2], values[3])
+
+
+class TestCriticRNNTraining:
+    """Test critic loss BPTT path and gradient flow."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def _make_critic_rnn_stub(self, num_agents=2, rnn_type="gru"):
+        """Create a minimal learner stub with critic RNN model."""
+        cfg = _make_happo_cfg(num_agents=num_agents, use_rnn=True, rnn_type=rnn_type,
+                              rnn_size=32, happo_critic_rnn=True)
+        cfg.recurrence = 4
+        cfg.rollout = 4
+        cfg.ppo_clip_value = 10.0
+        cfg.value_loss_coeff = 0.5
+        obs_space = _make_obs_space(num_agents=num_agents)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.train()
+
+        stub = object.__new__(HAPPOLearner)
+        stub.cfg = cfg
+        stub.n_agents = num_agents
+        stub.actor_critic = model
+        stub.use_critic_rnn = getattr(cfg, 'happo_critic_rnn', False) and cfg.use_rnn
+        return stub, model, cfg
+
+    def test_critic_loss_with_rnn_runs(self):
+        """_calculate_critic_loss should run without error with critic RNN."""
+        stub, model, cfg = self._make_critic_rnn_stub()
+        recurrence = cfg.recurrence
+        num_agents = cfg.num_agents
+        batch_size = recurrence * num_agents
+
+        obs = _make_obs_batch(batch_size, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // num_agents
+
+        mb = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": torch.randn(batch_size),
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
+        })
+
+        value_loss = stub._calculate_critic_loss(mb, agent_idx, env_group_idx, num_invalids=0)
+
+        assert value_loss.requires_grad
+        assert not torch.isnan(value_loss)
+        assert not torch.isinf(value_loss)
+
+    def test_gradients_flow_through_critic_cores(self):
+        """Critic RNN training should produce gradients on critic_cores parameters."""
+        stub, model, cfg = self._make_critic_rnn_stub()
+        recurrence = cfg.recurrence
+        num_agents = cfg.num_agents
+        batch_size = recurrence * num_agents
+
+        obs = _make_obs_batch(batch_size, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // num_agents
+
+        mb = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": torch.randn(batch_size),
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
+        })
+
+        value_loss = stub._calculate_critic_loss(mb, agent_idx, env_group_idx, num_invalids=0)
+        value_loss.backward()
+
+        # critic_cores should have gradients
+        for i, core in enumerate(model.critic_cores):
+            has_grad = any(p.grad is not None and (p.grad != 0).any() for p in core.parameters())
+            assert has_grad, f"Critic core {i} has no gradients after backward"
+
+    def test_critic_rnn_gradients_isolated_from_actor(self):
+        """Critic RNN training should NOT produce gradients on actor parameters."""
+        stub, model, cfg = self._make_critic_rnn_stub()
+        recurrence = cfg.recurrence
+        num_agents = cfg.num_agents
+        batch_size = recurrence * num_agents
+
+        obs = _make_obs_batch(batch_size, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // num_agents
+
+        mb = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": torch.randn(batch_size),
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
+        })
+
+        value_loss = stub._calculate_critic_loss(mb, agent_idx, env_group_idx, num_invalids=0)
+        value_loss.backward()
+
+        # Actor encoder/core/decoder should have zero or no gradients
+        for name, param in model.agent_encoders[0].named_parameters():
+            if param.grad is not None:
+                assert (param.grad == 0).all(), f"Actor encoder param {name} has grad from critic RNN loss"
+
+    def test_critic_projection_receives_gradients(self):
+        """When critic_projection exists, it should receive gradients during critic training."""
+        # Use rnn_size != encoder output to force projection creation
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, rnn_type="gru",
+                              rnn_size=32, happo_critic_rnn=True)
+        cfg.recurrence = 4
+        cfg.rollout = 4
+        cfg.ppo_clip_value = 10.0
+        cfg.value_loss_coeff = 0.5
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+        model.train()
+
+        # Projection should exist (enc_out=512 != rnn_size=32)
+        assert model.critic_projection is not None, "Expected critic_projection to exist"
+
+        stub = object.__new__(HAPPOLearner)
+        stub.cfg = cfg
+        stub.n_agents = 2
+        stub.actor_critic = model
+
+        batch_size = cfg.recurrence * 2
+        obs = _make_obs_batch(batch_size, 2)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // 2
+        mb = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": torch.randn(batch_size),
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
+        })
+
+        value_loss = stub._calculate_critic_loss(mb, agent_idx, env_group_idx, num_invalids=0)
+        value_loss.backward()
+
+        has_grad = any(
+            p.grad is not None and (p.grad != 0).any()
+            for p in model.critic_projection.parameters()
+        )
+        assert has_grad, "critic_projection should receive gradients during critic training"
+
+    @pytest.mark.parametrize("rnn_type", ["gru", "lstm"])
+    def test_critic_rnn_both_types(self, rnn_type):
+        """Critic RNN should work with both GRU and LSTM."""
+        stub, model, cfg = self._make_critic_rnn_stub(rnn_type=rnn_type)
+        recurrence = cfg.recurrence
+        num_agents = cfg.num_agents
+        batch_size = recurrence * num_agents
+
+        obs = _make_obs_batch(batch_size, num_agents)
+        agent_idx = obs["agent_id"].argmax(dim=-1)
+        env_group_idx = torch.arange(batch_size) // num_agents
+
+        mb = AttrDict({
+            "normalized_obs": obs,
+            "values": torch.zeros(batch_size),
+            "returns": torch.randn(batch_size),
+            "valids": torch.ones(batch_size),
+            "dones_cpu": torch.zeros(batch_size),
+            "rnn_states": torch.zeros(batch_size, get_rnn_size(cfg)),
+        })
+
+        value_loss = stub._calculate_critic_loss(mb, agent_idx, env_group_idx, num_invalids=0)
+        assert not torch.isnan(value_loss)
+        value_loss.backward()
+
+
+class TestGetCriticParams:
+    """Test _get_critic_params helper."""
+
+    @pytest.fixture(autouse=True)
+    def setup_context(self):
+        sf_global_context()
+        yield
+
+    def test_includes_cores_when_present(self):
+        """_get_critic_params should include critic_cores params when they exist."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, happo_critic_rnn=True)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+
+        stub = object.__new__(HAPPOLearner)
+        stub.actor_critic = model
+
+        params = stub._get_critic_params()
+        param_ids = set(id(p) for p in params)
+
+        # Must include critic_cores params
+        for core in model.critic_cores:
+            for p in core.parameters():
+                assert id(p) in param_ids, "critic_cores params missing from _get_critic_params"
+
+    def test_excludes_cores_when_absent(self):
+        """Without critic_rnn, _get_critic_params should only have encoder + MLP params."""
+        cfg = _make_happo_cfg(num_agents=2, use_rnn=True, happo_critic_rnn=False)
+        obs_space = _make_obs_space(num_agents=2)
+        action_space = _make_action_space()
+        model = make_happo_actor_critic(cfg, obs_space, action_space)
+
+        stub = object.__new__(HAPPOLearner)
+        stub.actor_critic = model
+
+        params = stub._get_critic_params()
+        param_ids = set(id(p) for p in params)
+
+        # Should include encoders and MLP
+        for p in model.centralized_critic.parameters():
+            assert id(p) in param_ids
+        for p in model.critic_encoders.parameters():
+            assert id(p) in param_ids
+
+
+class TestTransitionRNNMinibatches:
+    """Test recurrence-aligned transition minibatches for critic BPTT."""
+
+    @pytest.fixture
+    def learner_stub(self):
+        stub = object.__new__(HAPPOLearner)
+        stub.n_agents = 2
+        stub.cfg = AttrDict({"recurrence": 4, "rollout": 4})
+        return stub
+
+    def test_minibatch_temporal_alignment(self, learner_stub):
+        """Minibatches should contain recurrence-aligned temporal chunks."""
+        n_agents = 2
+        n_envs = 2
+        rollout = 4
+        experience_size = n_agents * n_envs * rollout
+
+        # Build data layout: agent0_env0(4 steps), agent1_env0(4 steps), agent0_env1(4 steps), agent1_env1(4 steps)
+        env_idx = torch.tensor(
+            [0] * rollout + [0] * rollout + [1] * rollout + [1] * rollout, dtype=torch.long
+        )
+        agent_idx = torch.tensor(
+            [0] * rollout + [1] * rollout + [0] * rollout + [1] * rollout, dtype=torch.long
+        )
+        env_group_idx = learner_stub._compute_env_group_idx(agent_idx, env_idx, experience_size)
+        n_transitions = env_group_idx.max().item() + 1
+
+        minibatches = learner_stub._get_transition_rnn_minibatches(
+            batch_size=experience_size, experience_size=experience_size,
+            env_group_idx=env_group_idx, n_transitions=n_transitions,
+            env_idx=env_idx, agent_idx=agent_idx,
+        )
+
+        # All samples should be covered
+        all_indices = np.concatenate(minibatches)
+        assert len(all_indices) == experience_size
+        assert len(set(all_indices)) == experience_size
+
+    def test_each_minibatch_has_all_agents(self, learner_stub):
+        """Each transition in a minibatch should have all N agents."""
+        n_agents = 2
+        rollout = 4
+        experience_size = n_agents * rollout
+
+        env_idx = torch.tensor([0] * rollout + [0] * rollout, dtype=torch.long)
+        agent_idx = torch.tensor([0] * rollout + [1] * rollout, dtype=torch.long)
+        env_group_idx = learner_stub._compute_env_group_idx(agent_idx, env_idx, experience_size)
+        n_transitions = env_group_idx.max().item() + 1
+
+        minibatches = learner_stub._get_transition_rnn_minibatches(
+            batch_size=experience_size, experience_size=experience_size,
+            env_group_idx=env_group_idx, n_transitions=n_transitions,
+            env_idx=env_idx, agent_idx=agent_idx,
+        )
+
+        for mb in minibatches:
+            mb_groups = env_group_idx[mb]
+            for g in mb_groups.unique():
+                assert (mb_groups == g).sum() == n_agents
