@@ -736,7 +736,9 @@ def add_happo_args(p: ArgumentParser):
         "--happo_critic_rnn",
         default=False,
         type=str2bool,
-        help="Add per agent RNN cores to HAPPO centralized critic (training-only BPTT). Requires --use_rnn=True.",
+        help="Add per-agent RNN cores to HAPPO centralized critic. "
+             "Runs at both inference and training; states stored in rollout buffer. "
+             "Requires --use_rnn=True.",
     )
 
 
