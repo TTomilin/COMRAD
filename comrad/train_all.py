@@ -1,75 +1,37 @@
+# python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=1 --pause_between=1
+
+import os
+
 from sample_factory.launcher.run_description import Experiment, ParamGrid, RunDescription
 
-_params = ParamGrid(
-    [
-        ("seed", [0, 1111]),
-        ("env", ["doom_pitfall"]),
-    ]
-)
+env = "doom_pitfall"
+n_agents = 2
+seed = [0]
+time = int(os.environ.get("train_for_seconds", 3600))
+wandb_project = "comrad_jr"
 
-cpu? = ' --device=cpu'
+wandb = f"--with_wandb=True --wandb_dir=. --wandb_project={wandb_project}"
+common = f"--env={env} --train_for_seconds={time} --env_frameskip=4 --wide_aspect_ratio=False --num_agents={n_agents} {wandb} --num_workers=8 --num_envs_per_worker=8 --batched_sampling=True"
 
+#======================
+
+mappo = f"python -m sf.train {common} --algo=MAPPO --use_rnn=True --num_policies=1 --batch_size=1024 --wandb_record_every=10"
+
+happo = f"python -m sf.train {common} --algo=HAPPO --policy_workers_per_policy=2 --batch_size=2048 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wandb_record_every=10"
+
+qmix = f"python -m sf.train {common} --algo=QMIX --mixer=qmix --policy_workers_per_policy=2 --batch_size=3072 --use_rnn=True --rnn_type=gru --rnn_size=256 --rollout=32 --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --qmix_sequence_batch_size=64 --replay_buffer_size=500000 --epsilon_decay_steps=20000000 --epsilon_end=0.005 --learning_rate=0.0001 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8"
+
+# vdn = f"python -m sf.train {common} --algo=QMIX --mixer=vdn --policy_workers_per_policy=2 --batch_size=3072 --use_rnn=True --rnn_type=gru --rnn_size=256 --rollout=32 --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --qmix_sequence_batch_size=64 --replay_buffer_size=500000 --epsilon_decay_steps=20000000 --epsilon_end=0.005 --learning_rate=0.0001 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8"
+
+
+#===================================
+
+_seed_grid = ParamGrid([("seed", seed)])
 _experiments = [
-    Experiment(
-        "doom_marl",
-        "python -m sf.train --train_for_env_steps=20000 --algo=APPO --env_frameskip=4 --use_rnn=True --num_workers=16 --num_envs_per_worker=8 --num_policies=1 --batch_size=1024 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom",
-        _params.generate_params(randomize=False),
-    ),
+    Experiment("MAPPO", mappo, _seed_grid.generate_params(randomize=False)),
+    Experiment("HAPPO", happo, _seed_grid.generate_params(randomize=False)),
+    Experiment("QMIX", qmix, _seed_grid.generate_params(randomize=False)),
+    # Experiment("VDN", vdn, _seed_grid.generate_params(randomize=False)),
 ]
 
-
-RUN_DESCRIPTION = RunDescription("doom_marl", experiments=_experiments)
-# python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4  --pause_between=1 --experiments_per_gpu=4 --num_gpus=1
-# python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4  --pause_between=1
-
-
-
-
-
-
-
-
-
-'''
-https://www.samplefactory.dev/04-experiments/experiment-launcher/#local-backend-multiprocessing
-
-Arguments:
--h, --help            show this help message and exit
---train_dir TRAIN_DIR
-                        Directory for sub-experiments
---run RUN             Name of the python module that describes the run, e.g.
-                        sf_examples.vizdoom.experiments.doom_basic
---backend {processes,slurm,ngc}
---pause_between PAUSE_BETWEEN
-                        Pause in seconds between processes
---experiment_suffix EXPERIMENT_SUFFIX
-                        Append this to the name of the experiment dir
-
-Multiprocessing backend:
---num_gpus NUM_GPUS   How many GPUs to use (only for local multiprocessing)
---experiments_per_gpu EXPERIMENTS_PER_GPU
-                        How many experiments can we squeeze on a single GPU
-                        (-1 for not altering CUDA_VISIBLE_DEVICES at all)
---max_parallel MAX_PARALLEL
-                        Maximum simultaneous experiments (only for local multiprocessing)
-
-Slurm-related:
---slurm_gpus_per_job SLURM_GPUS_PER_JOB
-                        GPUs in a single SLURM process
---slurm_cpus_per_gpu SLURM_CPUS_PER_GPU
-                        Max allowed number of CPU cores per allocated GPU
---slurm_print_only SLURM_PRINT_ONLY
-                        Just print commands to the console without executing
---slurm_workdir SLURM_WORKDIR
-                        Optional workdir. Used by slurm launcher to store
-                        logfiles etc.
---slurm_partition SLURM_PARTITION
-                        Adds slurm partition, i.e. for "gpu" it will add "-p
-                        gpu" to sbatch command line
---slurm_sbatch_template SLURM_SBATCH_TEMPLATE
-                        Commands to run before the actual experiment (i.e.
-                        activate conda env, etc.) Example: https://github.com/alex-petrenko/megaverse/blob/master/megaverse_rl/slurm/sbatch_template.sh
-                        (typically a shell script)
---slurm_timeout SLURM_TIMEOUT
-                        Time to run jobs before timing out job and requeuing the job. Defaults to 0, which does not time out the job
-'''
+RUN_DESCRIPTION = RunDescription(os.environ.get("COMRAD_RUN_NAME", f"bench_{env}"), experiments=_experiments)
