@@ -160,8 +160,8 @@ class HAPPOLearner(Learner):
         try:
             self.actor_critic.load_state_dict(checkpoint_dict["model"])
         except RuntimeError as e:
-            if "critic_cores" in str(e) or "critic_projection" in str(e):
-                log.warning("Checkpoint has different happo_critic_rnn setting.")
+            if "critic_cores" in str(e) or "critic_projection" in str(e) or "centralized_critic" in str(e):
+                log.warning("Checkpoint has different happo_critic_rnn setting. Loading with strict=False, critic layers will reinitialize.")
                 self.actor_critic.load_state_dict(checkpoint_dict["model"], strict=False)
             else:
                 raise
@@ -169,7 +169,10 @@ class HAPPOLearner(Learner):
             for i, opt_state in enumerate(checkpoint_dict["agent_optimizers"]):
                 self.agent_optimizers[i].load_state_dict(opt_state)
         if "critic_optimizer" in checkpoint_dict:
-            self.critic_optimizer.load_state_dict(checkpoint_dict["critic_optimizer"])
+            try:
+                self.critic_optimizer.load_state_dict(checkpoint_dict["critic_optimizer"])
+            except ValueError:
+                log.warning("Critic optimizer state mismatch") # could be happo_critic_rnn
         if load_progress:
             self.train_step = checkpoint_dict.get("train_step", 0)
             self.env_steps = checkpoint_dict.get("env_steps", 0)
@@ -358,7 +361,7 @@ class HAPPOLearner(Learner):
         # training critic
         critic_grad_norm_val = 0.0
         value_loss_val = 0.0
-        use_critic_rnn = self.actor_critic.critic_cores is not None and self.cfg.use_rnn
+        use_critic_rnn = self.actor_critic.use_critic_rnn
         for epoch in range(self.cfg.num_epochs):
             if use_critic_rnn:
                 transition_minibatches = self._get_transition_rnn_minibatches(batch_size, experience_size, env_group_idx, n_transitions, env_idx, agent_idx)
@@ -437,6 +440,10 @@ class HAPPOLearner(Learner):
             chunk_obs = {k: v[chunk_idx] for k, v in gpu_buffer["normalized_obs"].items()}
             chunk_actions = gpu_buffer["actions"][chunk_idx]
             chunk_rnn_states = gpu_buffer["rnn_states"][chunk_idx]
+            # Slice actor only RNN states
+            if self.actor_critic.use_critic_rnn:
+                R = self.actor_critic.critic_rnn_state_size
+                chunk_rnn_states = chunk_rnn_states[:, :R]
             agent_idx_sub = chunk_obs["agent_id"].argmax(dim=-1)
             with torch.no_grad():
                 head_out = self.actor_critic.forward_head(chunk_obs, agent_idx=agent_idx_sub)
@@ -477,14 +484,20 @@ class HAPPOLearner(Learner):
         # Forward pass
         head_out = self.actor_critic.forward_head(mb.normalized_obs, agent_idx=agent_idx_mb)
 
+        # Slice actor only RNN states
+        actor_rnn = mb.rnn_states
+        if self.actor_critic.use_critic_rnn:
+            R = self.actor_critic.critic_rnn_state_size
+            actor_rnn = actor_rnn[:, :R]
+
         if self.cfg.use_rnn:
             recurrence = self.cfg.recurrence
             done_or_invalid = torch.logical_or(mb.dones_cpu, ~mb.valids.cpu()).float()
-            seq, rnn_init, inv = build_rnn_inputs(head_out, done_or_invalid, mb.rnn_states, recurrence)
+            seq, rnn_init, inv = build_rnn_inputs(head_out, done_or_invalid, actor_rnn, recurrence)
             core_seq, _ = self.actor_critic.agent_cores[agent_id](seq, rnn_init)
             core_out = build_core_out_from_seq(core_seq, inv)
         else:
-            core_out, _ = self.actor_critic.agent_cores[agent_id](head_out, mb.rnn_states)
+            core_out, _ = self.actor_critic.agent_cores[agent_id](head_out, actor_rnn)
 
         decoder_out = self.actor_critic.agent_decoders[agent_id](core_out)
         logits, _ = self.actor_critic.agent_action_params[agent_id](decoder_out, None)
@@ -524,10 +537,13 @@ class HAPPOLearner(Learner):
         obs_no_id = {k: v for k, v in mb.normalized_obs.items() if k != "agent_id"}
         device = next(self.actor_critic.centralized_critic.parameters()).device
         critic_enc_out_size = self.actor_critic.critic_encoders[0].get_out_size()
-        use_critic_rnn = self.actor_critic.critic_cores is not None and self.cfg.use_rnn
+        use_critic_rnn = self.actor_critic.use_critic_rnn
 
         if use_critic_rnn:
             critic_feature_size = self.actor_critic.critic_cores[0].get_out_size()
+            # get critic half of stored rnn states
+            R = self.actor_critic.critic_rnn_state_size
+            critic_rnn_all = mb.rnn_states[:, R:]  # [mb_size, R]
         else:
             critic_feature_size = critic_enc_out_size
 
@@ -552,13 +568,10 @@ class HAPPOLearner(Learner):
                 chunk_valids = mb.valids[agent_indices_cpu].cpu()
                 done_or_invalid = torch.logical_or(chunk_dones, ~chunk_valids.bool()).float()
 
-                # Critic RNN starts from zero (not stored in rollout buffer)
-                rnn_state_size = self.cfg.rnn_size * self.cfg.rnn_num_layers
-                if self.cfg.rnn_type == "lstm":
-                    rnn_state_size *= 2
-                zero_rnn_states = torch.zeros(enc_out.shape[0], rnn_state_size, device=device)
+                # get stored critic rnn states from rollout buff
+                agent_critic_rnn = critic_rnn_all[mask]
 
-                seq, rnn_init, inv = build_rnn_inputs(enc_out, done_or_invalid, zero_rnn_states, recurrence)
+                seq, rnn_init, inv = build_rnn_inputs(enc_out, done_or_invalid, agent_critic_rnn, recurrence)
                 core_seq, _ = self.actor_critic.critic_cores[i](seq, rnn_init)
                 core_out = build_core_out_from_seq(core_seq, inv)
                 critic_features[mask] = core_out

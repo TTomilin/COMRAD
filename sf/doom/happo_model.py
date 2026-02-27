@@ -25,7 +25,8 @@ class HAPPOActorCritic(ActorCritic):
     Separate policy networks (encoder + core + decoder + action_param) each agents
     Independent critic encoder processes all agents' obs, MLP outputs scalar value
     Default: MLP-only critic like HARL paper. Actor still supports GRU/LSTM.
-    Optional: --happo_critic_rnn adds per agent RNN cores to critic but training-only BPTT
+    Optional: --happo_critic_rnn adds per agent RNN cores to critic, runs at both inference and training
+    Critic RNN states are stored in the rollout buffer (rnn_states doubles in size)
 
     I dont use ActorCriticSharedWeights because the sharedweights code doesn't have N separate policy netowrks
     """
@@ -101,6 +102,16 @@ class HAPPOActorCritic(ActorCritic):
         else:
             critic_feature_size = critic_enc_out
 
+        self.use_critic_rnn = use_critic_rnn
+        if use_critic_rnn:
+            # Size of one agent's critic RNN state vector
+            single_agent_rnn = cfg.rnn_size * cfg.rnn_num_layers
+            if cfg.rnn_type == "lstm":
+                single_agent_rnn *= 2
+            self.critic_rnn_state_size = single_agent_rnn
+        else:
+            self.critic_rnn_state_size = 0
+
         critic_input_dim = critic_feature_size * self.n_agents
 
         # Build critic MLP, the critic sees all agents' encoded
@@ -133,7 +144,18 @@ class HAPPOActorCritic(ActorCritic):
         """Returns tensordict"""
         agent_idx = normalized_obs_dict['agent_id'].argmax(dim=-1)
         head_out = self.forward_head(normalized_obs_dict, agent_idx=agent_idx)
-        core_out, new_rnn = self.forward_core(head_out, rnn_states, agent_idx=agent_idx)
+
+        # Split actor critic RNN states
+        if self.use_critic_rnn:
+            R = self.critic_rnn_state_size
+            actor_rnn = rnn_states[:, :R]
+            critic_rnn = rnn_states[:, R:]
+        else:
+            actor_rnn = rnn_states
+            critic_rnn = None
+
+        # pass to forward core
+        core_out, new_actor_rnn = self.forward_core(head_out, actor_rnn, agent_idx=agent_idx)
 
         # Group bases on position. Should be safe for batched_sampling=True unless race condition, but idk
         # In learner, after agent i trains, env_group_idx will be used to multiply all agents in the same transition
@@ -146,8 +168,16 @@ class HAPPOActorCritic(ActorCritic):
             values_only=values_only,
             sample_actions=sample_actions,
             action_mask=action_mask,
+            critic_rnn_states=critic_rnn,
         )
-        result['new_rnn_states'] = new_rnn
+
+        # updated critic half
+        if self.use_critic_rnn and "new_critic_rnn_states" in result:
+            new_critic_rnn = result.pop("new_critic_rnn_states")
+            result['new_rnn_states'] = torch.cat([new_actor_rnn, new_critic_rnn], dim=1)
+        else:
+            result['new_rnn_states'] = new_actor_rnn
+
         return result
 
     def forward_head(self, obs_dict, *, agent_idx=None):
@@ -188,7 +218,7 @@ class HAPPOActorCritic(ActorCritic):
         return out, new_rnn
 
     def forward_tail(self, core_output, *, agent_idx=None, env_group_idx=None, normalized_obs_dict=None,
-                     values_only=False, sample_actions=True, action_mask=None):
+                     values_only=False, sample_actions=True, action_mask=None, critic_rnn_states=None):
         """
         separate decoders + centralized critic + critic encoder
 
@@ -203,12 +233,20 @@ class HAPPOActorCritic(ActorCritic):
         # Should also look at HARL's implementation for this, this is afapted to work with SF
         obs_no_id = {k: v for k, v in normalized_obs_dict.items() if k != 'agent_id'}
         critic_enc_out_size = self.critic_encoders[0].get_out_size()
-        if self.critic_cores is not None:
+        if self.use_critic_rnn:
+            critic_feature_size = self.critic_cores[0].get_out_size()
+        elif self.critic_cores is not None:
             # project MLP input dim
             critic_feature_size = self.critic_cores[0].get_out_size()
         else:
             critic_feature_size = critic_enc_out_size
+
+        if self.use_critic_rnn:
+            if critic_rnn_states is None:
+                raise ValueError("forward_tail: use_critic_rnn=True but critic_rnn_states is None, must extract and pass critic states.")
+
         critic_features = torch.zeros(B, critic_feature_size, device=device)
+        new_critic_rnn = torch.zeros_like(critic_rnn_states) if critic_rnn_states is not None else None
         for i in range(self.n_agents):
             mask = (agent_idx == i)
             if mask.any():
@@ -216,7 +254,12 @@ class HAPPOActorCritic(ActorCritic):
                 enc_out = self.critic_encoders[i](agent_obs)
                 if self.critic_projection is not None:
                     enc_out = self.critic_projection(enc_out)
-                critic_features[mask] = enc_out
+                if self.use_critic_rnn:
+                    core_out_i, rnn_i = self.critic_cores[i](enc_out, critic_rnn_states[mask])
+                    critic_features[mask] = core_out_i
+                    new_critic_rnn[mask] = rnn_i
+                else:
+                    critic_features[mask] = enc_out
 
         n_transitions = env_group_idx.max().item() + 1
         grouped = _group_by_env(critic_features, agent_idx, env_group_idx, self.n_agents)
@@ -225,6 +268,8 @@ class HAPPOActorCritic(ActorCritic):
         values = joint_value.squeeze(-1)[env_group_idx] # Broadcast to all agents [B]
 
         result = TensorDict(values=values)
+        if new_critic_rnn is not None:
+            result["new_critic_rnn_states"] = new_critic_rnn
         if values_only: return result
 
         # decoders each agetns
