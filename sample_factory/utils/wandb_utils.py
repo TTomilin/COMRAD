@@ -42,7 +42,7 @@ def init_wandb(cfg):
             entity=cfg.wandb_user,
             sync_tensorboard=True,
             id=wandb_unique_id,
-            name=wandb_unique_id,
+            name=cfg.experiment,
             group=wandb_group,
             job_type=cfg.wandb_job_type,
             tags=cfg.wandb_tags,
