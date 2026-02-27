@@ -155,6 +155,9 @@ class MultiAgentEnvWorker:
                 self._terminate(env)
                 break
 
+            # ViZDoom 1.3.0 causes ViZDoomErrorException here
+            # Catching the error and recreates env doesnt work as in multiplayer mode the new instance cannot reconnect to the existing peer player's game and the port is still in use
+            # so the peer's game state is mismatched
             results = None
             if task_type == TaskType.RESET:
                 results = env.reset(**data) if data else env.reset()
