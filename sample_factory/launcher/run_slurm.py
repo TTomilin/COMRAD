@@ -55,6 +55,13 @@ def add_slurm_args(parser):
         help="Time to run jobs before timing out job and requeuing the job. Defaults to 0, which does not time out the job",
     )
 
+    parser.add_argument(
+        "--slurm_mem",
+        default=None,
+        type=str,
+        help="Memory per SLURM job, e.g. 32G. If not provided, cluster defaults are used.",
+    )
+
     return parser
 
 
@@ -82,6 +89,10 @@ def run_slurm(run_description, args):
     if args.slurm_partition is not None:
         partition = f"-p {args.slurm_partition} "
 
+    mem = ""
+    if args.slurm_mem is not None:
+        mem = f"--mem {args.slurm_mem} "
+
     num_cpus = args.slurm_cpus_per_gpu * args.slurm_gpus_per_job
 
     experiments = run_description.generate_experiments(args.train_dir)
@@ -93,7 +104,7 @@ def run_slurm(run_description, args):
         sbatch_fname = join(workdir, sbatch_fname)
         sbatch_fname = os.path.abspath(sbatch_fname)
 
-        file_content = Template(sbatch_template).substitute(
+        file_content = Template(sbatch_template).safe_substitute(
             CMD=cmd,
             FILENAME=sbatch_fname,
             PARTITION=partition,
@@ -111,7 +122,7 @@ def run_slurm(run_description, args):
     for sbatch_file in sbatch_files:
         idx += 1
         sbatch_fname = os.path.basename(sbatch_file)
-        cmd = f"sbatch {partition}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} --parsable --output {workdir}/{sbatch_fname}-slurm-%j.out {sbatch_file}"
+        cmd = f"sbatch {partition}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} {mem}--parsable --output {workdir}/{sbatch_fname}-slurm-%j.out {sbatch_file}"
         log.info("Executing %s...", cmd)
 
         if args.slurm_print_only:
