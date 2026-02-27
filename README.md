@@ -65,6 +65,7 @@ python -m sf.train \
     --num_agents=N \
     --max_policy_lag=1000*(N+1) \
     --lr_schedule=linear_decay \
+    --use_rnn=True --happo_critic_rnn=True \
     --train_for_env_steps=5000
 ```
 
