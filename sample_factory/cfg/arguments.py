@@ -217,8 +217,11 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
     if algo_upper == "HAPPO":
         if cfg.use_rnn and not getattr(cfg, "actor_critic_share_weights", True):
-            # HAPPO's critic is MLP-only, so get_rnn_size() over-allocates the RNN state buffer when actor_critic_share_weights=False, causing shape mismatches.
+            # HAPPO has rnn_size doubling for critic_rnn, actor_critic_share_weights=False doubles that
             raise ValueError("HAPPO with RNN requires actor_critic_share_weights=True. ")
+        if getattr(cfg, 'happo_critic_rnn', False) and not cfg.use_rnn:
+            log.warning("HAPPO: --happo_critic_rnn=True requires --use_rnn=True. Disabling happo_critic_rnn.")
+            cfg.happo_critic_rnn = False
         if cfg.lr_schedule in ('kl_adaptive_minibatch', 'kl_adaptive_epoch'):
             raise ValueError(
                 f"HAPPO does not support --lr_schedule={cfg.lr_schedule}. Use 'constant' or 'linear_decay' instead.")
