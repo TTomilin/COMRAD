@@ -24,7 +24,8 @@ class HAPPOActorCritic(ActorCritic):
     HAPPO actor critic
     Separate policy networks (encoder + core + decoder + action_param) each agents
     Independent critic encoder processes all agents' obs, MLP outputs scalar value
-    Only MLP like HARL paper, no RNN for critic. But Actor still supports GRU/LSTM
+    Default: MLP-only critic like HARL paper. Actor still supports GRU/LSTM.
+    Optional: --happo_critic_rnn adds per agent RNN cores to critic but training-only BPTT
 
     I dont use ActorCriticSharedWeights because the sharedweights code doesn't have N separate policy netowrks
     """
@@ -74,7 +75,33 @@ class HAPPOActorCritic(ActorCritic):
             self.critic_encoders.append(critic_enc)
 
         critic_enc_out = self.critic_encoders[0].get_out_size()
-        critic_input_dim = critic_enc_out * self.n_agents
+
+        # per agent critic RNN cores
+        self.critic_cores = None
+        self.critic_projection = None
+        use_critic_rnn = getattr(cfg, 'happo_critic_rnn', False) and cfg.use_rnn
+        if use_critic_rnn:
+            # get out size rnn
+            _probe_core = model_factory.make_model_core_func(cfg, critic_enc_out)
+            critic_feature_size = _probe_core.get_out_size() # probing
+            del _probe_core
+
+            # Project encoder output to RNN output size
+            # Note: both training and inference: encoder -> projection
+            if critic_enc_out != critic_feature_size:
+                self.critic_projection = nn.Linear(critic_enc_out, critic_feature_size) # projection gets grad during training
+                rnn_input_size = critic_feature_size
+            else:
+                rnn_input_size = critic_enc_out
+
+            self.critic_cores = nn.ModuleList()
+            for i in range(self.n_agents):
+                critic_core = model_factory.make_model_core_func(cfg, rnn_input_size)
+                self.critic_cores.append(critic_core)
+        else:
+            critic_feature_size = critic_enc_out
+
+        critic_input_dim = critic_feature_size * self.n_agents
 
         # Build critic MLP, the critic sees all agents' encoded
         hidden_sizes = getattr(cfg, 'happo_critic_hidden_sizes', [512, 256])
@@ -176,16 +203,24 @@ class HAPPOActorCritic(ActorCritic):
         # Should also look at HARL's implementation for this, this is afapted to work with SF
         obs_no_id = {k: v for k, v in normalized_obs_dict.items() if k != 'agent_id'}
         critic_enc_out_size = self.critic_encoders[0].get_out_size()
-        critic_features = torch.zeros(B, critic_enc_out_size, device=device)
+        if self.critic_cores is not None:
+            # project MLP input dim
+            critic_feature_size = self.critic_cores[0].get_out_size()
+        else:
+            critic_feature_size = critic_enc_out_size
+        critic_features = torch.zeros(B, critic_feature_size, device=device)
         for i in range(self.n_agents):
             mask = (agent_idx == i)
             if mask.any():
                 agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
-                critic_features[mask] = self.critic_encoders[i](agent_obs)
+                enc_out = self.critic_encoders[i](agent_obs)
+                if self.critic_projection is not None:
+                    enc_out = self.critic_projection(enc_out)
+                critic_features[mask] = enc_out
 
         n_transitions = env_group_idx.max().item() + 1
         grouped = _group_by_env(critic_features, agent_idx, env_group_idx, self.n_agents)
-        critic_input = grouped.view(n_transitions, -1) # [n_transitions, n_agents * critic_enc_out]
+        critic_input = grouped.view(n_transitions, -1) # [n_transitions, n_agents * critic_feature_size]
         joint_value = self.centralized_critic(critic_input) # [n_transitions, 1]
         values = joint_value.squeeze(-1)[env_group_idx] # Broadcast to all agents [B]
 

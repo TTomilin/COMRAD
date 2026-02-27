@@ -732,6 +732,12 @@ def add_happo_args(p: ArgumentParser):
         nargs="+", # https://docs.python.org/3/library/argparse.html#nargs
         help="Hidden layer sizes for centralized critic MLP",
     )
+    p.add_argument(
+        "--happo_critic_rnn",
+        default=False,
+        type=str2bool,
+        help="Add per agent RNN cores to HAPPO centralized critic (training-only BPTT). Requires --use_rnn=True.",
+    )
 
 
 def add_model_args(p: ArgumentParser):

@@ -116,7 +116,7 @@ class HAPPOLearner(Learner):
             )
             self.agent_optimizers.append(opt)
 
-        critic_params = (list(self.actor_critic.centralized_critic.parameters()) + list(self.actor_critic.critic_encoders.parameters()))
+        critic_params = self._get_critic_params()
         self.critic_optimizer = torch.optim.Adam(
             critic_params,
             lr=self.cfg.learning_rate,
@@ -157,7 +157,14 @@ class HAPPOLearner(Learner):
 
     def _load_state(self, checkpoint_dict, load_progress=True):
         """restore per agent,critic optimizer states"""
-        self.actor_critic.load_state_dict(checkpoint_dict["model"])
+        try:
+            self.actor_critic.load_state_dict(checkpoint_dict["model"])
+        except RuntimeError as e:
+            if "critic_cores" in str(e) or "critic_projection" in str(e):
+                log.warning("Checkpoint has different happo_critic_rnn setting.")
+                self.actor_critic.load_state_dict(checkpoint_dict["model"], strict=False)
+            else:
+                raise
         if "agent_optimizers" in checkpoint_dict:
             for i, opt_state in enumerate(checkpoint_dict["agent_optimizers"]):
                 self.agent_optimizers[i].load_state_dict(opt_state)
@@ -351,8 +358,12 @@ class HAPPOLearner(Learner):
         # training critic
         critic_grad_norm_val = 0.0
         value_loss_val = 0.0
+        use_critic_rnn = self.actor_critic.critic_cores is not None and self.cfg.use_rnn
         for epoch in range(self.cfg.num_epochs):
-            transition_minibatches = self._get_transition_minibatches(batch_size, experience_size, env_group_idx, n_transitions)
+            if use_critic_rnn:
+                transition_minibatches = self._get_transition_rnn_minibatches(batch_size, experience_size, env_group_idx, n_transitions, env_idx, agent_idx)
+            else:
+                transition_minibatches = self._get_transition_minibatches(batch_size, experience_size, env_group_idx, n_transitions)
             for indices in transition_minibatches:
                 mb = AttrDict(self._get_minibatch(gpu_buffer, indices))
                 mb_agent_idx = agent_idx[indices]
@@ -364,7 +375,7 @@ class HAPPOLearner(Learner):
                 self.critic_optimizer.zero_grad()
                 value_loss.backward()
                 critic_grad_norm = torch.nn.utils.clip_grad_norm_(
-                    list(self.actor_critic.centralized_critic.parameters()) + list(self.actor_critic.critic_encoders.parameters()),
+                    self._get_critic_params(),
                     self.cfg.max_grad_norm
                 )
 
@@ -376,7 +387,7 @@ class HAPPOLearner(Learner):
 
         stats["happo/factor_m_mean"] = M.abs().mean().item()
         stats["happo/factor_m_max"] = M.abs().max().item()
-        stats["happo/agent_order"] = str(agent_order)
+        stats["happo/agent_order_first"] = agent_order[0]
         stats["happo/critic_grad_norm"] = critic_grad_norm_val
         stats["value_loss"] = value_loss_val
         stats["adv_mean"] = adv_mean.item()
@@ -513,14 +524,46 @@ class HAPPOLearner(Learner):
         obs_no_id = {k: v for k, v in mb.normalized_obs.items() if k != "agent_id"}
         device = next(self.actor_critic.centralized_critic.parameters()).device
         critic_enc_out_size = self.actor_critic.critic_encoders[0].get_out_size()
+        use_critic_rnn = self.actor_critic.critic_cores is not None and self.cfg.use_rnn
 
-        # critic encoding for each agents, no RNN for critic, only MLP
-        critic_features = torch.zeros(agent_idx_mb.shape[0], critic_enc_out_size, device=device)
+        if use_critic_rnn:
+            critic_feature_size = self.actor_critic.critic_cores[0].get_out_size()
+        else:
+            critic_feature_size = critic_enc_out_size
+
+        critic_features = torch.zeros(agent_idx_mb.shape[0], critic_feature_size, device=device)
+
         for i in range(self.n_agents):
             mask = agent_idx_mb == i
-            if mask.any():
-                agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
-                critic_features[mask] = self.actor_critic.critic_encoders[i](agent_obs)
+            if not mask.any():
+                continue
+
+            agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
+            enc_out = self.actor_critic.critic_encoders[i](agent_obs)
+
+            if self.actor_critic.critic_projection is not None:
+                enc_out = self.actor_critic.critic_projection(enc_out)
+
+            if use_critic_rnn:
+                recurrence = self.cfg.recurrence
+                agent_indices = torch.where(mask)[0]
+                agent_indices_cpu = agent_indices.cpu()
+                chunk_dones = mb.dones_cpu[agent_indices_cpu]
+                chunk_valids = mb.valids[agent_indices_cpu].cpu()
+                done_or_invalid = torch.logical_or(chunk_dones, ~chunk_valids.bool()).float()
+
+                # Critic RNN starts from zero (not stored in rollout buffer)
+                rnn_state_size = self.cfg.rnn_size * self.cfg.rnn_num_layers
+                if self.cfg.rnn_type == "lstm":
+                    rnn_state_size *= 2
+                zero_rnn_states = torch.zeros(enc_out.shape[0], rnn_state_size, device=device)
+
+                seq, rnn_init, inv = build_rnn_inputs(enc_out, done_or_invalid, zero_rnn_states, recurrence)
+                core_seq, _ = self.actor_critic.critic_cores[i](seq, rnn_init)
+                core_out = build_core_out_from_seq(core_seq, inv)
+                critic_features[mask] = core_out
+            else:
+                critic_features[mask] = enc_out
 
         n_transitions = env_group_idx_mb.max().item() + 1
         grouped = _group_by_env(critic_features, agent_idx_mb, env_group_idx_mb, self.n_agents)
@@ -594,6 +637,65 @@ class HAPPOLearner(Learner):
             minibatches.append(indices.cpu().numpy())
         return minibatches
 
+    def _get_transition_rnn_minibatches(self, batch_size, experience_size, env_group_idx, n_transitions, env_idx, agent_idx):
+        """
+        Each minibatch contains temporally contiguous chunks of `recurrence` consecutive timesteps, with all N agents present at each timestep. This makes recurrence-aligned minibatches for critic BPTT. Groups by env_window, position (not env_idx) as theres multiple rollout windows from the same env in one training batch.
+        """
+        recurrence = self.cfg.recurrence
+        rollout = self.cfg.rollout
+        assert rollout % recurrence == 0, (
+            f"rollout ({rollout}) must be divisible by recurrence ({recurrence})"
+        )
+
+        # map each trans to its sample indice
+        sorted_idx = torch.argsort(env_group_idx)
+        counts = torch.bincount(env_group_idx, minlength=n_transitions)
+        transition_groups = torch.split(sorted_idx, counts.tolist())
+
+        # Get env_window and timestep from env_group_idx
+        # env_group_idx = env_window_group * rollout + timestep_idx
+        transition_env_window = torch.zeros(n_transitions, dtype=torch.long, device=env_idx.device)
+        transition_timestep = torch.zeros(n_transitions, dtype=torch.long, device=env_idx.device)
+        for t, group in enumerate(transition_groups):
+            gidx = env_group_idx[group[0]].item()
+            transition_env_window[t] = gidx // rollout
+            transition_timestep[t] = gidx % rollout
+
+        # Group trans
+        unique_windows = torch.unique(transition_env_window)
+
+        all_chunks = []  #each chunk = recurrence consecutive trans
+        for win_id in unique_windows:
+            win_mask = (transition_env_window == win_id)
+            win_transitions = torch.where(win_mask)[0]
+            win_timesteps = transition_timestep[win_transitions]
+            # sort temporally
+            sorted_order = torch.argsort(win_timesteps)
+            win_transitions_sorted = win_transitions[sorted_order]
+
+            assert len(win_transitions_sorted) == rollout, (f"Window {win_id.item()} has {len(win_transitions_sorted)} transitions, expected {rollout}")
+            for chunk_start in range(0, rollout, recurrence):
+                chunk_trans = win_transitions_sorted[chunk_start : chunk_start + recurrence]
+                all_chunks.append(chunk_trans)
+
+        # suffer
+        chunk_order = np.arange(len(all_chunks))
+        np.random.shuffle(chunk_order)
+
+        samples_per_chunk = recurrence * self.n_agents
+        chunks_per_batch = max(1, batch_size // samples_per_chunk)
+        minibatches = []
+        for i in range(0, len(all_chunks), chunks_per_batch):
+            batch_chunk_ids = chunk_order[i : i + chunks_per_batch]
+            indices = []
+            for c_id in batch_chunk_ids:
+                chunk_trans = all_chunks[c_id]
+                for t_id in chunk_trans:
+                    indices.append(transition_groups[t_id.item()])
+            indices = torch.cat(indices)
+            minibatches.append(indices.cpu().numpy())
+        return minibatches
+
     def _get_agent_params(self, agent_id):
         return (
             list(self.actor_critic.agent_encoders[agent_id].parameters())
@@ -602,26 +704,47 @@ class HAPPOLearner(Learner):
             + list(self.actor_critic.agent_action_params[agent_id].parameters())
         )
 
+    def _get_critic_params(self):
+        params = (list(self.actor_critic.centralized_critic.parameters()) + list(self.actor_critic.critic_encoders.parameters()))
+        if self.actor_critic.critic_cores is not None:
+            params += list(self.actor_critic.critic_cores.parameters())
+        if self.actor_critic.critic_projection is not None:
+            params += list(self.actor_critic.critic_projection.parameters())
+        return params
+
     def _compute_env_group_idx(self, agent_idx, env_idx, dataset_size):
         """
-        Compute group index from (env_idx, timestep) pairs. With batched_sampling=True, each _train() call processes 1 rollout window.
+        Compute group index from by position, n_agents consecutive traj share the same env and rollout window at each timestep
 
         :returns: [dataset_size] tensor mapping each sample to its transition group
         """
         rollout = self.cfg.rollout
         n_agents = self.n_agents
-        timestep_idx = torch.arange(dataset_size, device=env_idx.device) % rollout
-        # (env_idx, timestep) key so unique transition
-        composite_key = env_idx * rollout + timestep_idx
-        unique_keys, inverse = torch.unique(composite_key, return_inverse=True)
-        n_transitions = unique_keys.shape[0]
 
-        counts = torch.bincount(inverse, minlength=n_transitions)
+        arange = torch.arange(dataset_size, device=env_idx.device)
+        traj_idx = arange // rollout
+        timestep_idx = arange % rollout
+        # n_agents consecutive traj form one (env, window) group
+        env_window_group = traj_idx // n_agents
+
+        group_idx = env_window_group * rollout + timestep_idx
+        n_transitions = group_idx.max().item() + 1
+
+        counts = torch.bincount(group_idx, minlength=n_transitions)
         if not (counts == n_agents).all():
             bad = (counts != n_agents).nonzero(as_tuple=True)[0]
             raise RuntimeError(
                 f"env_group_idx: {bad.numel()} transitions have wrong agent count (expected {n_agents}, got counts {counts[bad[:5]].tolist()}). "
-                f"This likely means multiple rollout windows from the same env were combined in one training batch. HAPPO requires single-window batches."
+                f"dataset_size={dataset_size} must be divisible by n_agents*rollout={n_agents * rollout}."
             )
 
-        return inverse
+        # consecutive traj groups have same env_idx
+        traj_env = env_idx.view(-1, rollout)[:, 0]
+        n_traj = traj_env.shape[0]
+        if n_traj >= n_agents and n_traj % n_agents == 0:
+            grouped_env = traj_env.view(-1, n_agents)
+            if not (grouped_env == grouped_env[:, 0:1]).all():
+                bad_groups = (grouped_env != grouped_env[:, 0:1]).any(dim=1).nonzero(as_tuple=True)[0]
+                raise RuntimeError(f"Consecutive trajectory groups have mismatched env_idx at group(s) {bad_groups[:5].tolist()}.")
+
+        return group_idx
