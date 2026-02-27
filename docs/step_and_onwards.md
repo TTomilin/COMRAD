@@ -23,7 +23,7 @@ The process is Encoder -> Core -> Decoder -> ..... And the "......" is the proce
 ## Order of computations:
 Actor/critic head (decoder) -> Advantage -> Loss -> Backprop: {Gradient -> Weight update}
 
-Forward pass: 
+Forward pass:
 + Actor head -> policy logits/probabilities
 + Critic head -> Value estimate $V(s)$
 
@@ -33,7 +33,7 @@ Compute Advantage:
 + This "Advantage" function thing is just a concept, it can be implemented using many formulas, not tied to 1 fixed formula.
 	+ Advantage can be calculated with: Monte Carlo Advantage, TD Error, GAE, n-step average, etc.
 	+ In this project, we use vtrace for off-policy and GAE for on-policy
-+ $A=R+γV(s_{t+1})−V(s)$ (or $A=GAE(...)$), here $R$ is the **actual return** 
++ $A=R+γV(s_{t+1})−V(s)$ (or $A=GAE(...)$), here $R$ is the **actual return**
 + $s_{t+1}$ is next state after taking action $a$, while $s$ it current state
 
 

@@ -55,7 +55,7 @@ def _ensure_initialized(self):
 ```mermaid
 flowchart TB
     subgraph MAIN["MultiAgentEnv (Process)"]
-        
+
         subgraph mt["Main thread"]
             mt1["Gets actions"]
             mt2["Give tasks to workers in task_queue"]
