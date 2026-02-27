@@ -21,6 +21,10 @@ def get_rnn_size(cfg):
         # actor and critic need separate states
         size *= 2
 
+    if getattr(cfg, 'happo_critic_rnn', False) and cfg.use_rnn and str(getattr(cfg, 'algo', '')).upper() == 'HAPPO':
+        # HAPPO critic RNN needs its own states in the rollout buffer
+        size *= 2
+
     return size
 
 
