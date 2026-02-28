@@ -42,6 +42,9 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.core_death_penalty = core_death_penalty
         self.health_pickup_reward = health_pickup_reward
         self.team_spirit = team_spirit
+        self.core_proximity_reward = core_proximity_reward
+        self.away_penalty = away_penalty
+        self.defend_radius = defend_radius
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -132,11 +135,43 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if has_weapon and total_ammo <= 0:
             shaped_reward += self.no_ammo_penalty
 
+        # Spatial rewards: gradient based on distance from actual core position (USER2/USER3)
+        # Use manhattan distance
+        # If player runs too far away from the core they get punished
+        if current_hp > 0 and self.defend_radius > 0:
+            px = info.get("POSITION_X", 0)
+            py = info.get("POSITION_Y", 0)
+            cx = info.get("USER2", 0)
+            cy = info.get("USER3", 0)
+            dx = px - cx
+            dy = py - cy
+            dist = math.sqrt(dx * dx + dy * dy)
+            if dist <= self.defend_radius:
+                shaped_reward += self.core_proximity_reward * (1.0 - dist / self.defend_radius)
+            else:
+                shaped_reward += self.away_penalty * min(1.0, (dist - self.defend_radius) / self.defend_radius)
+
+        individual_reward = reward + shaped_reward
+        self.orig_env_reward += individual_reward
+
+
+        # Shared reward, so gradient flows through these and critic does credit assignment
+        if self.team_spirit > 0:
+            self._post_reward(individual_reward)
+            team_rewards = self._get_team_rewards()
+            if team_rewards is not None:
+                team_mean = sum(team_rewards) / len(team_rewards)
+                final_reward = (1.0 - self.team_spirit) * individual_reward + self.team_spirit * team_mean
+            else:
+                final_reward = individual_reward
+        else:
+            final_reward = individual_reward
+
         if terminated or truncated:
             info["true_objective"] = self.orig_env_reward
 
         self.sync_vars(info)
-        return obs, reward + shaped_reward, terminated, truncated, info
+        return obs, final_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
