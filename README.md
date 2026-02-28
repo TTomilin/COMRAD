@@ -2,8 +2,9 @@
 
 ## 0. to be removed
 + https://wandb.ai/comrad/marl_vizdoom/runs/ (and [this project for fair comparison runs](https://wandb.ai/comrad/comrad_jr))
-+ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD/runs
-+ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD
++ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD/runs/
++ https://wandb.ai/christinespring2020-eindhoven-university-of-technology/runs/
+
 
 ## 1. Installation
 
