@@ -79,7 +79,7 @@ def parse_args(argv=None, evaluation=False):
             algo_name = "IPPO"
         slurm_id = os.environ.get('SLURM_JOB_ID')
         jid = f"_j{slurm_id}" if slurm_id and os.environ.get('SLURM_JOB_NAME') else ""
-        final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}_{jid}"
+        final_cfg.experiment = f"{final_cfg.env}_{algo_name}_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}{jid}"
 
     return final_cfg
 
