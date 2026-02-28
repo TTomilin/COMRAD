@@ -109,7 +109,7 @@ DOOM_ENVS = [
         2100,
         num_agents=3,
         respawn_delay=1,
-        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+        extra_wrappers=[(ArmorySiegeRewardShaping, {"team_spirit": 0.0})], # Must be 0 for QMIX as mixer already does credit assignment
     ),
 
     DoomSpec(

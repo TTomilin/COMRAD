@@ -2,6 +2,8 @@ import gymnasium as gym
 import math
 
 class ArmorySiegeRewardShaping(gym.Wrapper):
+    shared = {} # keyed by (worker_index, vector_index)
+
     def __init__(
         self,
         env,
@@ -17,7 +19,12 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         ammo_use_penalty=0,
         no_ammo_penalty=0,
         weapon_keys=["WEAPON1", "WEAPON2"],
-        ammo_keys=["AMMO1", "AMMO2"]
+        ammo_keys=["AMMO1", "AMMO2"],
+        health_pickup_reward=0.01,
+        team_spirit=0.0,
+        core_proximity_reward=0.005,
+        away_penalty=-0.002,
+        defend_radius=350,
     ):
         super().__init__(env)
         self.core_alive_reward = core_alive_reward
@@ -33,8 +40,22 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.ammo_keys = ammo_keys
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
+        self.health_pickup_reward = health_pickup_reward
+        self.team_spirit = team_spirit
 
         self.prev_vars = {}
+        self.orig_env_reward = 0.0
+
+        self._ek = None
+        self.pid = getattr(env.unwrapped, 'player_id', None)
+
+    @property
+    def ek(self):
+        if self._ek is None:
+            worker_index = getattr(self.env.unwrapped, 'worker_index', 0)
+            vector_index = getattr(self.env.unwrapped, 'vector_index', 0)
+            self._ek = (worker_index, vector_index)
+        return self._ek
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -94,6 +115,10 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if current_hp <= 0 and prev_hp > 0:
             shaped_reward += self.death_penalty
 
+        # Health pickup
+        if current_hp > prev_hp and prev_hp > 0: # prev_hp > 0 to exclude respawn
+            shaped_reward += self.health_pickup_reward * (current_hp - prev_hp)
+
         diff_kills = info.get("KILLCOUNT", 0) - self.prev_vars.get("KILLCOUNT", 0)
         if diff_kills > 0:
             shaped_reward += self.kill_reward * diff_kills
@@ -107,13 +132,36 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if has_weapon and total_ammo <= 0:
             shaped_reward += self.no_ammo_penalty
 
+        if terminated or truncated:
+            info["true_objective"] = self.orig_env_reward
+
         self.sync_vars(info)
         return obs, reward + shaped_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.sync_vars(info)
+        self.orig_env_reward = 0.0
+        self._clear_shared()
         return obs, info
+
+    def _post_reward(self, reward):
+        ArmorySiegeRewardShaping.shared.setdefault(self.ek, {})[self.pid] = reward
+
+    def _get_team_rewards(self):
+        if self.ek not in ArmorySiegeRewardShaping.shared:
+            return None
+        rewards = ArmorySiegeRewardShaping.shared[self.ek]
+        if len(rewards) <= 1:
+            return None
+        return list(rewards.values())
+
+    def _clear_shared(self):
+        if self.ek in ArmorySiegeRewardShaping.shared:
+            shared = ArmorySiegeRewardShaping.shared[self.ek]
+            shared.pop(self.pid, None)
+            if not shared:
+                ArmorySiegeRewardShaping.shared.pop(self.ek, None)
 
     def sync_vars(self, info):
         self.prev_vars = {
