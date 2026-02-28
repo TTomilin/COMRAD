@@ -1,3 +1,6 @@
+Idea: voronoi-trained agents -> evaluate on orthogonal map -> should perform better
+
+
 Voronoi-based path planning based on visibility and kill/death ratio tactical component - https://ceur-ws.org/Vol-2268/paper14.pdf
 
 Leveraging Procedural Generation to Benchmark Reinforcement Learning - https://arxiv.org/abs/1912.01588 (ProcGen)
