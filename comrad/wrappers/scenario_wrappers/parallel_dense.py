@@ -43,16 +43,20 @@ class ParallelReward(gym.Wrapper):
         self.pnzwop = False  # Partner next zone while standing on plate
         self.plate_state = "0"  # 0: Not pressed yet -> 1: Pressed/ing -> 2: Rewarded
 
-        worker_index = getattr(env.unwrapped, "worker_index", None)
-        vector_index = getattr(env.unwrapped, "vector_index", None)
-        self.ek = (worker_index, vector_index)
+        self._ek = None
         self.pid = getattr(env.unwrapped, "player_id", None)
         self.orig_env_reward = 0.0
 
+    @property
+    def ek(self):
+        if self._ek is None:
+            worker_index = getattr(self.env.unwrapped, "worker_index", 0)
+            vector_index = getattr(self.env.unwrapped, "vector_index", 0)
+            self._ek = (worker_index, vector_index)
+        return self._ek
+
     def update_shared(self, zone):
-        if self.ek not in ParallelReward.shared:
-            ParallelReward.shared[self.ek] = {"agents": {}}
-        ParallelReward.shared[self.ek]["agents"][self.pid] = {"zone": zone}
+        ParallelReward.shared.setdefault(self.ek, {"agents": {}})["agents"][self.pid] = {"zone": zone}
 
     def get_partner_zone(self) -> int | None:
         if self.ek not in ParallelReward.shared:
@@ -66,10 +70,9 @@ class ParallelReward(gym.Wrapper):
     def clear_shared(self):
         if self.ek in ParallelReward.shared:
             shared = ParallelReward.shared[self.ek]
-            if self.pid in shared["agents"]:
-                del shared["agents"][self.pid]
+            shared["agents"].pop(self.pid, None)
             if not shared["agents"]:
-                del ParallelReward.shared[self.ek]
+                ParallelReward.shared.pop(self.ek, None)
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
