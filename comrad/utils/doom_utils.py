@@ -11,18 +11,18 @@ from sample_factory.envs.env_wrappers import (
     TimeLimitWrapper,
 )
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
-from sf.doom.action_space import (
+from comrad.envs.action_space import (
     doom_action_space_pitfall,
     doom_action_space_parallel,
     doom_action_space_armory_siege,
     doom_action_space_lavapit2,
     doom_action_space_ammo_carrier,
 )
-from sf.doom.doom_gym import VizdoomEnv
-from sf.doom.wrappers.additional_input import DoomAdditionalInput
-from sf.doom.wrappers.observation_space import SetResolutionWrapper, resolutions
-from sf.doom.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping
-from sf.doom.wrappers.video_recorder import VideoLoggerWrapper
+from comrad.envs.doom_gym import VizdoomEnv
+from comrad.wrappers.additional_input import DoomAdditionalInput
+from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
+from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping
+from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
     def __init__(
@@ -168,7 +168,7 @@ def make_doom_env_impl(
     else:
         timelimit = cfg.timelimit if cfg.timelimit is not None else doom_spec.timelimit
 
-        from sf.doom.multiplayer.doom_multiagent import VizdoomEnvMultiplayer
+        from comrad.envs.multiagent.doom_multiagent import VizdoomEnvMultiplayer
 
         env = VizdoomEnvMultiplayer(
             doom_spec.action_space,
@@ -232,7 +232,7 @@ def make_doom_env_impl(
     # Skip temp env (those with player_id=-1) used by MultiAgentEnv.__init__() for obs_space query
     # Should be fine without it as that setting is only for player testing.
     if str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO' and player_id is not None and player_id >= 0:
-        from sf.doom.wrappers.agent_id_wrapper import AgentIDWrapper
+        from comrad.wrappers.agent_id_wrapper import AgentIDWrapper
         _num_agents = num_agents if num_agents is not None else doom_spec.num_agents
         env = AgentIDWrapper(env, agent_index=player_id, num_agents=_num_agents)
 
@@ -288,7 +288,7 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
     if is_multiagent:
         # create a wrapper that treats multiple game instances as a single multi-agent environment
 
-        from sf.doom.multiplayer.doom_multiagent_wrapper import MultiAgentEnv
+        from comrad.envs.multiagent.doom_multiagent_wrapper import MultiAgentEnv
 
         env = MultiAgentEnv(
             num_agents=num_agents,
@@ -309,7 +309,7 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             env.observation_space = gym.spaces.Dict(spaces)
     else:
         # if we have only one agent, there's no need for multi-agent wrapper
-        from sf.doom.multiplayer.doom_multiagent_wrapper import init_multiplayer_env
+        from comrad.envs.multiagent.doom_multiagent_wrapper import init_multiplayer_env
 
         env = init_multiplayer_env(make_env_func, player_id=0, env_config=env_config)
 

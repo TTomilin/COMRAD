@@ -1,8 +1,8 @@
 import cv2
 from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.doom_params import add_doom_env_args, doom_override_defaults
-from sf.doom.doom_utils import make_doom_env
+from comrad.envs.doom_params import add_doom_env_args, doom_override_defaults
+from comrad.utils.doom_utils import make_doom_env
 
 def main():
     argv = ["--env=safe_ground2", "--num_agents=2", "--res_w=1920", "--res_h=1080"]

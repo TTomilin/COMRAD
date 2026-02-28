@@ -3,14 +3,14 @@ import math
 
 class ArmorySiegeRewardShaping(gym.Wrapper):
     def __init__(
-        self, 
-        env, 
+        self,
+        env,
         core_alive_reward=0,
         core_damage_penalty=-0.01,
-        death_penalty=-1,         
+        death_penalty=-1,
         weapon_pickup_reward=0.3,
-        first_weapon_reward=1,    
-        ammo_pickup_reward=0.012,     
+        first_weapon_reward=1,
+        ammo_pickup_reward=0.012,
         core_death_penalty=-7.0,
         kill_reward=3,
         hit_reward=0.1,
@@ -33,7 +33,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.ammo_keys = ammo_keys
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
-        
+
         self.prev_vars = {}
 
     def step(self, action):
@@ -41,13 +41,13 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
-        
+
         if not self.prev_vars:
             self.sync_vars(info)
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = 0.0
-        
+
         current_core = info.get("USER1", 0)
         if current_core > 0:
             shaped_reward += self.core_alive_reward
@@ -58,7 +58,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
             shaped_reward += self.core_damage_penalty * abs(diff_core)
             if diff_core < -100:
                 print(f"HUGE DROP: {prev_core} -> {current_core}")
-            
+
         if current_core <= 0:
             terminated = True
             if prev_core > 0:
@@ -66,7 +66,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
 
         prev_weapon_count = sum(1 for k in self.weapon_keys if self.prev_vars.get(k, 0) > 0)
-        
+
         newly_acquired_weapons = []
         for wk in self.weapon_keys:
             if info.get(wk, 0) > 0 and self.prev_vars.get(wk, 0) == 0:
@@ -77,11 +77,11 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
                 shaped_reward += self.first_weapon_reward
                 if len(newly_acquired_weapons) > 1:
                     shaped_reward += self.weapon_pickup_reward * (len(newly_acquired_weapons) - 1)
-            
+
             else:
                 shaped_reward += self.weapon_pickup_reward * len(newly_acquired_weapons)
 
-        
+
         for ak in self.ammo_keys:
             diff_ammo = info.get(ak, 0) - self.prev_vars.get(ak, 0)
             if diff_ammo > 0:
@@ -109,7 +109,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
         self.sync_vars(info)
         return obs, reward + shaped_reward, terminated, truncated, info
-    
+
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.sync_vars(info)

@@ -6,7 +6,7 @@ from sample_factory.algo.learning.learner_happo import HAPPOLearner
 from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 
-from sf.doom.happo_model import _group_by_env
+from comrad.models.happo_model import _group_by_env
 
 from .conftest import _make_happo_model, _make_obs_batch
 

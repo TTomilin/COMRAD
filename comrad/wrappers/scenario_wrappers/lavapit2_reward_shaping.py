@@ -38,7 +38,7 @@ class LavapitRewardShaping(gym.Wrapper):
 
         if based_rewards is None:
             return obs, based_rewards, terminations, truncations, infos
-        
+
         r = float(based_rewards)
         x = infos.get(self.pos_key, None)
         xp = self._prev_x
@@ -59,12 +59,12 @@ class LavapitRewardShaping(gym.Wrapper):
         # Death penalty
         dead_now = bool(infos.get(self.dead_key, 0))
         just_died = not self._prev_dead and dead_now
-        
+
         if just_died:
             r += self.death_penalty
             self._bridges_crossed = set()  # Reset bridge tracking on death
 
         self._prev_x = x
         self._prev_dead = dead_now
-        
+
         return obs, r, terminations, truncations, infos

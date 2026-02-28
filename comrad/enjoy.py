@@ -1,7 +1,7 @@
 import sys
 
 from sample_factory.enjoy import enjoy
-from sf.train import parse_args, register_vizdoom_components, register_model_factory
+from comrad.train import parse_args, register_vizdoom_components, register_model_factory
 
 
 def main():
@@ -10,7 +10,7 @@ def main():
 
     # num_agents may be -1 (default value)
     if cfg.num_agents < 1:
-        from sf.doom.doom_utils import get_num_agents
+        from comrad.utils.doom_utils import get_num_agents
         cfg.num_agents = get_num_agents(cfg, cfg.env)
 
     register_model_factory(cfg)

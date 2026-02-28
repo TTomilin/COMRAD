@@ -45,6 +45,9 @@ wandb/
 sf/jobs
 sf/templates
 sf/send.sh
+comrad/jobs
+comrad/templates
+comrad/send.sh
 
 # misc
 asdf.py

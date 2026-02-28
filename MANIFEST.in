@@ -1,5 +1,5 @@
 include README.md
-recursive-include sf/doom/scenarios *.cfg *.wad
-recursive-include sf/docs *.md
-recursive-include sf/experiments *.md
-recursive-include sf/templates *.sh
+recursive-include comrad/scenarios *.cfg *.wad
+recursive-include comrad/docs *.md
+recursive-include comrad/experiments *.md
+recursive-include comrad/templates *.sh

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import gymnasium as gym
 
-from sf.doom.doom_utils import DOOM_ENVS
+from comrad.utils.doom_utils import DOOM_ENVS
 
 
 class TestRewardShapingMissesTeamTermination:
@@ -15,7 +15,7 @@ class TestRewardShapingMissesTeamTermination:
     def test_surviving_agent_should_get_true_objective_on_team_death(self):
         """When agent A dies and wipe_when_one_die terminates agent B,
         agent B's wrapper should still set true_objective."""
-        from sf.doom.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfallRewardShaping
+        from comrad.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfallRewardShaping
 
         class FakeEnv:
             def __init__(self):
