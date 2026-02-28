@@ -8,7 +8,7 @@ from sample_factory.algo.utils.action_distributions import get_action_distributi
 from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 
-from sf.doom.happo_model import make_happo_actor_critic
+from comrad.models.happo_model import make_happo_actor_critic
 
 from .conftest import (
     _make_happo_cfg,

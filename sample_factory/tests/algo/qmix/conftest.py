@@ -11,7 +11,7 @@ from sample_factory.algo.utils.joint_sequence_replay_buffer import JointSequence
 from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.cfg.arguments import preprocess_cfg
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.qmix_model import QMixAgentNet, QMixMixer, make_mixer
+from comrad.models.qmix_model import QMixAgentNet, QMixMixer, make_mixer
 
 
 # ---------------------------------------------------------------------------

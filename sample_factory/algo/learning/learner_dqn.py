@@ -153,7 +153,7 @@ class DQNLearner(Learner):
             if "time_outs" in buff:
                 transitions["time_outs"] = buff["time_outs"].reshape(-1).float()
 
-            # This works suprisingly well with slow update: -m sf.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=1024 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=5000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=16 --target_update_tau=0.005 --dqn_reward_clip=1.0 --learning_rate=5e-5
+            # This works suprisingly well with slow update: -m comrad.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=1024 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=5000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=16 --target_update_tau=0.005 --dqn_reward_clip=1.0 --learning_rate=5e-5
             # valids = buff["policy_id"] == self.policy_id
             # valids &= self.train_step - buff["policy_version"] < self.cfg.max_policy_lag
             # valids = valids.reshape(-1)

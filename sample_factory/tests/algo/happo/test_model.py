@@ -7,7 +7,7 @@ import torch.nn as nn
 from sample_factory.algo.utils.context import sf_global_context
 from sample_factory.model.model_utils import get_rnn_size
 
-from sf.doom.happo_model import _group_by_env, make_happo_actor_critic
+from comrad.models.happo_model import _group_by_env, make_happo_actor_critic
 
 from .conftest import (
     _make_happo_cfg,

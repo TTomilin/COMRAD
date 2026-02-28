@@ -5,7 +5,7 @@ import torch
 
 from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict
-from sf.doom.qmix_model import QMixAgentNet, QMixActorCritic
+from comrad.models.qmix_model import QMixAgentNet, QMixActorCritic
 
 
 def _make_agent_net_multi_head():

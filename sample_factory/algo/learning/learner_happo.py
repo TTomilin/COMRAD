@@ -29,7 +29,7 @@ from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import InitModelData
 from sample_factory.utils.utils import log
 
-from sf.doom.happo_model import _group_by_env
+from comrad.models.happo_model import _group_by_env
 
 
 class HAPPOLearner(Learner):

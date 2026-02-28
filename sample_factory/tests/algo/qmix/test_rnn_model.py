@@ -8,7 +8,7 @@ import torch
 from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.qmix_model import QMixAgentNet, make_mixer
+from comrad.models.qmix_model import QMixAgentNet, make_mixer
 
 from .conftest import (
     SumMixer,

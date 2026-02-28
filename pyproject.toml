@@ -60,7 +60,7 @@ dev = [
 include-package-data = true
 
 [tool.setuptools.packages.find]
-include = ["sf*", "sample_factory*"]
+include = ["comrad*", "sample_factory*"]
 
 [tool.ruff]
 line-length = 120
