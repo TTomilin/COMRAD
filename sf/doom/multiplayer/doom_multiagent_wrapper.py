@@ -20,6 +20,14 @@ from sf.doom.doom_gym import doom_lock_file
 from sf.doom.doom_render import concat_grid
 from sf.doom.multiplayer.doom_multiagent import DEFAULT_UDP_PORT, find_available_port
 
+_CRASHED = object() # await_tasks() checks for this to check if the whole game group is dead
+class _GameGroupCrashError(Exception):
+    """
+    All vizdoom games have one UDP game. If one crashes, the others cannot recover independently, the entire
+    group must be killed and reinitialised on a fresh port.
+    This should be a separate Exception class
+    """
+
 
 def retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=False):
     def decorator(func):
@@ -31,7 +39,7 @@ def retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_r
                 except exception_class as e:
                     # This accesses the self instance variable
                     multiagent_wrapper_obj = args[0]
-                    multiagent_wrapper_obj.is_initialized = False
+                    multiagent_wrapper_obj.initialized = False
                     multiagent_wrapper_obj.close()
 
                     # This is done to reset if it is in the step function
@@ -155,26 +163,40 @@ class MultiAgentEnvWorker:
                 self._terminate(env)
                 break
 
-            # ViZDoom 1.3.0 causes ViZDoomErrorException here
-            # Catching the error and recreates env doesnt work as in multiplayer mode the new instance cannot reconnect to the existing peer player's game and the port is still in use
-            # so the peer's game state is mismatched
-            results = None
-            if task_type == TaskType.RESET:
-                results = env.reset(**data) if data else env.reset()
-            elif task_type == TaskType.INFO:
-                results = self._get_info(env)
-            elif task_type == TaskType.STEP or task_type == TaskType.STEP_UPDATE:
-                # collect obs, reward, terminated, truncated, and info
-                action = data
-                env.unwrapped.update_state = task_type == TaskType.STEP_UPDATE
-                results = env.step(action)
-            elif task_type == TaskType.SET_ATTR:
-                player_id, attr_chain, value = data
-                self._set_env_attr(env, player_id, attr_chain, value)
-            else:
-                raise Exception(f"Unknown task type {task_type}")
+            # ViZDoom 1.3.0 multiplayer crashes (signal 11) during new_episode() and advance_action(). When one process in a multiplayer game dies, the peers cant recover on their own because the UDP game is gone
+            # So we signal _CRASHED back to the main thread so it can kill the whole group and reinit new one on new port
+            # Another fix is on vizdoom codebase as reported here:
+            # https://github.com/Farama-Foundation/ViZDoom/issues/693
+            try:
+                results = None
+                if task_type == TaskType.RESET:
+                    results = env.reset(**data) if data else env.reset()
+                elif task_type == TaskType.INFO:
+                    results = self._get_info(env)
+                elif task_type == TaskType.STEP or task_type == TaskType.STEP_UPDATE:
+                    action = data
+                    env.unwrapped.update_state = task_type == TaskType.STEP_UPDATE
+                    results = env.step(action)
+                elif task_type == TaskType.SET_ATTR:
+                    player_id, attr_chain, value = data
+                    self._set_env_attr(env, player_id, attr_chain, value)
+                else:
+                    raise Exception(f"Unknown task type {task_type}")
 
-            self.result_queue.put(results)
+                self.result_queue.put(results)
+            except Exception as exc:
+                log.error(
+                    "ViZDoom worker player_id=%d crashed during %s: %s",
+                    self.player_id, task_type, exc,
+                )
+                self.result_queue.put(_CRASHED)
+                # Cleanup
+                try:
+                    self._terminate(env)
+                except Exception:
+                    pass
+                # Proc dead
+                break # Exit the worker loop
 
 
 class MultiAgentEnv(gym.Env, RewardShapingInterface):
@@ -288,6 +310,12 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                 timeout=0.2 if timeout is None else timeout,
                 msg=f"Takes a surprisingly long time to process task {task_type}, retry...",
             )
+
+            # A crashed worker puts _CRASHED on its queue
+            # The whole multiplayer game should be killed now
+            if results is _CRASHED:
+                log.error(f"Game group crash detected (worker {i}). Tearing down all {self.num_agents} workers and reinitializing.")
+                raise _GameGroupCrashError(f"ViZDoom worker {i} crashed during {task_type}")
 
             if not isinstance(results, (tuple, list)):
                 results = [results]
@@ -433,10 +461,19 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         if self.workers is not None:
             # log.info('Stopping multiagent env %d...', self.env_config.worker_index)
             for worker in self.workers:
-                worker.task_queue.put((None, TaskType.TERMINATE))
+                try:
+                    worker.task_queue.put((None, TaskType.TERMINATE))
+                except Exception:
+                    pass
                 time.sleep(0.1)
             for worker in self.workers:
-                worker.process.join()
+                worker.process.join(timeout=5)
+                if worker.process.is_alive():
+                    log.warning(
+                        f"Worker player_id={worker.player_id} did not exit in time (stuck in vizdoom C++ code). "
+                        "Thread will be abandoned and auto clean up on process exit."
+                    )
+            self.workers = None
 
     def set_env_attr(self, agent_idx, attr_chain, value):
         data = (agent_idx, attr_chain, value)
