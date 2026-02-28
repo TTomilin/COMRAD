@@ -7,7 +7,7 @@ import torch
 from sample_factory.algo.sampling.batched_sampling import BatchedVectorEnvRunner
 from sample_factory.algo.utils.misc import EPISODIC
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.video_uploader import upload_video
+from comrad.utils.video_uploader import upload_video
 
 
 class _DummyRunner:

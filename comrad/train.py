@@ -10,12 +10,12 @@ from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
 from sample_factory.envs.env_utils import register_env
 from sample_factory.train import make_runner
 
-from sf.doom.doom_model import make_vizdoom_encoder
-from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
-from sf.doom.doom_utils import DOOM_ENVS, make_doom_env_from_spec
-from sf.doom.video_uploader import upload_video
-from sf.doom.mappo_model import make_mappo_actor_critic
-from sf.doom.qmix_model import make_qmix_actor_critic
+from comrad.models.doom_model import make_vizdoom_encoder
+from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
+from comrad.utils.doom_utils import DOOM_ENVS, make_doom_env_from_spec
+from comrad.utils.video_uploader import upload_video
+from comrad.models.mappo_model import make_mappo_actor_critic
+from comrad.models.qmix_model import make_qmix_actor_critic
 
 
 def register_vizdoom_envs():
@@ -41,7 +41,7 @@ def register_model_factory(cfg):
         if str(getattr(cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
             global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
         elif str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO':
-            from sf.doom.happo_model import make_happo_actor_critic
+            from comrad.models.happo_model import make_happo_actor_critic
             global_model_factory().register_actor_critic_factory(make_happo_actor_critic)
         else:
             # MAPPO, IPPO
@@ -89,7 +89,7 @@ def main():
     cfg = parse_args()
 
     if cfg.num_agents < 1:
-        from sf.doom.doom_utils import get_num_agents
+        from comrad.utils.doom_utils import get_num_agents
         n_agents = get_num_agents(cfg, cfg.env)
         cfg.num_agents = n_agents
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 # import json
 # from sample_factory.utils.attr_dict import AttrDict
-# from sf.doom.doom_utils import make_doom_env
+# from comrad.utils.doom_utils import make_doom_env
 
 # cfg_dict=json.load(open('train_dir/pitfall_399c/config.json'))
 # cfg=AttrDict(cfg_dict)

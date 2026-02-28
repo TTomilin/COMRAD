@@ -30,7 +30,7 @@ class DoomMWHRewardShaping(gym.Wrapper):
 
         # Determine goal type for all agents, type index corresponds to user
         # +10 for correct treasure collection
-        # -0.2 every game tics 
+        # -0.2 every game tics
         # If no treasure collected in a step type stays at None
         type = None
         if d1 > 0:

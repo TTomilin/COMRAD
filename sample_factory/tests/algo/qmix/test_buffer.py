@@ -5,7 +5,7 @@ from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.qmix_model import QMixAgentNet
+from comrad.models.qmix_model import QMixAgentNet
 
 
 @pytest.fixture
@@ -117,7 +117,7 @@ class TestActionMask:
     def _make_actor_critic(self):
         import gymnasium as gym
         from sample_factory.utils.attr_dict import AttrDict
-        from sf.doom.qmix_model import QMixActorCritic
+        from comrad.models.qmix_model import QMixActorCritic
         cfg = AttrDict({
             'encoder_conv_architecture': 'convnet_simple',
             'encoder_conv_mlp_layers': [],
@@ -198,7 +198,7 @@ class TestBufferSingleThreadedAccess:
 class TestQMIXMonotonicity:
 
     def test_mixing_weights_non_negative(self):
-        from sf.doom.qmix_model import QMixMixer
+        from comrad.models.qmix_model import QMixMixer
         mixer = QMixMixer(num_agents=2, state_dim=8, embed_dim=4)
         agent_qs = torch.randn(4, 2)
         state = torch.randn(4, 8)

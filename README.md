@@ -30,14 +30,14 @@ pre-commit install
 
 ## 2. Training Commands
 
-The primary training script is `sf.train`.
+The primary training script is `comrad.train`.
 
 ### Algorithms
 
 #### IPPO (Independent PPO)
 
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=APPO \
     --train_for_env_steps=5000
@@ -48,7 +48,7 @@ python -m sf.train \
 #### MAPPO
 
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=MAPPO \
     --train_for_env_steps=5000
@@ -59,7 +59,7 @@ python -m sf.train \
 #### HAPPO
 
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=HAPPO \
     --num_agents=N \
@@ -77,7 +77,7 @@ python -m sf.train \
 #### IDQN (Independent DQN)
 
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=DQN \
     --use_rnn=False \
@@ -88,7 +88,7 @@ python -m sf.train \
 For training on HPC, I tuned with these parameters (this config technically edges 32GB RAM):
 ```bash
 # Single agent
-python -m sf.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=50000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --dqn_reward_clip=1.0 --train_frequency=8
+python -m comrad.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=50000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --dqn_reward_clip=1.0 --train_frequency=8
 
 # Multi agent
 # Same thing but num_agents=2
@@ -111,7 +111,7 @@ Note:
 
 #### VDN
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=VDN \
     --use_rnn=False \
@@ -124,7 +124,7 @@ This automatically set `--mixer="vdn"`. One can also use `--algo=QMIX --mixer=vd
 
 #### QMIX
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=QMIX \
     --use_rnn=False \
@@ -137,7 +137,7 @@ This automatically set `--mixer="qmix"` as that's the default value.
 
 #### VDN/QMIX + RNN (GRU)
 ```bash
-python -m sf.train \
+python -m comrad.train \
     --env=doom_pitfall \
     --algo=QMIX \
     --use_rnn=True --rnn_type=gru --rnn_size=64 --rollout=16 \
@@ -162,7 +162,7 @@ python -m sf.train \
 
 ### MAPPO
 ```bash
-python -m sf.train \
+python -m comrad.train \
   --env=doom_pitfall \
   --algo=APPO \
   --train_for_seconds=18000 \
@@ -183,13 +183,13 @@ python -m sf.train \
 
 ### QMIX
 ```bash
-python -m sf.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=3600 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --replay_buffer_size=200000 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True
+python -m comrad.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=3600 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --replay_buffer_size=200000 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True
 ```
 
 ### QMIX + RNN (GRU)
 rnn_size is only 256 as mixer also adds params
 ```bash
-python -m sf.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=43200 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=True --rnn_type=gru --rnn_size=256 --rollout=32 --gamma=0.99 --learning_starts=50000 --qmix_sequence_batch_size=64 --replay_buffer_size=500000 --epsilon_decay_steps=20000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True --per=False --actor_critic_share_weights=True
+python -m comrad.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=43200 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=True --rnn_type=gru --rnn_size=256 --rollout=32 --gamma=0.99 --learning_starts=50000 --qmix_sequence_batch_size=64 --replay_buffer_size=500000 --epsilon_decay_steps=20000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True --per=False --actor_critic_share_weights=True
 ```
 
 ## 4. Record Video
@@ -205,14 +205,14 @@ train_dir/<experiment>/
 
 ```bash
 # 1 episode at 720p
-python -m sf.record_video --env=doom_pitfall --experiment=my_experiment
+python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment
 
 # 1080p with deterministic actions
-python -m sf.record_video --env=doom_pitfall --experiment=my_experiment \
+python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment \
     --resolution=1920x1080 --eval_deterministic=True
 
 # Best checkpoint, 5 episodes, custom output
-python -m sf.record_video --env=doom_pitfall --experiment=my_experiment \
+python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment \
     --load_checkpoint_kind=best --max_num_episodes=5 --output_dir=./videos
 
 # Output: `{output_dir}/{video_prefix}_{ENV_INITIALS}_{ALGO}_{resolution}.mp4`
@@ -223,15 +223,15 @@ python -m sf.record_video --env=doom_pitfall --experiment=my_experiment \
 Run multiple experiments in parallel
 
 ```bash
-python -m sample_factory.launcher.run --run=sf.train_all --backend=processes --max_parallel=4 --pause_between=1
+python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes --max_parallel=4 --pause_between=1
 ```
 
 ## 6. Main files
-- **Scenarios:** `sf/doom/doom_utils.py` (Defines `DOOM_ENVS`)
-- **Reward Shaping:** `sf/doom/wrappers/scenario_wrappers/`
-- **Player init, ZDoom flags:** `sf/doom/multiplayer/doom_multiagent.py`
-- **Wrapper for game instances:** `sf/doom/multiplayer/doom_multiagent_wrapper.py`
-- **Config:** `sample_factory/cfg/cfg.py` + `sf/doom/doom_params.py`
+- **Scenarios:** `comrad/utils/doom_utils.py` (Defines `DOOM_ENVS`)
+- **Reward Shaping:** `comrad/wrappers/scenario_wrappers/`
+- **Player init, ZDoom flags:** `comrad/envs/multiagent/doom_multiagent.py`
+- **Wrapper for game instances:** `comrad/envs/multiagent/doom_multiagent_wrapper.py`
+- **Config:** `sample_factory/cfg/cfg.py` + `comrad/envs/doom_params.py`
 
 ## 7. Side Notes
 - Default obs shape is `(3, 72, 128)`.

@@ -3,7 +3,7 @@ from typing import Optional
 
 from sample_factory.utils.network import is_udp_port_available
 from sample_factory.utils.utils import log
-from sf.doom.doom_gym import VizdoomEnv
+from comrad.envs.doom_gym import VizdoomEnv
 
 DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
 # log.info('Default UDP port is %r', DEFAULT_UDP_PORT)

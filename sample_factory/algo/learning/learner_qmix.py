@@ -25,7 +25,7 @@ from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import Config, InitModelData, PolicyID
 from sample_factory.utils.utils import log
 
-from sf.doom.qmix_model import QMixAgentNet, QMixActorCritic
+from comrad.models.qmix_model import QMixAgentNet, QMixActorCritic
 
 
 class QMixLearner(Learner):

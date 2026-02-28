@@ -24,8 +24,8 @@ from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import Config, StatusCode
 from sample_factory.utils.utils import experiment_dir, log
 
-from sf.train import register_vizdoom_components, register_model_factory
-from sf.doom.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
+from comrad.train import register_vizdoom_components, register_model_factory
+from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
 
 AVAILABLE_RESOLUTIONS = [
     "640x360", "640x480", "800x450", "800x600",

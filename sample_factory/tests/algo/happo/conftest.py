@@ -14,13 +14,13 @@ from sample_factory.algo.utils.tensor_dict import TensorDict
 from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 
-from sf.doom.happo_model import (
+from comrad.models.happo_model import (
     HAPPOActorCritic,
     _group_by_env,
     make_happo_actor_critic,
     remove_agentid,
 )
-from sf.doom.wrappers.agent_id_wrapper import AgentIDWrapper
+from comrad.wrappers.agent_id_wrapper import AgentIDWrapper
 from sample_factory.algo.learning.learner_happo import HAPPOLearner
 
 

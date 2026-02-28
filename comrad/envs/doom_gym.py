@@ -122,7 +122,7 @@ class VizdoomEnv(gym.Env):
         if os.path.isabs(config_file):
             self.config_path = config_file
         else:
-            scenarios_dir = join(os.path.dirname(__file__), "scenarios")
+            scenarios_dir = join(os.path.dirname(__file__), os.pardir, "scenarios")
             self.config_path = join(scenarios_dir, config_file)
             if not os.path.isfile(self.config_path):
                 log.warning(

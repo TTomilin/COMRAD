@@ -1,11 +1,11 @@
 import sys
 import json
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.doom_utils import make_doom_env
+from comrad.utils.doom_utils import make_doom_env
 
 # import vizdoom as vzd
 # game = vzd.DoomGame()
-# game.load_config("sf/doom/scenarios/prot_beta_long.cfg")
+# game.load_config("comrad/doom/scenarios/prot_beta_long.cfg")
 # game.init()
 
 sys.argv = sys.argv[:1]

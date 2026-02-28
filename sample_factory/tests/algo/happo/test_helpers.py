@@ -3,8 +3,8 @@ import numpy as np
 import pytest
 import torch
 
-from sf.doom.happo_model import _group_by_env, remove_agentid
-from sf.doom.wrappers.agent_id_wrapper import AgentIDWrapper
+from comrad.models.happo_model import _group_by_env, remove_agentid
+from comrad.wrappers.agent_id_wrapper import AgentIDWrapper
 
 from .conftest import _make_obs_space
 

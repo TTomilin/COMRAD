@@ -16,9 +16,9 @@ from filelock import FileLock
 from sample_factory.algo.utils.rl_utils import make_dones
 from sample_factory.envs.env_utils import RewardShapingInterface, get_default_reward_shaping
 from sample_factory.utils.utils import log
-from sf.doom.doom_gym import doom_lock_file
-from sf.doom.doom_render import concat_grid
-from sf.doom.multiplayer.doom_multiagent import DEFAULT_UDP_PORT, find_available_port
+from comrad.envs.doom_gym import doom_lock_file
+from comrad.utils.doom_render import concat_grid
+from comrad.envs.multiagent.doom_multiagent import DEFAULT_UDP_PORT, find_available_port
 
 _CRASHED = object() # await_tasks() checks for this to check if the whole game group is dead
 class _GameGroupCrashError(Exception):

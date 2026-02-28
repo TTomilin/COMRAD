@@ -1,7 +1,3 @@
-# CMake and building output
-**/bin
-**/build
-
 *.egg-info
 
 # Python
@@ -23,7 +19,6 @@ wheelhouse
 *.zip
 **/doom2.wad
 **/doom.wad
-**/freedoom2.wad
 **/freedoom1.wad
 **/freedm.wad
 **_vizdoom.ini
@@ -45,6 +40,9 @@ wandb/
 sf/jobs
 sf/templates
 sf/send.sh
+comrad/jobs
+comrad/templates
+comrad/send.sh
 
 # misc
 asdf.py

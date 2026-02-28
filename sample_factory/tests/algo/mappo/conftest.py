@@ -5,7 +5,7 @@ import torch
 
 from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
-from sf.doom.mappo_model import MAPPOActorCritic, make_mappo_actor_critic
+from comrad.models.mappo_model import MAPPOActorCritic, make_mappo_actor_critic
 
 
 def _make_cfg(
