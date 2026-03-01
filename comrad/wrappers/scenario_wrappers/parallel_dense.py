@@ -135,7 +135,7 @@ class ParallelReward(gym.Wrapper):
         self.update_shared(zone)
         self.prev_zone = zone
         self.was_on_plate = on_plate
-        self.orig_env_reward += r
+        self.orig_env_reward += float(reward)
 
         if terminated or truncated:
             info["true_objective"] = self.orig_env_reward

@@ -48,6 +48,7 @@ class DoomPitfallRewardShaping(gym.Wrapper):
         if based_rewards is None: return obs, based_rewards, terminations, truncations, infos
 
         r = float(based_rewards)
+        self.orig_env_reward += r
         x = infos.get(self.pos_key, None)
         xp = self._prev_x
 
@@ -73,8 +74,6 @@ class DoomPitfallRewardShaping(gym.Wrapper):
         if self.goal_x is not None and not self._goal_given and x is not None and x > float(self.goal_x):
             r += self.goal_reward
             self._goal_given = True
-
-        self.orig_env_reward += r
         self._prev_x = x
         self._prev_dead = dead_now
 

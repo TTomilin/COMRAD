@@ -183,8 +183,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
                 shaped_reward += (current_core / max_hp) * self.survival_bonus
 
         individual_reward = reward + shaped_reward
-        self.orig_env_reward += individual_reward
-        # please check if this should be individual_reward or just reward!!
+        self.orig_env_reward += reward
 
 
         # Shared reward, so gradient flows through these and critic does credit assignment
