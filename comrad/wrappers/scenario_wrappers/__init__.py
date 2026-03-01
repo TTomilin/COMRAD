@@ -5,3 +5,4 @@ from comrad.wrappers.scenario_wrappers.parallel import ParallelReward
 from comrad.wrappers.scenario_wrappers.armory_siege import ArmorySiegeRewardShaping
 from comrad.wrappers.scenario_wrappers.lavapit2_reward_shaping import LavapitRewardShaping
 from comrad.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierRewardShaping
+from comrad.wrappers.scenario_wrappers.lava_maze import LavaMazeRewardShaping

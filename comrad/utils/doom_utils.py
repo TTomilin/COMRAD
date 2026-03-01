@@ -17,11 +17,12 @@ from comrad.envs.action_space import (
     doom_action_space_armory_siege,
     doom_action_space_lavapit2,
     doom_action_space_ammo_carrier,
+    doom_action_space_lava_maze,
 )
 from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
-from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping
+from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
 class DoomSpec:
@@ -110,6 +111,17 @@ DOOM_ENVS = [
         num_agents=3,
         respawn_delay=1,
         extra_wrappers=[(ArmorySiegeRewardShaping, {"team_spirit": 0.0})], # Must be 0 for QMIX as mixer already does credit assignment
+    ),
+    
+    DoomSpec(
+        "lava_maze",
+        "lava_maze.cfg",
+        doom_action_space_lava_maze(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(LavaMazeRewardShaping, {"team_spirit": 0.0})], 
     ),
 
     DoomSpec(

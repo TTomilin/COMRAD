@@ -153,6 +153,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
         individual_reward = reward + shaped_reward
         self.orig_env_reward += individual_reward
+        # please check if this should be individual_reward or just reward!!
 
 
         # Shared reward, so gradient flows through these and critic does credit assignment

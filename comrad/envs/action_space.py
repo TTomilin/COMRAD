@@ -148,7 +148,33 @@ def doom_action_space_armory_siege():
             Discrete(3),  # noop, select weapon 1, select weapon 2
         )
     )
-
+    
+def doom_action_space_lava_maze():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    TURN_LEFT
+    TURN_RIGHT
+    LOOK_UP
+    LOOK_DOWN
+    ATTACK
+    SELECT_WEAPON1
+    SELECT_WEAPON2
+    SELECT_WEAPON3
+    SELECT_WEAPON4
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(3),  # noop, look up, look down
+            Discrete(2),  # noop, attack
+            Discrete(5),  # noop, select weapon 1, 2, 3, 4
+        )
+    )
 
 
 def doom_action_space_extended():
