@@ -10,7 +10,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         goal_reward=10.0,
         death_penalty=-5.0,
         step_penalty=-0.001,
-        team_spirit=1.0,
+        common_reward=1.0,
         distance_reward_scale=0.1,
         lava_burn_penalty_scale=0.001,
     ):
@@ -18,7 +18,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.goal_reward = goal_reward
         self.death_penalty = death_penalty
         self.step_penalty = step_penalty
-        self.team_spirit = team_spirit
+        self.common_reward = common_reward
         self.distance_reward_scale = distance_reward_scale
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
 
@@ -43,16 +43,16 @@ class LavaMazeRewardShaping(gym.Wrapper):
         """
         grid = [[0 for _ in range(9)] for _ in range(9)]
         chunks = [int(bits_0), int(bits_1), int(bits_2)]
-        
+
         for y in range(9):
             for x in range(9):
                 bit_idx = y * 9 + x
                 chunk = bit_idx // 27
                 shift = bit_idx % 27
-                
+
                 is_safe = (chunks[chunk] & (1 << shift)) != 0
                 grid[y][x] = 1 if is_safe else 0
-                
+
         return grid
 
     def _safe_int(self, value, default):
@@ -72,30 +72,30 @@ class LavaMazeRewardShaping(gym.Wrapper):
 
         if start_x == goal_x and start_y == goal_y:
             return 0
-            
+
         if not (0 <= start_x < 9 and 0 <= start_y < 9) or grid[start_y][start_x] == 0:
             return 999 # Standing in lava
-            
+
         queue = deque([(start_x, start_y, 0)])
         visited = set([(start_x, start_y)])
-        
+
         while queue:
             cx, cy, dist = queue.popleft()
-            
+
             if cx == goal_x and cy == goal_y:
                 return dist
-                
+
             for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
                 nx, ny = cx + dx, cy + dy
-                
-                if (0 <= nx < 9 and 0 <= ny < 9 and 
-                    (nx, ny) not in visited and 
+
+                if (0 <= nx < 9 and 0 <= ny < 9 and
+                    (nx, ny) not in visited and
                     grid[ny][nx] == 1): # safe floor
-                    
+
                     visited.add((nx, ny))
                     queue.append((nx, ny, dist + 1))
-                    
-        return 999 # Fallback if path doesn't exist 
+
+        return 999 # Fallback if path doesn't exist
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -121,7 +121,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         goal_y = self._safe_int(info.get("USER18", -1), -1)
         prev_goal_x = self._safe_int(self.prev_vars.get("USER13", -1), -1)
         prev_goal_y = self._safe_int(self.prev_vars.get("USER18", -1), -1)
-        
+
         current_levels = self._safe_int(info.get("USER22", 0), 0)
         prev_levels = self._safe_int(self.prev_vars.get("USER22", 0), 0)
 
@@ -140,21 +140,21 @@ class LavaMazeRewardShaping(gym.Wrapper):
             shaped_reward += self.death_penalty
 
         # Shortest-Path Distance Reward
-        if (p1_x != -1 and p1_y != -1 and goal_x != -1 and goal_y != -1 and 
+        if (p1_x != -1 and p1_y != -1 and goal_x != -1 and goal_y != -1 and
             prev_p1_x != -1 and prev_p1_y != -1):
-            
+
             # Ensure the maze hasn't reset this exact frame
             if goal_x == prev_goal_x and goal_y == prev_goal_y:
-                
+
                 grid = self._decode_maze_grid(
-                    self._safe_int(info.get("USER19", 0), 0), 
-                    self._safe_int(info.get("USER20", 0), 0), 
+                    self._safe_int(info.get("USER19", 0), 0),
+                    self._safe_int(info.get("USER20", 0), 0),
                     self._safe_int(info.get("USER21", 0), 0)
                 )
-                
+
                 current_dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
                 prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, goal_x, goal_y)
-                
+
                 if current_dist != 999 and prev_dist != 999:
                     dist_diff = prev_dist - current_dist
                     shaped_reward += dist_diff * self.distance_reward_scale
@@ -162,12 +162,21 @@ class LavaMazeRewardShaping(gym.Wrapper):
         individual_reward = reward + shaped_reward
         self.orig_env_reward += reward
 
-        if self.team_spirit > 0:
+        # https://github.com/uoe-agents/epymarl/blob/cbc38c09588064eab978501d0f12c2cf58fa7fc2/src/envs/gymma.py#L63
+        if self.common_reward > 0:
             self._post_reward(individual_reward)
             team_rewards = self._get_team_rewards()
             if team_rewards is not None:
-                team_mean = sum(team_rewards) / len(team_rewards)
-                final_reward = (1.0 - self.team_spirit) * individual_reward + self.team_spirit * team_mean
+                # How to aggregate rewards to single common reward
+                # epymarl's default is sum so ig I will also use sum here
+                # From what I understand, sum is the standard, mean is only used when scaling up to 100 agents or sth but still need to be stable
+                # TODO: Decide and pass this to wrapper class, and probably cfg.py
+                summ = True
+                if not summ:
+                    reward_agg = sum(team_rewards) / len(team_rewards)
+                else:
+                    reward_agg = sum(team_rewards)
+                final_reward = (1.0 - self.common_reward) * individual_reward + self.common_reward * reward_agg
             else:
                 final_reward = individual_reward
         else:

@@ -21,7 +21,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         weapon_keys=["WEAPON1", "WEAPON2"],
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
-        team_spirit=0.0,
+        common_reward=0.0,
         core_proximity_reward=0.02,
         away_penalty=-0.01,
         defend_radius=350,
@@ -43,7 +43,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
         self.health_pickup_reward = health_pickup_reward
-        self.team_spirit = team_spirit
+        self.common_reward = common_reward
         self.core_proximity_reward = core_proximity_reward
         self.away_penalty = away_penalty
         self.defend_radius = defend_radius
@@ -186,13 +186,21 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.orig_env_reward += reward
 
 
-        # Shared reward, so gradient flows through these and critic does credit assignment
-        if self.team_spirit > 0:
+        # https://github.com/uoe-agents/epymarl/blob/cbc38c09588064eab978501d0f12c2cf58fa7fc2/src/envs/gymma.py#L63
+        if self.common_reward > 0:
             self._post_reward(individual_reward)
             team_rewards = self._get_team_rewards()
             if team_rewards is not None:
-                team_mean = sum(team_rewards) / len(team_rewards)
-                final_reward = (1.0 - self.team_spirit) * individual_reward + self.team_spirit * team_mean
+                # How to aggregate rewards to single common reward
+                # epymarl's default is sum so ig I will also use sum here
+                # From what I understand, sum is the standard, mean is only used when scaling up to 100 agents or sth but still need to be stable
+                # TODO: Decide and pass this to wrapper class, and probably cfg.py
+                summ = True
+                if not summ:
+                    reward_agg = sum(team_rewards) / len(team_rewards)
+                else:
+                    reward_agg = sum(team_rewards)
+                final_reward = (1.0 - self.common_reward) * individual_reward + self.common_reward * reward_agg
             else:
                 final_reward = individual_reward
         else:

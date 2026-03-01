@@ -108,12 +108,14 @@ DOOM_ENVS = [
         doom_action_space_armory_siege(),
         1.0,
         3500,
-        num_agents=3,
+        num_agents=2, # I find 2 agents learn better than 3 agents
         respawn_delay=1,
-        extra_wrappers=[(ArmorySiegeRewardShaping, {"team_spirit": 0.3})], # Must be 0 for QMIX as mixer already does credit assignment
-        # TODO: overwrite to 0 if QMIX/VDN
+        extra_wrappers=[(ArmorySiegeRewardShaping, {"common_reward": 1.0})],
+        # common_reward is the same as common_reward in https://github.com/uoe-agents/epymarl
+        # Set to 1.0 for IDQN, VDN, QMIX, QPLEX, COMA
+        # Any other values for IPPO, MAPPO, HAPPO
     ),
-    
+
     DoomSpec(
         "lava_maze",
         "lava_maze.cfg",
@@ -122,7 +124,7 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(LavaMazeRewardShaping, {"team_spirit": 0.0})], 
+        extra_wrappers=[(LavaMazeRewardShaping, {"common_reward": 1.0})],
     ),
 
     DoomSpec(
