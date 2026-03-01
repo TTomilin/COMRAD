@@ -5,7 +5,7 @@ from comrad.envs.doom_params import add_doom_env_args, doom_override_defaults
 from comrad.utils.doom_utils import make_doom_env
 
 def main():
-    argv = ["--env=safe_ground2", "--num_agents=2", "--res_w=1920", "--res_h=1080"]
+    argv = ["--env=lava_maze", "--num_agents=2", "--res_w=1920", "--res_h=1080"]
     parser, _ = parse_sf_args(argv=argv, evaluation=False)
     add_doom_env_args(parser)
     doom_override_defaults(parser)
@@ -37,6 +37,7 @@ def main():
 
         if terminated or truncated:
             break
+            continue
     print(f"Episode finished in {steps} steps. Reward: {total_reward:.2f}. Cost: {total_cost:.2f}")
     stats = info[0].get("env_stats", {}) if isinstance(info, list) else info.get("env_stats", {})
     print("Final Statistics:", stats)
