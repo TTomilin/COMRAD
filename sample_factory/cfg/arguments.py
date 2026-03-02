@@ -152,32 +152,36 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
     # copy pasting from DQN but modify a bit for qmix/vdn
     # TODO: refactor merge w DQN
     algo_upper = str(cfg.algo).upper()
-    if algo_upper in ("QMIX", "VDN"):
+    if algo_upper in ("QMIX", "VDN", "QPLEX"):
         if getattr(cfg, 'qmix_buffer_batch_size', 32) <= 0:
             raise ValueError(
-                f"QMIX/VDN requires qmix_buffer_batch_size > 0, got {cfg.qmix_buffer_batch_size}"
+                f"QMIX/VDN/QPLEX requires qmix_buffer_batch_size > 0, got {cfg.qmix_buffer_batch_size}"
             )
         if getattr(cfg, 'qmix_sequence_batch_size', 8) <= 0:
             raise ValueError(
-                f"QMIX/VDN requires qmix_sequence_batch_size > 0, got {cfg.qmix_sequence_batch_size}"
+                f"QMIX/VDN/QPLEX requires qmix_sequence_batch_size > 0, got {cfg.qmix_sequence_batch_size}"
             )
         if getattr(cfg, 'qmix_log_interval', 100) < 0:
-            raise ValueError(f"QMIX/VDN requires qmix_log_interval >= 0, got {cfg.qmix_log_interval}")
+            raise ValueError(f"QMIX/VDN/QPLEX requires qmix_log_interval >= 0, got {cfg.qmix_log_interval}")
 
         if algo_upper == "VDN" and getattr(cfg, 'mixer', 'qmix') != 'vdn':
             cfg.mixer = 'vdn'
             log.info("VDN algo: Setting mixer=vdn")
 
+        if algo_upper == "QPLEX" and getattr(cfg, 'mixer', 'qmix') not in ('dmaq', 'dmaq_qatten'):
+            cfg.mixer = 'dmaq_qatten'
+            log.info("QPLEX: auto-setting mixer=dmaq_qatten")
+
         if cfg.use_rnn:
             if cfg.rnn_type != "gru":
-                raise ValueError(f"QMIX/VDN RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
+                raise ValueError(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
             if cfg.rollout < 2:
-                raise ValueError(f"QMIX/VDN RNN requires rollout >= 2, got {cfg.rollout}")
+                raise ValueError(f"QMIX/VDN/QPLEX RNN requires rollout >= 2, got {cfg.rollout}")
             if getattr(cfg, "per", False):
-                log.warning("QMIX/VDN RNN: forcing per=False (uniform sequence sampling)")
+                log.warning("QMIX/VDN/QPLEX RNN: forcing per=False (uniform sequence sampling)")
                 cfg.per = False
             if not getattr(cfg, "actor_critic_share_weights", True):
-                raise ValueError("QMIX/VDN RNN requires actor_critic_share_weights=True")
+                raise ValueError("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
 
         num_agents = getattr(cfg, 'num_agents', 2)
         cli_args = getattr(cfg, "cli_args", {})
@@ -198,7 +202,7 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             if bytes_per_transition > 0:
                 max_size = max(1000, int(1_000_000_000 // bytes_per_transition))
                 if max_size < cfg.replay_buffer_size:
-                    log.warning(f"QMIX/VDN: Cap replay_buffer_size to {max_size}")
+                    log.warning(f"QMIX/VDN/QPLEX: Cap replay_buffer_size to {max_size}")
                     cfg.replay_buffer_size = max_size
 
         # learning_starts validation but per sequence for RNN
@@ -210,9 +214,9 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
         if cfg.learning_starts >= effective_capacity:
             old_starts = cfg.learning_starts
             cfg.learning_starts = max(1, effective_capacity // 2)
-            log.warning(f"QMIX/VDN: learning_starts capped from {old_starts} to {cfg.learning_starts} (effective buffer capacity={effective_capacity})")
+            log.warning(f"QMIX/VDN/QPLEX: learning_starts capped from {old_starts} to {cfg.learning_starts} (effective buffer capacity={effective_capacity})")
 
-        log.info(f"QMIX/VDN: num_agents={num_agents}, mixer={cfg.mixer}, "
+        log.info(f"QMIX/VDN/QPLEX: num_agents={num_agents}, mixer={cfg.mixer}, "
                  f"buffer_size={cfg.replay_buffer_size}")
 
     if algo_upper == "HAPPO":
