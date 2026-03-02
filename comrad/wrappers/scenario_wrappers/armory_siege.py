@@ -1,3 +1,23 @@
+"""
+Agent learns to pick up ammo, shoot, enemies in first few waves, but after the worm enemy appears and much more enemies spawn it stops shooting.
+Also one agent tends to stares at the core. Eventually it runs to the room to pick up weapon and shoot 1/2 enemies, but then it idles staring at the core again. Then the other agent also stops shooting.
+
+Old:
+core_alive_reward=0,
+core_damage_penalty=-0.01,
+death_penalty=-1,
+weapon_pickup_reward=0.3,
+first_weapon_reward=1,
+ammo_pickup_reward=0.012,
+core_death_penalty=-7.0,
+kill_reward=3,
+hit_reward=0.1,
+ammo_use_penalty=0,
+no_ammo_penalty=0,
+weapon_keys=["WEAPON1", "WEAPON2"],
+ammo_keys=["AMMO1", "AMMO2"]
+"""
+
 import gymnasium as gym
 import math
 
