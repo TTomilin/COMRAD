@@ -38,7 +38,7 @@ def register_model_factory(cfg):
     model registration facotry
     """
     if getattr(cfg, 'num_agents', 1) > 1:
-        if str(getattr(cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
+        if str(getattr(cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN', 'QPLEX'):
             global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
         elif str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO':
             from comrad.models.happo_model import make_happo_actor_critic
@@ -69,8 +69,14 @@ def parse_args(argv=None, evaluation=False):
     # Only rename experiment for training script, to avoid conflict for enjoy script
     # But currently train.py is hardcoded into if statement
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
-        if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN'):
-            algo_name = "VDN" if getattr(final_cfg, 'mixer', 'qmix') == 'vdn' else "QMIX"
+        if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN', 'QPLEX'):
+            mixer = getattr(final_cfg, 'mixer', 'qmix')
+            if mixer == 'vdn':
+                algo_name = "VDN"
+            elif mixer in ('dmaq', 'dmaq_qatten'):
+                algo_name = f"QPLEX_{mixer}"
+            else:
+                algo_name = "QMIX"
         elif str(getattr(final_cfg, 'algo', 'APPO')).upper() == 'HAPPO':
             algo_name = "HAPPO"
         elif str(getattr(final_cfg, 'algo', 'APPO')).upper() == 'MAPPO':
