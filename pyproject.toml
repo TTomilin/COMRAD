@@ -33,7 +33,10 @@ dependencies = [
     "pandas>=2.3.3",
     "onnx>=1.19.0",
     "onnxruntime>=1.23.2",
-    "vizdoom>=1.3.0",
+    "vizdoom @ git+https://github.com/lmBored/ViZDoom.git@7781bbf",
+    "matplotlib>=3.10.8",
+    "seaborn>=0.13.2",
+    "scipy>=1.17.0",
 ]
 
 [project.optional-dependencies]
