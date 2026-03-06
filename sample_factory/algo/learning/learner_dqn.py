@@ -83,7 +83,7 @@ class DQNLearner(Learner):
                 omega=getattr(self.cfg, "per_omega", 0.6),
                 beta_start=self.per_beta_start,
                 device="cpu",
-                share_memory=not self.cfg.serial_mode,
+                share_memory=False, # replay buffer is process local to learner, and share_memory_() wastes /dev/shm as it's around 13GB visual obs (I got shm error on HPC)
             )
             log.info(f"DQN using PER (omega={self.cfg.per_omega})")
         else:
@@ -92,7 +92,7 @@ class DQNLearner(Learner):
                 obs_space=self.env_info.obs_space,
                 action_space=self.env_info.action_space,
                 device="cpu",
-                share_memory=not self.cfg.serial_mode,
+                share_memory=False, # same as explained above
             )
         log.info(f"DQN replay batch size: {self._dqn_batch_size()}")
         return init_data
