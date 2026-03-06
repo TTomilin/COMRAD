@@ -435,8 +435,8 @@ class DMAQ_QattenMixer(nn.Module):
 
         if is_v:
             # Keep detached scalars only, otherwise logging can retain the full autograd
-            # Entropies are computed duirng forward pass of mixer, so this must hold detached tensor
-            # Else backward() frees the graph buffers then access _last_head_entropies after backward()
+            # Entropies are computed during forward pass of mixer, so this must store detached tensor
+            # Else backward() frees the graph buffers then access _last_head_entropies after backward() which is invalid
             # .cpu() is not necessary since .item() is called after, but i will just keep it
             self._last_head_entropies = [entropy.detach().cpu() for entropy in head_entropies]
 
