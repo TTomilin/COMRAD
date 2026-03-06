@@ -5,7 +5,7 @@ Ref: https://github.com/wjh720/QPLEX
 """
 from __future__ import annotations
 
-from typing import List, Tuple
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -121,8 +121,6 @@ class DMAQer(nn.Module):
         self.n_actions = n_actions
         self.state_dim = state_dim
         self.action_dim = n_agents * n_actions
-
-        embed_dim = getattr(cfg, 'qplex_embed_dim', 32) # OG implementation has this but they also didnt use, gonna keep just to be sure
 
         hypernet_embed = getattr(cfg, 'qplex_hypernet_embed', 64)
         self.is_minus_one = getattr(cfg, 'qplex_is_minus_one', True)
@@ -321,7 +319,7 @@ class Qatten_Weight(nn.Module):
             v = v * 0. # this is float
 
         attend_mag_regs = self.attend_reg_coef * sum((logit ** 2).mean() for logit in head_attend_logits)
-        head_entropies = [(-((probs + 1e-8).log() * probs).squeeze().sum(1).mean()) for probs in head_attend_weights]
+        head_entropies = [(-((probs + 1e-8).log() * probs).squeeze(1).sum(dim=1).mean()) for probs in head_attend_weights]
 
         return head_attend, v, attend_mag_regs, head_entropies
 

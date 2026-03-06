@@ -29,6 +29,8 @@ from comrad.models.qmix_model import QMixAgentNet, QMixActorCritic
 
 
 class QMixLearner(Learner):
+    _is_qplex = False
+
     def __init__(
         self,
         cfg: Config,

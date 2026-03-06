@@ -153,6 +153,8 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
     # TODO: refactor merge w DQN
     algo_upper = str(cfg.algo).upper()
     if algo_upper in ("QMIX", "VDN", "QPLEX"):
+        cli_args = getattr(cfg, "cli_args", {})
+
         if getattr(cfg, 'qmix_buffer_batch_size', 32) <= 0:
             raise ValueError(
                 f"QMIX/VDN/QPLEX requires qmix_buffer_batch_size > 0, got {cfg.qmix_buffer_batch_size}"
@@ -172,6 +174,14 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             cfg.mixer = 'dmaq_qatten'
             log.info("QPLEX: auto-setting mixer=dmaq_qatten")
 
+        if getattr(cfg, 'mixer', 'qmix') == 'dmaq':
+            if 'qplex_weighted_head' not in cli_args:
+                cfg.qplex_weighted_head = True
+                log.info("QPLEX dmaq: auto-setting qplex_weighted_head=True")
+            if 'qplex_adv_hypernet_layers' not in cli_args:
+                cfg.qplex_adv_hypernet_layers = 3
+                log.info("QPLEX dmaq: auto-setting qplex_adv_hypernet_layers=3")
+
         if cfg.use_rnn:
             if cfg.rnn_type != "gru":
                 raise ValueError(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
@@ -184,7 +194,6 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
                 raise ValueError("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
 
         num_agents = getattr(cfg, 'num_agents', 2)
-        cli_args = getattr(cfg, "cli_args", {})
         if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 1000000:
             obs_space = env_info.obs_space
             bytes_per_obs = 0
