@@ -724,25 +724,25 @@ def add_qmix_args(p: ArgumentParser):
     p.add_argument(
         "--qplex_is_minus_one",
         default=True,
-        type=lambda x: x.lower() != 'false',
+        type=str2bool,
         help="QPLEX allow negative advantage weights"
     )
     p.add_argument(
         "--qplex_weighted_head",
         default=False,
-        type=lambda x: x.lower() == 'true',
+        type=str2bool,
         help="QPLEX weighted head Q-values"
     )
     p.add_argument(
         "--qplex_nonlinear",
         default=False,
-        type=lambda x: x.lower() == 'true',
+        type=str2bool,
         help="QPLEX nonlinear key in qatten"
     )
     p.add_argument(
         "--qplex_state_bias",
         default=True,
-        type=lambda x: x.lower() != 'false',
+        type=str2bool,
         help="QPLEX V(s) bias in qatten"
     )
 
