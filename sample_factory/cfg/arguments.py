@@ -196,6 +196,10 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
                 cfg.per = False
             if not getattr(cfg, "actor_critic_share_weights", True):
                 raise ValueError("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
+            if algo_upper == "QPLEX":
+                mini_bs = getattr(cfg, 'qplex_grad_accum_mini_bs', 16)
+                if mini_bs <= 0:
+                    raise ValueError(f"QPLEX requires qplex_grad_accum_mini_bs > 0, got {mini_bs}")
 
         num_agents = getattr(cfg, 'num_agents', 2)
         if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 1000000:

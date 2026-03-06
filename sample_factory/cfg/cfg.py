@@ -745,6 +745,12 @@ def add_qmix_args(p: ArgumentParser):
         type=str2bool,
         help="QPLEX V(s) bias in qatten"
     )
+    p.add_argument(
+        "--qplex_grad_accum_mini_bs",
+        default=16,
+        type=int,
+        help="QPLEX+RNN gradient accumulation mini-batch size. Batches larger than this are split and gradients accumulated to avoid GPU OOM."
+    )
 
 
 def add_happo_args(p: ArgumentParser):
