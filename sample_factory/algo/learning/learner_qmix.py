@@ -216,10 +216,9 @@ class QMixLearner(Learner):
     # ===========================================
     # qplex
 
-    def _build_compound_onehot(self, q_logits: Tensor, actions: Tensor) -> Tensor:
+    def _build_compound_onehot(self, actions: Tensor) -> Tensor:
         """
         Concat onehot action vectors for qplex SI weights
-        :param q_logits: [B, N, total_actions] Q values per agent
         :param actions: [B, N, H] per head action indices
         :returns: [B, N * total_actions] flattened onehot
         """
@@ -260,11 +259,12 @@ class QMixLearner(Learner):
         :returns: [B] Q_tot
         """
         max_q_i = self._compute_max_q_i(q_logits).detach()
-        onehot_actions = self._build_compound_onehot(q_logits, actions)
+        onehot_actions = self._build_compound_onehot(actions)
 
         # V_tot
-        # pass max_q_i as agent_qs
-        v_tot, v_regs = mixer(max_q_i, state, is_v=True)
+        # pass agent_qs (with gradient) so Q-net receives d(V_tot)/d(Q_i) = w_i
+        # Reference: dmaq_qatten_learner.py passes chosen_action_qvals here
+        v_tot, v_regs = mixer(agent_qs, state, is_v=True)
         v_tot = v_tot.squeeze(-1).squeeze(-1)  # [B, 1, 1] -> [B]
 
         # A_tot
@@ -521,18 +521,19 @@ class QMixLearner(Learner):
         else:
             elementwise_loss = td_error.pow(2)
 
-        # qplex attention regularization
-        if self._is_qplex and qplex_regs:
-            for reg in qplex_regs:
-                elementwise_loss = elementwise_loss + reg
-
-        # Weights
+        # Weights (applied to TD loss only, before adding reg)
         if weights is not None:
             if weights.dim() == 1:
                 weights = weights.unsqueeze(-1)
             elementwise_loss = elementwise_loss * weights
 
         loss = elementwise_loss.mean()
+
+        # qplex attention regularization (added after PER weighting so reg is not
+        # distorted by importance weights; PER priorities use pure TD error)
+        if self._is_qplex and qplex_regs:
+            for reg in qplex_regs:
+                loss = loss + reg
 
         # loss metric from detached td_error
         _td_d = td_error.detach()
@@ -704,16 +705,17 @@ class QMixLearner(Learner):
         else:
             elementwise_loss = td_error.pow(2)
 
-        # QPLEX attention regularization
-        if self._is_qplex and qplex_regs:
-            for reg in qplex_regs:
-                elementwise_loss = elementwise_loss + reg
-
-        # PER weights
+        # PER weights (applied to TD loss only, before adding reg)
         if weights is not None:
             elementwise_loss = elementwise_loss * weights
 
         loss = elementwise_loss.mean()
+
+        # QPLEX attention regularization (added after PER weighting so reg is not
+        # distorted by importance weights; PER priorities use pure TD error)
+        if self._is_qplex and qplex_regs:
+            for reg in qplex_regs:
+                loss = loss + reg
 
         # loss metric from detached td_error
         _td_d = td_error.detach()
