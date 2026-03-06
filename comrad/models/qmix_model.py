@@ -322,12 +322,7 @@ class QMixActorCritic(nn.Module):
         from sample_factory.utils.normalize import ObservationNormalizer
         self.obs_normalizer = ObservationNormalizer(obs_space, cfg)
 
-        # For compatibility, not used in Q learning
-        from sample_factory.algo.utils.running_mean_std import RunningMeanStdInPlace
         self.returns_normalizer = None
-        if getattr(cfg, 'normalize_returns', True):
-            self.returns_normalizer = RunningMeanStdInPlace((1,))
-            self.returns_normalizer = torch.jit.script(self.returns_normalizer)
 
         # Q-value net
         self.agent_net = QMixAgentNet(cfg, obs_space, action_space)
