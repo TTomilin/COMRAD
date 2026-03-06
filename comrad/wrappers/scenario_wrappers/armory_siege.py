@@ -22,8 +22,6 @@ import gymnasium as gym
 import math
 
 class ArmorySiegeRewardShaping(gym.Wrapper):
-    shared = {} # keyed by (worker_index, vector_index)
-
     def __init__(
         self,
         env,
@@ -41,7 +39,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         weapon_keys=["WEAPON1", "WEAPON2"],
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
-        common_reward=0.0,
         core_proximity_reward=0.02,
         away_penalty=-0.01,
         defend_radius=350,
@@ -63,7 +60,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
         self.health_pickup_reward = health_pickup_reward
-        self.common_reward = common_reward
         self.core_proximity_reward = core_proximity_reward
         self.away_penalty = away_penalty
         self.defend_radius = defend_radius
@@ -74,17 +70,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.orig_env_reward = 0.0
         self.steps_away = 0
         self.max_core_hp = None
-
-        self._ek = None
-        self.pid = getattr(env.unwrapped, 'player_id', None)
-
-    @property
-    def ek(self):
-        if self._ek is None:
-            worker_index = getattr(self.env.unwrapped, 'worker_index', 0)
-            vector_index = getattr(self.env.unwrapped, 'vector_index', 0)
-            self._ek = (worker_index, vector_index)
-        return self._ek
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -205,32 +190,11 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         individual_reward = reward + shaped_reward
         self.orig_env_reward += reward
 
-
-        # https://github.com/uoe-agents/epymarl/blob/cbc38c09588064eab978501d0f12c2cf58fa7fc2/src/envs/gymma.py#L63
-        if self.common_reward > 0:
-            self._post_reward(individual_reward)
-            team_rewards = self._get_team_rewards()
-            if team_rewards is not None:
-                # How to aggregate rewards to single common reward
-                # epymarl's default is sum so ig I will also use sum here
-                # From what I understand, sum is the standard, mean is only used when scaling up to 100 agents or sth but still need to be stable
-                # TODO: Decide and pass this to wrapper class, and probably cfg.py
-                summ = True
-                if not summ:
-                    reward_agg = sum(team_rewards) / len(team_rewards)
-                else:
-                    reward_agg = sum(team_rewards)
-                final_reward = (1.0 - self.common_reward) * individual_reward + self.common_reward * reward_agg
-            else:
-                final_reward = individual_reward
-        else:
-            final_reward = individual_reward
-
         if terminated or truncated:
             info["true_objective"] = self.orig_env_reward
 
         self.sync_vars(info)
-        return obs, final_reward, terminated, truncated, info
+        return obs, individual_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -238,26 +202,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.orig_env_reward = 0.0
         self.steps_away = 0
         self.max_core_hp = None
-        self._clear_shared()
         return obs, info
-
-    def _post_reward(self, reward):
-        ArmorySiegeRewardShaping.shared.setdefault(self.ek, {})[self.pid] = reward
-
-    def _get_team_rewards(self):
-        if self.ek not in ArmorySiegeRewardShaping.shared:
-            return None
-        rewards = ArmorySiegeRewardShaping.shared[self.ek]
-        if len(rewards) <= 1:
-            return None
-        return list(rewards.values())
-
-    def _clear_shared(self):
-        if self.ek in ArmorySiegeRewardShaping.shared:
-            shared = ArmorySiegeRewardShaping.shared[self.ek]
-            shared.pop(self.pid, None)
-            if not shared:
-                ArmorySiegeRewardShaping.shared.pop(self.ek, None)
 
     def sync_vars(self, info):
         self.prev_vars = {
