@@ -346,8 +346,8 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
         if shared_reward_alpha > 0 and str(getattr(cfg, "algo", "MAPPO")).upper() not in OFF_POLICY:
             env = SharedRewardWrapper(
                 env,
-                reward_alpha=shared_reward_alpha,
-                reward_scalarisation=shared_reward_scalarisation,
+                alpha=shared_reward_alpha,
+                scalarisation=shared_reward_scalarisation,
             )
     else:
         # if we have only one agent, there's no need for multi-agent wrapper
