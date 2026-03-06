@@ -29,6 +29,8 @@ from comrad.models.qmix_model import QMixAgentNet, QMixActorCritic
 
 
 class QMixLearner(Learner):
+    _is_qplex = False
+
     def __init__(
         self,
         cfg: Config,
@@ -47,6 +49,10 @@ class QMixLearner(Learner):
 
         self.global_env_steps_tensor = global_env_steps_tensor
         self.replay_buffer = None
+
+        # qplex
+        mixer_type = getattr(cfg, 'mixer', 'qmix').lower()
+        self._is_qplex = mixer_type in ('dmaq', 'dmaq_qatten')
 
         # Networks
         self.agent_net = None
@@ -81,6 +87,9 @@ class QMixLearner(Learner):
         self._last_q_std_across_actions = 0.0
         self._last_done_ratio = 0.0
         self._last_timeout_ratio = 0.0
+        # qplex stats
+        self._last_attend_mag_regs = 0.0
+        self._last_head_entropy_mean = 0.0
 
     def init(self) -> InitModelData:
         from sample_factory.algo.utils.shared_buffers import policy_device
@@ -205,6 +214,73 @@ class QMixLearner(Learner):
         encoded = encoded.view(batch_size, num_agents, encoder_out_size) # [B*N, encoder_out] -> [B, N, encoder_out]
         return encoded.flatten(start_dim=1) # [B, N, encoder_out] -> [B, N*encoder_out]
 
+
+    # ===========================================
+    # qplex
+
+    def _build_compound_onehot(self, actions: Tensor) -> Tensor:
+        """
+        Concat onehot action vectors for qplex SI weights
+        :param actions: [B, N, H] per head action indices
+        :returns: [B, N * total_actions] flattened onehot
+        """
+        import torch.nn.functional as F_oh
+        batch_size = actions.shape[0]
+        num_agents = actions.shape[1]
+        one_hots = []
+        for head_idx, head_size in enumerate(self.agent_net.action_sizes):
+            head_actions = actions[:, :, head_idx].long() # [B, N]
+            oh = F_oh.one_hot(head_actions, num_classes=head_size).float() # [B, N, head_size]
+            one_hots.append(oh)
+        # [B, N, total_actions] -> [B, N * total_actions]
+        per_agent_onehot = torch.cat(one_hots, dim=-1) # [B, N, total_actions]
+        return per_agent_onehot.reshape(batch_size, num_agents * per_agent_onehot.shape[-1])
+
+    def _compute_max_q_i(self, q_logits):
+        """
+        Per agent max Q for adv
+        :param q_logits: [B, N, total_actions]
+        :returns: [B, N]
+        """
+        batch_size, num_agents = q_logits.shape[0], q_logits.shape[1]
+        max_q = torch.zeros(batch_size, num_agents, device=q_logits.device)
+        offset = 0
+        for head_size in self.agent_net.action_sizes:
+            head_q = q_logits[:, :, offset:offset + head_size] # [B, N, head_size]
+            max_q = max_q + head_q.max(dim=-1)[0]
+            offset += head_size
+        return max_q
+
+    def _compute_qplex_q_tot(self, agent_qs, state, q_logits, actions, mixer):
+        """
+        :param agent_qs: [B, N] chosen Q values per agent
+        :param state: [B, state_dim] global state
+        :param q_logits: [B, N, total_actions] full Q values (for max_q_i and onehot)
+        :param actions: [B, N, H] chosen actions per agent
+        :param mixer: DMAQer/DMAQ_QattenMixer
+        :returns: [B] Q_tot
+        """
+        max_q_i = self._compute_max_q_i(q_logits).detach()
+        onehot_actions = self._build_compound_onehot(actions)
+
+        # V_tot
+        # pass agent_qs (with gradient) so Q-net receives d(V_tot)/d(Q_i) = w_i
+        # Reference: dmaq_qatten_learner.py passes chosen_action_qvals here
+        v_tot, v_regs = mixer(agent_qs, state, is_v=True)
+        v_tot = v_tot.squeeze(-1).squeeze(-1)  # [B, 1, 1] -> [B]
+
+        # A_tot
+        # pass chosen agent_qs, actions, max_q_i
+        a_tot, _ = mixer(agent_qs, state, actions=onehot_actions, max_q_i=max_q_i, is_v=False)
+        a_tot = a_tot.squeeze(-1).squeeze(-1)  # [B, 1, 1] -> [B]
+
+        q_tot = v_tot + a_tot
+
+        return q_tot, v_regs
+
+    #===================================
+
+
     def _update_target_networks(self, tau: float = 1.0):
         if tau < 1.0:
             with torch.no_grad():
@@ -257,6 +333,9 @@ class QMixLearner(Learner):
         obs_steps = sample_obs.shape[1]
         num_agents = sample_obs.shape[2]
         if num_agents != self.num_agents: raise ValueError(f"Expected num_agents={self.num_agents}, got {num_agents}")
+
+        if hasattr(agent_net, 'flatten_rnn_parameters'):
+            agent_net.flatten_rnn_parameters()
 
         def flatten_step_obs(step_obs: TensorDict) -> TensorDict:
             flat = TensorDict()
@@ -367,16 +446,62 @@ class QMixLearner(Learner):
         next_state = enc_target_all[:, 1:].detach().reshape(batch_size, t_steps, self.num_agents * enc_dim)
 
         # Target Q_tot and Q_tot
-        q_tot = self.mixer(
-            agent_qs.reshape(batch_size * t_steps, self.num_agents),
-            state.reshape(batch_size * t_steps, -1),
-        ).view(batch_size, t_steps)
-        with torch.no_grad():
-            target_q_tot = self.target_mixer(
-                target_agent_qs.reshape(batch_size * t_steps, self.num_agents),
-                next_state.reshape(batch_size * t_steps, -1),
-            ).view(batch_size, t_steps)
+        if self._is_qplex:
+            # Get q_logits and actions for duplex dueling
+            # For sequential path, we need to deal with [B, T, N, ...] shapes
+            # Flatten B*T for mixer, then reshape back
+            flat_agent_qs = agent_qs.reshape(batch_size * t_steps, self.num_agents)
+            flat_state = state.reshape(batch_size * t_steps, -1)
+            flat_q_online = q_online.reshape(batch_size * t_steps, self.num_agents, -1)
 
+            if is_compound_action:
+                flat_actions_for_qplex = actions.reshape(batch_size * t_steps, self.num_agents, -1)
+            else:
+                # Single head
+                # Expand to [B*T, N, 1] to match compound format
+                flat_actions_for_qplex = actions.reshape(batch_size * t_steps, self.num_agents, -1)
+
+            q_tot, qplex_regs = self._compute_qplex_q_tot(
+                flat_agent_qs, flat_state, flat_q_online, flat_actions_for_qplex, self.mixer
+            )
+            q_tot = q_tot.view(batch_size, t_steps)
+
+            with torch.no_grad():
+                flat_target_agent_qs = target_agent_qs.reshape(batch_size * t_steps, self.num_agents)
+                flat_next_state = next_state.reshape(batch_size * t_steps, -1)
+                flat_q_target_next = q_target_next.reshape(batch_size * t_steps, self.num_agents, -1)
+
+                # greedy actions For target
+                # best_actions from online net
+                if is_compound_action:
+                    if getattr(self.cfg, 'double_dqn', True):
+                        flat_target_actions = best_actions.reshape(batch_size * t_steps, self.num_agents, -1)
+                    else:
+                        flat_target_actions = greedy_target_actions.reshape(batch_size * t_steps, self.num_agents, -1)
+                else:
+                    if getattr(self.cfg, 'double_dqn', True):
+                        flat_target_actions = best_actions.reshape(batch_size * t_steps, self.num_agents, -1)
+                    else:
+                        # max actions from target
+                        flat_target_actions = q_target_next.argmax(dim=-1).reshape(batch_size * t_steps, self.num_agents, -1)
+
+                target_q_tot, _ = self._compute_qplex_q_tot(
+                    flat_target_agent_qs, flat_next_state, flat_q_target_next, flat_target_actions, self.target_mixer
+                )
+                target_q_tot = target_q_tot.view(batch_size, t_steps)
+        else:
+            q_tot = self.mixer(
+                agent_qs.reshape(batch_size * t_steps, self.num_agents),
+                state.reshape(batch_size * t_steps, -1),
+            ).view(batch_size, t_steps)
+            qplex_regs = []
+            with torch.no_grad():
+                target_q_tot = self.target_mixer(
+                    target_agent_qs.reshape(batch_size * t_steps, self.num_agents),
+                    next_state.reshape(batch_size * t_steps, -1),
+                ).view(batch_size, t_steps)
+
+        with torch.no_grad():
             team_reward = rewards.sum(dim=2)
             effective_done = (dones * (1.0 - time_outs)).amax(dim=2)
             # same as learner_dqn
@@ -400,13 +525,19 @@ class QMixLearner(Learner):
         else:
             elementwise_loss = td_error.pow(2)
 
-        # Weights
+        # Weights (applied to TD loss only, before adding reg)
         if weights is not None:
             if weights.dim() == 1:
                 weights = weights.unsqueeze(-1)
             elementwise_loss = elementwise_loss * weights
 
         loss = elementwise_loss.mean()
+
+        # qplex attention regularization (added after PER weighting so reg is not
+        # distorted by importance weights; PER priorities use pure TD error)
+        if self._is_qplex and qplex_regs:
+            for reg in qplex_regs:
+                loss = loss + reg
 
         # loss metric from detached td_error
         _td_d = td_error.detach()
@@ -424,6 +555,10 @@ class QMixLearner(Learner):
         self._last_q_std_across_actions = _q_online_d.std(dim=-1).mean().item()
         self._last_done_ratio = effective_done.mean().item()
         self._last_timeout_ratio = time_outs.mean().item()
+        if self._is_qplex:
+            self._last_attend_mag_regs = sum(r.item() if hasattr(r, 'item') else float(r) for r in qplex_regs) if qplex_regs else 0.0
+            head_ents = getattr(self.mixer, '_last_head_entropies', None)
+            self._last_head_entropy_mean = float(sum(h.item() for h in head_ents) / len(head_ents)) if head_ents else 0.0
 
         td_per_sequence = _td_d.abs().mean(dim=1)
         return loss, td_per_sequence
@@ -486,10 +621,19 @@ class QMixLearner(Learner):
         effective_done = (per_agent_dones * (1.0 - per_agent_timeouts)).amax(dim=-1)
 
         # Target Q_tot and Q_tot
-        q_tot = self.mixer(agent_qs, state) # [B]
+        is_compound_action = actions.dim() > 2
+        if self._is_qplex:
+            if is_compound_action:
+                actions_for_qplex = actions # [B, N, H]
+            else:
+                actions_for_qplex = actions.unsqueeze(-1) # [B, N] -> [B, N, 1]
+            q_tot, qplex_regs = self._compute_qplex_q_tot(agent_qs, state, all_q, actions_for_qplex, self.mixer)
+        else:
+            q_tot = self.mixer(agent_qs, state) # [B]
+            qplex_regs = []
+
         with torch.no_grad():
             all_target_q = self._vectorized_agent_forward(next_obs, self.target_agent_net)
-            is_compound_action = actions.dim() > 2
 
             def greedy_compound_actions(q_logits: Tensor) -> Tensor:
                 action_heads = []
@@ -525,7 +669,23 @@ class QMixLearner(Learner):
                 else:
                     target_agent_qs = all_target_q.max(dim=-1)[0] # [B, N]
 
-            target_q_tot = self.target_mixer(target_agent_qs, next_state)
+            if self._is_qplex:
+                # actions for duplex dueling
+                if is_compound_action:
+                    if getattr(self.cfg, 'double_dqn', True):
+                        target_actions_for_qplex = best_actions
+                    else:
+                        target_actions_for_qplex = greedy_target_actions
+                else:
+                    if getattr(self.cfg, 'double_dqn', True):
+                        target_actions_for_qplex = best_actions  # [B, N, 1]
+                    else:
+                        target_actions_for_qplex = all_target_q.argmax(dim=-1, keepdim=True)
+                target_q_tot, _ = self._compute_qplex_q_tot(
+                    target_agent_qs, next_state, all_target_q, target_actions_for_qplex, self.target_mixer
+                )
+            else:
+                target_q_tot = self.target_mixer(target_agent_qs, next_state)
 
             # same as learner_dqn
             gamma = getattr(self.cfg, 'gamma', 0.99)
@@ -548,11 +708,17 @@ class QMixLearner(Learner):
         else:
             elementwise_loss = td_error.pow(2)
 
-        # PER weights
+        # PER weights (applied to TD loss only, before adding reg)
         if weights is not None:
             elementwise_loss = elementwise_loss * weights
 
         loss = elementwise_loss.mean()
+
+        # QPLEX attention regularization (added after PER weighting so reg is not
+        # distorted by importance weights; PER priorities use pure TD error)
+        if self._is_qplex and qplex_regs:
+            for reg in qplex_regs:
+                loss = loss + reg
 
         # loss metric from detached td_error
         _td_d = td_error.detach()
@@ -568,6 +734,11 @@ class QMixLearner(Learner):
         self._last_q_std_across_actions = all_q.std(dim=-1).mean().item() # std across actions should be > 0
         self._last_done_ratio = effective_done.mean().item()
         self._last_timeout_ratio = per_agent_timeouts.mean().item()
+        if self._is_qplex:
+            self._last_attend_mag_regs = sum(r.item() if hasattr(r, 'item') else float(r) for r in qplex_regs) if qplex_regs else 0.0
+            # Head entropies from qatten mixer (stored in mixer._last_head_entropies)
+            head_ents = getattr(self.mixer, '_last_head_entropies', None)
+            self._last_head_entropy_mean = float(sum(h.item() for h in head_ents) / len(head_ents)) if head_ents else 0.0
 
         return loss, td_error.abs().detach()
 
@@ -610,6 +781,9 @@ class QMixLearner(Learner):
         stats.q_std_across_actions = getattr(self, '_last_q_std_across_actions', 0)
         stats.done_ratio = getattr(self, '_last_done_ratio', 0)
         stats.timeout_ratio = getattr(self, '_last_timeout_ratio', 0)
+        if self._is_qplex:
+            stats.attend_mag_regs = getattr(self, '_last_attend_mag_regs', 0)
+            stats.head_entropy_mean = getattr(self, '_last_head_entropy_mean', 0)
 
         return stats, td_errors
 

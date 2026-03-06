@@ -2,16 +2,13 @@ from __future__ import annotations
 
 import copy
 
-import gymnasium as gym
 import torch
 
 from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.tensor_dict import TensorDict
-from sample_factory.utils.attr_dict import AttrDict
 from comrad.models.qmix_model import QMixAgentNet, make_mixer
 
 from .conftest import (
-    SumMixer,
     compound_action_space,
     make_real_obs_batch,
     real_model_cfg,
@@ -98,7 +95,9 @@ class TestRealModelLossComputation:
         agent_net = QMixAgentNet(cfg, obs_space, act_space)
         target_net = copy.deepcopy(agent_net)
         state_dim = agent_net.encoder_out_size * num_agents
-        mixer = make_mixer(cfg, num_agents, state_dim)
+        action_dim = agent_net.total_actions
+        unit_dim = agent_net.encoder_out_size
+        mixer = make_mixer(cfg, num_agents, state_dim, action_dim, unit_dim)
         target_mixer = copy.deepcopy(mixer)
 
         learner = object.__new__(QMixLearner)
@@ -109,7 +108,24 @@ class TestRealModelLossComputation:
         learner.target_agent_net = target_net
         learner.mixer = mixer
         learner.target_mixer = target_mixer
+        learner._is_qplex = getattr(cfg, 'mixer', 'qmix') in ('dmaq', 'dmaq_qatten')
         return learner
+
+    def test_flatten_rnn_parameters_delegates_to_gru(self, monkeypatch):
+        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+
+        calls = {"count": 0}
+
+        def fake_flatten_parameters():
+            calls["count"] += 1
+
+        monkeypatch.setattr(agent_net.core.core, 'flatten_parameters', fake_flatten_parameters)
+
+        agent_net.flatten_rnn_parameters()
+
+        assert calls["count"] == 1
 
     def test_qmix_loss_shapes_compound_actions(self):
         cfg = real_model_cfg(rnn_size=32, rnn_num_layers=1, mixer='qmix')
@@ -223,8 +239,44 @@ class TestRealModelLossComputation:
         loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
         assert loss.dim() == 0
         assert td_summary.shape == (B,)
-        # Should not error on backward with multi-layer GRU
+
+    def test_qplex_qatten_sequential_backward(self):
+        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='dmaq_qatten')
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        N = 2
+        learner = self._make_learner(cfg, obs_space, act_space, N)
+
+        B, T = 1, 2
+        batch = TensorDict({
+            'obs': make_real_obs_batch(B, T + 1, N),
+            'actions': torch.stack([
+                torch.randint(0, 3, (B, T, N)),
+                torch.randint(0, 2, (B, T, N)),
+            ], dim=-1),
+            'rewards': torch.randn(B, T, N),
+            'dones': torch.zeros(B, T, N),
+            'time_outs': torch.zeros(B, T, N),
+            'rnn_states': torch.zeros(B, N, learner.agent_net.get_rnn_size()),
+        })
+
+        loss, td_summary = QMixLearner._calculate_qmix_loss_sequential(learner, batch)
+        assert torch.isfinite(loss)
+        assert td_summary.shape == (B,)
+
         loss.backward()
+
+        attention_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in learner.mixer.named_parameters()
+            if name.startswith('attention_weight')
+        )
+        si_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in learner.mixer.named_parameters()
+            if name.startswith('si_weight')
+        )
+        assert attention_has_grad
+        assert si_has_grad
 
     def test_single_action_space_loss(self):
         cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')

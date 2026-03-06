@@ -674,7 +674,7 @@ def add_qmix_args(p: ArgumentParser):
         "--mixer",
         default="qmix",
         type=str,
-        choices=["vdn", "qmix"],
+        choices=["vdn", "qmix", "dmaq", "dmaq_qatten"],
         help="Mixing network",
     )
     p.add_argument(
@@ -706,6 +706,44 @@ def add_qmix_args(p: ArgumentParser):
         default=10000,
         type=int,
         help="Log QMIX stats every N env steps",
+    )
+
+    # qplex
+    p.add_argument("--qplex_embed_dim", default=32, type=int, help="QPLEX mixing embed dim")
+    p.add_argument("--qplex_hypernet_embed", default=64, type=int, help="QPLEX hypernet hidden dim")
+    p.add_argument(
+        "--qplex_adv_hypernet_layers",
+        default=1,
+        type=int,
+        help="QPLEX adv weight layers (1 for qatten, 3 for dmaq)"
+    )
+    p.add_argument("--qplex_adv_hypernet_embed", default=64, type=int, help="QPLEX adv weight hidden dim")
+    p.add_argument("--qplex_num_kernel", default=4, type=int, help="QPLEX SI weight heads")
+    p.add_argument("--qplex_n_head", default=4, type=int, help="QPLEX Q-attention heads")
+    p.add_argument("--qplex_attend_reg_coef", default=0.001, type=float, help="QPLEX attention regularization coef")
+    p.add_argument(
+        "--qplex_is_minus_one",
+        default=True,
+        type=str2bool,
+        help="QPLEX allow negative advantage weights"
+    )
+    p.add_argument(
+        "--qplex_weighted_head",
+        default=False,
+        type=str2bool,
+        help="QPLEX weighted head Q-values"
+    )
+    p.add_argument(
+        "--qplex_nonlinear",
+        default=False,
+        type=str2bool,
+        help="QPLEX nonlinear key in qatten"
+    )
+    p.add_argument(
+        "--qplex_state_bias",
+        default=True,
+        type=str2bool,
+        help="QPLEX V(s) bias in qatten"
     )
 
 

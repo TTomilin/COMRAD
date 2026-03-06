@@ -14,6 +14,7 @@ wandb = f"--with_wandb=True --wandb_dir=. --wandb_project={wandb_project}"
 common = f"--env={env} --train_for_seconds={time} --env_frameskip=4 --wide_aspect_ratio=False --num_agents={n_agents} {wandb} --num_workers=8 --num_envs_per_worker=8 --batched_sampling=True"
 
 #======================
+# For on-policy, we can set --shared_reward_alpha and --shared_reward_scalarisation
 
 mappo = f"python -m comrad.train {common} --algo=MAPPO --use_rnn=True --num_policies=1 --batch_size=1024 --wandb_record_every=10"
 

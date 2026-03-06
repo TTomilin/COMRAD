@@ -50,6 +50,7 @@ class HAPPOLearner(Learner):
     def __init__(self, cfg, env_info, policy_versions_tensor, policy_id, param_server):
         super().__init__(cfg, env_info, policy_versions_tensor, policy_id, param_server)
         self.n_agents = cfg.num_agents
+        self._warned_on_non_shared_rewards = False
 
     def init(self) -> InitModelData:
         # Note: Cant use super().init(), everything needs to be updated
@@ -245,7 +246,55 @@ class HAPPOLearner(Learner):
         assert buff["env_idx"].shape[0] == dataset_size, (f"env_idx size {buff['env_idx'].shape[0]} != dataset_size {dataset_size}")
         assert (buff["env_idx"] >= 0).all(), "HAPPO: env_idx contains negative values"
 
+        self._warn_if_rewards_not_shared(buff, dataset_size)
+
         return buff, dataset_size, num_invalids
+
+    # ===========================================================================
+
+    def _warn_if_rewards_not_shared(self, buff, dataset_size):
+        '''
+        This is here for when shared reward is enabled as HAPPO assumes agents in the same transition saw the same scalar reward
+        With alpha=0.5 and two agents getting r_0=10, r_1=0, the blended rewards are r_0=7.5, r_1=2.5, this breaks the assumption
+        as GAE will compute diff returns for agents
+
+        The original HAPPO paper assumes single shared team reward signal (so alpha = 1.0). However, alpha < 1 is fine to mix in individual rewards, thus here's just a warning
+        '''
+        if self._warned_on_non_shared_rewards:
+            return
+
+        rewards = buff.get("rewards")
+        normalized_obs = buff.get("normalized_obs")
+        if rewards is None or rewards.dim() != 1 or normalized_obs is None:
+            return
+        if "agent_id" not in normalized_obs or "env_idx" not in buff:
+            return
+
+        agent_idx = normalized_obs["agent_id"].argmax(dim=-1).long()
+        env_idx = buff["env_idx"].long()
+        group_idx = self._compute_env_group_idx(agent_idx, env_idx, dataset_size)
+        n_transitions = group_idx.max().item() + 1
+
+        reward_sum = torch.zeros(n_transitions, dtype=rewards.dtype, device=rewards.device)
+        reward_sq_sum = torch.zeros_like(reward_sum)
+        reward_count = torch.zeros_like(reward_sum)
+
+        reward_sum.index_add_(0, group_idx, rewards)
+        reward_sq_sum.index_add_(0, group_idx, rewards * rewards)
+        reward_count.index_add_(0, group_idx, torch.ones_like(rewards))
+
+        reward_mean = reward_sum / reward_count.clamp_min(1.0)
+        reward_var = reward_sq_sum / reward_count.clamp_min(1.0) - reward_mean.square()
+        reward_var.clamp_(min=0.0)
+
+        if reward_var.max().item() <= 1e-6:
+            return
+
+        max_abs_diff = (rewards - reward_mean[group_idx]).abs().max().item()
+        log.warning(f"HAPPO assumes joint team rewards, but this batch contains per-agent reward differences within the same transition (max abs diff {max_abs_diff})")
+        self._warned_on_non_shared_rewards = True
+
+    # ==========================================================================
 
     def _train(self, gpu_buffer, batch_size, experience_size, num_invalids):
         stats = AttrDict()

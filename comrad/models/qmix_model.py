@@ -106,6 +106,15 @@ class QMixAgentNet(nn.Module):
             return self.cfg.rnn_size * self.cfg.rnn_num_layers
         return 0
 
+    def flatten_rnn_parameters(self) -> None:
+        if not self.use_rnn:
+            return
+
+        core = getattr(self.core, "core", None)
+        flatten_parameters = getattr(core, "flatten_parameters", None)
+        if flatten_parameters is not None:
+            flatten_parameters()
+
     def encode(self, obs: TensorDict) -> Tensor:
         """
         :param obs: obs dct
@@ -278,7 +287,7 @@ class QMixMixer(nn.Module):
         return q_tot.squeeze(-1).squeeze(-1)
 
 
-def make_mixer(cfg: Config, num_agents: int, state_dim: int) -> nn.Module:
+def make_mixer(cfg: Config, num_agents: int, state_dim: int, action_dim: int = 0, unit_dim: int = 0) -> nn.Module:
     mixer_type = getattr(cfg, 'mixer', 'qmix').lower()
 
     if mixer_type == 'vdn':
@@ -289,6 +298,14 @@ def make_mixer(cfg: Config, num_agents: int, state_dim: int) -> nn.Module:
         hypernet_hidden = getattr(cfg, 'qmix_hypernet_hidden', 64)
         log.info(f"Using QMIX mixer for {num_agents} agents: state_dim={state_dim}, embed={embed_dim}, hypernet={hypernet_hidden}")
         return QMixMixer(num_agents, state_dim, embed_dim, hypernet_hidden)
+    elif mixer_type == 'dmaq':
+        from comrad.models.qplex_mixer import DMAQer
+        log.info(f"Using QPLEX DMAQer mixer for {num_agents} agents: state_dim={state_dim}, action_dim={action_dim}")
+        return DMAQer(cfg, num_agents, state_dim, action_dim)
+    elif mixer_type == 'dmaq_qatten':
+        from comrad.models.qplex_mixer import DMAQ_QattenMixer
+        log.info(f"Using QPLEX DMAQ_QattenMixer for {num_agents} agents: state_dim={state_dim}, action_dim={action_dim}, unit_dim={unit_dim}")
+        return DMAQ_QattenMixer(cfg, num_agents, state_dim, action_dim, unit_dim)
     else:
         raise ValueError(f"Wrong mixer type: {mixer_type}")
 
@@ -314,12 +331,7 @@ class QMixActorCritic(nn.Module):
         from sample_factory.utils.normalize import ObservationNormalizer
         self.obs_normalizer = ObservationNormalizer(obs_space, cfg)
 
-        # For compatibility, not used in Q learning
-        from sample_factory.algo.utils.running_mean_std import RunningMeanStdInPlace
         self.returns_normalizer = None
-        if getattr(cfg, 'normalize_returns', True):
-            self.returns_normalizer = RunningMeanStdInPlace((1,))
-            self.returns_normalizer = torch.jit.script(self.returns_normalizer)
 
         # Q-value net
         self.agent_net = QMixAgentNet(cfg, obs_space, action_space)
@@ -328,7 +340,9 @@ class QMixActorCritic(nn.Module):
         # Use encoder output size for state_dim instead of raw pixels to avoid too big HN dimensions
         # as we have visual input
         state_dim = self.agent_net.encoder_out_size * num_agents
-        self.mixer = make_mixer(cfg, num_agents, state_dim)
+        action_dim = self.agent_net.total_actions
+        unit_dim = self.agent_net.encoder_out_size
+        self.mixer = make_mixer(cfg, num_agents, state_dim, action_dim, unit_dim)
 
         self._device = torch.device('cpu')
         self.last_action_distribution = None # Not used
@@ -342,6 +356,7 @@ class QMixActorCritic(nn.Module):
         sample_actions: bool = True, # Q-values for argmax if false
         **kwargs,
     ) -> TensorDict:
+        self.agent_net.flatten_rnn_parameters()
         q_values, new_rnn = self.agent_net(obs, rnn_states)
         batch_size = q_values.shape[0]
 
