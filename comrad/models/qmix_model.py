@@ -106,6 +106,15 @@ class QMixAgentNet(nn.Module):
             return self.cfg.rnn_size * self.cfg.rnn_num_layers
         return 0
 
+    def flatten_rnn_parameters(self) -> None:
+        if not self.use_rnn:
+            return
+
+        core = getattr(self.core, "core", None)
+        flatten_parameters = getattr(core, "flatten_parameters", None)
+        if flatten_parameters is not None:
+            flatten_parameters()
+
     def encode(self, obs: TensorDict) -> Tensor:
         """
         :param obs: obs dct
@@ -347,6 +356,7 @@ class QMixActorCritic(nn.Module):
         sample_actions: bool = True, # Q-values for argmax if false
         **kwargs,
     ) -> TensorDict:
+        self.agent_net.flatten_rnn_parameters()
         q_values, new_rnn = self.agent_net(obs, rnn_states)
         batch_size = q_values.shape[0]
 

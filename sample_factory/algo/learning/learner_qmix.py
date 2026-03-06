@@ -334,6 +334,9 @@ class QMixLearner(Learner):
         num_agents = sample_obs.shape[2]
         if num_agents != self.num_agents: raise ValueError(f"Expected num_agents={self.num_agents}, got {num_agents}")
 
+        if hasattr(agent_net, 'flatten_rnn_parameters'):
+            agent_net.flatten_rnn_parameters()
+
         def flatten_step_obs(step_obs: TensorDict) -> TensorDict:
             flat = TensorDict()
             for key, val in step_obs.items():
