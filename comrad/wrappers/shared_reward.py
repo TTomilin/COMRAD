@@ -13,7 +13,7 @@ class SharedRewardWrapper(gym.Wrapper):
         super().__init__(env)
 
         if not 0.0 < alpha <= 1.0:
-            raise ValueError(f"reward_alpha must be in [0, 1], not {alpha}")
+            raise ValueError(f"alpha must be in (0, 1], not {alpha}")
         if scalarisation not in ("sum", "mean"):
             raise ValueError(f"reward scalarisation must be 'sum' or 'mean', not {scalarisation!r}")
 
