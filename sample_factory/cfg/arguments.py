@@ -155,6 +155,10 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
     if algo_upper in ("QMIX", "VDN", "QPLEX"):
         cli_args = getattr(cfg, "cli_args", {})
 
+        if getattr(cfg, "normalize_returns", False):
+            log.warning("QMIX/VDN/QPLEX: forcing normalize_returns=False")
+            cfg.normalize_returns = False
+
         if getattr(cfg, 'qmix_buffer_batch_size', 32) <= 0:
             raise ValueError(
                 f"QMIX/VDN/QPLEX requires qmix_buffer_batch_size > 0, got {cfg.qmix_buffer_batch_size}"
