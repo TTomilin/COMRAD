@@ -23,7 +23,11 @@ from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping
+from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
+
+
+OFF_POLICY = {"DQN", "VDN", "QMIX", "QPLEX"}
 
 class DoomSpec:
     def __init__(
@@ -39,6 +43,8 @@ class DoomSpec:
         respawn_delay=0,
         timelimit=4.0,
         extra_wrappers=None,
+        shared_reward_alpha=0.0,
+        shared_reward_scalarisation="sum",
     ):
         self.name = name
         self.env_spec_file = env_spec_file
@@ -57,6 +63,10 @@ class DoomSpec:
 
         # expect list of tuples (wrapper_cls, wrapper_kwargs)
         self.extra_wrappers = extra_wrappers
+        # reward wrappers before rewards are collected into joint env step
+        # unused for off-policy variants
+        self.shared_reward_alpha = shared_reward_alpha
+        self.shared_reward_scalarisation = shared_reward_scalarisation
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 DOOM_ENVS = [
@@ -110,10 +120,7 @@ DOOM_ENVS = [
         3500,
         num_agents=2, # I find 2 agents learn better than 3 agents
         respawn_delay=1,
-        extra_wrappers=[(ArmorySiegeRewardShaping, {"common_reward": 1.0})],
-        # common_reward is the same as common_reward in https://github.com/uoe-agents/epymarl
-        # Set to 1.0 for IDQN, VDN, QMIX, QPLEX, COMA
-        # Any other values for IPPO, MAPPO, HAPPO
+        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -124,7 +131,7 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(LavaMazeRewardShaping, {"common_reward": 1.0})],
+        extra_wrappers=[(LavaMazeRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -149,6 +156,17 @@ def doom_env_by_name(name):
 def get_num_agents(cfg, env_name):
     spec = doom_env_by_name(env_name)
     return spec.num_agents if cfg.num_agents <= 0 else cfg.num_agents
+
+def get_alpha(cfg, doom_spec) -> float:
+    override = getattr(cfg, "shared_reward_alpha", None)
+    if override is None: return doom_spec.shared_reward_alpha
+    return override
+
+
+def get_scalarisation(cfg, doom_spec) -> str:
+    override = getattr(cfg, "shared_reward_scalarisation", None)
+    if override is None: return doom_spec.shared_reward_scalarisation
+    return override
 
 # noinspection PyUnusedLocal
 def make_doom_env_impl(
@@ -322,6 +340,15 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             spaces = dict(env.observation_space.spaces) if isinstance(env.observation_space, gym.spaces.Dict) else {'obs': env.observation_space}
             spaces['agent_id'] = gym.spaces.Box(low=0.0, high=1.0, shape=(num_agents,), dtype=np.float32)
             env.observation_space = gym.spaces.Dict(spaces)
+
+        shared_reward_alpha = get_alpha(cfg, doom_spec)
+        shared_reward_scalarisation = get_scalarisation(cfg, doom_spec)
+        if shared_reward_alpha > 0 and str(getattr(cfg, "algo", "MAPPO")).upper() not in OFF_POLICY:
+            env = SharedRewardWrapper(
+                env,
+                reward_alpha=shared_reward_alpha,
+                reward_scalarisation=shared_reward_scalarisation,
+            )
     else:
         # if we have only one agent, there's no need for multi-agent wrapper
         from comrad.envs.multiagent.doom_multiagent_wrapper import init_multiplayer_env

@@ -33,6 +33,18 @@ def add_doom_env_args(parser):
         type=str2bool,
         help="If true render wide aspect ratio (slower but gives better FOV to the agent)",
     )
+    p.add_argument(
+        "--shared_reward_alpha",
+        default=None,
+        type=float,
+        help="Override the COMRAD joint-env shared reward blend factor after per-agent reward shaping. Applied only for actor-critic multi-agent algos; QMIX/VDN/QPLEX already scalarize rewards once in the learner.",
+    )
+    p.add_argument(
+        "--shared_reward_scalarisation",
+        default=None,
+        choices=("sum", "mean"),
+        help="Override how joint-env shared rewards are scalarized before they are broadcast to actor-critic agents.",
+    )
 
 def add_wandb_args(parser):
     parser.add_argument("--wandb_record_every", default=50, type=int, help="Every N episodes")
