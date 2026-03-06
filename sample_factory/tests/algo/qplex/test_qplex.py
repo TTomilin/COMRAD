@@ -9,6 +9,7 @@ from comrad.models.qplex_mixer import (
     DMAQ_QattenMixer,
 )
 from comrad.models.qmix_model import make_mixer, VDNMixer, QMixMixer
+from sample_factory.algo.learning.learner_qmix import QMixLearner
 
 
 def _default_cfg(**overrides):
@@ -102,6 +103,9 @@ class TestDMAQer:
         assert agent_qs.grad is not None
 
         agent_qs.grad = None
+        for param in mixer.parameters():
+            param.grad = None
+
         # A_tot path: adv_q = (agent_qs - max_q_i).detach(), so no grad through agent_qs
         # This is correct per the reference: gradients only flow through SI weights
         a_tot, _ = mixer(agent_qs, states, actions=actions, max_q_i=max_q_i, is_v=False)
@@ -109,6 +113,19 @@ class TestDMAQer:
         a_loss.backward()
         # agent_qs should NOT have gradient from A_tot (advantage detached)
         assert agent_qs.grad is None
+
+        weighted_head_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in mixer.named_parameters()
+            if name.startswith("hyper_w_final") or name.startswith("V")
+        )
+        si_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in mixer.named_parameters()
+            if name.startswith("si_weight")
+        )
+        assert not weighted_head_has_grad
+        assert si_has_grad
 
 
 # Qatten_Weight
@@ -174,6 +191,8 @@ class TestDMAQ_QattenMixer:
         mixer(torch.randn(B, 3), torch.randn(B, 96), is_v=True)
         assert hasattr(mixer, '_last_head_entropies')
         assert len(mixer._last_head_entropies) == 4  # n_head=4
+        assert all(not entropy.requires_grad for entropy in mixer._last_head_entropies)
+        assert all(entropy.device.type == "cpu" for entropy in mixer._last_head_entropies)
 
     def test_regularization_gradient_flows(self):
         """Attention regularization should be differentiable."""
@@ -184,6 +203,30 @@ class TestDMAQ_QattenMixer:
         loss = v_tot.squeeze().sum() + sum(regs)
         loss.backward()
         assert states.grad is not None
+
+    def test_a_tot_grad_flows_only_through_si_weights(self):
+        mixer = self._make(n_agents=2, state_dim=64, n_actions=10, unit_dim=32)
+        agent_qs = torch.randn(4, 2, requires_grad=True)
+        states = torch.randn(4, 64)
+        actions = torch.randn(4, 2 * 10)
+        max_q_i = torch.randn(4, 2)
+
+        a_tot, _ = mixer(agent_qs, states, actions=actions, max_q_i=max_q_i, is_v=False)
+        a_tot.squeeze().sum().backward()
+
+        assert agent_qs.grad is None
+        attention_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in mixer.named_parameters()
+            if name.startswith("attention_weight")
+        )
+        si_has_grad = any(
+            param.grad is not None and param.grad.abs().sum() > 0
+            for name, param in mixer.named_parameters()
+            if name.startswith("si_weight")
+        )
+        assert not attention_has_grad
+        assert si_has_grad
 
 
 class TestMakeMixer:
@@ -287,3 +330,31 @@ class TestReturnTypes:
         assert out.shape == (8, 1, 1)
         assert isinstance(regs, list)
         assert len(regs) == 1
+
+
+class TestQMixLearnerQPLEXHelpers:
+    def test_compute_qplex_q_tot_returns_regs_without_persistent_graph_state(self):
+        learner = object.__new__(QMixLearner)
+        learner.agent_net = SimpleNamespace(action_sizes=[3, 2])
+
+        cfg = _default_cfg(mixer='dmaq_qatten')
+        mixer = DMAQ_QattenMixer(cfg, 2, 64, 5, 32)
+
+        agent_qs = torch.randn(4, 2, requires_grad=True)
+        state = torch.randn(4, 64)
+        q_logits = torch.randn(4, 2, 5, requires_grad=True)
+        actions = torch.tensor(
+            [
+                [[0, 0], [1, 1]],
+                [[2, 1], [0, 0]],
+                [[1, 0], [2, 1]],
+                [[0, 1], [1, 0]],
+            ],
+            dtype=torch.long,
+        )
+
+        q_tot, regs = QMixLearner._compute_qplex_q_tot(learner, agent_qs, state, q_logits, actions, mixer)
+
+        assert q_tot.shape == (4,)
+        assert len(regs) == 1
+        assert not hasattr(learner, '_last_qplex_regs')

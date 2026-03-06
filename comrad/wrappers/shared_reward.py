@@ -33,6 +33,8 @@ class SharedRewardWrapper(gym.Wrapper):
         Pettinzoo uses this as `local_ratio` (https://github.com/Farama-Foundation/PettingZoo/blob/master/pettingzoo/sisl/multiwalker/multiwalker_base.py).
 
         For us we use `alpha` to toggle and optionally blend the rewards.
+        We only use for on-policy as they dont aggregate reward by default in the learner, it only applies a scalar scale and clip, and returns it unchanged per-agent (in `NonBatchedVectorEnvRunner._process_rewards()`)
+
         '''
         obs, rewards, terminated, truncated, infos = self.env.step(action)
 

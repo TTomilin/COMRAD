@@ -89,6 +89,77 @@ class TestComputeEnvGroupIdx:
         with pytest.raises(RuntimeError, match="wrong agent count"):
             learner_stub._compute_env_group_idx(agent_idx, env_idx, dataset_size)
 
+
+class TestSharedRewardWarning:
+
+    @pytest.fixture
+    def learner_stub(self):
+        stub = object.__new__(HAPPOLearner)
+        stub.n_agents = 2
+        stub.cfg = AttrDict({"rollout": 2})
+        stub._warned_on_non_shared_rewards = False
+        return stub
+
+    def test_warns_once_when_rewards_differ_within_transition(self, learner_stub, monkeypatch):
+        warnings = []
+
+        def fake_warning(msg, *args):
+            warnings.append(msg % args if args else msg)
+
+        monkeypatch.setattr("sample_factory.algo.learning.learner_happo.log.warning", fake_warning)
+
+        buff = AttrDict(
+            {
+                "rewards": torch.tensor([1.0, 1.0, 3.0, 1.0]),
+                "env_idx": torch.tensor([0, 0, 0, 0], dtype=torch.long),
+                "normalized_obs": {
+                    "agent_id": torch.tensor(
+                        [
+                            [1.0, 0.0],
+                            [1.0, 0.0],
+                            [0.0, 1.0],
+                            [0.0, 1.0],
+                        ]
+                    )
+                },
+            }
+        )
+
+        learner_stub._warn_if_rewards_not_shared(buff, dataset_size=4)
+        learner_stub._warn_if_rewards_not_shared(buff, dataset_size=4)
+
+        assert len(warnings) == 1
+        assert "HAPPO assumes joint team rewards" in warnings[0]
+
+    def test_skips_warning_when_rewards_are_shared(self, learner_stub, monkeypatch):
+        warnings = []
+
+        def fake_warning(msg, *args):
+            warnings.append(msg % args if args else msg)
+
+        monkeypatch.setattr("sample_factory.algo.learning.learner_happo.log.warning", fake_warning)
+
+        buff = AttrDict(
+            {
+                "rewards": torch.tensor([2.0, 2.0, 2.0, 2.0]),
+                "env_idx": torch.tensor([0, 0, 0, 0], dtype=torch.long),
+                "normalized_obs": {
+                    "agent_id": torch.tensor(
+                        [
+                            [1.0, 0.0],
+                            [1.0, 0.0],
+                            [0.0, 1.0],
+                            [0.0, 1.0],
+                        ]
+                    )
+                },
+            }
+        )
+
+        learner_stub._warn_if_rewards_not_shared(buff, dataset_size=4)
+
+        assert warnings == []
+
     def test_mismatched_env_idx_in_group_raises(self, learner_stub):
         rollout = 4
         n_agents = 2
@@ -104,6 +175,7 @@ class TestComputeEnvGroupIdx:
             dtype=torch.long,
         )
 
+        learner_stub.cfg.rollout = rollout
         with pytest.raises(RuntimeError, match="mismatched env_idx"):
             learner_stub._compute_env_group_idx(agent_idx, env_idx, dataset_size)
 
