@@ -276,9 +276,7 @@ class QMixLearner(Learner):
 
         q_tot = v_tot + a_tot
 
-        # Store regs for loss
-        self._last_qplex_regs = v_regs # only from V_tot call
-        return q_tot
+        return q_tot, v_regs
 
     #===================================
 
@@ -460,10 +458,10 @@ class QMixLearner(Learner):
                 # Expand to [B*T, N, 1] to match compound format
                 flat_actions_for_qplex = actions.reshape(batch_size * t_steps, self.num_agents, -1)
 
-            q_tot = self._compute_qplex_q_tot(
+            q_tot, qplex_regs = self._compute_qplex_q_tot(
                 flat_agent_qs, flat_state, flat_q_online, flat_actions_for_qplex, self.mixer
-            ).view(batch_size, t_steps)
-            qplex_regs = self._last_qplex_regs
+            )
+            q_tot = q_tot.view(batch_size, t_steps)
 
             with torch.no_grad():
                 flat_target_agent_qs = target_agent_qs.reshape(batch_size * t_steps, self.num_agents)
@@ -484,9 +482,10 @@ class QMixLearner(Learner):
                         # max actions from target
                         flat_target_actions = q_target_next.argmax(dim=-1).reshape(batch_size * t_steps, self.num_agents, -1)
 
-                target_q_tot = self._compute_qplex_q_tot(
+                target_q_tot, _ = self._compute_qplex_q_tot(
                     flat_target_agent_qs, flat_next_state, flat_q_target_next, flat_target_actions, self.target_mixer
-                ).view(batch_size, t_steps)
+                )
+                target_q_tot = target_q_tot.view(batch_size, t_steps)
         else:
             q_tot = self.mixer(
                 agent_qs.reshape(batch_size * t_steps, self.num_agents),
@@ -625,8 +624,7 @@ class QMixLearner(Learner):
                 actions_for_qplex = actions # [B, N, H]
             else:
                 actions_for_qplex = actions.unsqueeze(-1) # [B, N] -> [B, N, 1]
-            q_tot = self._compute_qplex_q_tot(agent_qs, state, all_q, actions_for_qplex, self.mixer)
-            qplex_regs = self._last_qplex_regs
+            q_tot, qplex_regs = self._compute_qplex_q_tot(agent_qs, state, all_q, actions_for_qplex, self.mixer)
         else:
             q_tot = self.mixer(agent_qs, state) # [B]
             qplex_regs = []
@@ -680,7 +678,7 @@ class QMixLearner(Learner):
                         target_actions_for_qplex = best_actions  # [B, N, 1]
                     else:
                         target_actions_for_qplex = all_target_q.argmax(dim=-1, keepdim=True)
-                target_q_tot = self._compute_qplex_q_tot(
+                target_q_tot, _ = self._compute_qplex_q_tot(
                     target_agent_qs, next_state, all_target_q, target_actions_for_qplex, self.target_mixer
                 )
             else:

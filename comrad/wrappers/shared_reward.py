@@ -9,7 +9,7 @@ class SharedRewardWrapper(gym.Wrapper):
     def __init__(self, env, *, alpha: float = 1.0, scalarisation: str = "sum"):
         super().__init__(env)
 
-        if not 0.0 <= alpha <= 1.0:
+        if not 0.0 < alpha <= 1.0:
             raise ValueError(f"reward_alpha must be in [0, 1], not {alpha}")
         if scalarisation not in ("sum", "mean"):
             raise ValueError(f"reward scalarisation must be 'sum' or 'mean', not {scalarisation!r}")
@@ -26,7 +26,7 @@ class SharedRewardWrapper(gym.Wrapper):
     def step(self, action):
         obs, rewards, terminated, truncated, infos = self.env.step(action)
 
-        if rewards is None or self.alpha <= 0.0:
+        if rewards is None:
             return obs, rewards, terminated, truncated, infos
 
         if not isinstance(rewards, Sequence):
