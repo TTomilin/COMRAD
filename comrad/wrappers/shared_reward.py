@@ -6,6 +6,9 @@ import gymnasium as gym
 
 
 class SharedRewardWrapper(gym.Wrapper):
+    '''
+    Wrapper to add shared reward
+    '''
     def __init__(self, env, *, alpha: float = 1.0, scalarisation: str = "sum"):
         super().__init__(env)
 
