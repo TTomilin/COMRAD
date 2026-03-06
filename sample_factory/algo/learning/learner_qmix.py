@@ -447,7 +447,7 @@ class QMixLearner(Learner):
 
         # Target Q_tot and Q_tot
         if self._is_qplex:
-            # Getd q_logits and actions for duplex dueling
+            # Get q_logits and actions for duplex dueling
             # For sequential path, we need to deal with [B, T, N, ...] shapes
             # Flatten B*T for mixer, then reshape back
             flat_agent_qs = agent_qs.reshape(batch_size * t_steps, self.num_agents)
