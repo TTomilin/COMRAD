@@ -187,13 +187,22 @@ class DMAQer(nn.Module):
         states = states.reshape(-1, self.state_dim)
         agent_qs = agent_qs.view(-1, self.n_agents)
 
-        w_final = self.hyper_w_final(states)
-        w_final = torch.abs(w_final)
-        w_final = w_final.view(-1, self.n_agents) + 1e-10
-        v = self.V(states)
-        v = v.view(-1, self.n_agents)
-
         if self.weighted_head:
+            if is_v:
+                w_final = self.hyper_w_final(states)
+                w_final = torch.abs(w_final)
+                w_final = w_final.view(-1, self.n_agents) + 1e-10
+                v = self.V(states)
+                v = v.view(-1, self.n_agents)
+            else:
+                # A_tot detaches the transformed advantage immediately, so keep this
+                # transform out of autograd to avoid needless activation retention.
+                with torch.no_grad():
+                    w_final = self.hyper_w_final(states)
+                    w_final = torch.abs(w_final)
+                    w_final = w_final.view(-1, self.n_agents) + 1e-10
+                    v = self.V(states)
+                    v = v.view(-1, self.n_agents)
             agent_qs = w_final * agent_qs + v
         if not is_v:
             max_q_i = max_q_i.view(-1, self.n_agents)
@@ -404,7 +413,13 @@ class DMAQ_QattenMixer(nn.Module):
         """
         bs = agent_qs.size(0)
 
-        w_final, v, attend_mag_regs, head_entropies = self.attention_weight(agent_qs, states, actions)
+        if is_v:
+            w_final, v, attend_mag_regs, head_entropies = self.attention_weight(agent_qs, states, actions)
+        else:
+            # A_tot only uses the transformed advantage as a detached scalar weight,
+            # so the qatten path does not need its own backward graph here.
+            with torch.no_grad():
+                w_final, v, attend_mag_regs, head_entropies = self.attention_weight(agent_qs, states, actions)
         w_final = w_final.view(-1, self.n_agents) + 1e-10
         v = v.view(-1, 1).repeat(1, self.n_agents)
         v = v / self.n_agents
@@ -418,7 +433,11 @@ class DMAQ_QattenMixer(nn.Module):
         y = self.calc(agent_qs, states, actions=actions, max_q_i=max_q_i, is_v=is_v)
         v_tot = y.view(bs, -1, 1)
 
-        # Store head_entropies for logging
-        self._last_head_entropies = head_entropies
+        if is_v:
+            # Keep detached scalars only, otherwise logging can retain the full autograd
+            # Entropies are computed duirng forward pass of mixer, so this must hold detached tensor
+            # Else backward() frees the graph buffers then access _last_head_entropies after backward()
+            # .cpu() is not necessary since .item() is called after, but i will just keep it
+            self._last_head_entropies = [entropy.detach().cpu() for entropy in head_entropies]
 
         return v_tot, [attend_mag_regs]
