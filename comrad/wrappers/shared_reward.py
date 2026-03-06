@@ -27,6 +27,13 @@ class SharedRewardWrapper(gym.Wrapper):
         return team_reward
 
     def step(self, action):
+        '''
+        epymarl (https://github.com/uoe-agents/epymarl/blob/main/src/envs/gymma.py) uses a hard binary, either only team reward
+        or only individual reward.
+        Pettinzoo uses this as `local_ratio` (https://github.com/Farama-Foundation/PettingZoo/blob/master/pettingzoo/sisl/multiwalker/multiwalker_base.py).
+
+        For us we use `alpha` to toggle and optionally blend the rewards.
+        '''
         obs, rewards, terminated, truncated, infos = self.env.step(action)
 
         if rewards is None:

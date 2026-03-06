@@ -28,6 +28,7 @@ from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
 
 OFF_POLICY = {"DQN", "VDN", "QMIX", "QPLEX"}
+ON_POLICY = {"APPO", "MAPPO", "HAPPO"}
 
 class DoomSpec:
     def __init__(
@@ -159,7 +160,13 @@ def get_num_agents(cfg, env_name):
 
 def get_alpha(cfg, doom_spec) -> float:
     override = getattr(cfg, "shared_reward_alpha", None)
-    if override is None: return doom_spec.shared_reward_alpha
+    if override is None:
+        if doom_spec.shared_reward_alpha == 0.0:
+            if str(getattr(cfg, "algo", "MAPPO")).upper() in ON_POLICY:
+                # Force 1.0
+                # This matches assumption of original HAPPO,MAPPO paper anyways
+                return 1.0
+        return doom_spec.shared_reward_alpha
     return override
 
 
