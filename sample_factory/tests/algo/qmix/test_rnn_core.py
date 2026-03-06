@@ -12,7 +12,6 @@ from comrad.models.qmix_model import QMixAgentNet
 from .conftest import (
     AgentRnnStub,
     DummyEnvInfo,
-    SumMixer,
     make_full_qmix_cfg,
     make_qmix_cfg,
     make_sequence_batch,
@@ -368,3 +367,40 @@ class TestConfigRejection:
         )
         preprocess_cfg(cfg, DummyEnvInfo())
         assert cfg.per is False
+
+
+class TestQPlexConfigDefaults:
+
+    def test_dmaq_defaults_are_applied_when_not_explicitly_overridden(self):
+        cfg = make_full_qmix_cfg(
+            algo='QPLEX',
+            mixer='dmaq',
+            qplex_weighted_head=False,
+            qplex_adv_hypernet_layers=1,
+        )
+        preprocess_cfg(cfg, DummyEnvInfo())
+        assert cfg.qplex_weighted_head is True
+        assert cfg.qplex_adv_hypernet_layers == 3
+
+    def test_dmaq_cli_overrides_are_preserved(self):
+        cfg = make_full_qmix_cfg(
+            algo='QPLEX',
+            mixer='dmaq',
+            qplex_weighted_head=False,
+            qplex_adv_hypernet_layers=1,
+            cli_args={'qplex_weighted_head': False, 'qplex_adv_hypernet_layers': 1},
+        )
+        preprocess_cfg(cfg, DummyEnvInfo())
+        assert cfg.qplex_weighted_head is False
+        assert cfg.qplex_adv_hypernet_layers == 1
+
+
+class TestNormalizeReturnsDisabledForValueDecomposition:
+
+    @pytest.mark.parametrize('algo', ['QMIX', 'VDN', 'QPLEX'])
+    def test_preprocess_forces_normalize_returns_off(self, algo):
+        cfg = make_full_qmix_cfg(algo=algo, normalize_returns=True)
+
+        preprocess_cfg(cfg, DummyEnvInfo())
+
+        assert cfg.normalize_returns is False

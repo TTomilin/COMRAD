@@ -1,6 +1,5 @@
 import pytest
 import torch
-import torch.nn as nn
 from types import SimpleNamespace
 
 from comrad.models.qplex_mixer import (
@@ -152,6 +151,12 @@ class TestDMAQ_QattenMixer:
         v_tot, regs = mixer(torch.randn(B, 3), torch.randn(B, 96), is_v=True)
         assert v_tot.shape == (B, 1, 1)
         assert len(regs) == 1  # attend_mag_regs
+
+    def test_v_tot_shape_batch_size_one(self):
+        mixer = self._make(n_agents=2, state_dim=64, n_actions=10, unit_dim=32)
+        v_tot, regs = mixer(torch.randn(1, 2), torch.randn(1, 64), is_v=True)
+        assert v_tot.shape == (1, 1, 1)
+        assert len(regs) == 1
 
     def test_a_tot_shape(self):
         mixer = self._make()
