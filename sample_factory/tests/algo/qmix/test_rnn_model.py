@@ -414,3 +414,148 @@ class TestMinimalRollout:
         assert loss.dim() == 0
         assert td_summary.shape == (B,)
         loss.backward()
+
+
+class TestBatchedEncoderEquivalence:
+    """Verify batched encoder produces identical results to per-timestep sequential encoding"""
+
+    @staticmethod
+    def _sequential_reference(obs, dones, rnn_states, agent_net, num_agents):
+        """Reference implementation of per-timestep forward_decomposed (the old approach)"""
+        sample_obs = obs["obs"] if isinstance(obs, dict) and "obs" in obs else obs
+        batch_size = sample_obs.shape[0]
+        obs_steps = sample_obs.shape[1]
+        t_steps = dones.shape[1]
+
+        def flatten_step_obs(step_obs):
+            from sample_factory.algo.utils.tensor_dict import TensorDict as TD
+            flat = TD()
+            for key, val in step_obs.items():
+                if isinstance(val, TD):
+                    flat[key] = flatten_step_obs(val)
+                else:
+                    flat[key] = val.reshape(val.shape[0] * val.shape[1], *val.shape[2:])
+            return flat
+
+        rnn_flat = rnn_states.reshape(batch_size * num_agents, -1)
+        q_values_list = []
+        encoder_outs_list = []
+        for t in range(obs_steps):
+            step_obs = obs[:, t]
+            flat_obs = flatten_step_obs(step_obs)
+            q_flat, new_rnn_flat, encoder_flat = agent_net.forward_decomposed(flat_obs, rnn_flat)
+            num_actions = q_flat.shape[-1]
+            encoder_dim = encoder_flat.shape[-1]
+            q_values_list.append(q_flat.view(batch_size, num_agents, num_actions))
+            encoder_outs_list.append(encoder_flat.view(batch_size, num_agents, encoder_dim))
+            if t < t_steps:
+                done_mask = dones[:, t, :].reshape(batch_size * num_agents, 1).to(new_rnn_flat.dtype)
+                new_rnn_flat = new_rnn_flat * (1.0 - done_mask)
+            rnn_flat = new_rnn_flat
+        return torch.stack(q_values_list, dim=1), torch.stack(encoder_outs_list, dim=1)
+
+    def test_batched_matches_sequential_no_dones(self):
+        cfg = real_model_cfg(rnn_size=32, rnn_num_layers=1)
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        agent_net.eval()
+
+        B, T, N = 2, 4, 2
+        obs = make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        rnn_states = torch.randn(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_batched, enc_batched = QMixLearner._sequential_agent_forward(
+            learner, obs, dones, rnn_states, agent_net
+        )
+        q_ref, enc_ref = self._sequential_reference(obs, dones, rnn_states, agent_net, N)
+
+        assert torch.allclose(q_batched, q_ref, atol=1e-5), \
+            f"Q-value max diff: {(q_batched - q_ref).abs().max()}"
+        assert torch.allclose(enc_batched, enc_ref, atol=1e-5), \
+            f"Encoder output max diff: {(enc_batched - enc_ref).abs().max()}"
+
+    def test_batched_matches_sequential_with_dones(self):
+        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1)
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        agent_net.eval()
+
+        B, T, N = 2, 5, 2
+        obs = make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        dones[0, 1, 0] = 1.0  # agent 0 dies at t=1
+        dones[1, 3, 1] = 1.0  # agent 1 dies at t=3
+        rnn_states = torch.randn(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_batched, enc_batched = QMixLearner._sequential_agent_forward(
+            learner, obs, dones, rnn_states, agent_net
+        )
+        q_ref, enc_ref = self._sequential_reference(obs, dones, rnn_states, agent_net, N)
+
+        assert torch.allclose(q_batched, q_ref, atol=1e-5), \
+            f"Q-value max diff: {(q_batched - q_ref).abs().max()}"
+        assert torch.allclose(enc_batched, enc_ref, atol=1e-5), \
+            f"Encoder output max diff: {(enc_batched - enc_ref).abs().max()}"
+
+    def test_batched_matches_sequential_multi_layer_gru(self):
+        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=2)
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+        agent_net.eval()
+
+        B, T, N = 1, 3, 2
+        obs = make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        dones[0, 0, 1] = 1.0
+        rnn_states = torch.randn(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_batched, enc_batched = QMixLearner._sequential_agent_forward(
+            learner, obs, dones, rnn_states, agent_net
+        )
+        q_ref, enc_ref = self._sequential_reference(obs, dones, rnn_states, agent_net, N)
+
+        assert torch.allclose(q_batched, q_ref, atol=1e-5), \
+            f"Q-value max diff: {(q_batched - q_ref).abs().max()}"
+        assert torch.allclose(enc_batched, enc_ref, atol=1e-5), \
+            f"Encoder output max diff: {(enc_batched - enc_ref).abs().max()}"
+
+    def test_batched_gradients_flow_correctly(self):
+        """Verify that backward through batched encoder produces valid gradients."""
+        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1)
+        obs_space, act_space = small_obs_space(), compound_action_space()
+        agent_net = QMixAgentNet(cfg, obs_space, act_space)
+
+        B, T, N = 1, 3, 2
+        obs = make_real_obs_batch(B, T + 1, N)
+        dones = torch.zeros(B, T, N)
+        rnn_states = torch.zeros(B, N, agent_net.get_rnn_size())
+
+        learner = object.__new__(QMixLearner)
+        learner.num_agents = N
+
+        q_values, enc_outs = QMixLearner._sequential_agent_forward(
+            learner, obs, dones, rnn_states, agent_net
+        )
+        loss = q_values.sum()
+        loss.backward()
+
+        encoder_has_grad = any(
+            p.grad is not None and p.grad.abs().sum() > 0
+            for p in agent_net.encoder.parameters()
+        )
+        core_has_grad = any(
+            p.grad is not None and p.grad.abs().sum() > 0
+            for p in agent_net.core.parameters()
+        )
+        assert encoder_has_grad, "Encoder should receive gradients through batched path"
+        assert core_has_grad, "RNN core should receive gradients through sequential path"
