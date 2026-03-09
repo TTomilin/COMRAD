@@ -4,8 +4,8 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        ammo_pickup_reward=0.02,
-        ammo_give_reward=0.05,
+        ammo_pickup_reward=0.5,
+        ammo_give_reward=1.0,
         kill_reward=1.0,
         death_penalty=-1.0,
     ):
