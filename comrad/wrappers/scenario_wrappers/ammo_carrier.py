@@ -16,12 +16,17 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         self.death_penalty = death_penalty
 
         self.prev_vars = {}
+        self.orig_env_reward = 0.0
+        self.episode_shaped_return = 0.0
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
 
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
+
+        reward = float(reward)
+        self.orig_env_reward += reward
 
         if not self.prev_vars:
             self.sync_vars(info)
@@ -59,7 +64,22 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
 
         self.prev_vars = info.copy()
 
-        return obs, reward + shaped_reward, terminated, truncated, info
+        total_reward = reward + shaped_reward
+        self.episode_shaped_return += total_reward
+
+        done = terminated | truncated
+        if done:
+            info["true_objective"] = self.episode_shaped_return
+
+        return obs, total_reward, terminated, truncated, info
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.prev_vars = {}
+        self.orig_env_reward = 0.0
+        self.episode_shaped_return = 0.0
+        self.sync_vars(info)
+        return obs, info
 
     def sync_vars(self, info):
         self.prev_vars = info.copy()

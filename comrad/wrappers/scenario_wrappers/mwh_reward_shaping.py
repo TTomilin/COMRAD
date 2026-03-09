@@ -17,6 +17,7 @@ class DoomMWHRewardShaping(gym.Wrapper):
         self.p_u2 = None
         self.orig_env_reward = 0
         self.key = id(env)
+        self._episode_shaped_return = 0.0
 
     def _reward_shaping(self, info, done):
         if info is None or done:
@@ -54,6 +55,7 @@ class DoomMWHRewardShaping(gym.Wrapper):
         self.p_u1 = None
         self.p_u2 = None
         self.orig_env_reward = 0
+        self._episode_shaped_return = 0.0
         if self.key in DoomMWHRewardShaping.goal:
             del DoomMWHRewardShaping.goal[self.key]
         return self.env.reset(**kwargs)

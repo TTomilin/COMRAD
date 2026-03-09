@@ -25,12 +25,14 @@ class LavapitRewardShaping(gym.Wrapper):
         self._prev_x: float | None = None
         self._prev_dead: bool = True
         self._bridges_crossed: set[float] = set()
+        self._episode_shaped_return: float = 0.0
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self._prev_x = info.get(self.pos_key, None)
         self._prev_dead = bool(info.get(self.dead_key, 0))
         self._bridges_crossed = set()
+        self._episode_shaped_return = 0.0
         return obs, info
 
     def step(self, action):
@@ -66,5 +68,11 @@ class LavapitRewardShaping(gym.Wrapper):
 
         self._prev_x = x
         self._prev_dead = dead_now
+
+        self._episode_shaped_return += r
+
+        done = terminations | truncations
+        if done:
+            infos["true_objective"] = self._episode_shaped_return
 
         return obs, r, terminations, truncations, infos
