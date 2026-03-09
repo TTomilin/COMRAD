@@ -57,12 +57,23 @@ def retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_r
     return decorator
 
 
-def safe_get(q, timeout=1e6, msg="Queue timeout"):
-    """Using queue.get() with timeout is necessary, otherwise KeyboardInterrupt is not handled."""
+def safe_get(q, timeout=1e6, msg="Queue timeout", max_retries=None):
+    """Using queue.get() with timeout is necessary, otherwise KeyboardInterrupt is not handled.
+
+    If max_retries is set, raises _GameGroupCrashError after that many consecutive timeouts
+    instead of retrying forever.
+    """
+    retries = 0
     while True:
         try:
             return q.get(timeout=timeout)
         except Empty:
+            retries += 1
+            if max_retries is not None and retries >= max_retries:
+                raise _GameGroupCrashError(
+                    f"Queue timed out {retries} times ({retries * timeout:.1f}s total). "
+                    f"Worker is likely dead. {msg}"
+                )
             log.warning(msg)
 
 
@@ -305,10 +316,20 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         # This is sequential, so might make it async so main thread waits for all at once
         # TODO: Try asynchronous collection with select() or asyncio
         for i, worker in enumerate(self.workers):
+            # STEP: 0.2s * 25 = 5s patience before declaring crash
+            # RESET: 2.0s * 15 = 30s patience
+            step_max_retries = 25
+            reset_max_retries = 15
+            if timeout is None:
+                effective_max_retries = step_max_retries
+            else:
+                effective_max_retries = reset_max_retries
+
             results = safe_get(
                 worker.result_queue,
                 timeout=0.2 if timeout is None else timeout,
                 msg=f"Takes a surprisingly long time to process task {task_type}, retry...",
+                max_retries=effective_max_retries,
             )
 
             # A crashed worker puts _CRASHED on its queue
@@ -383,7 +404,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                             time.sleep(0.05)
 
                     for i, worker in enumerate(self.workers):
-                        worker.result_queue.get(timeout=70)
+                        result = worker.result_queue.get(timeout=70)
+                        if result is _CRASHED:
+                            raise _GameGroupCrashError(f"Worker {i} crashed during initialization")
 
             except filelock.Timeout:
                 continue
@@ -480,5 +503,5 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         worker = self.workers[agent_idx]
         worker.task_queue.put((data, TaskType.SET_ATTR))
 
-        result = safe_get(worker.result_queue, timeout=0.1)
+        result = safe_get(worker.result_queue, timeout=0.1, max_retries=50)
         assert result is None, f"Expected None, got {result}"
