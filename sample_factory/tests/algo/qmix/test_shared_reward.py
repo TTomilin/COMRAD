@@ -73,6 +73,28 @@ def test_shared_reward_cli_overrides_spec_defaults():
     assert get_scalarisation(cfg, spec) == "mean"
 
 
+def test_get_alpha_auto_enables_shared_reward_for_on_policy():
+    spec = SimpleNamespace(shared_reward_alpha=0.0, shared_reward_scalarisation="sum")
+    cfg = AttrDict({
+        "algo": "MAPPO",
+        "shared_reward_alpha": None,
+        "shared_reward_scalarisation": None,
+    })
+
+    assert get_alpha(cfg, spec) == 1.0
+
+
+def test_get_alpha_keeps_off_policy_default_disabled():
+    spec = SimpleNamespace(shared_reward_alpha=0.0, shared_reward_scalarisation="sum")
+    cfg = AttrDict({
+        "algo": "QMIX",
+        "shared_reward_alpha": None,
+        "shared_reward_scalarisation": None,
+    })
+
+    assert get_alpha(cfg, spec) == 0.0
+
+
 def test_partial_shared_reward_blend_does_not_force_equal_rewards():
     env = SharedRewardWrapper(_DummyJointEnv([1.0, 3.0]), alpha=0.5, scalarisation="sum")
 
@@ -126,3 +148,58 @@ def test_make_doom_multiplayer_env_uses_wrapper_api_keywords(monkeypatch):
     assert env is not None
     assert captured["alpha"] == 0.25
     assert captured["scalarisation"] == "mean"
+
+
+def test_make_doom_multiplayer_env_auto_wraps_on_policy_only(monkeypatch):
+    import comrad.envs.multiagent.doom_multiagent_wrapper as doom_multiagent_wrapper
+
+    captured = []
+
+    class _DummyMultiAgentEnv:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+    class _CapturingSharedRewardWrapper:
+        def __init__(self, env, *, alpha, scalarisation):
+            captured.append((env, alpha, scalarisation))
+            self.env = env
+            self.alpha = alpha
+            self.scalarisation = scalarisation
+
+    monkeypatch.setattr(doom_multiagent_wrapper, "MultiAgentEnv", _DummyMultiAgentEnv)
+    monkeypatch.setattr("comrad.utils.doom_utils.SharedRewardWrapper", _CapturingSharedRewardWrapper)
+
+    doom_spec = SimpleNamespace(
+        num_agents=2,
+        num_bots=0,
+        shared_reward_alpha=0.0,
+        shared_reward_scalarisation="sum",
+    )
+    cfg_base = {
+        "env_frameskip": 4,
+        "num_bots": -1,
+        "num_agents": 2,
+        "num_humans": 0,
+        "wandb_record_every": 0,
+        "with_wandb": False,
+        "shared_reward_alpha": None,
+        "shared_reward_scalarisation": None,
+    }
+
+    on_policy_env = make_doom_multiplayer_env(
+        doom_spec,
+        cfg=AttrDict({**cfg_base, "algo": "MAPPO"}),
+        env_config=None,
+    )
+    off_policy_env = make_doom_multiplayer_env(
+        doom_spec,
+        cfg=AttrDict({**cfg_base, "algo": "QMIX"}),
+        env_config=None,
+    )
+
+    assert isinstance(on_policy_env, _CapturingSharedRewardWrapper)
+    assert len(captured) == 1
+    assert isinstance(captured[0][0], _DummyMultiAgentEnv)
+    assert captured[0][1:] == (1.0, "sum")
+    assert isinstance(off_policy_env, _DummyMultiAgentEnv)
