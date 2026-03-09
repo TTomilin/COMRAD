@@ -279,6 +279,15 @@ class QMixLearner(Learner):
 
         return q_tot, v_regs
 
+    def _compute_qplex_target_v_tot(self, target_agent_qs, state, mixer):
+        """
+        Target Q_tot = V_tot only, A_tot = 0 at target-greedy action by definition
+
+        Only correct when the evaluated action is the target-greedy action, like for non-Double DQN.  For Double DQN, use _compute_qplex_q_tot which computes V_tot + A_tot at the action selected online
+        """
+        v_tot, _ = mixer(target_agent_qs, state, is_v=True)
+        return v_tot.squeeze(-1).squeeze(-1) # [B, 1, 1] -> [B]
+
     #===================================
 
 
@@ -470,25 +479,24 @@ class QMixLearner(Learner):
             with torch.no_grad():
                 flat_target_agent_qs = target_agent_qs.reshape(batch_size * t_steps, self.num_agents)
                 flat_next_state = next_state.reshape(batch_size * t_steps, -1)
-                flat_q_target_next = q_target_next.reshape(batch_size * t_steps, self.num_agents, -1)
 
-                # greedy actions For target
-                # best_actions from online net
-                if is_compound_action:
-                    if getattr(self.cfg, 'double_dqn', True):
+                if getattr(self.cfg, 'double_dqn', True):
+                    # for double DQN, online greedy action is not target greedy, so A_tot != 0
+                    # so we must evaluate full V_tot + A_tot at the online selected action
+                    flat_q_target_next = q_target_next.reshape(batch_size * t_steps, self.num_agents, -1)
+                    if is_compound_action:
                         flat_target_actions = best_actions.reshape(batch_size * t_steps, self.num_agents, -1)
                     else:
-                        flat_target_actions = greedy_target_actions.reshape(batch_size * t_steps, self.num_agents, -1)
+                        flat_target_actions = best_actions.reshape(batch_size * t_steps, self.num_agents, -1)
+                    target_q_tot, _ = self._compute_qplex_q_tot(
+                        flat_target_agent_qs, flat_next_state, flat_q_target_next, flat_target_actions, self.target_mixer
+                    )
                 else:
-                    if getattr(self.cfg, 'double_dqn', True):
-                        flat_target_actions = best_actions.reshape(batch_size * t_steps, self.num_agents, -1)
-                    else:
-                        # max actions from target
-                        flat_target_actions = q_target_next.argmax(dim=-1).reshape(batch_size * t_steps, self.num_agents, -1)
-
-                target_q_tot, _ = self._compute_qplex_q_tot(
-                    flat_target_agent_qs, flat_next_state, flat_q_target_next, flat_target_actions, self.target_mixer
-                )
+                    # This is non-double DQN
+                    # target-greedy action, and A_tot = 0 by definition
+                    target_q_tot = self._compute_qplex_target_v_tot(
+                        flat_target_agent_qs, flat_next_state, self.target_mixer
+                    )
                 target_q_tot = target_q_tot.view(batch_size, t_steps)
         else:
             q_tot = self.mixer(
@@ -671,20 +679,18 @@ class QMixLearner(Learner):
                     target_agent_qs = all_target_q.max(dim=-1)[0] # [B, N]
 
             if self._is_qplex:
-                # actions for duplex dueling
-                if is_compound_action:
-                    if getattr(self.cfg, 'double_dqn', True):
-                        target_actions_for_qplex = best_actions
-                    else:
-                        target_actions_for_qplex = greedy_target_actions
+                if getattr(self.cfg, 'double_dqn', True):
+                    # for double DQN, online greedy action is not target greedy, so A_tot != 0
+                    # so we must evaluate full V_tot + A_tot at the online selected action
+                    target_q_tot, _ = self._compute_qplex_q_tot(
+                        target_agent_qs, next_state, all_target_q, best_actions, self.target_mixer
+                    )
                 else:
-                    if getattr(self.cfg, 'double_dqn', True):
-                        target_actions_for_qplex = best_actions  # [B, N, 1]
-                    else:
-                        target_actions_for_qplex = all_target_q.argmax(dim=-1, keepdim=True)
-                target_q_tot, _ = self._compute_qplex_q_tot(
-                    target_agent_qs, next_state, all_target_q, target_actions_for_qplex, self.target_mixer
-                )
+                    # This is non-double DQN
+                    # target-greedy action, and A_tot = 0 by definition
+                    target_q_tot = self._compute_qplex_target_v_tot(
+                        target_agent_qs, next_state, self.target_mixer
+                    )
             else:
                 target_q_tot = self.target_mixer(target_agent_qs, next_state)
 
