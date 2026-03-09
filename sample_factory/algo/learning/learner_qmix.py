@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 from typing import Dict, Optional, Tuple
 
 import torch
@@ -148,7 +149,7 @@ class QMixLearner(Learner):
                 obs_space=self.env_info.obs_space,
                 action_space=self.env_info.action_space,
                 device='cpu',
-                share_memory=not self.cfg.serial_mode,
+                share_memory=False, # replay buffer is process local to learner, and share_memory_() wastes /dev/shm as it's around 13GB visual obs (I got shm error on HPC)
                 rnn_state_size=self.agent_net.get_rnn_size(),
                 rng_seed=replay_buffer_seed,
             )
@@ -162,7 +163,7 @@ class QMixLearner(Learner):
                 obs_space=self.env_info.obs_space,
                 action_space=self.env_info.action_space,
                 device='cpu',
-                share_memory=not self.cfg.serial_mode,
+                share_memory=False, # same as explained above
                 use_per=self.use_per,
                 per_omega=getattr(self.cfg, 'per_omega', 0.6),
                 per_beta_start=self.per_beta_start,
