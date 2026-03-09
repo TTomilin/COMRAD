@@ -497,6 +497,7 @@ class TestGradAccumEquivalence:
                 self._rnn_size = rnn_size
                 self.num_actions = n_actions
                 self.enc_dim = enc_dim
+                self.encoder_out_size = enc_dim
                 self.action_sizes = [n_actions]
                 self.fc = nn.Linear(rnn_size, n_actions, bias=False)
                 self.enc_fc = nn.Linear(rnn_size, enc_dim, bias=False)
@@ -504,12 +505,28 @@ class TestGradAccumEquivalence:
             def get_rnn_size(self):
                 return self._rnn_size
 
-            def forward_decomposed(self, obs, rnn_states):
-                batch = rnn_states.shape[0]
+            def encode(self, obs):
+                # stub: produce enc_dim features from obs by projecting rnn-sized zeros
+                # We need deterministic output based on obs content
+                if isinstance(obs, dict) and "obs" in obs:
+                    val = obs["obs"]
+                else:
+                    val = obs if torch.is_tensor(obs) else list(obs.values())[0]
+                batch_size = val.shape[0]
+                # Use a simple deterministic transform matching the rnn_size -> enc_dim path
+                dummy_rnn = torch.zeros(batch_size, self._rnn_size, device=val.device)
+                return self.enc_fc(dummy_rnn)
+
+            def forward_head(self, encoded, rnn_states):
+                """Core -> decoder -> Q-head on pre-encoded features."""
                 new_rnn = rnn_states + 0.1
                 q_values = self.fc(new_rnn)
-                encoder_out = self.enc_fc(new_rnn)
-                return q_values, new_rnn, encoder_out
+                return q_values, new_rnn
+
+            def forward_decomposed(self, obs, rnn_states):
+                encoded = self.encode(obs)
+                q_values, new_rnn = self.forward_head(encoded, rnn_states)
+                return q_values, new_rnn, encoded
 
             def get_q_for_actions(self, q, a):
                 return q.gather(-1, a.unsqueeze(-1)).squeeze(-1) if a.dim() == 1 else q[:, 0]
