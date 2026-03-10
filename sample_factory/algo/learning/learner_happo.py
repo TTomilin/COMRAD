@@ -628,7 +628,7 @@ class HAPPOLearner(Learner):
                 critic_features[mask] = enc_out
 
         n_transitions = env_group_idx_mb.max().item() + 1
-        grouped = _group_by_env(critic_features, agent_idx_mb, env_group_idx_mb, self.n_agents)
+        grouped = _group_by_env(critic_features, agent_idx_mb, env_group_idx_mb, self.n_agents, n_transitions)
         critic_input = grouped.view(n_transitions, -1)
         joint_value = self.actor_critic.centralized_critic(critic_input)
         values = joint_value.squeeze(-1)[env_group_idx_mb]
