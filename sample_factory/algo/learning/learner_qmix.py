@@ -348,6 +348,7 @@ class QMixLearner(Learner):
             agent_net.flatten_rnn_parameters()
 
         def flatten_step_obs(step_obs: TensorDict) -> TensorDict:
+            """Flatten [B, N, ...] -> [B*N, ...] for per step encoding"""
             flat = TensorDict()
             for key, val in step_obs.items():
                 if isinstance(val, TensorDict):
@@ -363,11 +364,12 @@ class QMixLearner(Learner):
             step_obs = obs[:, t]
             flat_obs = flatten_step_obs(step_obs)
 
-            q_flat, new_rnn_flat, encoder_flat = agent_net.forward_decomposed(flat_obs, rnn_flat)
+            enc_flat = agent_net.encode(flat_obs)
+            q_flat, new_rnn_flat = agent_net.forward_head(enc_flat, rnn_flat)
             num_actions = q_flat.shape[-1]
-            encoder_dim = encoder_flat.shape[-1]
+            encoder_dim = enc_flat.shape[-1]
             q_values_list.append(q_flat.view(batch_size, num_agents, num_actions))
-            encoder_outs_list.append(encoder_flat.view(batch_size, num_agents, encoder_dim))
+            encoder_outs_list.append(enc_flat.view(batch_size, num_agents, encoder_dim))
             if t < t_steps:
                 done_mask = dones[:, t, :].reshape(batch_size * num_agents, 1).to(new_rnn_flat.dtype)
                 new_rnn_flat = new_rnn_flat * (1.0 - done_mask)
@@ -749,16 +751,101 @@ class QMixLearner(Learner):
 
         return loss, td_error.abs().detach()
 
+    @staticmethod
+    def _slice_batch(batch: TensorDict, start: int, end: int) -> TensorDict:
+        """Slice a TensorDict along the batch first dim"""
+        sliced = TensorDict()
+        for key, val in batch.items():
+            if isinstance(val, TensorDict):
+                sliced[key] = QMixLearner._slice_batch(val, start, end)
+            elif isinstance(val, Tensor):
+                sliced[key] = val[start:end]
+            else:
+                sliced[key] = val
+        return sliced
+
     def _train_on_batch(self, batch: TensorDict, weights: Optional[Tensor] = None, indices: Optional[Tensor] = None):
         self.agent_net.train()
         self.mixer.train()
 
-        if self.use_rnn:
-            loss, td_errors = self._calculate_qmix_loss_sequential(batch, weights)
+        # For QPLEX with RNN, we accumulate gradients to avoid OOM on large sequence batches
+        # Split the batch into minibatches, forward+backward each, accumulate grads, step once
+        qplex_rnn_mini_bs = int(getattr(self.cfg, 'qplex_grad_accum_mini_bs', 16))
+        if self.use_rnn and self._is_qplex and batch['rewards'].shape[0] > qplex_rnn_mini_bs:
+            total_bs = batch['rewards'].shape[0]
+            num_chunks = math.ceil(total_bs / qplex_rnn_mini_bs)
+
+            self.optimizer.zero_grad()
+            all_td_errors = []
+            accum_loss = 0.0
+
+            # stats
+            accum_q_tot_mean = 0.0
+            accum_td_error_mean = 0.0
+            accum_agent_qs_mean = 0.0
+            accum_q_tot_max = float('-inf')
+            accum_agent_qs_max = float('-inf')
+            accum_agent_qs_min = float('inf')
+            accum_target_q_tot_mean = 0.0
+            accum_target_before_clamp = 0.0
+            accum_q_std = 0.0
+            accum_done_ratio = 0.0
+            accum_timeout_ratio = 0.0
+            accum_attend_mag_regs = 0.0
+            accum_head_entropy = 0.0
+
+            for chunk_idx in range(num_chunks):
+                start = chunk_idx * qplex_rnn_mini_bs
+                end = min(start + qplex_rnn_mini_bs, total_bs)
+                chunk_frac = (end - start) / total_bs
+
+                chunk_batch = self._slice_batch(batch, start, end)
+                chunk_weights = weights[start:end] if weights is not None else None
+
+                loss, td_errors = self._calculate_qmix_loss_sequential(chunk_batch, chunk_weights)
+                scaled_loss = loss * chunk_frac
+                scaled_loss.backward()
+
+                all_td_errors.append(td_errors.detach())
+                accum_loss += loss.detach().item() * chunk_frac
+                # stats
+                accum_q_tot_mean += self._last_q_tot_mean * chunk_frac
+                accum_td_error_mean += self._last_td_error_mean * chunk_frac
+                accum_agent_qs_mean += self._last_agent_qs_mean * chunk_frac
+                accum_q_tot_max = max(accum_q_tot_max, self._last_q_tot_max)
+                accum_agent_qs_max = max(accum_agent_qs_max, self._last_agent_qs_max)
+                accum_agent_qs_min = min(accum_agent_qs_min, self._last_agent_qs_min)
+                accum_target_q_tot_mean += self._last_target_q_tot_mean * chunk_frac
+                accum_target_before_clamp += self._last_target_before_clamp * chunk_frac
+                accum_q_std += self._last_q_std_across_actions * chunk_frac
+                accum_done_ratio += self._last_done_ratio * chunk_frac
+                accum_timeout_ratio += self._last_timeout_ratio * chunk_frac
+                accum_attend_mag_regs += self._last_attend_mag_regs * chunk_frac
+                accum_head_entropy += self._last_head_entropy_mean * chunk_frac
+
+            td_errors = torch.cat(all_td_errors, dim=0)
+            self._last_loss_value = accum_loss
+            self._last_q_tot_mean = accum_q_tot_mean
+            self._last_q_tot_max = accum_q_tot_max
+            self._last_td_error_mean = accum_td_error_mean
+            self._last_agent_qs_mean = accum_agent_qs_mean
+            self._last_agent_qs_max = accum_agent_qs_max
+            self._last_agent_qs_min = accum_agent_qs_min
+            self._last_target_q_tot_mean = accum_target_q_tot_mean
+            self._last_target_before_clamp = accum_target_before_clamp
+            self._last_q_std_across_actions = accum_q_std
+            self._last_done_ratio = accum_done_ratio
+            self._last_timeout_ratio = accum_timeout_ratio
+            self._last_attend_mag_regs = accum_attend_mag_regs
+            self._last_head_entropy_mean = accum_head_entropy
         else:
-            loss, td_errors = self._calculate_qmix_loss(batch, weights)
-        self.optimizer.zero_grad()
-        loss.backward()
+            self.optimizer.zero_grad()
+            if self.use_rnn:
+                loss, td_errors = self._calculate_qmix_loss_sequential(batch, weights)
+            else:
+                loss, td_errors = self._calculate_qmix_loss(batch, weights)
+            loss.backward()
+
         if self.cfg.max_grad_norm > 0:
             params = list(self.agent_net.parameters()) + list(self.mixer.parameters())
             _gnorm_sq = sum(p.grad.detach().pow(2).sum().item() for p in params if p.grad is not None)

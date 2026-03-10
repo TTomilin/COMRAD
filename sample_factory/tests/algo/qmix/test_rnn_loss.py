@@ -220,10 +220,10 @@ class TestTDTargetNumericalCorrectness:
         learner = object.__new__(QMixLearner)
         learner.num_agents = 2
         learner.cfg = AttrDict({
-            'gamma': 0.5,            # easy to verify manually
-            'double_dqn': False,     # simpler: target net greedy
-            'q_value_clamp': 0,      # disabled
-            'use_huber_loss': False,  # MSE
+            'gamma': 0.5, # easy to verify manually
+            'double_dqn': False, # simpler: target net greedy
+            'q_value_clamp': 0, # disabled
+            'use_huber_loss': False, # MSE
         })
         learner.obs_normalizer = None
 
@@ -238,11 +238,22 @@ class TestTDTargetNumericalCorrectness:
             def get_rnn_size(self):
                 return self._rnn_size
 
-            def forward_decomposed(self, obs, rnn_states):
+            def encode(self, obs):
+                if isinstance(obs, dict) and "obs" in obs:
+                    val = obs["obs"]
+                else:
+                    val = obs if torch.is_tensor(obs) else list(obs.values())[0]
+                return torch.zeros(val.shape[0], self.enc_dim)
+
+            def forward_head(self, encoded, rnn_states):
                 batch = rnn_states.shape[0]
                 q = torch.full((batch, 3), self.q_val)
                 new_rnn = rnn_states.clone()
-                enc = torch.zeros(batch, self.enc_dim)
+                return q, new_rnn
+
+            def forward_decomposed(self, obs, rnn_states):
+                enc = self.encode(obs)
+                q, new_rnn = self.forward_head(enc, rnn_states)
                 return q, new_rnn, enc
 
             def get_q_for_actions(self, q, a):

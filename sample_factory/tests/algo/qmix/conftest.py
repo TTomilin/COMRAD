@@ -14,10 +14,6 @@ from sample_factory.utils.attr_dict import AttrDict
 from comrad.models.qmix_model import QMixAgentNet, QMixMixer, make_mixer
 
 
-# ---------------------------------------------------------------------------
-# Stubs for RNN tests
-# ---------------------------------------------------------------------------
-
 class AgentRnnStub:
     def __init__(self, rnn_size: int = 2, num_actions: int = 3, enc_dim: int = 2):
         self._rnn_size = rnn_size
@@ -28,18 +24,26 @@ class AgentRnnStub:
     def get_rnn_size(self) -> int:
         return self._rnn_size
 
-    def forward_decomposed(self, obs: TensorDict, rnn_states: torch.Tensor):
-        batch = rnn_states.shape[0]
+    def encode(self, obs: TensorDict) -> torch.Tensor:
+        if isinstance(obs, dict) and "obs" in obs:
+            val = obs["obs"]
+        else:
+            val = obs if torch.is_tensor(obs) else list(obs.values())[0]
+        batch_size = val.shape[0]
+        return torch.zeros(batch_size, self.enc_dim, device=val.device)
+
+    def forward_head(self, encoded: torch.Tensor, rnn_states: torch.Tensor):
+        """Core -> decoder -> Q-head on pre-encoded features"""
         new_rnn = rnn_states + 1.0
+        batch = rnn_states.shape[0]
         q_values = torch.zeros(batch, self.num_actions, device=new_rnn.device)
         q_values[:, 0] = new_rnn[:, 0]
+        return q_values, new_rnn
 
-        if self.enc_dim <= self._rnn_size:
-            encoder_out = new_rnn[:, :self.enc_dim]
-        else:
-            encoder_out = torch.nn.functional.pad(new_rnn, (0, self.enc_dim - self._rnn_size))
-
-        return q_values, new_rnn, encoder_out
+    def forward_decomposed(self, obs: TensorDict, rnn_states: torch.Tensor):
+        encoded = self.encode(obs)
+        q_values, new_rnn = self.forward_head(encoded, rnn_states)
+        return q_values, new_rnn, encoded
 
 
 class SumMixer(nn.Module):
@@ -52,10 +56,6 @@ class DummyEnvInfo:
         self.obs_space = None
         self.num_agents = num_agents
 
-
-# ---------------------------------------------------------------------------
-# Config factories
-# ---------------------------------------------------------------------------
 
 def make_qmix_cfg(use_rnn: bool, rnn_size: int = 16, rnn_num_layers: int = 1) -> AttrDict:
     return AttrDict(
@@ -109,10 +109,6 @@ def make_full_qmix_cfg(**overrides) -> AttrDict:
     return cfg
 
 
-# ---------------------------------------------------------------------------
-# Space factories
-# ---------------------------------------------------------------------------
-
 def make_spaces():
     obs_space = gym.spaces.Dict({'obs': gym.spaces.Box(0, 1, shape=(3, 64, 64))})
     action_space = gym.spaces.Tuple((gym.spaces.Discrete(3), gym.spaces.Discrete(2)))
@@ -130,10 +126,6 @@ def compound_action_space():
 def single_action_space():
     return gym.spaces.Discrete(4)
 
-
-# ---------------------------------------------------------------------------
-# Batch factories
-# ---------------------------------------------------------------------------
 
 def make_sequence_batch(num_envs: int = 2, num_agents: int = 2, rollout: int = 3, rnn_size: int = 4):
     num_traj = num_envs * num_agents

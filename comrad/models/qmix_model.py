@@ -131,20 +131,27 @@ class QMixAgentNet(nn.Module):
 
         return x
 
-    def forward_decomposed(self, obs: TensorDict, rnn_states = None):
-        """Modularize this to use in learner_qmix"""
-        x = self.encode(obs)
-        encoder_out = x
+    def forward_head(self, encoded: Tensor, rnn_states=None) -> Tuple[Tensor, Tensor]:
+        """
+        Run core -> decoder -> Q-head on pre-encoded features
 
-        x, new_rnn = self.core(x, rnn_states)
-
+        :param encoded: [batch, encoder_out_size] from encode()
+        :param rnn_states: [batch, rnn_size] or None
+        :returns: (q_values [batch, total_actions], new_rnn_states [batch, rnn_size])
+        """
+        x, new_rnn = self.core(encoded, rnn_states)
         x = self.decoder(x)
-
         if self.q_head is not None:
             q_values = self.q_head(x)
         else:
             q_values = torch.cat([head(x) for head in self.q_heads], dim=-1)
+        return q_values, new_rnn
 
+    def forward_decomposed(self, obs: TensorDict, rnn_states = None):
+        """Modularize this to use in learner_qmix"""
+        x = self.encode(obs)
+        encoder_out = x
+        q_values, new_rnn = self.forward_head(x, rnn_states)
         return q_values, new_rnn, encoder_out
 
     def forward(self, obs: TensorDict, rnn_states: Optional[Tensor] = None) -> Tuple[Tensor, Optional[Tensor]]:

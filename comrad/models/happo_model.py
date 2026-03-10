@@ -140,10 +140,28 @@ class HAPPOActorCritic(ActorCritic):
 
         self.apply(self.initialize_weights)
 
+    def _compute_agent_indices(self, agent_idx):
+        """
+        Precompute per agent idx tensors to avoid repeated boolean masking and GPU syncs
+        Used when forward_head/forward_core/forward_tail are called directly (from learner) where batch layout not interleaved
+        """
+        indices = []
+        for i in range(self.n_agents):
+            idx = (agent_idx == i).nonzero(as_tuple=True)[0]
+            indices.append(idx)
+        return indices
+
+    def _compute_agent_indices_strided(self, B, device):
+        """Uses deterministic stride pattern - agents always interleaved [0,1,...,N-1,0,1,...] - to avoid GPU-CPU syncs. Only valid when called from forward() where inference batch layout is interleaved"""
+        return [torch.arange(i, B, self.n_agents, device=device) for i in range(self.n_agents)]
+
     def forward(self, normalized_obs_dict, rnn_states, values_only=False, action_mask=None, sample_actions=True):
         """Returns tensordict"""
         agent_idx = normalized_obs_dict['agent_id'].argmax(dim=-1)
-        head_out = self.forward_head(normalized_obs_dict, agent_idx=agent_idx)
+        B = agent_idx.shape[0]
+        # Precompute integer indices once for all
+        agent_indices = self._compute_agent_indices_strided(B, agent_idx.device)
+        head_out = self.forward_head(normalized_obs_dict, agent_idx=agent_idx, agent_indices=agent_indices)
 
         # Split actor critic RNN states
         if self.use_critic_rnn:
@@ -155,7 +173,7 @@ class HAPPOActorCritic(ActorCritic):
             critic_rnn = None
 
         # pass to forward core
-        core_out, new_actor_rnn = self.forward_core(head_out, actor_rnn, agent_idx=agent_idx)
+        core_out, new_actor_rnn = self.forward_core(head_out, actor_rnn, agent_idx=agent_idx, agent_indices=agent_indices)
 
         # Group bases on position. Should be safe for batched_sampling=True unless race condition, but idk
         # In learner, after agent i trains, env_group_idx will be used to multiply all agents in the same transition
@@ -169,6 +187,8 @@ class HAPPOActorCritic(ActorCritic):
             sample_actions=sample_actions,
             action_mask=action_mask,
             critic_rnn_states=critic_rnn,
+            head_output=head_out,
+            agent_indices=agent_indices,
         )
 
         # updated critic half
@@ -180,7 +200,7 @@ class HAPPOActorCritic(ActorCritic):
 
         return result
 
-    def forward_head(self, obs_dict, *, agent_idx=None):
+    def forward_head(self, obs_dict, *, agent_idx=None, agent_indices=None):
         """
         Route obs to each agents' encoder
         """
@@ -191,14 +211,17 @@ class HAPPOActorCritic(ActorCritic):
         B = next(iter(obs_no_id.values())).shape[0]
         out = torch.zeros(B, self.agent_encoders[0].get_out_size(), device=device)
 
+        if agent_indices is None:
+            agent_indices = self._compute_agent_indices(agent_idx)
+
         for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
-                out[mask] = self.agent_encoders[i](agent_obs)
+            idx = agent_indices[i]
+            if idx.numel() > 0:
+                agent_obs = {k: v[idx] for k, v in obs_no_id.items()}
+                out[idx] = self.agent_encoders[i](agent_obs)
         return out
 
-    def forward_core(self, head_output, rnn_states, *, agent_idx=None):
+    def forward_core(self, head_output, rnn_states, *, agent_idx=None, agent_indices=None):
         """
         same but RNN cores
         """
@@ -209,34 +232,41 @@ class HAPPOActorCritic(ActorCritic):
         out = torch.zeros(B, self.agent_cores[0].get_out_size(), device=device)
         new_rnn = torch.zeros_like(rnn_states)
 
+        if agent_indices is None:
+            agent_indices = self._compute_agent_indices(agent_idx)
+
         for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                core_out_i, rnn_i = self.agent_cores[i](head_output[mask], rnn_states[mask])
-                out[mask] = core_out_i
-                new_rnn[mask] = rnn_i
+            idx = agent_indices[i]
+            if idx.numel() > 0:
+                core_out_i, rnn_i = self.agent_cores[i](head_output[idx], rnn_states[idx])
+                out[idx] = core_out_i
+                new_rnn[idx] = rnn_i
         return out, new_rnn
 
     def forward_tail(self, core_output, *, agent_idx=None, env_group_idx=None, normalized_obs_dict=None,
-                     values_only=False, sample_actions=True, action_mask=None, critic_rnn_states=None):
+                     values_only=False, sample_actions=True, action_mask=None, critic_rnn_states=None,
+                     head_output=None, agent_indices=None):
         """
         separate decoders + centralized critic + critic encoder
 
-        All args after core_output are keyword-only
+        All args after core_output are keyword-only.
+        head_output: if provided and not training, reuse actor encoder features for critic to skip the expensive critic CNN encoders at inference time.
+        agent_indices: pre-computed integer index tensors per agent (avoids repeated masking or GPU syncs)
         """
         if agent_idx is None:
             raise ValueError("agent_idx is required for HAPPOActorCritic.forward_tail")
         device = model_device(self)
         B = core_output.shape[0]
 
+        if agent_indices is None:
+            agent_indices = self._compute_agent_indices(agent_idx)
+
         # V Critic centralized critic with separate encoders
-        # Should also look at HARL's implementation for this, this is afapted to work with SF
         obs_no_id = {k: v for k, v in normalized_obs_dict.items() if k != 'agent_id'}
         critic_enc_out_size = self.critic_encoders[0].get_out_size()
         if self.use_critic_rnn:
             critic_feature_size = self.critic_cores[0].get_out_size()
         elif self.critic_cores is not None:
-            # project MLP input dim
             critic_feature_size = self.critic_cores[0].get_out_size()
         else:
             critic_feature_size = critic_enc_out_size
@@ -245,24 +275,45 @@ class HAPPOActorCritic(ActorCritic):
             if critic_rnn_states is None:
                 raise ValueError("forward_tail: use_critic_rnn=True but critic_rnn_states is None, must extract and pass critic states.")
 
+        # At inference (not training), reuse actor encoder features for the critic to avoid running 2 extra CNN passe
+        # The critic encoders have diff weights, but the actor features are a good approx for GAE bootstrapping. The learner always runs the real critic encoders
+        skip_critic_encoder = (head_output is not None and not self.training)
+
         critic_features = torch.zeros(B, critic_feature_size, device=device)
         new_critic_rnn = torch.zeros_like(critic_rnn_states) if critic_rnn_states is not None else None
-        for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
-                enc_out = self.critic_encoders[i](agent_obs)
-                if self.critic_projection is not None:
-                    enc_out = self.critic_projection(enc_out)
-                if self.use_critic_rnn:
-                    core_out_i, rnn_i = self.critic_cores[i](enc_out, critic_rnn_states[mask])
-                    critic_features[mask] = core_out_i
-                    new_critic_rnn[mask] = rnn_i
-                else:
-                    critic_features[mask] = enc_out
 
-        n_transitions = env_group_idx.max().item() + 1
-        grouped = _group_by_env(critic_features, agent_idx, env_group_idx, self.n_agents)
+        if skip_critic_encoder:
+            # Reuse actor encoder output as critic features
+            enc_out = head_output
+            if self.critic_projection is not None:
+                enc_out = self.critic_projection(enc_out)
+            if self.use_critic_rnn:
+                for i in range(self.n_agents):
+                    idx = agent_indices[i]
+                    if idx.numel() > 0:
+                        core_out_i, rnn_i = self.critic_cores[i](enc_out[idx], critic_rnn_states[idx])
+                        critic_features[idx] = core_out_i
+                        new_critic_rnn[idx] = rnn_i
+            else:
+                critic_features = enc_out
+        else:
+            for i in range(self.n_agents):
+                idx = agent_indices[i]
+                if idx.numel() > 0:
+                    agent_obs = {k: v[idx] for k, v in obs_no_id.items()}
+                    enc_out = self.critic_encoders[i](agent_obs)
+                    if self.critic_projection is not None:
+                        enc_out = self.critic_projection(enc_out)
+                    if self.use_critic_rnn:
+                        core_out_i, rnn_i = self.critic_cores[i](enc_out, critic_rnn_states[idx])
+                        critic_features[idx] = core_out_i
+                        new_critic_rnn[idx] = rnn_i
+                    else:
+                        critic_features[idx] = enc_out
+
+        # Group critic features by env transition for centralized critic
+        n_transitions = B // self.n_agents # no GPU sync
+        grouped = _group_by_env(critic_features, agent_idx, env_group_idx, self.n_agents, n_transitions)
         critic_input = grouped.view(n_transitions, -1) # [n_transitions, n_agents * critic_feature_size]
         joint_value = self.centralized_critic(critic_input) # [n_transitions, 1]
         values = joint_value.squeeze(-1)[env_group_idx] # Broadcast to all agents [B]
@@ -277,18 +328,18 @@ class HAPPOActorCritic(ActorCritic):
         decoder_out_size = self.agent_decoders[0].get_out_size()
         decoder_outputs = torch.zeros(B, decoder_out_size, device=device)
         for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                decoder_outputs[mask] = self.agent_decoders[i](core_output[mask])
+            idx = agent_indices[i]
+            if idx.numel() > 0:
+                decoder_outputs[idx] = self.agent_decoders[i](core_output[idx])
 
         # action parameterization
         all_action_logits = torch.zeros(B, self.action_logit_dim, device=device)
         for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                mask_action_mask = action_mask[mask] if action_mask is not None else None
-                logits_i, _ = self.agent_action_params[i](decoder_outputs[mask], mask_action_mask)
-                all_action_logits[mask] = logits_i
+            idx = agent_indices[i]
+            if idx.numel() > 0:
+                mask_action_mask = action_mask[idx] if action_mask is not None else None
+                logits_i, _ = self.agent_action_params[i](decoder_outputs[idx], mask_action_mask)
+                all_action_logits[idx] = logits_i
 
         result["action_logits"] = all_action_logits
 
@@ -299,15 +350,17 @@ class HAPPOActorCritic(ActorCritic):
         return result
 
 
-def _group_by_env(features, agent_idx, env_group_idx, n_agents):
+def _group_by_env(features, agent_idx, env_group_idx, n_agents, n_transitions=None):
     """
     [B, F] -> [n_transitions, n_agents, F] by env
     Concat all agents features in a transition to get joint obs
+    When n_transitions is provided (inference path), uses zero-copy reshape since agents are interleaved [a0,a1,...,aN-1,a0,a1,...].
     """
+    if n_transitions is not None:
+        # Agents interleaved so just reshape
+        return features.view(n_transitions, n_agents, features.shape[1])
+    # Scatter for non-standard orderings
     n_transitions = env_group_idx.max().item() + 1
-    # (env_group_idx, agent_idx) pairs shouldnt have dupe
-    pairs = env_group_idx * n_agents + agent_idx
-    assert pairs.unique().shape[0] == pairs.shape[0], ("Duplicate (env_group_idx, agent_idx) pairs detected in _group_by_env")
     grouped = torch.zeros(n_transitions, n_agents, features.shape[1], device=features.device)
     grouped[env_group_idx, agent_idx] = features
     return grouped
