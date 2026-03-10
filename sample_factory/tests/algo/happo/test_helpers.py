@@ -101,10 +101,12 @@ class TestGroupByEnv:
         for i in range(B):
             torch.testing.assert_close(grouped[env_group_idx[i], agent_idx[i]], features[i])
 
-    def test_duplicate_pair_raises(self):
+    def test_duplicate_pair_overwrites(self):
+        """With the assert removed for performance, duplicates silently overwrite (last writer wins)."""
         features = torch.tensor([[1.0], [2.0]])
         agent_idx = torch.tensor([0, 0])
         env_group_idx = torch.tensor([0, 0])
 
-        with pytest.raises(AssertionError, match="Duplicate"):
-            _group_by_env(features, agent_idx, env_group_idx, 2)
+        grouped = _group_by_env(features, agent_idx, env_group_idx, 2)
+        # Last value (2.0) wins for slot [0, 0]
+        assert grouped[0, 0, 0].item() == 2.0
