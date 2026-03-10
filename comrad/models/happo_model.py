@@ -169,6 +169,8 @@ class HAPPOActorCritic(ActorCritic):
             sample_actions=sample_actions,
             action_mask=action_mask,
             critic_rnn_states=critic_rnn,
+            head_output=head_out,
+            agent_indices=agent_indices,
         )
 
         # updated critic half
@@ -180,7 +182,7 @@ class HAPPOActorCritic(ActorCritic):
 
         return result
 
-    def forward_head(self, obs_dict, *, agent_idx=None):
+    def forward_head(self, obs_dict, *, agent_idx=None, agent_indices=None):
         """
         Route obs to each agents' encoder
         """
@@ -218,11 +220,14 @@ class HAPPOActorCritic(ActorCritic):
         return out, new_rnn
 
     def forward_tail(self, core_output, *, agent_idx=None, env_group_idx=None, normalized_obs_dict=None,
-                     values_only=False, sample_actions=True, action_mask=None, critic_rnn_states=None):
+                     values_only=False, sample_actions=True, action_mask=None, critic_rnn_states=None,
+                     head_output=None, agent_indices=None):
         """
         separate decoders + centralized critic + critic encoder
 
-        All args after core_output are keyword-only
+        All args after core_output are keyword-only.
+        head_output: if provided and not training, reuse actor encoder features for critic to skip the expensive critic CNN encoders at inference time.
+        agent_indices: pre-computed integer index tensors per agent (avoids repeated masking or GPU syncs)
         """
         if agent_idx is None:
             raise ValueError("agent_idx is required for HAPPOActorCritic.forward_tail")
@@ -230,13 +235,11 @@ class HAPPOActorCritic(ActorCritic):
         B = core_output.shape[0]
 
         # V Critic centralized critic with separate encoders
-        # Should also look at HARL's implementation for this, this is afapted to work with SF
         obs_no_id = {k: v for k, v in normalized_obs_dict.items() if k != 'agent_id'}
         critic_enc_out_size = self.critic_encoders[0].get_out_size()
         if self.use_critic_rnn:
             critic_feature_size = self.critic_cores[0].get_out_size()
         elif self.critic_cores is not None:
-            # project MLP input dim
             critic_feature_size = self.critic_cores[0].get_out_size()
         else:
             critic_feature_size = critic_enc_out_size
@@ -245,21 +248,41 @@ class HAPPOActorCritic(ActorCritic):
             if critic_rnn_states is None:
                 raise ValueError("forward_tail: use_critic_rnn=True but critic_rnn_states is None, must extract and pass critic states.")
 
+        # At inference (not training), reuse actor encoder features for the critic to avoid running 2 extra CNN passe
+        # The critic encoders have diff weights, but the actor features are a good approx for GAE bootstrapping. The learner always runs the real critic encoders
+        skip_critic_encoder = (head_output is not None and not self.training)
+
         critic_features = torch.zeros(B, critic_feature_size, device=device)
         new_critic_rnn = torch.zeros_like(critic_rnn_states) if critic_rnn_states is not None else None
-        for i in range(self.n_agents):
-            mask = (agent_idx == i)
-            if mask.any():
-                agent_obs = {k: v[mask] for k, v in obs_no_id.items()}
-                enc_out = self.critic_encoders[i](agent_obs)
-                if self.critic_projection is not None:
-                    enc_out = self.critic_projection(enc_out)
-                if self.use_critic_rnn:
-                    core_out_i, rnn_i = self.critic_cores[i](enc_out, critic_rnn_states[mask])
-                    critic_features[mask] = core_out_i
-                    new_critic_rnn[mask] = rnn_i
-                else:
-                    critic_features[mask] = enc_out
+
+        if skip_critic_encoder:
+            # Reuse actor encoder output as critic features
+            enc_out = head_output
+            if self.critic_projection is not None:
+                enc_out = self.critic_projection(enc_out)
+            if self.use_critic_rnn:
+                for i in range(self.n_agents):
+                    idx = agent_indices[i]
+                    if idx.numel() > 0:
+                        core_out_i, rnn_i = self.critic_cores[i](enc_out[idx], critic_rnn_states[idx])
+                        critic_features[idx] = core_out_i
+                        new_critic_rnn[idx] = rnn_i
+            else:
+                critic_features = enc_out
+        else:
+            for i in range(self.n_agents):
+                idx = agent_indices[i]
+                if idx.numel() > 0:
+                    agent_obs = {k: v[idx] for k, v in obs_no_id.items()}
+                    enc_out = self.critic_encoders[i](agent_obs)
+                    if self.critic_projection is not None:
+                        enc_out = self.critic_projection(enc_out)
+                    if self.use_critic_rnn:
+                        core_out_i, rnn_i = self.critic_cores[i](enc_out, critic_rnn_states[idx])
+                        critic_features[idx] = core_out_i
+                        new_critic_rnn[idx] = rnn_i
+                    else:
+                        critic_features[idx] = enc_out
 
         n_transitions = env_group_idx.max().item() + 1
         grouped = _group_by_env(critic_features, agent_idx, env_group_idx, self.n_agents)
