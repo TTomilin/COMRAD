@@ -347,48 +347,36 @@ class QMixLearner(Learner):
         if hasattr(agent_net, 'flatten_rnn_parameters'):
             agent_net.flatten_rnn_parameters()
 
-        # Batched encoder forward pass
-        # Instead of calling encode() T+1 times in a loop, we batch all obs into a single encoder call so there's only 1 encoder call on entire batch, then run RNN sequentially on encoded features
-
-        def flatten_all_obs(obs_td: TensorDict) -> TensorDict:
-            """Flatten [B, T+1, N, ...] -> [B*(T+1)*N, ...] for batched encoding"""
+        def flatten_step_obs(step_obs: TensorDict) -> TensorDict:
+            """Flatten [B, N, ...] -> [B*N, ...] for per step encoding"""
             flat = TensorDict()
-            for key, val in obs_td.items():
+            for key, val in step_obs.items():
                 if isinstance(val, TensorDict):
-                    flat[key] = flatten_all_obs(val)
+                    flat[key] = flatten_step_obs(val)
                 else:
-                    # val shape [B, T+1, N, ...] -> [B*(T+1)*N, ...]
-                    flat[key] = val.reshape(-1, *val.shape[3:])
+                    flat[key] = val.reshape(val.shape[0] * val.shape[1], *val.shape[2:])
             return flat
 
-        # Batch encode all obs
-        flat_all_obs = flatten_all_obs(obs)
-        encoded_all = agent_net.encode(flat_all_obs)  # [B*(T+1)*N, enc_dim]
-        enc_dim = encoded_all.shape[-1]
-
-        # Reshape to [B*N, T+1, enc_dim] for RNN
-        encoded_seq = encoded_all.view(batch_size, obs_steps, num_agents, enc_dim)
-        # Also keep encoder outputs in [B, T+1, N, enc_dim] for mixer state
-        encoder_outs = encoded_seq  # [B, T+1, N, enc_dim]
-
-        # Sequential RNN loop, only core + decoder + Q-head, no CNN
         rnn_flat = rnn_states.reshape(batch_size * num_agents, -1)
         q_values_list = []
+        encoder_outs_list = []
         for t in range(obs_steps):
-            # encoded features for this timestep
-            # [B, N, enc_dim] -> [B*N, enc_dim]
-            enc_t = encoded_seq[:, t].reshape(batch_size * num_agents, enc_dim)
+            step_obs = obs[:, t]
+            flat_obs = flatten_step_obs(step_obs)
 
-            q_flat, new_rnn_flat = agent_net.forward_head(enc_t, rnn_flat)
+            enc_flat = agent_net.encode(flat_obs)
+            q_flat, new_rnn_flat = agent_net.forward_head(enc_flat, rnn_flat)
             num_actions = q_flat.shape[-1]
+            encoder_dim = enc_flat.shape[-1]
             q_values_list.append(q_flat.view(batch_size, num_agents, num_actions))
-
+            encoder_outs_list.append(enc_flat.view(batch_size, num_agents, encoder_dim))
             if t < t_steps:
                 done_mask = dones[:, t, :].reshape(batch_size * num_agents, 1).to(new_rnn_flat.dtype)
                 new_rnn_flat = new_rnn_flat * (1.0 - done_mask)
             rnn_flat = new_rnn_flat
 
         q_values = torch.stack(q_values_list, dim=1)
+        encoder_outs = torch.stack(encoder_outs_list, dim=1)
         assert q_values.shape[1] == t_steps + 1
         assert encoder_outs.shape[1] == t_steps + 1
         return q_values, encoder_outs
