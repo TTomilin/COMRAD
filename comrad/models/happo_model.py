@@ -141,18 +141,26 @@ class HAPPOActorCritic(ActorCritic):
         self.apply(self.initialize_weights)
 
     def _compute_agent_indices(self, agent_idx):
-        """Precompute per agent idx tensors to avoid repeated boolean masking and GPU syncs"""
+        """
+        Precompute per agent idx tensors to avoid repeated boolean masking and GPU syncs
+        Used when forward_head/forward_core/forward_tail are called directly (from learner) where batch layout not interleaved
+        """
         indices = []
         for i in range(self.n_agents):
             idx = (agent_idx == i).nonzero(as_tuple=True)[0]
             indices.append(idx)
         return indices
 
+    def _compute_agent_indices_strided(self, B, device):
+        """Uses deterministic stride pattern - agents always interleaved [0,1,...,N-1,0,1,...] - to avoid GPU-CPU syncs. Only valid when called from forward() where inference batch layout is interleaved"""
+        return [torch.arange(i, B, self.n_agents, device=device) for i in range(self.n_agents)]
+
     def forward(self, normalized_obs_dict, rnn_states, values_only=False, action_mask=None, sample_actions=True):
         """Returns tensordict"""
         agent_idx = normalized_obs_dict['agent_id'].argmax(dim=-1)
+        B = agent_idx.shape[0]
         # Precompute integer indices once for all
-        agent_indices = self._compute_agent_indices(agent_idx)
+        agent_indices = self._compute_agent_indices_strided(B, agent_idx.device)
         head_out = self.forward_head(normalized_obs_dict, agent_idx=agent_idx, agent_indices=agent_indices)
 
         # Split actor critic RNN states
@@ -346,9 +354,13 @@ def _group_by_env(features, agent_idx, env_group_idx, n_agents, n_transitions=No
     """
     [B, F] -> [n_transitions, n_agents, F] by env
     Concat all agents features in a transition to get joint obs
+    When n_transitions is provided (inference path), uses zero-copy reshape since agents are interleaved [a0,a1,...,aN-1,a0,a1,...].
     """
-    if n_transitions is None:
-        n_transitions = env_group_idx.max().item() + 1
+    if n_transitions is not None:
+        # Agents interleaved so just reshape
+        return features.view(n_transitions, n_agents, features.shape[1])
+    # Scatter for non-standard orderings
+    n_transitions = env_group_idx.max().item() + 1
     grouped = torch.zeros(n_transitions, n_agents, features.shape[1], device=features.device)
     grouped[env_group_idx, agent_idx] = features
     return grouped
