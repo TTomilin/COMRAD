@@ -6,3 +6,4 @@ from comrad.wrappers.scenario_wrappers.armory_siege import ArmorySiegeRewardShap
 from comrad.wrappers.scenario_wrappers.lavapit2_reward_shaping import LavapitRewardShaping
 from comrad.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierRewardShaping
 from comrad.wrappers.scenario_wrappers.lava_maze import LavaMazeRewardShaping
+from comrad.wrappers.scenario_wrappers.common_harvest_doom import CommonHarvestRewardShaping

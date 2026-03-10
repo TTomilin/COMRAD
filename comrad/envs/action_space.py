@@ -44,6 +44,26 @@ def doom_action_space_ammo_carrier():
     )
 
 
+def doom_action_space_common_harvest():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_LEFT
+    MOVE_RIGHT
+    ATTACK
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, strafe left, strafe right
+            Discrete(2),  # noop, attack
+        )
+    )
+
+
 def doom_action_space_basic():
     """
     TURN_LEFT
