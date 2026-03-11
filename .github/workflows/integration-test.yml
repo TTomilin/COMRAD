@@ -1,0 +1,27 @@
+on:
+  pull_request:
+      paths: ['sample-factory/**']
+  push:
+    branches:
+      - main
+    paths:
+      - 'sample-factory/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --frozen --all-extras
+
+      - name: Run pytest
+        run: uv run pytest sample-factory/ -v
