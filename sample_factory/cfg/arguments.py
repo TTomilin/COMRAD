@@ -1,6 +1,8 @@
 import argparse
 import copy
 import json
+import math
+import multiprocessing
 import os
 import sys
 from typing import List, Optional, Tuple
@@ -102,10 +104,142 @@ def postprocess_args(args, argv, parser) -> argparse.Namespace:
     return args
 
 
+def auto_adjust_marl_config(cfg: Config, env_info: EnvInfo) -> None:
+    """
+    User only needs to specify --num_agents or let the scenario default it, and everything else is auto calculated if not explicitly passed via CLI.
+
+    worker_traj_per_iteration must divide trajectories_per_training_iteration or vice versa
+        + worker_traj_per_iteration = (num_agents * num_envs_per_worker) // worker_num_splits
+        + trajectories_per_training_iteration = num_batches_per_epoch * (batch_size // rollout)
+    HAPPO: batch_size % (num_agents * recurrence) == 0
+    Sync RL: samples_per_training_iteration % samples_from_all_workers == 0
+    """
+    num_agents = env_info.num_agents
+    if num_agents <= 1: return
+
+    cli_args = getattr(cfg, "cli_args", {})
+    algo_upper = str(cfg.algo).upper()
+
+    if algo_upper in ("QMIX", "VDN", "QPLEX", "HAPPO", "MAPPO"):
+        if "batched_sampling" not in cli_args:
+            cfg.batched_sampling = True # This technically doesnt matter that much for our settings but I like it
+            log.info("Auto changing config: batched_sampling=True")
+
+    # Auto set num_workers, num_envs_per_worker, policy_workers_per_policy
+    # num_workers = min(cpu_count // 4, 8)
+    # num_envs_per_worker = 4
+    # policy_workers_per_policy = 2: second inference worker enables GPU pipelining (+25% FPS).
+    fps_warns = []
+    if "num_workers" not in cli_args:
+        rec_nw = max(1, min(multiprocessing.cpu_count() // 4, 8))
+        if cfg.num_workers != rec_nw:
+            cfg.num_workers = rec_nw
+            fps_warns.append(f"num_workers={rec_nw} (cpu_count={multiprocessing.cpu_count()})")
+    if "num_envs_per_worker" not in cli_args:
+        if cfg.num_envs_per_worker != 4:
+            cfg.num_envs_per_worker = 4
+            fps_warns.append("num_envs_per_worker=4")
+    if getattr(cfg, "batched_sampling", False) and "policy_workers_per_policy" not in cli_args:
+        if cfg.policy_workers_per_policy < 2:
+            cfg.policy_workers_per_policy = 2
+            fps_warns.append("policy_workers_per_policy=2")
+    if fps_warns:
+        log.warning(f"Auto changing config: {num_agents} agents: " + ", ".join(fps_warns))
+
+    if getattr(cfg, "batched_sampling", False):
+        worker_num_splits = getattr(cfg, "worker_num_splits", 2)
+        num_envs_per_worker = getattr(cfg, "num_envs_per_worker", 2)
+        rollout = getattr(cfg, "rollout", 32)
+        num_batches_per_epoch = getattr(cfg, "num_batches_per_epoch", 1)
+
+        worker_traj = (num_agents * num_envs_per_worker) // worker_num_splits
+
+        # For HAPPO, batch_size should be divisible by num_agents * recurrence
+        recurrence = rollout if getattr(cfg, "use_rnn", False) else 1
+        if algo_upper == "HAPPO":
+            group_size = num_agents * recurrence
+        else:
+            group_size = 1
+
+        # Auto set batch_size
+        # trajectories_per_training_iteration = num_batches_per_epoch * (batch_size // rollout)
+        # Need: trajectories_per_training_iteration % worker_traj == 0 or worker_traj % trajectories_per_training_iteration == 0
+        # This is the same as (batch_size // rollout) % worker_traj == 0 since num_batches_per_epoch is usually 1
+        # Also: batch_size % group_size == 0 (for HAPPO) and batch_size % rollout == 0
+
+        orig_batch_size = getattr(cfg, "batch_size", 1024)
+        traj_per_mb = orig_batch_size // rollout
+
+        # Check if traj_per_mb and worker_traj are divisible
+        g = math.gcd(traj_per_mb * num_batches_per_epoch, worker_traj)
+        needs_adjustment = g != min(traj_per_mb * num_batches_per_epoch, worker_traj)
+        needs_group_align = group_size > 1 and (orig_batch_size % group_size != 0)
+
+        if (needs_adjustment or needs_group_align) and "batch_size" not in cli_args:
+            # Find nearest valid batch_size >= rollout * worker_traj that also satisfies group_size alignment
+            # -> the minimum valid batch_size is rollout * worker_traj (1 worker fill = 1 minibatch)
+            min_traj = worker_traj # smallest valid traj_per_mb
+            # Try multiples of worker_traj until group_size is also good
+            candidate_traj = min_traj
+            for _ in range(100):
+                candidate_bs = candidate_traj * rollout
+                if candidate_bs % group_size == 0 and candidate_bs >= rollout:
+                    break
+                candidate_traj += worker_traj
+            else:
+                # If not then get lcm
+                lcm_traj_group = (worker_traj * rollout * group_size) // math.gcd(worker_traj * rollout, group_size)
+                candidate_bs = max(lcm_traj_group, rollout)
+
+            # Stay close to orig batch_size
+            if candidate_bs < orig_batch_size:
+                # Scale up to be >= orig
+                scale = (orig_batch_size + candidate_bs - 1) // candidate_bs
+                candidate_bs *= scale
+                while (candidate_bs // rollout) % worker_traj != 0 or (group_size > 1 and candidate_bs % group_size != 0):
+                    candidate_bs += worker_traj * rollout
+
+            if candidate_bs != orig_batch_size:
+                cfg.batch_size = candidate_bs
+                log.warning(
+                    f"Auto changing config: batch_size {orig_batch_size} -> {candidate_bs} "
+                    f"(num_agents={num_agents}, worker_traj={worker_traj}, "
+                    f"traj_per_mb={candidate_bs // rollout}, group_size={group_size})"
+                )
+        elif needs_adjustment and "batch_size" in cli_args:
+            # Suggest new batch size instead of just error
+            valid_below = orig_batch_size
+            while valid_below > rollout:
+                tpm = valid_below // rollout
+                if math.gcd(tpm * num_batches_per_epoch, worker_traj) == min(tpm * num_batches_per_epoch, worker_traj):
+                    if group_size <= 1 or valid_below % group_size == 0:
+                        break
+                valid_below -= rollout
+
+            valid_above = orig_batch_size
+            for _ in range(200):
+                valid_above += rollout
+                tpm = valid_above // rollout
+                if math.gcd(tpm * num_batches_per_epoch, worker_traj) == min(tpm * num_batches_per_epoch, worker_traj):
+                    if group_size <= 1 or valid_above % group_size == 0:
+                        break
+
+            log.warning(
+                f"Auto changing config: batch_size={orig_batch_size} will fail SharedBuffers assertion. "
+                f"With num_agents={num_agents}, num_envs_per_worker={num_envs_per_worker}, "
+                f"worker_num_splits={worker_num_splits}: worker_traj={worker_traj}, traj_per_mb={traj_per_mb}. "
+                f"Valid batch sizes near {orig_batch_size}: {valid_below}, {valid_above}. "
+                f"Auto adjusting to {valid_below}"
+            )
+            cfg.batch_size = valid_below
+
+
 def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
     if cfg.recurrence == -1:
         cfg.recurrence = cfg.rollout if cfg.use_rnn else 1
         log.debug(f"Automatically setting recurrence to {cfg.recurrence}")
+
+    auto_adjust_marl_config(cfg, env_info)
 
     if str(cfg.algo).upper() == "DQN":
         dqn_batch_size = getattr(cfg, "dqn_batch_size", 0)
