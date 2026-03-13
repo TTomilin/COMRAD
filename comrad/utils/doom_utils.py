@@ -1,7 +1,12 @@
 import datetime
 import os
+from dataclasses import dataclass
 from os.path import join
 from typing import Optional
+
+from comrad.envs.wad_catalog import WadBatch
+from comrad.envs.multi_wad_env import MultiWADEnv
+from comrad.utils.wad_utils import patch_wad_path
 
 from sample_factory.envs.env_wrappers import (
     PixelFormatChwWrapper,
@@ -419,3 +424,34 @@ def make_doom_env_from_spec(spec, _env_name, cfg, env_config, render_mode: Optio
         return make_doom_multiplayer_env(spec, cfg=cfg, env_config=env_config, render_mode=render_mode, **kwargs)
     else:
         return make_doom_env_impl(spec, cfg=cfg, env_config=env_config, render_mode=render_mode, **kwargs)
+
+@dataclass
+class DoomBatchSpec:
+    base: DoomSpec
+    batch_dir: str
+    swap_every: int = 1
+    strategy: str = "round_robin"
+
+
+def make_doom_env_from_batch(batch_spec: DoomBatchSpec, _env_name, cfg, env_config,
+                             render_mode: Optional[str] = None, **kwargs):
+    batch = WadBatch.from_dir(batch_spec.batch_dir)
+    base_cfg = _resolve_scenario_cfg(batch_spec.base.env_spec_file)
+    base_env = make_doom_env_from_spec(
+        batch_spec.base, _env_name, cfg, env_config, render_mode, **kwargs
+    )
+    seed = env_config.worker_index * 1000 + env_config.vector_index if env_config else 0
+    return MultiWADEnv(
+        env=base_env,
+        batch=batch,
+        base_cfg=base_cfg,
+        swap_every=batch_spec.swap_every,
+        strategy=batch_spec.strategy,
+        seed=seed,
+    )
+
+def _resolve_scenario_cfg(env_spec_file: str) -> str:
+    if os.path.isabs(env_spec_file):
+        return env_spec_file
+    scenarios_dir = join(os.path.dirname(__file__), os.pardir, "scenarios")
+    return os.path.normpath(join(scenarios_dir, env_spec_file))

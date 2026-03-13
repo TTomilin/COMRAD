@@ -71,36 +71,41 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.steps_away = 0
         self.max_core_hp = None
 
+    def _get_core_health(self, info):
+        core_raw = info.get("USER1")
+        if core_raw is not None and core_raw > 0:
+            if self.max_core_hp is None:
+                self.max_core_hp = core_raw
+            return core_raw
+        return self.prev_vars.get("USER1") if self.prev_vars else self.max_core_hp
+
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
 
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
 
+        current_core = self._get_core_health(info)
+
         if not self.prev_vars:
             self.sync_vars(info)
-            # Track max core HP from first observation
-            current_core_init = info.get("USER1", 0)
-            if self.max_core_hp is None and current_core_init > 0:
-                self.max_core_hp = current_core_init
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = 0.0
 
-        current_core = info.get("USER1", 0)
-        if current_core > 0:
+        prev_core = self.prev_vars.get("USER1")
+
+        if current_core is not None and current_core > 0:
             shaped_reward += self.core_alive_reward
 
-        prev_core = self.prev_vars.get("USER1", 1000)
-        diff_core = current_core - prev_core
-        if diff_core < 0:
-            shaped_reward += self.core_damage_penalty * abs(diff_core)
-            # if diff_core < -100:
-            #     print(f"HUGE DROP: {prev_core} -> {current_core}")
+        if current_core is not None and prev_core is not None:
+            diff_core = current_core - prev_core
+            if diff_core < 0:
+                shaped_reward += self.core_damage_penalty * abs(diff_core)
 
-        if current_core <= 0:
+        if current_core is not None and current_core <= 0:
             terminated = True
-            if prev_core > 0:
+            if prev_core is not None and prev_core > 0:
                 shaped_reward += self.core_death_penalty
 
 
@@ -183,7 +188,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
         # Terminal bonus: reward for keeping the core alive
         if terminated or truncated:
-            if current_core > 0 and self.survival_bonus > 0:
+            if current_core is not None and current_core > 0 and self.survival_bonus > 0:
                 max_hp = self.max_core_hp if self.max_core_hp else 1000
                 shaped_reward += (current_core / max_hp) * self.survival_bonus
 
@@ -198,15 +203,23 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.sync_vars(info)
+        self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.steps_away = 0
         self.max_core_hp = None
+
+        if info is not None and "USER1" in info:
+            self.sync_vars(info)
+            core_init = info.get("USER1")
+            if core_init is not None and core_init > 0:
+                self.max_core_hp = core_init
+
         return obs, info
 
     def sync_vars(self, info):
+        core_val = self._get_core_health(info)
         self.prev_vars = {
-            "USER1": info.get("USER1", 1000),
+            "USER1": core_val,
             "KILLCOUNT": info.get("KILLCOUNT", 0),
             "HITCOUNT": info.get("HITCOUNT", 0),
             "HEALTH": info.get("HEALTH", 100),

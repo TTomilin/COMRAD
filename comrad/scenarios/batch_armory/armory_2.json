@@ -1,0 +1,12 @@
+{
+    "id": "armory_2",
+    "filename": "armory_2.wad",
+    "config": {
+        "distance": 1100,
+        "corridor_width": 3,
+        "door_timer": 250,
+        "core_health": 500,
+        "enemy_difficulty": 1.25,
+        "seed": null
+    }
+}

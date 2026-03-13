@@ -12,7 +12,7 @@ from sample_factory.train import make_runner
 
 from comrad.models.doom_model import make_vizdoom_encoder
 from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
-from comrad.utils.doom_utils import DOOM_ENVS, make_doom_env_from_spec
+from comrad.utils.doom_utils import DOOM_ENVS, DoomBatchSpec, make_doom_env_from_spec, make_doom_env_from_batch, doom_env_by_name
 from comrad.utils.video_uploader import upload_video
 from comrad.models.mappo_model import make_mappo_actor_critic
 from comrad.models.qmix_model import make_qmix_actor_critic
@@ -22,6 +22,20 @@ def register_vizdoom_envs():
     for env_spec in DOOM_ENVS:
         make_env_func = functools.partial(make_doom_env_from_spec, env_spec)
         register_env(env_spec.name, make_env_func)
+
+
+def register_batch_env(cfg) -> str:
+    base_spec = doom_env_by_name(cfg.env)
+    batch_spec = DoomBatchSpec(
+        base=base_spec,
+        batch_dir=cfg.wad_batch,
+        swap_every=getattr(cfg, "wad_swap_every", 1),
+        strategy=getattr(cfg, "wad_strategy", "round_robin"),
+    )
+    env_name = f"{cfg.env}_batch"
+    make_env_func = functools.partial(make_doom_env_from_batch, batch_spec)
+    register_env(env_name, make_env_func)
+    return env_name
 
 
 def register_vizdoom_models():
@@ -94,10 +108,16 @@ def main():
     register_vizdoom_components()
     cfg = parse_args()
 
+    # When --wad_batch is given, override cfg.env with the pool name and
+    # register the pool environment. Existing DOOM_ENVS are unaffected.
+    from comrad.utils.doom_utils import get_num_agents
+    
+    if getattr(cfg, "wad_batch", None):
+        cfg.env = register_batch_env(cfg)
+        
     if cfg.num_agents < 1:
-        from comrad.utils.doom_utils import get_num_agents
-        n_agents = get_num_agents(cfg, cfg.env)
-        cfg.num_agents = n_agents
+        # Strip "_batch" to lookup standard env base properties (a little bit hardcoded but works for now)
+        cfg.num_agents = get_num_agents(cfg, cfg.env.replace("_batch", ""))
 
     if cfg.num_agents > 1:
         register_model_factory(cfg)
@@ -118,27 +138,3 @@ def main():
 if __name__ == "__main__":
     sys.exit(main())
 
-# import sys
-# sys.argv = sys.argv[:1]
-
-# import json
-# from sample_factory.utils.attr_dict import AttrDict
-# from comrad.utils.doom_utils import make_doom_env
-
-# cfg_dict=json.load(open('train_dir/pitfall_399c/config.json'))
-# cfg=AttrDict(cfg_dict)
-# env_config=AttrDict({'worker_index':0, 'vector_index':0, 'safe_init':False})
-
-# env=make_doom_env('doom_pitfall', cfg, env_config)
-
-# obs, infos=env.reset(seed=42)
-# print('Initial reset obs:', [type(o) for o in obs], [o.shape for o in obs])
-
-# num_agents = env.unwrapped.num_agents
-# for i in range(5):
-#     actions = [env.action_space.sample() for _ in range(num_agents)]
-#     obs, rewards, terms, truncs, infos = env.step(actions)
-#     print(f'Step {i}: obs: {[o.shape for o in obs]}, rewards: {rewards}, terms: {terms}, truncs: {truncs}', 'infos:', infos)
-
-# obs2, infos2 = env.reset()
-# print('Manual reset without seed obs:', [type(o) for o in obs], [o.shape for o in obs2])

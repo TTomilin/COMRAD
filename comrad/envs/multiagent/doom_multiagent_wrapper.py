@@ -5,7 +5,7 @@ from functools import wraps
 from multiprocessing import Process
 from queue import Empty, Queue
 from time import sleep
-from typing import Union
+from typing import Optional, Union
 
 import cv2
 import faster_fifo
@@ -85,7 +85,7 @@ def udp_port_num(env_config):
 
 
 class TaskType(Enum):
-    INIT, TERMINATE, RESET, STEP, STEP_UPDATE, INFO, SET_ATTR = range(7)
+    INIT, TERMINATE, RESET, STEP, STEP_UPDATE, INFO, SET_ATTR, SWAP_SCENARIO = range(8)
 
 
 def init_multiplayer_env(make_env_func, player_id, env_config, init_info=None):
@@ -126,6 +126,8 @@ class MultiAgentEnvWorker:
     def _init(self, init_info):
         log.info("Initializing env for player %d, init_info: %r...", self.player_id, init_info)
         env = init_multiplayer_env(self.make_env_func, self.player_id, self.env_config, init_info)
+        if "swap_scenario" in init_info:
+            env.unwrapped.swap_scenario(init_info["swap_scenario"])
         if self.reset_on_init:
             env.reset()
         return env
@@ -191,6 +193,11 @@ class MultiAgentEnvWorker:
                 elif task_type == TaskType.SET_ATTR:
                     player_id, attr_chain, value = data
                     self._set_env_attr(env, player_id, attr_chain, value)
+                elif task_type == TaskType.SWAP_SCENARIO:
+                    # data is the new config_path string.
+                    # the pending swap is registered and it fires on the next reset().
+                    config_path = data
+                    env.unwrapped.swap_scenario(config_path)
                 else:
                     raise Exception(f"Unknown task type {task_type}")
 
@@ -248,6 +255,10 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         self.reset_on_init = True
 
         self.initialized = False
+
+        # Holds a config_path when swap_scenario() is called before the env
+        # is initialised (workers not yet created).
+        self._pending_swap_config: Optional[str] = None
 
         self.render_mode = render_mode
 
@@ -392,6 +403,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                 port = find_available_port(port_to_use, increment=1000)
                 log.debug("Using port %d", port)
                 init_info = dict(port=port)
+                
+                if self._pending_swap_config is not None:
+                    init_info["swap_scenario"] = self._pending_swap_config
 
                 lock_file = doom_lock_file(max_parallel=20)
                 lock = FileLock(lock_file)
@@ -417,6 +431,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         log.debug("%d agent workers initialized for env %d!", len(self.workers), self.env_config.worker_index)
         self.initialized = True
+        self._pending_swap_config = None
 
     @retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=False)
     def info(self):
@@ -505,3 +520,28 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         result = safe_get(worker.result_queue, timeout=0.1, max_retries=50)
         assert result is None, f"Expected None, got {result}"
+
+    def swap_scenario(self, config_path: str) -> None:
+        """
+        Schedule a WAD/config swap on all agent workers.
+
+        The swap is deferred to each worker's next reset() call, so this
+        method is safe to call between episodes. It blocks until all workers
+        have acknowledged the request.
+        """
+        if self.workers is None:
+            # Not yet initialised, store centrally so _ensure_initialized
+            # can propagate after workers are created.
+            self._pending_swap_config = config_path
+            return
+
+        for worker in self.workers:
+            worker.task_queue.put((config_path, TaskType.SWAP_SCENARIO))
+
+        for worker in self.workers:
+            result = safe_get(
+                worker.result_queue,
+                timeout=5.0,
+                msg="swap_scenario: waiting for worker ack...",
+            )
+            assert result is None, f"swap_scenario: unexpected result {result!r}"

@@ -1,0 +1,26 @@
+[
+    {
+        "id": "armory_0",
+        "filename": "armory_0.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": null
+        }
+    },
+    {
+        "id": "armory_1",
+        "filename": "armory_1.wad",
+        "config": {
+            "distance": 2000,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": null
+        }
+    }
+]
