@@ -43,7 +43,7 @@ class DoomSpec:
         num_bots=0,
         forcerespawn=1,
         respawn_delay=0,
-        timelimit=4.0,
+        timelimit=10.0,
         extra_wrappers=None,
         shared_reward_alpha=0.0,
         shared_reward_scalarisation="sum",
@@ -72,6 +72,8 @@ class DoomSpec:
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 DOOM_ENVS = [
+
+    #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
 
     DoomSpec(
         "doom_pitfall",
