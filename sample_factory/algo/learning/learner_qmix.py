@@ -364,12 +364,12 @@ class QMixLearner(Learner):
             step_obs = obs[:, t]
             flat_obs = flatten_step_obs(step_obs)
 
-            enc_flat = agent_net.encode(flat_obs)
-            q_flat, new_rnn_flat = agent_net.forward_head(enc_flat, rnn_flat)
+            # enc_flat = agent_net.encode(flat_obs)
+            q_flat, new_rnn_flat, encoder_flat = agent_net.forward_decomposed(flat_obs, rnn_flat)
             num_actions = q_flat.shape[-1]
-            encoder_dim = enc_flat.shape[-1]
+            encoder_dim = encoder_flat.shape[-1]
             q_values_list.append(q_flat.view(batch_size, num_agents, num_actions))
-            encoder_outs_list.append(enc_flat.view(batch_size, num_agents, encoder_dim))
+            encoder_outs_list.append(encoder_flat.view(batch_size, num_agents, encoder_dim))
             if t < t_steps:
                 done_mask = dones[:, t, :].reshape(batch_size * num_agents, 1).to(new_rnn_flat.dtype)
                 new_rnn_flat = new_rnn_flat * (1.0 - done_mask)
