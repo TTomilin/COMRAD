@@ -12,7 +12,14 @@ from sample_factory.train import make_runner
 
 from comrad.models.doom_model import make_vizdoom_encoder
 from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
-from comrad.utils.doom_utils import DOOM_ENVS, DoomBatchSpec, make_doom_env_from_spec, make_doom_env_from_batch, doom_env_by_name
+from comrad.utils.doom_utils import (
+    DOOM_ENVS,
+    DoomBatchSpec,
+    make_doom_env_from_spec,
+    make_doom_env_from_batch,
+    doom_env_by_name,
+    get_num_agents,
+)
 from comrad.utils.video_uploader import upload_video
 from comrad.models.mappo_model import make_mappo_actor_critic
 from comrad.models.qmix_model import make_qmix_actor_critic
@@ -45,6 +52,17 @@ def register_vizdoom_models():
 def register_vizdoom_components():
     register_vizdoom_envs()
     register_vizdoom_models()
+
+
+def configure_batch_env_and_agents(cfg):
+    # When --wad_batch is given, override cfg.env with the pool name and
+    # register the pool environment. Existing DOOM_ENVS are unaffected.
+    if getattr(cfg, "wad_batch", None):
+        cfg.env = register_batch_env(cfg)
+
+    if cfg.num_agents < 1:
+        # Strip "_batch" to lookup standard env base properties.
+        cfg.num_agents = get_num_agents(cfg, cfg.env.replace("_batch", ""))
 
 
 def register_model_factory(cfg):
@@ -107,17 +125,7 @@ def parse_args(argv=None, evaluation=False):
 def main():
     register_vizdoom_components()
     cfg = parse_args()
-
-    # When --wad_batch is given, override cfg.env with the pool name and
-    # register the pool environment. Existing DOOM_ENVS are unaffected.
-    from comrad.utils.doom_utils import get_num_agents
-    
-    if getattr(cfg, "wad_batch", None):
-        cfg.env = register_batch_env(cfg)
-        
-    if cfg.num_agents < 1:
-        # Strip "_batch" to lookup standard env base properties (a little bit hardcoded but works for now)
-        cfg.num_agents = get_num_agents(cfg, cfg.env.replace("_batch", ""))
+    configure_batch_env_and_agents(cfg)
 
     if cfg.num_agents > 1:
         register_model_factory(cfg)
