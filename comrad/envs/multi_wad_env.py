@@ -1,7 +1,7 @@
 import os
 import random
 import tempfile
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import Optional
 
 import gymnasium as gym
 
@@ -35,12 +35,6 @@ class MultiWADEnv(gym.Wrapper):
         self._current: Optional[WadInfo] = None
         initial_wad = batch.sample(strategy, self._rng)
         self._apply_swap(initial_wad)
-
-    def reset(self, **kwargs):
-        if self._should_swap_before_next_episode():
-            self._swap_to_next_wad()
-        self._eps += 1
-        return self.env.reset(**kwargs)
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)

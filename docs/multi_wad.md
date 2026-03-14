@@ -10,7 +10,7 @@ The standard COMRAD setup binds one `DoomSpec` to one `.cfg` file, which points 
 
 1. Keeping the base `.cfg` identical across all WADs (action space, reward shaping, game settings).
 2. Patching only the `doom_scenario_path` line in a temporary copy of that `.cfg` for each WAD.
-3. Calling `swap_scenario()` on the underlying `VizdoomEnv` at every `reset()` boundary.
+3. Calling `swap_scenario()` on the underlying `VizdoomEnv` only when an episode ends and the inner env auto-resets.
 
 No agent code changes are required. The observation and action spaces are identical across all maps in a batch.
 
@@ -19,7 +19,7 @@ No agent code changes are required. The observation and action spaces are identi
 ## Data flow
 
 ```
-DoomGen batch script
+Batch directory on disk
   -> WAD files + batch_registry.json
 
 COMRAD WadBatch.from_dir(batch_dir)
@@ -30,8 +30,9 @@ DoomBatchSpec(base=DoomSpec, batch_dir=..., swap_every=N, strategy=...)
       -> make_doom_env_from_spec(base)   - builds the full env stack
       -> MultiWADEnv(env, batch, ...)    - wraps it
 
-MultiWADEnv.reset()
-  every swap_every episodes:
+MultiWADEnv.step()
+  when episode is done and inner env auto-resets:
+  every swap_every completed episodes:
     -> patch_wad_path(base_cfg, new_wad_path, tmp_cfg)
     -> env.swap_scenario(tmp_cfg)
       -> VizdoomEnv: game.close() + game.load_config(tmp_cfg) + game.init()
@@ -61,7 +62,7 @@ MultiWADEnv.reset()
 python -m comrad.train \
     --env armory_siege \
     --algo MAPPO \
-    --wad_batch /path/to/batch_armory \
+    --wad_batch comrad/scenarios/batch_armory \
     --wad_swap_every 1 \
     --wad_strategy round_robin
 ```
@@ -99,6 +100,7 @@ Reads the base `.cfg`, replaces the `doom_scenario_path` line in-place, writes t
 
 ## Adding a New Scenario Batch
 
-1. Create a `BatchGenerator` script in `DoomGen/examples/benchmark/batches/` following `generate_armory_siege_batch.py`.
-2. Add a `DoomSpec` entry for the scenario in `comrad/utils/doom_utils.py`.
-3. Point `--wad_batch` at the generated directory.
+1. Generate a batch directory that contains `.wad` files and a `batch_registry.json` index.
+2. Place it somewhere accessible to training (for example `comrad/scenarios/<batch_name>/`).
+3. Add a `DoomSpec` entry for the scenario in `comrad/utils/doom_utils.py`.
+4. Point `--wad_batch` at the generated directory.
