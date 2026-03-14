@@ -7,3 +7,4 @@ from comrad.wrappers.scenario_wrappers.lavapit2_reward_shaping import LavapitRew
 from comrad.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierRewardShaping
 from comrad.wrappers.scenario_wrappers.lava_maze import LavaMazeRewardShaping
 from comrad.wrappers.scenario_wrappers.common_harvest_doom import CommonHarvestRewardShaping
+from comrad.wrappers.scenario_wrappers.coop_health_gathering import CoopHealthGatheringRewardShaping

@@ -128,6 +128,23 @@ def doom_action_space_parallel():
         )
     )
 
+def doom_action_space_coop_health_gathering():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    TURN_LEFT
+    TURN_RIGHT
+    """
+
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(3),  # noop, turn left, turn right
+        )
+    )
 
 def doom_action_space_mwh():
     """
