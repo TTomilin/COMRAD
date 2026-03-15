@@ -7,6 +7,7 @@ import gymnasium as gym
 
 from comrad.envs.wad_catalog import WadBatch, WadInfo
 from comrad.utils.wad_utils import patch_wad_path
+import shutil
 
 # if TYPE_CHECKING:
 #     from comrad.curriculum.scheduler import CurriculumScheduler
@@ -35,6 +36,12 @@ class MultiWADEnv(gym.Wrapper):
         self._current: Optional[WadInfo] = None
         initial_wad = batch.sample(strategy, self._rng)
         self._apply_swap(initial_wad)
+        
+    def close(self):
+        super().close()
+        if self._cfg_dir and os.path.isdir(self._cfg_dir):
+            shutil.rmtree(self._cfg_dir, ignore_errors=True)
+            self._cfg_dir = None
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -43,16 +50,14 @@ class MultiWADEnv(gym.Wrapper):
             self._eps += 1
             if self._should_swap_before_next_episode():
                 self._swap_to_next_wad()
-                obs, _ = self.env.reset()
 
         return obs, reward, terminated, truncated, info
 
-    def _apply_swap(self, info: WadInfo) -> None:
-        cfg_out = os.path.join(self._cfg_dir, f"{info.name}.cfg")
-        patch_wad_path(self.base_cfg, info.wad_path, cfg_out)
-        self._current = info
-        target = self.env if hasattr(self.env, "swap_scenario") else self.env.unwrapped
-        target.swap_scenario(cfg_out)
+    def _apply_swap(self, wad: WadInfo) -> None:
+        cfg_out = os.path.join(self._cfg_dir, f"{wad.name}.cfg")
+        patch_wad_path(self.base_cfg, wad.wad_path, cfg_out)
+        self._current = wad
+        self.env.unwrapped.swap_scenario(cfg_out)
 
     def _swap_to_next_wad(self) -> None:
         if self.scheduler:
@@ -64,10 +69,5 @@ class MultiWADEnv(gym.Wrapper):
 
     def _did_inner_env_auto_reset(self, terminated, truncated, info) -> bool:
         if isinstance(terminated, (list, tuple)):
-            all_done = all(t or tr for t, tr in zip(terminated, truncated))
-            has_reset = isinstance(info, list) and any(isinstance(i, dict) and "reset_info" in i for i in info)
-            return all_done and has_reset
-            
-        all_done = bool(terminated) or bool(truncated)
-        has_reset = isinstance(info, dict) and "reset_info" in info
-        return all_done and has_reset
+            return all(t or tr for t, tr in zip(terminated, truncated))
+        return bool(terminated) or bool(truncated)

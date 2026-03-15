@@ -194,10 +194,8 @@ class MultiAgentEnvWorker:
                     player_id, attr_chain, value = data
                     self._set_env_attr(env, player_id, attr_chain, value)
                 elif task_type == TaskType.SWAP_SCENARIO:
-                    # data is the new config_path string.
                     # the pending swap is registered and it fires on the next reset().
-                    config_path = data
-                    env.unwrapped.swap_scenario(config_path)
+                    env.unwrapped.swap_scenario(data)
                 else:
                     raise Exception(f"Unknown task type {task_type}")
 
