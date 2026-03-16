@@ -539,7 +539,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         for worker in self.workers:
             result = safe_get(
                 worker.result_queue,
-                timeout=5.0,
+                timeout=0.2, # haven't tested on HPC yet, with too much env overhead this might need to be 0.3 but we'll see
                 msg="swap_scenario: waiting for worker ack...",
             )
             assert result is None, f"swap_scenario: unexpected result {result!r}"
