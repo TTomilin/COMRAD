@@ -93,6 +93,9 @@ class VizdoomEnv(gym.Env):
     ):
         self.initialized = False
 
+        # pending WAD hot-swap (set via swap_scenario(), consumed in reset())
+        self._pending_config: Optional[str] = None
+
         # essential game data
         self.game = None
         self.state = None
@@ -269,6 +272,45 @@ class VizdoomEnv(gym.Env):
         self._game_init()
         self.initialized = True
 
+    def swap_scenario(self, config_path: str) -> None:
+        """
+        Schedule a WAD/config swap that takes effect at the next reset().
+
+        The path must point to a valid VizDoom .cfg file (absolute or relative
+        to the scenarios directory).
+        """
+        self._pending_config = config_path
+
+    def _apply_pending_swap(self) -> None:
+        """Tear down the current game session and apply a pending config swap."""
+        if self._pending_config is None:
+            return
+
+        # Close the running game
+        if self.game is not None:
+            try:
+                self.game.close()
+            except Exception:
+                pass
+            self.game = None
+
+        new_config = self._pending_config
+        self._pending_config = None
+
+        if os.path.isabs(new_config):
+            self.config_path = new_config
+        else:
+            scenarios_dir = join(os.path.dirname(__file__), os.pardir, "scenarios")
+            self.config_path = join(scenarios_dir, new_config)
+
+        # Re-parse the game-variable. Index mapping for the new config
+        self.variable_indices = self._parse_variable_indices(self.config_path)
+
+        # Force re-initialisation on the next _ensure_initialized() call
+        self.initialized = False
+
+        log.debug("VizdoomEnv: scenario swap scheduled %s", self.config_path)
+
     def _ensure_initialized(self):
         if not self.initialized:
             self.initialize()
@@ -319,6 +361,9 @@ class VizdoomEnv(gym.Env):
     def reset(self, **kwargs) -> Tuple[np.ndarray, Dict]:
         if "seed" in kwargs:
             self.seed(kwargs["seed"])
+
+        # Apply any pending WAD swap before (re-)initialising the game.
+        self._apply_pending_swap()
 
         self._ensure_initialized()
 

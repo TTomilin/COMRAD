@@ -45,6 +45,25 @@ def add_doom_env_args(parser):
         choices=("sum", "mean"),
         help="Override how joint-env shared rewards are scalarized before they are broadcast to actor-critic agents.",
     )
+    p.add_argument(
+        "--wad_batch",
+        default=None,
+        type=str,
+        help="Path to a batch directory (with batch_registry.json)",
+    )
+    p.add_argument(
+        "--wad_swap_every",
+        default=1,
+        type=int,
+        help="Swap WAD every N episodes (only used with --wad_batch).",
+    )
+    p.add_argument(
+        "--wad_strategy",
+        default="round_robin",
+        type=str,
+        choices=["round_robin", "random", "weighted"],
+        help="Sampling strategy for --wad_batch.",
+    )
 
 def add_wandb_args(parser):
     parser.add_argument("--wandb_record_every", default=50, type=int, help="Every N episodes")
