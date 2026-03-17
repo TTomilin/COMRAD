@@ -616,7 +616,9 @@ def add_dqn_args(p: ArgumentParser):
         "--train_frequency",
         default=4,
         type=int,
-        help="How often to update training. Dont set to 0.",
+        help="How often to update training. Dont set to 0."
+             "Note: This is calculated by min(total_env_steps_for_training // train_freq, dqn_max_updates_per_batch), "
+             "which is usually 1024//4 or more, so normally this can be discarded.",
     )
 
     p.add_argument(
