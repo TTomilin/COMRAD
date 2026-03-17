@@ -7,6 +7,7 @@
 | GPU Architecture | Turing (TU102) | Ada Lovelace (AD104) |
 | GPU FP32 TFLOPS | 13.4 | 30.3 |
 | GPU Memory | 11 GB GDDR6 | 24 GB GDDR6 |
+| Mem bandwidth | 600 | 300 |
 
 | ... | RTX 2080 Ti | L4 |
 |---|---|---|
@@ -77,6 +78,7 @@
 | Total frames | 5,021,696 | 5,022,720 | |
 | Time | 511 | 472.2 | |
 
++ FPS incr as each environment step produces more frames (more agents),
 + N=2: env steps = `5,021,696 / (2*4) = 627,712` (627,712 env steps / 1,228.1 env_steps_per_sec = 511.0s)
 + N=3: env steps = `5,022,720 / (3*4) = 418,560`
 
@@ -128,4 +130,5 @@
 
 ## So what next
 
++ In all cases, on faster GPU, with more agents GPU is not utilized as much because env collection is not fast enough
 + On fast GPU, maybe request 32/64 CPUs instead of 16 and increase rollout_workers, and increase inference batch size `num_envs_per_worker` as well
