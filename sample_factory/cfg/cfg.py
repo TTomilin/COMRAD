@@ -741,9 +741,9 @@ def add_qmix_args(p: ArgumentParser):
     )
     p.add_argument(
         "--qplex_state_bias",
-        default=True,
+        default=False,
         type=str2bool,
-        help="QPLEX V(s) bias in qatten"
+        help="QPLEX V(s) bias in qatten. Default False to prevent V(s) from absorbing TD signal and starving agent Q-networks."
     )
     p.add_argument(
         "--qplex_grad_accum_mini_bs",

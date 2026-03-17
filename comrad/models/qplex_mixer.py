@@ -233,7 +233,7 @@ class Qatten_Weight(nn.Module):
         attend_reg_coef = 0.001,
         weighted_head = False,
         nonlinear = False,
-        state_bias = True
+        state_bias = False # Default False to prevent V(s) from absorbing TD signal, only True for many agents
         ):
         super().__init__()
 
@@ -355,7 +355,7 @@ class DMAQ_QattenMixer(nn.Module):
         attend_reg_coef = getattr(cfg, 'qplex_attend_reg_coef', 0.001)
         weighted_head = getattr(cfg, 'qplex_weighted_head', False) # default False for qatten
         nonlinear = getattr(cfg, 'qplex_nonlinear', False)
-        state_bias = getattr(cfg, 'qplex_state_bias', True)
+        state_bias = getattr(cfg, 'qplex_state_bias', False) # Default False to prevent V(s) gradient starvation, as explained above
 
         self.attention_weight = Qatten_Weight(
             n_agents, state_dim, n_actions, unit_dim,
