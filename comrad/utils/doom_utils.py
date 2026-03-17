@@ -48,6 +48,7 @@ class DoomSpec:
         num_agents=1,
         num_bots=0,
         forcerespawn=1,
+        nofreelook=1,
         respawn_delay=0,
         timelimit=10.0,
         extra_wrappers=None,
@@ -66,6 +67,7 @@ class DoomSpec:
         self.num_bots = num_bots
 
         self.forcerespawn = forcerespawn
+        self.nofreelook = nofreelook
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
 
@@ -141,6 +143,7 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
+        nofreelook=0,
         extra_wrappers=[(LavaMazeRewardShaping, {})],
     ),
 
@@ -251,6 +254,7 @@ def make_doom_env_impl(
             skip_frames=skip_frames,
             async_mode=async_mode,
             forcerespawn=doom_spec.forcerespawn,
+            nofreelook=doom_spec.nofreelook,
             respawn_delay=doom_spec.respawn_delay,
             timelimit=timelimit,
             render_mode=render_mode,

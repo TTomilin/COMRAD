@@ -37,6 +37,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         async_mode=False,
         forcerespawn=1,
         respawn_delay=0,
+        nofreelook=1,
         timelimit=0.0,
         record_to=None,
         render_mode: Optional[str] = None,
@@ -61,6 +62,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         self.update_state = True
 
         self.forcerespawn = forcerespawn
+        self.nofreelook = nofreelook
         if num_agents == 1: self.forcerespawn = 1 # To overwrite for single agent pitfall
 
         self.respawn_delay = respawn_delay
@@ -94,7 +96,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 f"+timelimit {self.timelimit}",  # The game (episode) will end after this many minutes have elapsed.
                 "+sv_noautoaim 1",  # Autoaim is disabled for all players.
                 "+sv_nocrouch 1",  # Disables crouching.
-                "+sv_nofreelook 1",  # Disables free look with a mouse (only keyboard).
+                "+sv_nofreelook {self.nofreelook}",  # Disables free look with a mouse (only keyboard).
                 f"+sv_forcerespawn {self.forcerespawn}",  # Players will respawn automatically after they die.
                 f"+viz_respawn_delay {self.respawn_delay}",  # Sets delay between respanws (in seconds).
                 f"+viz_connect_timeout {vizdoom_env_timeout}",
