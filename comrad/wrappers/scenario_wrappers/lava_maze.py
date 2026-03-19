@@ -10,6 +10,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         step_penalty=-0.001,
         distance_reward_scale=0.1,
         lava_burn_penalty_scale=0.001,
+        look_at_navigator_reward=0.01,
     ):
         super().__init__(env)
         self.goal_reward = goal_reward
@@ -17,6 +18,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.step_penalty = step_penalty
         self.distance_reward_scale = distance_reward_scale
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
+        self.look_at_navigator_reward = look_at_navigator_reward
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -115,6 +117,14 @@ class LavaMazeRewardShaping(gym.Wrapper):
         if hp_loss > 0:
             shaped_reward -= hp_loss * self.lava_burn_penalty_scale
 
+        player_has_weapon2 = self._safe_int(info.get("WEAPON2", 0), 0) > 0
+        current_can_see = self._safe_int(info.get("USER23", 0), 0)
+        
+        if player_has_weapon2 and current_can_see == 1:
+            shaped_reward += self.look_at_navigator_reward
+        if player_has_weapon2 and current_can_see == 0:
+            shaped_reward -= self.look_at_navigator_reward
+            
         if current_levels > prev_levels:
             shaped_reward += self.goal_reward
 
@@ -167,5 +177,6 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "USER20": self._safe_int(info.get("USER20", 0), 0),
             "USER21": self._safe_int(info.get("USER21", 0), 0),
             "USER22": self._safe_int(info.get("USER22", 0), 0),
+            "USER23": self._safe_int(info.get("USER23", 0), 0),
             "HEALTH": self._safe_int(info.get("HEALTH", 100), 100),
         }
