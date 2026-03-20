@@ -28,6 +28,7 @@ from comrad.envs.action_space import (
 )
 from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
+from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping
 from comrad.wrappers.shared_reward import SharedRewardWrapper
@@ -264,6 +265,8 @@ def make_doom_env_impl(
 
     if record_to is not None and should_record:
         env = RecordingWrapper(env, record_to, player_id)
+
+    env = MultiplayerStatsWrapper(env)
 
     resolution = custom_resolution
     if resolution is None:
