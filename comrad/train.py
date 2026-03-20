@@ -103,7 +103,7 @@ def parse_args(argv=None, evaluation=False):
     if not (any('--experiment=' in i for i in sys.argv)) and any('train.py' in i for i in sys.argv):
         if str(getattr(final_cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN', 'QPLEX'):
             mixer = getattr(final_cfg, 'mixer', 'qmix')
-            if mixer == 'vdn':
+            if mixer == 'vdn' or getattr(final_cfg, 'algo', 'APPO').upper() == 'VDN':
                 algo_name = "VDN"
             elif mixer in ('dmaq', 'dmaq_qatten'):
                 algo_name = f"QPLEX_{mixer}"
@@ -145,4 +145,3 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
-
