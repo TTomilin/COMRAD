@@ -125,27 +125,6 @@ def auto_adjust_marl_config(cfg: Config, env_info: EnvInfo) -> None:
             cfg.batched_sampling = True # This technically doesnt matter that much for our settings but I like it
             log.info("Auto changing config: batched_sampling=True")
 
-    # Auto set num_workers, num_envs_per_worker, policy_workers_per_policy
-    # num_workers = min(cpu_count // 4, 8)
-    # num_envs_per_worker = 4
-    # policy_workers_per_policy = 2: second inference worker enables GPU pipelining (+25% FPS).
-    fps_warns = []
-    if "num_workers" not in cli_args:
-        rec_nw = max(1, min(multiprocessing.cpu_count() // 4, 8))
-        if cfg.num_workers != rec_nw:
-            cfg.num_workers = rec_nw
-            fps_warns.append(f"num_workers={rec_nw} (cpu_count={multiprocessing.cpu_count()})")
-    if "num_envs_per_worker" not in cli_args:
-        if cfg.num_envs_per_worker != 4:
-            cfg.num_envs_per_worker = 4
-            fps_warns.append("num_envs_per_worker=4")
-    if getattr(cfg, "batched_sampling", False) and "policy_workers_per_policy" not in cli_args:
-        if cfg.policy_workers_per_policy < 2:
-            cfg.policy_workers_per_policy = 2
-            fps_warns.append("policy_workers_per_policy=2")
-    if fps_warns:
-        log.warning(f"Auto changing config: {num_agents} agents: " + ", ".join(fps_warns))
-
     if getattr(cfg, "batched_sampling", False):
         worker_num_splits = getattr(cfg, "worker_num_splits", 2)
         num_envs_per_worker = getattr(cfg, "num_envs_per_worker", 2)
