@@ -1,12 +1,24 @@
 import os
 from typing import Optional
+import hashlib
 
-from sample_factory.utils.network import is_udp_port_available
+from sample_factory.utils.network import is_udp_port_available, PortReservation
 from sample_factory.utils.utils import log
 from comrad.envs.doom_gym import VizdoomEnv
 
-DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
+# DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
 # log.info('Default UDP port is %r', DEFAULT_UDP_PORT)
+
+if os.environ.get("SLURM_JOB_ID"):
+    key = ":".join([
+        os.environ.get("SLURM_JOB_ID", "0"),
+        os.environ.get("SLURM_LOCALID", "0"),
+        os.environ.get("SLURM_ARRAY_TASK_ID", "0"),
+    ]).encode()
+    h = int(hashlib.blake2s(key, digest_size=4).hexdigest(), 16)
+    DEFAULT_UDP_PORT = 40300 + (h % 25236) * 30000
+else:
+    DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
 
 # This try except block is to increase the env timeout connection flag in travis
 try:
