@@ -167,38 +167,25 @@ python -m comrad.train \
 
 ## 3. HPC Configuration
 
-**Recommended Specs:** 64GB RAM (32GB may run out quite quick for long training).
+**Specs:**
++ 16 CPUs
++ At least 64GB RAM, might need 128GB
 
-### MAPPO
-```bash
-python -m comrad.train \
-  --env=doom_pitfall \
-  --algo=APPO \
-  --train_for_seconds=18000 \
-  --env_frameskip=4 \
-  --use_rnn=True \
-  --num_workers=16 \
-  --num_envs_per_worker=8 \
-  --num_policies=1 \
-  --batch_size=1024 \
-  --wide_aspect_ratio=False \
-  --use_mappo \
-  --with_wandb=True \
-  --wandb_dir=. \
-  --wandb_record_every=10 \
-  --batched_sampling=True \
-  --experiment=pitfall_0 <-- You can change or remove this flag
 ```
+# QMIX
+python -m comrad.train --env=armory_siege --algo=QMIX --mixer=qmix --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True
 
-### QMIX
-```bash
-python -m comrad.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=3600 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --gamma=0.99 --learning_starts=50000 --qmix_buffer_batch_size=256 --replay_buffer_size=200000 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True
-```
+# QPLEX with dmaq
+python -m comrad.train --env=armory_siege --algo=QPLEX --mixer=dmaq --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --qmix_sequence_batch_size=16 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=16 --qplex_state_bias=False
 
-### QMIX + RNN (GRU)
-rnn_size is only 256 as mixer also adds params
-```bash
-python -m comrad.train --env=doom_pitfall --algo=QMIX --mixer=qmix --train_for_seconds=43200 --num_workers=8 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=True --rnn_type=gru --rnn_size=256 --rollout=32 --gamma=0.99 --learning_starts=50000 --qmix_sequence_batch_size=64 --replay_buffer_size=500000 --epsilon_decay_steps=20000000 --epsilon_end=0.005 --learning_rate=0.0001 --num_agents=2 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --use_huber_loss=True --q_value_clamp=100 --train_frequency=8 --batched_sampling=True --per=False --actor_critic_share_weights=True
+# QPLEX with qatten
+python -m comrad.train --env=armory_siege --algo=QPLEX --mixer=dmaq_qatten --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=64 --qplex_state_bias=False
+
+# MAPPO
+python -m comrad.train --env=armory_siege --algo=MAPPO --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom --num_agents=2 --num_epochs=4 --rnn_type=lstm
+
+# HAPPO
+python -m comrad.train --env=armory_siege --algo=HAPPO --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom --num_agents=2
 ```
 
 ## 4. Record Video
