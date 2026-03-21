@@ -322,14 +322,16 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
         if cfg.use_rnn:
             if cfg.rnn_type != "gru":
-                raise ValueError(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
+                cfg.rnn_type = "gru"
+                log.warning(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
             if cfg.rollout < 2:
                 raise ValueError(f"QMIX/VDN/QPLEX RNN requires rollout >= 2, got {cfg.rollout}")
             if getattr(cfg, "per", False):
                 log.warning("QMIX/VDN/QPLEX RNN: forcing per=False (uniform sequence sampling)")
                 cfg.per = False
             if not getattr(cfg, "actor_critic_share_weights", True):
-                raise ValueError("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
+                cfg.actor_critic_share_weights = False
+                log.warning("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
             if algo_upper == "QPLEX":
                 mini_bs = getattr(cfg, 'qplex_grad_accum_mini_bs', 16)
                 if mini_bs <= 0:
@@ -373,17 +375,21 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
     if algo_upper == "HAPPO":
         if cfg.use_rnn and not getattr(cfg, "actor_critic_share_weights", True):
             # HAPPO has rnn_size doubling for critic_rnn, actor_critic_share_weights=False doubles that
-            raise ValueError("HAPPO with RNN requires actor_critic_share_weights=True. ")
+            cfg.actor_critic_share_weights = True
+            log.warning("HAPPO with RNN requires actor_critic_share_weights=True.")
         if getattr(cfg, 'happo_critic_rnn', False) and not cfg.use_rnn:
-            raise ValueError("HAPPO: --happo_critic_rnn=True requires --use_rnn=True.")
+            cfg.use_rnn = True
+            log.warning("HAPPO: --happo_critic_rnn=True requires --use_rnn=True.")
         if cfg.lr_schedule in ('kl_adaptive_minibatch', 'kl_adaptive_epoch'):
-            raise ValueError(
-                f"HAPPO does not support --lr_schedule={cfg.lr_schedule}. Use 'constant' or 'linear_decay' instead.")
+            cfg.lr_schedule = "constant"
+            log.warning(
+                f"HAPPO does not support --lr_schedule={cfg.lr_schedule}. Use 'constant' or 'linear_decay' instead. Setting to constant.")
         if not cfg.batched_sampling:
             log.warning("HAPPO requires batched_sampling=True. Enabling it.")
             cfg.batched_sampling = True
         if getattr(cfg, 'num_policies', 1) != 1:
-            raise ValueError("HAPPO requires num_policies=1 (all agents share one policy ID)")
+            cfg.num_policies = 1
+            log.warning("HAPPO requires num_policies=1 (all agents share one policy ID)")
 
         # Warn if kl_loss_coeff > 0 since HAPPO's per-agent training does not apply KL loss
         if getattr(cfg, 'kl_loss_coeff', 0.0) > 0:
