@@ -1,7 +1,10 @@
 import os
 import numpy as np
+import logging
 import wandb
 from sample_factory.algo.utils.misc import EPISODIC
+
+log = logging.getLogger(__name__)
 
 def upload_video(runner, cfg):
     def upload(_runner, msg, policy_id):
@@ -15,13 +18,22 @@ def upload_video(runner, cfg):
         path = data.get("path")
         if not path: return
 
-        with np.load(path) as p:
-            frames = np.asarray(p["frames"])
-        os.remove(path)
+        try:
+            with np.load(path) as p:
+                frames = np.asarray(p["frames"])
+            os.remove(path)
 
-        ep = data.get("episode", 0)
-        fps = data.get("fps", getattr(cfg, "wandb_video_fps", 35))
-        wandb.log({f"videos/p_{policy_id:02d}_ep_{ep:05d}": wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
-        # step None so only logs 1 latest video
+            ep = data.get("episode", 0)
+            fps = data.get("fps", getattr(cfg, "wandb_video_fps", 35))
+            wandb.log({f"videos/p_{policy_id:02d}_ep_{ep:05d}": wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
+            # step None so only logs 1 latest video
+        except Exception as e:
+            # happen when vizdoom crashes while video is being encoded
+            log.debug(f"Failed to upload video to wandb (likely during shutdown): {e}")
+            if os.path.exists(path):
+                try:
+                    os.remove(path)
+                except Exception:
+                    pass
 
     runner.policy_msg_handlers.setdefault(EPISODIC, []).insert(0, upload)
