@@ -338,7 +338,7 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
                     raise ValueError(f"QPLEX requires qplex_grad_accum_mini_bs > 0, got {mini_bs}")
 
         num_agents = getattr(cfg, 'num_agents', 2)
-        if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 1000000:
+        if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 500000:
             obs_space = env_info.obs_space
             bytes_per_obs = 0
             if hasattr(obs_space, "spaces"):

@@ -548,7 +548,7 @@ def add_dqn_args(p: ArgumentParser):
     """DQN arguments"""
     p.add_argument(
         "--replay_buffer_size",
-        default=1000000, # Also change in arguments.py if change this
+        default=500000, # Also change in arguments.py if change this
         type=int,
         help="Size of the replay buffer in transitions",
     )
@@ -584,7 +584,7 @@ def add_dqn_args(p: ArgumentParser):
     )
     p.add_argument(
         "--epsilon_decay_steps",
-        default=100000,
+        default=20000000,
         type=int,
         help="Number of env steps over to anneal epsilon from epsilon_start to epsilon_end",
     )
