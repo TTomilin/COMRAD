@@ -699,7 +699,7 @@ def add_qmix_args(p: ArgumentParser):
     )
     p.add_argument(
         "--qmix_sequence_batch_size",
-        default=8,
+        default=32,
         type=int,
         help="Number of sequences sampled per QMIX/VDN update by GRU",
     )
