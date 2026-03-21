@@ -736,6 +736,12 @@ class Runner(EventLoopObject, Configurable):
             self.all_components_stopped.emit()
 
     def _on_everything_stopped(self):
+        # Fix double call during shutdown race conditions (e.g. when vizdoom crashes during environment cleanup)
+        # first call converts component_profiles from dict to sorted list, then second call would fail on .items()
+        if isinstance(self.component_profiles, list):
+            log.debug("_on_everything_stopped already called, skipping duplicate call")
+            return
+
         # sort profiles by name
         self.component_profiles = sorted(list(self.component_profiles.items()), key=lambda x: x[0])
         for component, profile in self.component_profiles:
