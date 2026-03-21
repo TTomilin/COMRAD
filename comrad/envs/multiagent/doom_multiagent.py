@@ -96,7 +96,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 f"+timelimit {self.timelimit}",  # The game (episode) will end after this many minutes have elapsed.
                 "+sv_noautoaim 1",  # Autoaim is disabled for all players.
                 "+sv_nocrouch 1",  # Disables crouching.
-                "+sv_nofreelook {self.nofreelook}",  # Disables free look with a mouse (only keyboard).
+                f"+sv_nofreelook {self.nofreelook}",  # Disables free look with a mouse (only keyboard).
                 f"+sv_forcerespawn {self.forcerespawn}",  # Players will respawn automatically after they die.
                 f"+viz_respawn_delay {self.respawn_delay}",  # Sets delay between respanws (in seconds).
                 f"+viz_connect_timeout {vizdoom_env_timeout}",
