@@ -1,17 +1,16 @@
 import gymnasium as gym
-import math
 
 class ArmorySiegeRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
         core_alive_reward=0,
-        core_damage_penalty=-0.03,
+        core_damage_penalty=-0.01,
         death_penalty=-1,
         weapon_pickup_reward=0.3,
         first_weapon_reward=1,
         ammo_pickup_reward=0.012,
-        core_death_penalty=-10.0,
+        core_death_penalty=-7.0,
         kill_reward=3,
         hit_reward=0.1,
         ammo_use_penalty=0,
@@ -19,11 +18,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         weapon_keys=["WEAPON1", "WEAPON2"],
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
-        core_proximity_reward=0.02,
-        away_penalty=-0.01,
-        defend_radius=385,
-        interception_bonus=1.5,
-        survival_bonus=5.0,
     ):
         super().__init__(env)
         self.core_alive_reward = core_alive_reward
@@ -40,15 +34,9 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
         self.health_pickup_reward = health_pickup_reward
-        self.core_proximity_reward = core_proximity_reward
-        self.away_penalty = away_penalty
-        self.defend_radius = defend_radius
-        self.interception_bonus = interception_bonus
-        self.survival_bonus = survival_bonus
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.steps_away = 0
         self.max_core_hp = None
 
     def _get_core_health(self, info):
@@ -128,19 +116,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if diff_kills > 0:
             shaped_reward += self.kill_reward * diff_kills
 
-            # # Interception bonus: kills further from core get up to interception_bonus extra
-            # base_kill = self.kill_reward * diff_kills
-            # if current_hp > 0 and self.defend_radius > 0 and self.interception_bonus > 0:
-            #     px = info.get("POSITION_X", 0)
-            #     py = info.get("POSITION_Y", 0)
-            #     cx = info.get("USER2", 0)
-            #     cy = info.get("USER3", 0)
-            #     kill_dist = math.sqrt((px - cx)**2 + (py - cy)**2)
-            #     bonus_frac = min(1.0, kill_dist / (self.defend_radius * 2))
-            #     shaped_reward += base_kill + self.interception_bonus * bonus_frac * diff_kills
-            # else:
-            #     shaped_reward += base_kill
-
         diff_hits = info.get("HITCOUNT", 0) - self.prev_vars.get("HITCOUNT", 0)
         if diff_hits > 0:
             shaped_reward += self.hit_reward * diff_hits
@@ -149,31 +124,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         total_ammo = sum(info.get(k, 0) for k in self.ammo_keys)
         if has_weapon and total_ammo <= 0:
             shaped_reward += self.no_ammo_penalty
-
-        # # Spatial rewards: gradient based on distance from actual core position (USER2/USER3)
-        # # Use manhattan distance
-        # # If player runs too far away from the core they get punished
-        # if current_hp > 0 and self.defend_radius > 0:
-        #     px = info.get("POSITION_X", 0)
-        #     py = info.get("POSITION_Y", 0)
-        #     cx = info.get("USER2", 0)
-        #     cy = info.get("USER3", 0)
-        #     dx = px - cx
-        #     dy = py - cy
-        #     dist = math.sqrt(dx * dx + dy * dy)
-        #     if dist <= self.defend_radius:
-        #         shaped_reward += self.core_proximity_reward * (1.0 - dist / self.defend_radius)
-        #         self.steps_away = 0
-        #     else:
-        #         self.steps_away += 1
-        #         escalation = 1.0 + min(self.steps_away / 50.0, 3.0)
-        #         shaped_reward += self.away_penalty * min(1.0, (dist - self.defend_radius) / self.defend_radius) * escalation
-
-        # # Terminal bonus: reward for keeping the core alive
-        # if terminated or truncated:
-        #     if current_core is not None and current_core > 0 and self.survival_bonus > 0:
-        #         max_hp = self.max_core_hp if self.max_core_hp else 1000
-        #         shaped_reward += (current_core / max_hp) * self.survival_bonus
 
         reward += shaped_reward
         self.orig_env_reward += reward
@@ -188,7 +138,6 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         obs, info = self.env.reset(**kwargs)
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.steps_away = 0
         self.max_core_hp = None
 
         if info is not None and "USER1" in info:
