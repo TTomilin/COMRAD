@@ -1,23 +1,3 @@
-"""
-Agent learns to pick up ammo, shoot, enemies in first few waves, but after the worm enemy appears and much more enemies spawn it stops shooting.
-Also one agent tends to stares at the core. Eventually it runs to the room to pick up weapon and shoot 1/2 enemies, but then it idles staring at the core again. Then the other agent also stops shooting.
-
-Old:
-core_alive_reward=0,
-core_damage_penalty=-0.01,
-death_penalty=-1,
-weapon_pickup_reward=0.3,
-first_weapon_reward=1,
-ammo_pickup_reward=0.012,
-core_death_penalty=-7.0,
-kill_reward=3,
-hit_reward=0.1,
-ammo_use_penalty=0,
-no_ammo_penalty=0,
-weapon_keys=["WEAPON1", "WEAPON2"],
-ammo_keys=["AMMO1", "AMMO2"]
-"""
-
 import gymnasium as gym
 import math
 
@@ -34,15 +14,15 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         core_death_penalty=-10.0,
         kill_reward=3,
         hit_reward=0.1,
-        ammo_use_penalty=0.001,
+        ammo_use_penalty=0,
         no_ammo_penalty=0,
         weapon_keys=["WEAPON1", "WEAPON2"],
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
         core_proximity_reward=0.02,
         away_penalty=-0.01,
-        defend_radius=350,
-        interception_bonus=0.5,
+        defend_radius=385,
+        interception_bonus=1.5,
         survival_bonus=5.0,
     ):
         super().__init__(env)
@@ -86,6 +66,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
             return obs, reward, terminated, truncated, info
 
         current_core = self._get_core_health(info)
+        reward = float(reward)
 
         if not self.prev_vars:
             self.sync_vars(info)
@@ -145,18 +126,20 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         # Kills with corridor interception bonus
         diff_kills = info.get("KILLCOUNT", 0) - self.prev_vars.get("KILLCOUNT", 0)
         if diff_kills > 0:
-            base_kill = self.kill_reward * diff_kills
-            # Interception bonus: kills further from core get up to interception_bonus extra
-            if current_hp > 0 and self.defend_radius > 0 and self.interception_bonus > 0:
-                px = info.get("POSITION_X", 0)
-                py = info.get("POSITION_Y", 0)
-                cx = info.get("USER2", 0)
-                cy = info.get("USER3", 0)
-                kill_dist = math.sqrt((px - cx)**2 + (py - cy)**2)
-                bonus_frac = min(1.0, kill_dist / (self.defend_radius * 2))
-                shaped_reward += base_kill + self.interception_bonus * bonus_frac * diff_kills
-            else:
-                shaped_reward += base_kill
+            shaped_reward += self.kill_reward * diff_kills
+
+            # # Interception bonus: kills further from core get up to interception_bonus extra
+            # base_kill = self.kill_reward * diff_kills
+            # if current_hp > 0 and self.defend_radius > 0 and self.interception_bonus > 0:
+            #     px = info.get("POSITION_X", 0)
+            #     py = info.get("POSITION_Y", 0)
+            #     cx = info.get("USER2", 0)
+            #     cy = info.get("USER3", 0)
+            #     kill_dist = math.sqrt((px - cx)**2 + (py - cy)**2)
+            #     bonus_frac = min(1.0, kill_dist / (self.defend_radius * 2))
+            #     shaped_reward += base_kill + self.interception_bonus * bonus_frac * diff_kills
+            # else:
+            #     shaped_reward += base_kill
 
         diff_hits = info.get("HITCOUNT", 0) - self.prev_vars.get("HITCOUNT", 0)
         if diff_hits > 0:
@@ -167,39 +150,39 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if has_weapon and total_ammo <= 0:
             shaped_reward += self.no_ammo_penalty
 
-        # Spatial rewards: gradient based on distance from actual core position (USER2/USER3)
-        # Use manhattan distance
-        # If player runs too far away from the core they get punished
-        if current_hp > 0 and self.defend_radius > 0:
-            px = info.get("POSITION_X", 0)
-            py = info.get("POSITION_Y", 0)
-            cx = info.get("USER2", 0)
-            cy = info.get("USER3", 0)
-            dx = px - cx
-            dy = py - cy
-            dist = math.sqrt(dx * dx + dy * dy)
-            if dist <= self.defend_radius:
-                shaped_reward += self.core_proximity_reward * (1.0 - dist / self.defend_radius)
-                self.steps_away = 0
-            else:
-                self.steps_away += 1
-                escalation = 1.0 + min(self.steps_away / 50.0, 3.0)
-                shaped_reward += self.away_penalty * min(1.0, (dist - self.defend_radius) / self.defend_radius) * escalation
+        # # Spatial rewards: gradient based on distance from actual core position (USER2/USER3)
+        # # Use manhattan distance
+        # # If player runs too far away from the core they get punished
+        # if current_hp > 0 and self.defend_radius > 0:
+        #     px = info.get("POSITION_X", 0)
+        #     py = info.get("POSITION_Y", 0)
+        #     cx = info.get("USER2", 0)
+        #     cy = info.get("USER3", 0)
+        #     dx = px - cx
+        #     dy = py - cy
+        #     dist = math.sqrt(dx * dx + dy * dy)
+        #     if dist <= self.defend_radius:
+        #         shaped_reward += self.core_proximity_reward * (1.0 - dist / self.defend_radius)
+        #         self.steps_away = 0
+        #     else:
+        #         self.steps_away += 1
+        #         escalation = 1.0 + min(self.steps_away / 50.0, 3.0)
+        #         shaped_reward += self.away_penalty * min(1.0, (dist - self.defend_radius) / self.defend_radius) * escalation
 
-        # Terminal bonus: reward for keeping the core alive
-        if terminated or truncated:
-            if current_core is not None and current_core > 0 and self.survival_bonus > 0:
-                max_hp = self.max_core_hp if self.max_core_hp else 1000
-                shaped_reward += (current_core / max_hp) * self.survival_bonus
+        # # Terminal bonus: reward for keeping the core alive
+        # if terminated or truncated:
+        #     if current_core is not None and current_core > 0 and self.survival_bonus > 0:
+        #         max_hp = self.max_core_hp if self.max_core_hp else 1000
+        #         shaped_reward += (current_core / max_hp) * self.survival_bonus
 
-        individual_reward = reward + shaped_reward
+        reward += shaped_reward
         self.orig_env_reward += reward
 
         if terminated or truncated:
             info["true_objective"] = self.orig_env_reward
 
         self.sync_vars(info)
-        return obs, individual_reward, terminated, truncated, info
+        return obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
