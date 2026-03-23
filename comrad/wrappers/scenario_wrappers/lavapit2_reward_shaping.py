@@ -7,7 +7,7 @@ class LavapitRewardShaping(gym.Wrapper):
         *,
         scaler: float = 0.01,
         death_penalty: float = -1.0,
-        bridge_positions: list[float] = [256.0, 1024.0, 1792.0],
+        bridge_positions: list[float] = [400, 800, 1200, 1600, 2000],
         bridge_reward: float = 5.0,
         pos_key: str = "POSITION_X",
         dead_key: str = "DEAD",
