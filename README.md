@@ -1,10 +1,11 @@
 # COMRAD
 
 ## 0. to be removed
-+ https://wandb.ai/comrad/marl_vizdoom/runs/ (and [this project for fair comparison runs](https://wandb.ai/comrad/comrad_jr))
-+ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD/runs/
-+ https://wandb.ai/christinespring2020-eindhoven-university-of-technology/
-+ https://wandb.ai/loucorto-buring-eindhoven-university-of-technology/marl_vizdoom/overview
++ https://wandb.ai/comrad/marl_vizdoom/table/ (and [this project for fair comparison runs](https://wandb.ai/comrad/comrad_jr))
++ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD/table/
++ https://wandb.ai/christinespring2020-eindhoven-university-of-technology/vizdoom_hpc/table
++ https://wandb.ai/loucorto-buring-eindhoven-university-of-technology/marl_vizdoom/table
++ https://wandb.ai/andrei-s-moise-eindhoven-university-of-technology/projects
 
 
 ## 1. Installation
