@@ -38,8 +38,6 @@ h2 {
 }
 </style>
 
-<!-- SLIDE 1: COVER -->
-
 <div class="h-full flex flex-col justify-center items-center">
   <h1 class="text-8xl font-black tracking-tight text-[#1a1a1a] mb-6">COMRAD</h1>
   <p class="text-2xl text-[#666] tracking-wide">Cooperative Multi-Agent Reinforcement Learning in Doom</p>
@@ -66,9 +64,25 @@ h2 {
     </div>
   </div>
 
-  <p class="text-xl text-[#888] mt-12 text-center italic">
+  <p class="text-xl text-[#888] mt-6 text-center italic">
     Like moving a couch up stairs. Each person only sees their side.
   </p>
+  <div class="grid grid-cols-2 gap-8 mt-4" style="height: 60%">
+    <div class="flex flex-col items-center gap-2">
+      <div style="width:auto;border-radius:8px; border: 2px solid #1a1a1a;">
+        <img src="https://datalab.flitto.com/en/company/blog/wp-content/uploads/OpenAI-1X-AI-Humanoid-Eve-Robot-Lifting-Box.jpg"
+             style="width:auto;height:auto;display:block;" />
+      </div>
+      <p class="text-sm text-[#666]">Single agent: carries a box alone</p>
+    </div>
+    <div class="flex flex-col items-center gap-2">
+      <div style="height:70%; border-radius:8px; border: 2px solid #1a1a1a; overflow: hidden;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQAYrXo46YBGf_Ak-tVXQmkSRQXxrmx-JxXQ&s"
+             style="width:auto;height:auto;display:block;" />
+      </div>
+      <p class="text-sm text-[#666]">Multi-agent: moving a couch up stairs</p>
+    </div>
+  </div>
 </div>
 
 ---
@@ -103,6 +117,10 @@ h2 {
 <div class="h-full flex flex-col justify-center px-16">
   <h1 class="text-5xl font-bold text-[#1a1a1a] mb-12">COMRAD</h1>
 
+  <p class="text-sm font-medium tracking-widest uppercase text-[#88888] mt-12">
+    Moving MARL off the flat floor and up the stair.
+  </p>
+
   <div class="grid grid-cols-3 gap-10">
     <div class="border-t-4 border-[#e63946] pt-6">
       <h3 class="text-2xl font-bold text-[#1a1a1a] mb-3">First-Person 3D</h3>
@@ -118,7 +136,7 @@ h2 {
     </div>
   </div>
 
-  <p class="text-center text-lg text-[#888] mt-12">
+  <p class="text-center text-lg text-[#888] mt-3">
     Bridging the gap between toy benchmarks and real-world robotics.
   </p>
 </div>
@@ -126,9 +144,9 @@ h2 {
 ---
 
 <div class="h-full flex flex-col justify-center px-16">
-  <h1 class="text-5xl font-bold text-[#1a1a1a] mb-10">Why It Matters</h1>
+  <h1 class="text-5xl font-bold text-[#1a1a1a] mb-8">Why It Matters</h1>
 
-  <div class="grid grid-cols-3 gap-10 mb-8">
+  <div class="grid grid-cols-3 gap-10 mb-6">
     <div class="text-center p-6 bg-[#fafafa] rounded-lg">
       <p class="text-5xl font-black text-[#e63946] mb-2">>50K</p>
       <p class="text-sm text-[#666]">Frames per second</p>
@@ -146,8 +164,8 @@ h2 {
     </div>
   </div>
 
-  <div class="border border-[#eee] rounded-lg p-2 bg-[#f5f5f5] flex items-center justify-center">
-    <img src="./scenarios.gif" alt="scenarios" class="rounded" />
+  <div class="border border-[#eee] rounded-lg p-2 bg-[#f5f5f5] inline-flex items-center justify-center self-center">
+    <img src="./scenarios.gif" alt="scenarios" class="rounded h-48" />
   </div>
 </div>
 
