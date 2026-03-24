@@ -130,7 +130,7 @@ DOOM_ENVS = [
         "armory_siege.cfg",
         doom_action_space_armory_siege(),
         1.0,
-        3500,
+        4500,
         num_agents=2, # I find 2 agents learn better than 3 agents
         respawn_delay=1,
         extra_wrappers=[(ArmorySiegeRewardShaping, {})],

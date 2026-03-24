@@ -6,18 +6,19 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         env,
         core_alive_reward=0,
         core_damage_penalty=-0.01,
-        death_penalty=-1,
+        death_penalty=-2.0,
         weapon_pickup_reward=0.3,
         first_weapon_reward=1,
         ammo_pickup_reward=0.012,
         core_death_penalty=-7.0,
         kill_reward=3,
-        hit_reward=0.1,
+        hit_reward=0.2,
         ammo_use_penalty=0,
-        no_ammo_penalty=0,
+        no_ammo_penalty=-0.02,
         weapon_keys=["WEAPON1", "WEAPON2"],
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
+        survival_bonus=10.0,
     ):
         super().__init__(env)
         self.core_alive_reward = core_alive_reward
@@ -34,6 +35,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.first_weapon_reward = first_weapon_reward
         self.core_death_penalty = core_death_penalty
         self.health_pickup_reward = health_pickup_reward
+        self.survival_bonus = survival_bonus
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -124,6 +126,9 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         total_ammo = sum(info.get(k, 0) for k in self.ammo_keys)
         if has_weapon and total_ammo <= 0:
             shaped_reward += self.no_ammo_penalty
+
+        if truncated and not terminated and current_core is not None and current_core > 0:
+            shaped_reward += self.survival_bonus
 
         reward += shaped_reward
         self.orig_env_reward += reward
