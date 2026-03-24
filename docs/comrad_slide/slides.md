@@ -32,7 +32,6 @@ h2 {
 }
 
 .category-card {
-  /* border-left: 3px solid #e63946; */
   padding-left: 1rem;
   margin-bottom: 1rem;
 }
@@ -76,7 +75,7 @@ h2 {
       <p class="text-sm text-[#666]">Single agent: carries a box alone</p>
     </div>
     <div class="flex flex-col items-center gap-2">
-      <div style="height:64%; border-radius:8px; border: 2px solid #1a1a1a; overflow: hidden;">
+      <div style="height:67%; border-radius:8px; border: 2px solid #1a1a1a; overflow: hidden;">
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSQAYrXo46YBGf_Ak-tVXQmkSRQXxrmx-JxXQ&s"
              style="width:auto;height:auto;display:block;" />
       </div>
@@ -93,19 +92,19 @@ h2 {
   <p class="text-2xl text-[#555] mb-10">Current multi-agent benchmarks use simplified 2D/3D worlds.</p>
 
   <div class="grid grid-cols-2 gap-8 text-center">
-    <div class="p-6 border border-[#ddd] rounded-lg">
+    <div class="p-6 bg-[#fafafa] border border-[#ddd] rounded-lg">
       <p class="text-lg font-semibold text-[#666] mb-2">StarCraft (SMAC)</p>
       <p class="text-sm text-[#999]">Top-down view, micromanagement</p>
     </div>
-    <div class="p-6 border border-[#ddd] rounded-lg">
+    <div class="p-6 bg-[#fafafa] border border-[#ddd] rounded-lg">
       <p class="text-lg font-semibold text-[#666] mb-2">Google Research Football (GRF)</p>
       <p class="text-sm text-[#999]">Physics-based 3D sports sim</p>
     </div>
-    <div class="p-6 border border-[#ddd] rounded-lg">
+    <div class="p-6 bg-[#fafafa] border border-[#ddd] rounded-lg">
       <p class="text-lg font-semibold text-[#666] mb-2">Megaverse</p>
       <p class="text-sm text-[#999]">High-speed 3D training (mainly single agent)</p>
     </div>
-    <div class="p-6 border border-[#ddd] rounded-lg">
+    <div class="p-6 bg-[#fafafa] border border-[#ddd] rounded-lg">
       <p class="text-lg font-semibold text-[#666] mb-2">Overcooked / Gridworlds</p>
       <p class="text-sm text-[#999]">Simple discrete coordination</p>
     </div>
@@ -252,7 +251,7 @@ h2 {
 ---
 
 <div class="h-full flex flex-col justify-center px-16">
-  <h1 class="text-4xl font-bold text-[#1a1a1a] mb-10">Procedural Generation: Non-Stationary Environments</h1>
+  <h1 class="text-4xl font-bold text-[#1a1a1a] mb-10" style="padding-bottom: 20px;">Procedural Generation: Non-Stationary Environments</h1>
   <div class="grid grid-cols-2 gap-12 items-start">
     <div>
       <h3 class="text-sm uppercase tracking-widest text-[#888] mb-3 border-b border-[#ddd] pb-2">Map Generation</h3>
