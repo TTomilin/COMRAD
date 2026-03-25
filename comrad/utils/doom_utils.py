@@ -25,6 +25,8 @@ from comrad.envs.action_space import (
     doom_action_space_lava_maze,
     doom_action_space_common_harvest,
     doom_action_space_coop_health_gathering,
+    doom_action_space_rhythm_sync,
+    doom_action_space_full_discretized,
 )
 from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
@@ -180,6 +182,17 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(CoopHealthGatheringRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "rhythm_sync",
+        "rhythm_sync.cfg",
+        doom_action_space_rhythm_sync(),
+        1.0,
+        4200,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(RhythmSyncRewardShaping, {})],
     ),
 ]
 

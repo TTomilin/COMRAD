@@ -128,6 +128,26 @@ def doom_action_space_parallel():
         )
     )
 
+def doom_action_space_rhythm_sync():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    TURN_LEFT
+    TURN_RIGHT
+    USE
+    """
+
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, use
+        )
+    )
+
 def doom_action_space_coop_health_gathering():
     """
     MOVE_FORWARD
@@ -185,7 +205,7 @@ def doom_action_space_armory_siege():
             Discrete(3),  # noop, select weapon 1, select weapon 2
         )
     )
-    
+
 def doom_action_space_lava_maze():
     """
     MOVE_FORWARD
