@@ -1,4 +1,96 @@
 import gymnasium as gym
+import numpy as np
+
+
+class ArmorySiegeAdditionalInput(gym.Wrapper):
+    """
+    health
+    ammo1: pistol
+    ammo2: shotgun
+    weapon1: has pistol (0/1)
+    weapon2: has shotgun (0/1)
+    core_hp (0-1)
+    selected_weapon: 0=none, 1=pistol, 2=shotugn
+    killcount
+    attack_ready: 0/1
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        current_obs_space = self.observation_space
+
+        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+        high = np.array([200.0, 200.0, 100.0, 1.0, 1.0, 1.0, 3.0, 500.0, 1.0], dtype=np.float32)
+
+        self.observation_space = gym.spaces.Dict({
+            "obs": current_obs_space,
+            "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+        })
+
+        self.measurements_vec = np.zeros(9, dtype=np.float32)
+        self._observed_max_core_hp = None
+
+    def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
+
+        if info is None:
+            return obs_dict
+
+        health = max(0.0, info.get("HEALTH", 0.0))
+        self.measurements_vec[0] = health
+
+        ammo1 = max(0.0, info.get("AMMO1", 0.0))
+        self.measurements_vec[1] = ammo1
+
+        ammo2 = max(0.0, info.get("AMMO2", 0.0))
+        self.measurements_vec[2] = ammo2
+
+        self.measurements_vec[3] = float(info.get("WEAPON1", 0) > 0)
+
+        self.measurements_vec[4] = float(info.get("WEAPON2", 0) > 0)
+
+        # already 0-1 normalized
+        core_hp = info.get("USER1", None)
+        if core_hp is not None and core_hp > 0:
+            if self._observed_max_core_hp is None:
+                self._observed_max_core_hp = core_hp
+            self.measurements_vec[5] = core_hp / self._observed_max_core_hp
+        elif self._observed_max_core_hp is not None:
+            self.measurements_vec[5] = 0.0 # Core destroyed
+        else:
+            self.measurements_vec[5] = 1.0
+
+        selected = max(0, int(info.get("SELECTED_WEAPON", 0)))
+        self.measurements_vec[6] = float(selected)
+
+        killcount = max(0.0, info.get("KILLCOUNT", 0.0))
+        self.measurements_vec[7] = killcount # TODO: might scale to smaller range
+
+        self.measurements_vec[8] = float(info.get("ATTACK_READY", 0) > 0)
+
+        return obs_dict
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self._observed_max_core_hp = None
+        self.measurements_vec.fill(0.0)
+
+        # Get initial info from unwrapped env if needed
+        if info is None:
+            info = self.env.unwrapped.get_info()
+
+        obs_dict = self._parse_info(obs, info)
+        return obs_dict, info
+
+    def step(self, action):
+        obs, rew, terminated, truncated, info = self.env.step(action)
+
+        if obs is None:
+            return obs, rew, terminated, truncated, info
+
+        obs_dict = self._parse_info(obs, info)
+        return obs_dict, rew, terminated, truncated, info
+
 
 class ArmorySiegeRewardShaping(gym.Wrapper):
     def __init__(

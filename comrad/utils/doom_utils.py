@@ -30,7 +30,7 @@ from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
-from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping
+from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, RhythmSyncRewardShaping
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
@@ -80,6 +80,7 @@ class DoomSpec:
         self.shared_reward_scalarisation = shared_reward_scalarisation
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
+ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
 DOOM_ENVS = [
 
     #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
@@ -133,7 +134,7 @@ DOOM_ENVS = [
         4500,
         num_agents=2, # I find 2 agents learn better than 3 agents
         respawn_delay=1,
-        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+        extra_wrappers=[ARMORY_SIEGE_ADDITIONAL_INPUT, (ArmorySiegeRewardShaping, {})],
     ),
 
     DoomSpec(
