@@ -86,6 +86,20 @@ class VideoLoggerWrapper(gym.Wrapper):
         self._recording = False
         self._frames: list[np.ndarray] = [] # list of tiled HWC uint8 frames
 
+    def _env_indices(self):
+        unwrapped = self.env.unwrapped
+        worker_index = getattr(unwrapped, "worker_index", None)
+        vector_index = getattr(unwrapped, "vector_index", None)
+
+        if (worker_index is None or vector_index is None) and hasattr(unwrapped, "env_config"):
+            env_config = getattr(unwrapped, "env_config")
+            if worker_index is None and env_config is not None and "worker_index" in env_config:
+                worker_index = env_config.worker_index
+            if vector_index is None and env_config is not None and "vector_index" in env_config:
+                vector_index = env_config.vector_index
+
+        return worker_index, vector_index
+
     def _capture(self, obs):
         if not self._recording: return
         # Maybe we dont need this as technically not necessary
@@ -119,7 +133,12 @@ class VideoLoggerWrapper(gym.Wrapper):
         f = os.path.join(self.out_dir, f"{uuid.uuid4().hex}.npz")
         np.savez_compressed(f, frames=vf)
 
+        worker_index, vector_index = self._env_indices()
         dct = dict(path=f, fps=self.fps, episode=self._ep_idx)
+        if worker_index is not None:
+            dct["worker_index"] = int(worker_index)
+        if vector_index is not None:
+            dct["vector_index"] = int(vector_index)
         self._frames.clear()
         return dct
 
@@ -160,7 +179,10 @@ class VideoLoggerWrapper(gym.Wrapper):
             elif isinstance(info, dict):
                 end = "reset_info" in info
 
-        self._capture(obs)
+        # Multi-agent envs auto-reset before returning on terminal transitions.
+        # Do not contaminate the finished episode with the first frame of the next one.
+        if not (ep_done and end):
+            self._capture(obs)
 
         # This is the payload to send to video_uploader
         data = None
