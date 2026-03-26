@@ -25,6 +25,7 @@ from comrad.envs.action_space import (
     doom_action_space_lava_maze,
     doom_action_space_common_harvest,
     doom_action_space_coop_health_gathering,
+    doom_action_space_foraging_commons,
     doom_action_space_rhythm_sync,
     doom_action_space_full_discretized,
 )
@@ -32,10 +33,19 @@ from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
-from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, RhythmSyncRewardShaping
+from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
+from comrad.wrappers.reward_shaping import (
+    REWARD_SHAPING_DEATHMATCH_V1,
+    DoomRewardShapingWrapper,
+    true_objective_winning_the_game,
+)
 
+DEATHMATCH_REWARD_SHAPING = (
+    DoomRewardShapingWrapper,
+    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V1, true_objective_func=true_objective_winning_the_game),
+)
 
 OFF_POLICY = {"DQN", "VDN", "QMIX", "QPLEX"}
 ON_POLICY = {"APPO", "MAPPO", "HAPPO"}
@@ -83,9 +93,22 @@ class DoomSpec:
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
+FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 DOOM_ENVS = [
 
     #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
+
+    DoomSpec(
+        "doom_duel",
+        "ssl2.cfg",
+        doom_action_space_full_discretized(with_use=True),
+        1.0,
+        int(1e9),
+        num_agents=2,
+        num_bots=0,
+        respawn_delay=2,
+        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
+    ),
 
     DoomSpec(
         "doom_pitfall",
@@ -171,6 +194,18 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=1,
         extra_wrappers=[(CommonHarvestRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "foraging_commons",
+        "foraging_commons.cfg",
+        doom_action_space_foraging_commons(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        # extra_wrappers=[(ForagingCommonsRewardShaping, {})],
+        extra_wrappers=[FORAGING_COMMONS_ADDITIONAL_INPUT, (ForagingCommonsRewardShaping, {})],
     ),
 
     DoomSpec(

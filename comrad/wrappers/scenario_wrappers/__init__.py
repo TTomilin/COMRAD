@@ -8,4 +8,5 @@ from comrad.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierRewardShap
 from comrad.wrappers.scenario_wrappers.lava_maze import LavaMazeRewardShaping
 from comrad.wrappers.scenario_wrappers.common_harvest_doom import CommonHarvestRewardShaping
 from comrad.wrappers.scenario_wrappers.coop_health_gathering import CoopHealthGatheringRewardShaping
+from comrad.wrappers.scenario_wrappers.foraging_commons import ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping
 from comrad.wrappers.scenario_wrappers.rhythm_sync import RhythmSyncRewardShaping
