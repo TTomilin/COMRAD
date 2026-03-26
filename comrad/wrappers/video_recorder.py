@@ -86,19 +86,19 @@ class VideoLoggerWrapper(gym.Wrapper):
         self._recording = False
         self._frames: list[np.ndarray] = [] # list of tiled HWC uint8 frames
 
-    def _env_indices(self):
-        unwrapped = self.env.unwrapped
-        worker_index = getattr(unwrapped, "worker_index", None)
-        vector_index = getattr(unwrapped, "vector_index", None)
-
-        if (worker_index is None or vector_index is None) and hasattr(unwrapped, "env_config"):
-            env_config = getattr(unwrapped, "env_config")
-            if worker_index is None and env_config is not None and "worker_index" in env_config:
-                worker_index = env_config.worker_index
-            if vector_index is None and env_config is not None and "vector_index" in env_config:
-                vector_index = env_config.vector_index
-
-        return worker_index, vector_index
+    # def _env_indices(self):
+    #     unwrapped = self.env.unwrapped
+    #     worker_index = getattr(unwrapped, "worker_index", None)
+    #     vector_index = getattr(unwrapped, "vector_index", None)
+    #
+    #     if (worker_index is None or vector_index is None) and hasattr(unwrapped, "env_config"):
+    #         env_config = getattr(unwrapped, "env_config")
+    #         if worker_index is None and env_config is not None and "worker_index" in env_config:
+    #             worker_index = env_config.worker_index
+    #         if vector_index is None and env_config is not None and "vector_index" in env_config:
+    #             vector_index = env_config.vector_index
+    #
+    #     return worker_index, vector_index
 
     def _capture(self, obs):
         if not self._recording: return
@@ -133,12 +133,12 @@ class VideoLoggerWrapper(gym.Wrapper):
         f = os.path.join(self.out_dir, f"{uuid.uuid4().hex}.npz")
         np.savez_compressed(f, frames=vf)
 
-        worker_index, vector_index = self._env_indices()
+        # worker_index, vector_index = self._env_indices()
         dct = dict(path=f, fps=self.fps, episode=self._ep_idx)
-        if worker_index is not None:
-            dct["worker_index"] = int(worker_index)
-        if vector_index is not None:
-            dct["vector_index"] = int(vector_index)
+        # if worker_index is not None:
+        #     dct["worker_index"] = int(worker_index)
+        # if vector_index is not None:
+        #     dct["vector_index"] = int(vector_index)
         self._frames.clear()
         return dct
 

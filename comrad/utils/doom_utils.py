@@ -323,22 +323,27 @@ def make_doom_env_impl(
         _num_agents = num_agents if num_agents is not None else doom_spec.num_agents
         env = AgentIDWrapper(env, agent_index=player_id, num_agents=_num_agents)
 
+    # Only record video from worker_0, vec_0
     if getattr(cfg, "wandb_record_every", 0) and getattr(cfg, "with_wandb", False) and player_id is None:
-        root = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
-        if env_config is not None:
-            worker_id = getattr(env_config, "worker_index", "main")
-            vec_id = getattr(env_config, "vector_index", "main")
-        else:
-            worker_id = "main"
-            vec_id = "main"
-        dirr = ensure_dir_exists(join(root, f"worker_{worker_id}_vec_{vec_id}"))
-        env = VideoLoggerWrapper(
-            env,
-            record_every=getattr(cfg, "wandb_record_every", 0),
-            fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
-            is_multi=False,
-            output_dir=dirr,
-        )
+        # root = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
+        # if env_config is not None:
+        #     worker_id = getattr(env_config, "worker_index", "main")
+        #     vec_id = getattr(env_config, "vector_index", "main")
+        # else:
+        #     worker_id = "main"
+        #     vec_id = "main"
+        # dirr = ensure_dir_exists(join(root, f"worker_{worker_id}_vec_{vec_id}"))
+        worker_id = getattr(env_config, "worker_index", 0) if env_config else 0
+        vec_id = getattr(env_config, "vector_index", 0) if env_config else 0
+        if worker_id == 0 and vec_id == 0:
+            dirr = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
+            env = VideoLoggerWrapper(
+                env,
+                record_every=getattr(cfg, "wandb_record_every", 0),
+                fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
+                is_multi=False,
+                output_dir=dirr,
+            )
 
     return env
 
@@ -409,22 +414,27 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
 
         env = init_multiplayer_env(make_env_func, player_id=0, env_config=env_config)
 
+    # Only record video from worker_0, vec_0
     if getattr(cfg, "wandb_record_every", 0) and getattr(cfg, "with_wandb", False):
-        root = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
-        if env_config is not None:
-            worker_id = getattr(env_config, "worker_index", "main")
-            vec_id = getattr(env_config, "vector_index", "main")
-        else:
-            worker_id = "main"
-            vec_id = "main"
-        dirr = ensure_dir_exists(join(root, f"worker_{worker_id}_vec_{vec_id}"))
-        env = VideoLoggerWrapper(
-            env,
-            record_every=getattr(cfg, "wandb_record_every", 0),
-            fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
-            is_multi=is_multiagent,
-            output_dir=dirr,
-        )
+        # root = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
+        # if env_config is not None:
+        #     worker_id = getattr(env_config, "worker_index", "main")
+        #     vec_id = getattr(env_config, "vector_index", "main")
+        # else:
+        #     worker_id = "main"
+        #     vec_id = "main"
+        # dirr = ensure_dir_exists(join(root, f"worker_{worker_id}_vec_{vec_id}"))
+        worker_id = getattr(env_config, "worker_index", 0) if env_config else 0
+        vec_id = getattr(env_config, "vector_index", 0) if env_config else 0
+        if worker_id == 0 and vec_id == 0:
+            dirr = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
+            env = VideoLoggerWrapper(
+                env,
+                record_every=getattr(cfg, "wandb_record_every", 0),
+                fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
+                is_multi=is_multiagent,
+                output_dir=dirr,
+            )
 
     return env
 

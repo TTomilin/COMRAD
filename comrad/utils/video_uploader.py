@@ -25,16 +25,19 @@ def upload_video(runner, cfg):
 
             ep = data.get("episode", 0)
             fps = data.get("fps", getattr(cfg, "wandb_video_fps", 35))
-            worker_index = data.get("worker_index")
-            vector_index = data.get("vector_index")
-            key = f"videos/p_{policy_id:02d}"
-            if worker_index is not None:
-                key += f"_w_{int(worker_index):02d}"
-            if vector_index is not None:
-                key += f"_v_{int(vector_index):02d}"
-            key += f"_ep_{ep:05d}"
 
-            wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
+            # worker_index = data.get("worker_index")
+            # vector_index = data.get("vector_index")
+            # key = f"videos/p_{policy_id:02d}"
+            # if worker_index is not None:
+            #     key += f"_w_{int(worker_index):02d}"
+            # if vector_index is not None:
+            #     key += f"_v_{int(vector_index):02d}"
+            # key += f"_ep_{ep:05d}"
+            # wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
+
+            key = f"videos/p_{policy_id:02d}_ep_{ep:05d}"
+            wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=None)
             # step None so only logs 1 latest video
         except Exception as e:
             # happen when vizdoom crashes while video is being encoded
