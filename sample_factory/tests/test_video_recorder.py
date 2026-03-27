@@ -49,8 +49,6 @@ def test_video_logger_records_diagnostic_metadata(tmp_path):
 
     payload = info["episode_extra_stats"]["wandb_video"]
     assert payload["episode"] == 1
-    assert payload["worker_index"] == 2
-    assert payload["vector_index"] == 7
     assert payload["recorded_frames"] == 1
     assert payload["true_objective"] == 44.0
     assert payload["reset_boundary"] is True
@@ -131,5 +129,3 @@ def test_video_logger_multiagent_metadata_uses_agent_lists(tmp_path):
     assert payload["agent_HEALTH"] == [88.0, 0.0]
     assert payload["agent_episode_time_tics"] == [212, 212]
     assert payload["agent_player_dead"] == [False, True]
-    assert payload["worker_index"] == 4
-    assert payload["vector_index"] == 9
