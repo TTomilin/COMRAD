@@ -464,6 +464,28 @@ class VizdoomEnv(gym.Env):
                 if v in info:
                     info[v] -= self._last_episode_info.get(v, 0)
 
+    def _terminal_status_info(self):
+        info = {}
+        if self.game is None:
+            return info
+
+        try:
+            info["episode_time_tics"] = int(self.game.get_episode_time())
+        except Exception:
+            pass
+
+        try:
+            info["episode_timeout_tics"] = int(self.game.get_episode_timeout())
+        except Exception:
+            pass
+
+        try:
+            info["player_dead"] = bool(self.game.is_player_dead())
+        except Exception:
+            pass
+
+        return info
+
     def _process_game_step(self, state, done, info):
         if not done:
             observation = np.transpose(state.screen_buffer, (1, 2, 0))
@@ -476,6 +498,7 @@ class VizdoomEnv(gym.Env):
 
             # when done=True Doom does not allow us to call get_info, so we provide info from the last frame
             info.update(self._prev_info)
+            info.update(self._terminal_status_info())
 
         self._vizdoom_variables_bug_workaround(info, done)
 
