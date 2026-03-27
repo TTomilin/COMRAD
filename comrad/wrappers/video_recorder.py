@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import math
 import os
 import uuid
@@ -60,6 +61,61 @@ def _select_image(obs) -> np.ndarray | None:
             o = _select_image(i)
             if o is not None: return o
     return None
+
+#==================================================
+# Those are for logging metadata only
+
+def _json_scalar(value):
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, (bool, int, float, str)) or value is None:
+        return value
+    return None
+
+def _info_scalars(info):
+    if not isinstance(info, dict):
+        return {}
+
+    scalars = {}
+    for key, value in info.items():
+        if key in ("episode_extra_stats", "reset_info"):
+            continue
+        scalar = _json_scalar(value)
+        if scalar is not None:
+            scalars[key] = scalar
+    return scalars
+
+def _multi_info_scalars(infos):
+    if not isinstance(infos, (list, tuple)):
+        return {}
+
+    keys = set()
+    for item in infos:
+        if isinstance(item, dict):
+            keys.update(item.keys())
+
+    scalars = {}
+    for key in sorted(keys):
+        if key in ("episode_extra_stats", "reset_info"):
+            continue
+
+        values = []
+        valid = True
+        for item in infos:
+            value = item.get(key) if isinstance(item, dict) else None
+            scalar = _json_scalar(value)
+            if value is not None and scalar is None:
+                valid = False
+                break
+            values.append(scalar)
+
+        if valid:
+            scalars[f"agent_{key}"] = values
+
+    return scalars
+
+#==================================================
+
 
 class VideoLoggerWrapper(gym.Wrapper):
     def __init__(
@@ -123,7 +179,7 @@ class VideoLoggerWrapper(gym.Wrapper):
         for i in lst:
             self._frames.append(i)
 
-    def _save(self):
+    def _save(self, metadata=None):
         if not (self._recording and self._frames and self.out_dir is not None):
             self._frames.clear()
             return None
@@ -139,6 +195,15 @@ class VideoLoggerWrapper(gym.Wrapper):
         #     dct["worker_index"] = int(worker_index)
         # if vector_index is not None:
         #     dct["vector_index"] = int(vector_index)
+
+        #Logging metadata
+        if metadata:
+            meta_path = os.path.join(self.out_dir, f"{uuid.uuid4().hex}.json")
+            with open(meta_path, "w", encoding="utf-8") as meta_file:
+                json.dump(metadata, meta_file, indent=2, sort_keys=True)
+            dct.update(metadata)
+            dct["meta_path"] = meta_path
+
         self._frames.clear()
         return dct
 
@@ -187,7 +252,35 @@ class VideoLoggerWrapper(gym.Wrapper):
         # This is the payload to send to video_uploader
         data = None
         if ep_done:
-            data = self._save()
+            # Logging purpose only.
+            metadata = {
+                "recorded_frames": len(self._frames),
+                "reset_boundary": bool(end),
+            }
+
+            if term_list is not None or trunc_list is not None:
+                metadata["terminated"] = bool(term_list is not None and all(bool(t) for t in term_list))
+                metadata["truncated"] = bool(trunc_list is not None and all(bool(t) for t in trunc_list))
+                if term_list is not None:
+                    metadata["agent_terminated"] = [bool(t) for t in term_list]
+                if trunc_list is not None:
+                    metadata["agent_truncated"] = [bool(t) for t in trunc_list]
+            else:
+                metadata["terminated"] = bool(term)
+                metadata["truncated"] = bool(trunc)
+
+            if isinstance(info, dict):
+                metadata.update(_info_scalars(info))
+            elif isinstance(info, list):
+                metadata.update(_multi_info_scalars(info))
+                for item in info:
+                    if isinstance(item, dict) and "true_objective" in item:
+                        scalar = _json_scalar(item.get("true_objective"))
+                        if scalar is not None:
+                            metadata["true_objective"] = scalar
+                            break
+            # Set to none if no logging.
+            data = self._save(metadata=metadata)
             self._recording = False
             self._frames.clear()
             if end:
