@@ -6,7 +6,7 @@ from typing import Optional
 
 from comrad.envs.wad_catalog import WadBatch
 from comrad.envs.multi_wad_env import MultiWADEnv
-from comrad.utils.wad_utils import patch_wad_path
+# from comrad.utils.wad_utils import patch_wad_path
 
 from sample_factory.envs.env_wrappers import (
     PixelFormatChwWrapper,
