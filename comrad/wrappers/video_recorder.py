@@ -126,6 +126,7 @@ class VideoLoggerWrapper(gym.Wrapper):
         fps: int = 35,
         max_frames: int = 1000,
         is_multi: bool = False,
+        done_mode: str = "all",
         output_dir: str | None = None,
     ):
         super().__init__(env)
@@ -133,6 +134,9 @@ class VideoLoggerWrapper(gym.Wrapper):
         self.fps = int(fps)
         self.max_frames = int(max_frames)
         self.is_multi = is_multi
+        if done_mode not in ("all", "any"):
+            raise ValueError(f"done_mode must be 'all' or 'any', not {done_mode!r}")
+        self.done_mode = done_mode
 
         self.out_dir = os.fspath(output_dir) if output_dir is not None else None
         if self.out_dir is not None:
@@ -229,7 +233,8 @@ class VideoLoggerWrapper(gym.Wrapper):
                 term_list = [bool(term)] * len(trunc_list)
             if trunc_list is None:
                 trunc_list = [bool(trunc)] * len(term_list)
-            ep_done = all(t or tr for t, tr in zip(term_list, trunc_list))
+            done_flags = [bool(t) or bool(tr) for t, tr in zip(term_list, trunc_list)]
+            ep_done = all(done_flags) if self.done_mode == "all" else any(done_flags)
         else:
             ep_done = bool(term) or bool(trunc)
 
@@ -259,8 +264,12 @@ class VideoLoggerWrapper(gym.Wrapper):
             }
 
             if term_list is not None or trunc_list is not None:
-                metadata["terminated"] = bool(term_list is not None and all(bool(t) for t in term_list))
-                metadata["truncated"] = bool(trunc_list is not None and all(bool(t) for t in trunc_list))
+                if self.done_mode == "all":
+                    metadata["terminated"] = bool(term_list is not None and all(bool(t) for t in term_list))
+                    metadata["truncated"] = bool(trunc_list is not None and all(bool(t) for t in trunc_list))
+                else:
+                    metadata["terminated"] = bool(term_list is not None and any(bool(t) for t in term_list))
+                    metadata["truncated"] = bool(trunc_list is not None and any(bool(t) for t in trunc_list))
                 if term_list is not None:
                     metadata["agent_terminated"] = [bool(t) for t in term_list]
                 if trunc_list is not None:
@@ -268,6 +277,7 @@ class VideoLoggerWrapper(gym.Wrapper):
             else:
                 metadata["terminated"] = bool(term)
                 metadata["truncated"] = bool(trunc)
+            metadata["done_mode"] = self.done_mode
 
             if isinstance(info, dict):
                 metadata.update(_info_scalars(info))
@@ -283,7 +293,7 @@ class VideoLoggerWrapper(gym.Wrapper):
             data = self._save(metadata=metadata)
             self._recording = False
             self._frames.clear()
-            if end:
+            if end or self.done_mode == "any":
                 self._maybe_start_ep(obs)
 
         if data is not None:

@@ -37,7 +37,7 @@ def upload_video(runner, cfg):
             # wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=None and _runner.env_steps.get(policy_id, 0))
 
             key = f"videos/p_{policy_id:02d}_ep_{ep:05d}"
-            wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=None)
+            wandb.log({key: wandb.Video(frames, fps=fps, format="mp4")}, step=_runner.env_steps.get(policy_id, 0))
             # step None so only logs 1 latest video
         except Exception as e:
             # happen when vizdoom crashes while video is being encoded

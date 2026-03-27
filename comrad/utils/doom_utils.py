@@ -463,11 +463,13 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
         vec_id = getattr(env_config, "vector_index", 0) if env_config else 0
         if worker_id == 0 and vec_id == 0:
             dirr = ensure_dir_exists(join(experiment_dir(cfg=cfg), "wandb_videos"))
+            algo_name = str(getattr(cfg, "algo", "APPO")).upper()
             env = VideoLoggerWrapper(
                 env,
                 record_every=getattr(cfg, "wandb_record_every", 0),
                 fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
                 is_multi=is_multiagent,
+                done_mode="any" if is_multiagent and algo_name in ON_POLICY else "all",
                 output_dir=dirr,
             )
 
