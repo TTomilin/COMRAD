@@ -65,20 +65,12 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         harvest_reward=0.03,
         # cleanup_reward=0.25,
         cleanup_reward=0.03,
-        cleanup_progress_reward=0.0,
-        low_spawn_threshold=25,
-        low_spawn_penalty=-0.002,
         death_penalty=-1.0,
-        cleanup_time=72.0,
     ):
         super().__init__(env)
         self.harvest_reward = harvest_reward
         self.cleanup_reward = cleanup_reward
-        self.cleanup_progress_reward = cleanup_progress_reward
-        self.low_spawn_threshold = low_spawn_threshold
-        self.low_spawn_penalty = low_spawn_penalty
         self.death_penalty = death_penalty
-        self.cleanup_time = max(float(cleanup_time), 1.0)
 
         self.prev_vars = {}
         self.episode_steps = 0
@@ -99,7 +91,6 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
             "USER1": info.get("USER1", 0.0),
             "OWN_HARVESTS": info.get(self._key(4), 0.0),
             "OWN_CLEANUPS": info.get(self._key(8), 0.0),
-            "OWN_PROGRESS": info.get(self._key(12), 0.0),
         }
 
     def reset(self, **kwargs):
@@ -129,15 +120,12 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         shaped_reward = 0.0
 
         curr_health = info.get("HEALTH", 0.0)
-        curr_spawn_rate = info.get("USER1", 0.0)
         curr_harvests = info.get(self._key(4), 0.0)
         curr_cleanups = info.get(self._key(8), 0.0)
-        curr_progress = info.get(self._key(12), 0.0)
 
         prev_health = self.prev_vars.get("HEALTH", 0.0)
         prev_harvests = self.prev_vars.get("OWN_HARVESTS", 0.0)
         prev_cleanups = self.prev_vars.get("OWN_CLEANUPS", 0.0)
-        prev_progress = self.prev_vars.get("OWN_PROGRESS", 0.0)
 
         delta_harvests = curr_harvests - prev_harvests
         if delta_harvests > 0:
@@ -146,13 +134,6 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         delta_cleanups = curr_cleanups - prev_cleanups
         if delta_cleanups > 0:
             shaped_reward += delta_cleanups * self.cleanup_reward
-
-        delta_progress = curr_progress - prev_progress
-        if self.cleanup_progress_reward > 0.0 and delta_progress > 0 and delta_cleanups <= 0:
-            shaped_reward += (delta_progress / self.cleanup_time) * self.cleanup_progress_reward
-
-        if curr_health > 0 and curr_spawn_rate < self.low_spawn_threshold:
-            shaped_reward += self.low_spawn_penalty
 
         if curr_health <= 0 < prev_health:
             shaped_reward += self.death_penalty
