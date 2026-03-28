@@ -185,8 +185,8 @@ python -m comrad.train --env=armory_siege --algo=QPLEX --mixer=dmaq_qatten --tra
 # MAPPO
 python -m comrad.train --env=armory_siege --algo=MAPPO --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom --num_agents=2 --num_epochs=4 --rnn_type=lstm
 
-# HAPPO
-python -m comrad.train --env=armory_siege --algo=HAPPO --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom --num_agents=2
+# HAPPO (with linear_decay and shared reward)
+python -m comrad.train --env=armory_siege --algo=HAPPO --train_for_env_steps=150000000 --num_workers=20 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --shared_reward_alpha=1.0 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=marl_vizdoom --num_agents=2
 ```
 
 ## 4. Record Video
