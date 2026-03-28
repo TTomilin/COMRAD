@@ -82,6 +82,14 @@ python -m comrad.train \
 + HAPPO `train_step` increases N+1 times faster than base MAPPO/IPPO, so you should increase `--max_policy_lag` to `default_max_policy_lag * (num_agents + 1)`
 + For `--lr_schedule`, only `constant` or `linear_decay` allowed as policy is updated sequentially. Using a KL-adaptive learning rate doesnt make sense
 
+##### HAPPO shared reward
+
++ Use `--shared_reward_alpha=1.0` when the task is meant to be fully cooperative but the per-agent env/wrapper rewards are different because of local or role-specific shaping. This makes every agent optimize the same team scalar reward, which matches the usual HAPPO formulation better.
+    + e.g. when reward shaping depends on agent-local info such as `HEALTH`, `KILLCOUNT`, `POSITION_X`, role-specific inventory, or own counters
+    + When the wrapper is reading a single shared event that is mirrored into every agent's `info` like in `rhythm_sync`
+    + When the wrapper emits different rewards per agent
++ For now you should enable this for every scenario except `rhythm_sync`. But it's not dead rule, just a suggested default option.
+
 ---
 
 #### IDQN (Independent DQN)
