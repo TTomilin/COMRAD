@@ -224,7 +224,7 @@ DOOM_ENVS = [
         "rhythm_sync.cfg",
         doom_action_space_rhythm_sync(),
         1.0,
-        4200,
+        3000,
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(RhythmSyncRewardShaping, {})],
