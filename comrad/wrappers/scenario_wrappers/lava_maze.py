@@ -5,35 +5,36 @@ class LavaMazeRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
+        grid_size=5,
         goal_reward=10.0,
         death_penalty=-5.0,
-        step_penalty=-0.001,
-        distance_reward_scale=0.1,
-        lava_burn_penalty_scale=0.001,
-        look_at_navigator_reward=0.01,
+        step_penalty=-0.005,
+        distance_reward_scale=0.5,
+        lava_burn_penalty_scale=0.005,
     ):
         super().__init__(env)
+        self.grid_size = grid_size
         self.goal_reward = goal_reward
         self.death_penalty = death_penalty
         self.step_penalty = step_penalty
         self.distance_reward_scale = distance_reward_scale
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
-        self.look_at_navigator_reward = look_at_navigator_reward
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
 
     def _decode_maze_grid(self, bits_0, bits_1, bits_2):
         """
-        Reconstructs the 9x9 grid from the 3 ACS integer chunks.
-        Returns a 9x9 2D list where 1 is safe, 0 is lava.
+        Reconstructs the grid from the 3 ACS integer chunks.
+        Returns a 2D list where 1 is safe, 0 is lava.
         """
-        grid = [[0 for _ in range(9)] for _ in range(9)]
+        s = self.grid_size
+        grid = [[0 for _ in range(s)] for _ in range(s)]
         chunks = [int(bits_0), int(bits_1), int(bits_2)]
 
-        for y in range(9):
-            for x in range(9):
-                bit_idx = y * 9 + x
+        for y in range(s):
+            for x in range(s):
+                bit_idx = y * s + x
                 chunk = bit_idx // 27
                 shift = bit_idx % 27
 
@@ -60,7 +61,8 @@ class LavaMazeRewardShaping(gym.Wrapper):
         if start_x == goal_x and start_y == goal_y:
             return 0
 
-        if not (0 <= start_x < 9 and 0 <= start_y < 9) or grid[start_y][start_x] == 0:
+        s = self.grid_size
+        if not (0 <= start_x < s and 0 <= start_y < s) or grid[start_y][start_x] == 0:
             return 999 # Standing in lava
 
         queue = deque([(start_x, start_y, 0)])
@@ -75,7 +77,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
             for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
                 nx, ny = cx + dx, cy + dy
 
-                if (0 <= nx < 9 and 0 <= ny < 9 and
+                if (0 <= nx < s and 0 <= ny < s and
                     (nx, ny) not in visited and
                     grid[ny][nx] == 1): # safe floor
 
@@ -117,14 +119,6 @@ class LavaMazeRewardShaping(gym.Wrapper):
         if hp_loss > 0:
             shaped_reward -= hp_loss * self.lava_burn_penalty_scale
 
-        player_has_weapon2 = self._safe_int(info.get("WEAPON2", 0), 0) > 0
-        current_can_see = self._safe_int(info.get("USER23", 0), 0)
-        
-        if player_has_weapon2 and current_can_see == 1:
-            shaped_reward += self.look_at_navigator_reward
-        if player_has_weapon2 and current_can_see == 0:
-            shaped_reward -= self.look_at_navigator_reward
-            
         if current_levels > prev_levels:
             shaped_reward += self.goal_reward
 
@@ -177,6 +171,5 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "USER20": self._safe_int(info.get("USER20", 0), 0),
             "USER21": self._safe_int(info.get("USER21", 0), 0),
             "USER22": self._safe_int(info.get("USER22", 0), 0),
-            "USER23": self._safe_int(info.get("USER23", 0), 0),
             "HEALTH": self._safe_int(info.get("HEALTH", 100), 100),
         }

@@ -1,4 +1,6 @@
 import gymnasium as gym
+import collections
+import math
 
 class CoopHealthGatheringRewardShaping(gym.Wrapper):
     """Reward shaping for cooperative health gathering scenario."""
@@ -6,14 +8,22 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
     def __init__(
         self, 
         env,
-        health_reward=0.1,
-        coop_pickup_reward=0.5,
-        chain_penalty=-0.05,
+        health_reward=0.5,
+        coop_pickup_reward=0.25,
+        chain_penalty=-0.025,
+        exploration_reward=0.05,
+        exploration_distance=50.0,
+        exploration_steps=150,
     ):
         super().__init__(env)
         self.health_reward = health_reward
         self.coop_pickup_reward = coop_pickup_reward
         self.chain_penalty = chain_penalty
+        self.exploration_reward = exploration_reward
+        self.exploration_distance = exploration_distance
+        self.exploration_steps = exploration_steps
+        
+        self.past_positions = collections.deque(maxlen=exploration_steps)
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -57,6 +67,18 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         delta_stretches = curr_chain_stretches - prev_chain_stretches
         if delta_stretches > 0:
             shaped_reward += self.chain_penalty * delta_stretches
+            
+        # Exploration reward
+        curr_x = info.get("POSITION_X")
+        curr_y = info.get("POSITION_Y")
+        
+        if curr_x is not None and curr_y is not None:
+            if len(self.past_positions) == self.exploration_steps:
+                past_x, past_y = self.past_positions[0]
+                dist = math.sqrt((curr_x - past_x)**2 + (curr_y - past_y)**2)
+                if dist >= self.exploration_distance:
+                    shaped_reward += self.exploration_reward
+            self.past_positions.append((curr_x, curr_y))
 
         individual_reward = reward + shaped_reward
         self.orig_env_reward += reward
@@ -68,7 +90,10 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         return obs, individual_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
+        self.past_positions.clear()
         obs, info = self.env.reset(**kwargs)
+        if "POSITION_X" in info and "POSITION_Y" in info:
+            self.past_positions.append((info["POSITION_X"], info["POSITION_Y"]))
         self.sync_vars(info)
         self.orig_env_reward = 0.0
         return obs, info
