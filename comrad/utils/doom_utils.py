@@ -33,7 +33,9 @@ from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
-from comrad.wrappers.scenario_wrappers import DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping
+from comrad.wrappers.scenario_wrappers import (
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
+)
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 from comrad.wrappers.reward_shaping import (
@@ -152,6 +154,17 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
+        "armory_siege_vision",
+        "armory_siege.cfg",
+        doom_action_space_armory_siege(),
+        1.0,
+        4500,
+        num_agents=2, # I find 2 agents learn better than 3 agents
+        respawn_delay=1,
+        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+    ),
+
+    DoomSpec(
         "armory_siege",
         "armory_siege.cfg",
         doom_action_space_armory_siege(),
@@ -197,6 +210,17 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
+        "foraging_commons_vision",
+        "foraging_commons.cfg",
+        doom_action_space_foraging_commons(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(ForagingCommonsRewardShaping, {})],
+    ),
+
+    DoomSpec(
         "foraging_commons",
         "foraging_commons.cfg",
         doom_action_space_foraging_commons(),
@@ -204,7 +228,6 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
-        # extra_wrappers=[(ForagingCommonsRewardShaping, {})],
         extra_wrappers=[FORAGING_COMMONS_ADDITIONAL_INPUT, (ForagingCommonsRewardShaping, {})],
     ),
 
@@ -228,6 +251,17 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(RhythmSyncRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "rhythm_sync_dense",
+        "rhythm_sync.cfg",
+        doom_action_space_rhythm_sync(),
+        1.0,
+        3000,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(RhythmSyncRewardShapingDense, {})],
     ),
 ]
 
