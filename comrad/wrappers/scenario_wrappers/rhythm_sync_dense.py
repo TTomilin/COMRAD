@@ -14,9 +14,6 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         max_approach_delta=128.0,
         switch_zone_entry_reward=0.05,
         switch_use_range=96.0,
-        on_cue_press_bonus=0.3,
-        off_cue_press_penalty=0.0005,
-        waiting_near_switch_bonus=0,
     ):
         super().__init__(env)
         self.num_agents = int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -28,9 +25,6 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         self.max_approach_delta = max_approach_delta
         self.switch_zone_entry_reward = switch_zone_entry_reward
         self.switch_use_range = switch_use_range
-        self.on_cue_press_bonus = on_cue_press_bonus
-        self.off_cue_press_penalty = off_cue_press_penalty
-        self.waiting_near_switch_bonus = waiting_near_switch_bonus
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -162,24 +156,6 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
             if in_switch_zone and self._switch_zone_rewarded_stage != curr_stage:
                 shaped_reward += self.switch_zone_entry_reward
                 self._switch_zone_rewarded_stage = curr_stage
-
-        # Timing-based reward shaping for USE presses
-        cue_visible = int(info.get(self._cue_visible_key(), 0))
-        use_pressed = isinstance(action, (list, tuple)) and len(action) > 3 and action[3] == 1
-        in_switch_zone = self._in_switch_zone(info)
-        curr_distance = self._distance_to_switch(info)
-        pending_self = int(info.get(self._pending_key(), 0))
-
-        if use_pressed and in_switch_zone:
-            if cue_visible:
-                shaped_reward += self.on_cue_press_bonus
-            else:
-                shaped_reward += self.off_cue_press_penalty
-
-        # near switch, not pending, cue not visible, not pressing USE
-        near_switch = curr_distance is not None and curr_distance < (2.0 * self.switch_use_range)
-        if near_switch and not pending_self and not cue_visible and not use_pressed:
-            shaped_reward += self.waiting_near_switch_bonus
 
         done = bool(terminated) or bool(truncated)
         if done:
