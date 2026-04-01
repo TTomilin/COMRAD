@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import json
+from types import SimpleNamespace
 
 import gymnasium as gym
 import numpy as np
 
+from sample_factory.utils.attr_dict import AttrDict
+
+from comrad.utils.doom_utils import make_doom_multiplayer_env
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
 
@@ -129,3 +133,107 @@ def test_video_logger_multiagent_metadata_uses_agent_lists(tmp_path):
     assert payload["agent_HEALTH"] == [88.0, 0.0]
     assert payload["agent_episode_time_tics"] == [212, 212]
     assert payload["agent_player_dead"] == [False, True]
+
+
+class _MultiAgentPartialDoneEnv(gym.Env):
+    metadata = {}
+
+    def __init__(self):
+        super().__init__()
+        self.action_space = gym.spaces.Discrete(1)
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(3, 2, 2), dtype=np.uint8)
+        self._step_idx = 0
+
+    def reset(self, *, seed=None, options=None):
+        super().reset(seed=seed)
+        self._step_idx = 0
+        obs = [
+            np.full((3, 2, 2), 10, dtype=np.uint8),
+            np.full((3, 2, 2), 20, dtype=np.uint8),
+        ]
+        return obs, [{}, {}]
+
+    def step(self, action):
+        self._step_idx += 1
+        obs = [
+            np.full((3, 2, 2), 30 + self._step_idx, dtype=np.uint8),
+            np.full((3, 2, 2), 40 + self._step_idx, dtype=np.uint8),
+        ]
+        if self._step_idx == 1:
+            info = [{"HEALTH": 0.0}, {"HEALTH": 88.0}]
+            return obs, [0.0, 0.0], [True, False], [False, False], info
+
+        info = [{"HEALTH": 90.0}, {"HEALTH": 0.0}]
+        return obs, [0.0, 0.0], [False, True], [False, False], info
+
+
+def test_video_logger_multiagent_any_mode_saves_partial_boundaries(tmp_path):
+    env = VideoLoggerWrapper(
+        _MultiAgentPartialDoneEnv(),
+        record_every=1,
+        fps=8,
+        is_multi=True,
+        done_mode="any",
+        output_dir=str(tmp_path),
+    )
+
+    env.reset()
+
+    _, _, _, _, info1 = env.step([0, 0])
+    payload1 = info1[0]["episode_extra_stats"]["wandb_video"]
+    assert payload1["episode"] == 1
+    assert payload1["done_mode"] == "any"
+    assert payload1["reset_boundary"] is False
+    assert payload1["agent_terminated"] == [True, False]
+
+    _, _, _, _, info2 = env.step([0, 0])
+    payload2 = info2[0]["episode_extra_stats"]["wandb_video"]
+    assert payload2["episode"] == 2
+    assert payload2["done_mode"] == "any"
+    assert payload2["agent_terminated"] == [False, True]
+
+
+def test_make_doom_multiplayer_env_uses_any_done_mode_for_on_policy_only(monkeypatch):
+    import comrad.envs.multiagent.doom_multiagent_wrapper as doom_multiagent_wrapper
+    import comrad.utils.doom_utils as doom_utils
+
+    captured = []
+
+    class _DummyMultiAgentEnv:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+    class _CapturingVideoLoggerWrapper:
+        def __init__(self, env, **kwargs):
+            captured.append(kwargs["done_mode"])
+            self.env = env
+            self.kwargs = kwargs
+
+    monkeypatch.setattr(doom_multiagent_wrapper, "MultiAgentEnv", _DummyMultiAgentEnv)
+    monkeypatch.setattr(doom_utils, "VideoLoggerWrapper", _CapturingVideoLoggerWrapper)
+
+    doom_spec = SimpleNamespace(
+        num_agents=2,
+        num_bots=0,
+        shared_reward_alpha=0.0,
+        shared_reward_scalarisation="sum",
+    )
+    cfg_base = {
+        "env_frameskip": 4,
+        "num_bots": -1,
+        "num_agents": 2,
+        "num_humans": 0,
+        "wandb_record_every": 10,
+        "wandb_video_fps": 35,
+        "with_wandb": True,
+        "shared_reward_alpha": None,
+        "shared_reward_scalarisation": None,
+        "experiment": "video-test",
+        "train_dir": "/tmp/video-test",
+    }
+
+    make_doom_multiplayer_env(doom_spec, cfg=AttrDict({**cfg_base, "algo": "MAPPO"}), env_config=None)
+    make_doom_multiplayer_env(doom_spec, cfg=AttrDict({**cfg_base, "algo": "QMIX"}), env_config=None)
+
+    assert captured == ["any", "all"]
