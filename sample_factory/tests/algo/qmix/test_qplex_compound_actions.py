@@ -1,4 +1,3 @@
-"""Tests for QPLEX compound action handling: _compute_max_q_i, _build_compound_onehot."""
 import itertools
 import math
 
