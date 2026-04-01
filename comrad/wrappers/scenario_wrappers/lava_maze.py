@@ -5,12 +5,13 @@ class LavaMazeRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        grid_size=5,
+        grid_size=6,
         goal_reward=10.0,
         death_penalty=-5.0,
         step_penalty=-0.005,
         distance_reward_scale=0.5,
         lava_burn_penalty_scale=0.005,
+        signal_penalty=-0.01,
     ):
         super().__init__(env)
         self.grid_size = grid_size
@@ -19,6 +20,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.step_penalty = step_penalty
         self.distance_reward_scale = distance_reward_scale
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
+        self.signal_penalty = signal_penalty
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -111,6 +113,11 @@ class LavaMazeRewardShaping(gym.Wrapper):
         current_levels = self._safe_int(info.get("USER22", 0), 0)
         prev_levels = self._safe_int(self.prev_vars.get("USER22", 0), 0)
 
+        current_signal = self._safe_int(info.get("USER17", 0), 0)
+        prev_signal = self._safe_int(self.prev_vars.get("USER17", 0), 0)
+
+        if current_signal == 1:
+            shaped_reward += self.signal_penalty
 
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
         prev_hp = self._safe_int(self.prev_vars.get("HEALTH", 0), 0)
@@ -166,6 +173,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "USER13": self._safe_int(info.get("USER13", -1), -1),
             "USER14": self._safe_int(info.get("USER14", -1), -1),
             "USER15": self._safe_int(info.get("USER15", -1), -1),
+            "USER17": self._safe_int(info.get("USER17", 0), 0),
             "USER18": self._safe_int(info.get("USER18", -1), -1),
             "USER19": self._safe_int(info.get("USER19", 0), 0),
             "USER20": self._safe_int(info.get("USER20", 0), 0),
@@ -173,3 +181,64 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "USER22": self._safe_int(info.get("USER22", 0), 0),
             "HEALTH": self._safe_int(info.get("HEALTH", 100), 100),
         }
+
+import numpy as np
+
+class LavaMazeAdditionalInput(gym.Wrapper):
+    """
+    health
+    color_signal: 0=none, 1=green, 2=red, 3=yellow, 4=blue (USER16)
+    flash_active: 0/1 (USER17)
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        current_obs_space = self.observation_space
+
+        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
+        high = np.array([200., 1., 1., 1., 1., 1., 1.], dtype=np.float32)
+
+        self.observation_space = gym.spaces.Dict({
+            "obs": current_obs_space,
+            "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+        })
+
+        self.measurements_vec = np.zeros(7, dtype=np.float32)
+
+    def _parse_info(self, obs, info):
+        if info is None:
+            return obs_dict
+
+        self.measurements_vec[0] = max(0.0, info.get("HEALTH", 0.0))
+        flash_active = bool(info.get("USER17", 0))
+        self.measurements_vec[1:6] = 0.0
+        color = max(0, min(4, int(info.get("USER16", 0))))
+        if not flash_active or color == 0:
+            self.measurements_vec[1] = 1.0
+        else:            
+            self.measurements_vec[1 + color] = 1.0
+
+        self.measurements_vec[6] = float(bool(info.get("USER17", 0)))
+
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
+
+        return obs_dict
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.measurements_vec.fill(0.0)
+
+        if info is None:
+            info = self.env.unwrapped.get_info()
+
+        obs_dict = self._parse_info(obs, info)
+        return obs_dict, info
+
+    def step(self, action):
+        obs, rew, terminated, truncated, info = self.env.step(action)
+
+        if obs is None:
+            return obs, rew, terminated, truncated, info
+
+        obs_dict = self._parse_info(obs, info)
+        return obs_dict, rew, terminated, truncated, info

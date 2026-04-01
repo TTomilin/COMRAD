@@ -8,16 +8,20 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
     def __init__(
         self, 
         env,
-        health_reward=0.5,
-        coop_pickup_reward=0.25,
-        chain_penalty=-0.025,
-        exploration_reward=0.05,
-        exploration_distance=50.0,
-        exploration_steps=150,
+        health_reward=0.8,
+        health_loss_penalty=-0.05,
+        coop_pickup_reward=0.3,
+        death_penalty=-3.0,
+        chain_penalty=-0.05,
+        exploration_reward=0,
+        exploration_distance=80.0,
+        exploration_steps=200,
     ):
         super().__init__(env)
         self.health_reward = health_reward
+        self.health_loss_penalty = health_loss_penalty
         self.coop_pickup_reward = coop_pickup_reward
+        self.death_penalty = death_penalty
         self.chain_penalty = chain_penalty
         self.exploration_reward = exploration_reward
         self.exploration_distance = exploration_distance
@@ -46,18 +50,20 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         delta_health = curr_health - prev_health
         if delta_health > 0.0:
             shaped_reward += self.health_reward * delta_health
-
+            
+        # Health loss
+        elif delta_health < 0.0:
+            shaped_reward += self.health_loss_penalty * abs(delta_health)
+            
+        # Death penalty
+        if curr_health <= 0.0 and prev_health > 0.0:
+            shaped_reward += self.death_penalty
+            
         # Global pick ups
-        curr_active_kits = info.get("USER1", 0)
-        curr_spawned_kits = info.get("USER2", 0)
+        curr_picked_up_kits = info.get("USER4", 0)
+        prev_picked_up_kits = self.prev_vars.get("USER4", 0)
         
-        prev_active_kits = self.prev_vars.get("USER1", 0)
-        prev_spawned_kits = self.prev_vars.get("USER2", 0)
-        
-        curr_picked_up = curr_spawned_kits - curr_active_kits
-        prev_picked_up = prev_spawned_kits - prev_active_kits
-        
-        delta_pickups = curr_picked_up - prev_picked_up
+        delta_pickups = curr_picked_up_kits - prev_picked_up_kits
         if delta_pickups > 0:
             shaped_reward += self.coop_pickup_reward * delta_pickups
 
@@ -101,7 +107,6 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
     def sync_vars(self, info):
         self.prev_vars = {
             "HEALTH": info.get("HEALTH", 0.0),
-            "USER1": info.get("USER1", 0),
-            "USER2": info.get("USER2", 0),
             "USER3": info.get("USER3", 0),
+            "USER4": info.get("USER4", 0),
         }
