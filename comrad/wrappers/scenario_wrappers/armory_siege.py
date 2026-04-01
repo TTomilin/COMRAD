@@ -31,9 +31,10 @@ class ArmorySiegeAdditionalInput(gym.Wrapper):
         self._observed_max_core_hp = None
 
     def _parse_info(self, obs, info):
-        obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
 
         if info is None:
+            self.measurements_vec.fill(0.0)
             return obs_dict
 
         health = max(0.0, info.get("HEALTH", 0.0))
