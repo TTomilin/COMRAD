@@ -27,8 +27,9 @@ class ForagingCommonsAdditionalInput(gym.Wrapper):
         return f"USER{base + self._player_index()}"
 
     def _parse_info(self, obs, info):
-        obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
         if info is None:
+            self.measurements_vec.fill(0.0)
             return obs_dict
 
         own_cleanups = max(0.0, info.get(self._key(8), 0.0))
@@ -43,7 +44,6 @@ class ForagingCommonsAdditionalInput(gym.Wrapper):
         self.measurements_vec[6] = total_cleanups
         self.measurements_vec[7] = min(1.0, max(0.0, info.get(self._key(12), 0.0) / self.cleanup_time))
 
-        obs_dict["measurements"] = self.measurements_vec.copy()
         return obs_dict
 
     def reset(self, **kwargs):
