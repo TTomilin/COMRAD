@@ -242,12 +242,12 @@ class TestMakeMixer:
 
     def test_dmaq(self):
         cfg = _default_cfg(mixer='dmaq', qplex_weighted_head=True, qplex_adv_hypernet_layers=3)
-        m = make_mixer(cfg, num_agents=3, state_dim=96, action_dim=18)
+        m = make_mixer(cfg, num_agents=3, state_dim=96)
         assert isinstance(m, DMAQer)
 
     def test_dmaq_qatten(self):
         cfg = _default_cfg(mixer='dmaq_qatten')
-        m = make_mixer(cfg, num_agents=3, state_dim=96, action_dim=18, unit_dim=32)
+        m = make_mixer(cfg, num_agents=3, state_dim=96, unit_dim=32)
         assert isinstance(m, DMAQ_QattenMixer)
 
     def test_invalid_mixer(self):

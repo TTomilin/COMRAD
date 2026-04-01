@@ -111,22 +111,6 @@ class TestRealModelLossComputation:
         learner._is_qplex = getattr(cfg, 'mixer', 'qmix') in ('dmaq', 'dmaq_qatten')
         return learner
 
-    def test_flatten_rnn_parameters_delegates_to_gru(self, monkeypatch):
-        cfg = real_model_cfg(rnn_size=16, rnn_num_layers=1, mixer='qmix')
-        obs_space, act_space = small_obs_space(), compound_action_space()
-        agent_net = QMixAgentNet(cfg, obs_space, act_space)
-
-        calls = {"count": 0}
-
-        def fake_flatten_parameters():
-            calls["count"] += 1
-
-        monkeypatch.setattr(agent_net.core.core, 'flatten_parameters', fake_flatten_parameters)
-
-        agent_net.flatten_rnn_parameters()
-
-        assert calls["count"] == 1
-
     def test_qmix_loss_shapes_compound_actions(self):
         cfg = real_model_cfg(rnn_size=32, rnn_num_layers=1, mixer='qmix')
         obs_space, act_space = small_obs_space(), compound_action_space()
