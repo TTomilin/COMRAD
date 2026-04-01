@@ -21,6 +21,8 @@ class ArmorySiegeAdditionalInput(gym.Wrapper):
 
         low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
         high = np.array([200.0, 200.0, 100.0, 1.0, 1.0, 1.0, 3.0, 500.0, 1.0], dtype=np.float32)
+        self.low = low
+        self.high = high
 
         self.observation_space = gym.spaces.Dict({
             "obs": current_obs_space,
@@ -68,6 +70,8 @@ class ArmorySiegeAdditionalInput(gym.Wrapper):
         self.measurements_vec[7] = killcount # TODO: might scale to smaller range
 
         self.measurements_vec[8] = float(info.get("ATTACK_READY", 0) > 0)
+
+        np.clip(self.measurements_vec, self.low, self.high, out=self.measurements_vec)
 
         return obs_dict
 
