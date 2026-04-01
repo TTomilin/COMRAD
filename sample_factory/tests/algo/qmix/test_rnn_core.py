@@ -209,21 +209,13 @@ def test_prepare_joint_sequences_rejects_bad_rnn_feature_dim():
         QMixLearner._prepare_joint_sequences(learner, batch)
 
 
-def test_config_rejects_lstm_for_qmix():
-    cfg = AttrDict(
-        {
-            'algo': 'QMIX',
-            'recurrence': -1,
-            'rollout': 8,
-            'use_rnn': True,
-            'rnn_type': 'lstm',
-            'per': False,
-            'actor_critic_share_weights': True,
-        }
+def test_config_warns_and_fixes_lstm_for_qmix():
+    cfg = make_full_qmix_cfg(
+        use_rnn=True,
+        rnn_type='lstm',
     )
-
-    with pytest.raises(ValueError, match="rnn_type='gru'"):
-        preprocess_cfg(cfg, DummyEnvInfo())
+    preprocess_cfg(cfg, DummyEnvInfo())
+    assert cfg.rnn_type == 'gru', "rnn_type should be auto-corrected to 'gru'"
 
 
 @pytest.mark.parametrize(
@@ -343,21 +335,13 @@ class TestConfigRejection:
         with pytest.raises(ValueError, match='rollout >= 2'):
             preprocess_cfg(cfg, DummyEnvInfo())
 
-    def test_rejects_shared_weights_false(self):
-        cfg = AttrDict({
-            'algo': 'QMIX',
-            'recurrence': -1,
-            'rollout': 8,
-            'use_rnn': True,
-            'rnn_type': 'gru',
-            'per': False,
-            'actor_critic_share_weights': False,
-            'qmix_buffer_batch_size': 32,
-            'qmix_sequence_batch_size': 8,
-            'qmix_log_interval': 100,
-        })
-        with pytest.raises(ValueError, match='actor_critic_share_weights'):
-            preprocess_cfg(cfg, DummyEnvInfo())
+    def test_warns_and_fixes_shared_weights_false(self):
+        cfg = make_full_qmix_cfg(
+            use_rnn=True,
+            actor_critic_share_weights=False,
+        )
+        preprocess_cfg(cfg, DummyEnvInfo())
+        assert cfg.actor_critic_share_weights is True, "actor_critic_share_weights should be auto-corrected to True"
 
     def test_per_forced_false_for_rnn(self):
         cfg = make_full_qmix_cfg(

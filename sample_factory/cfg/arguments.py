@@ -301,15 +301,16 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
         if cfg.use_rnn:
             if cfg.rnn_type != "gru":
+                old_rnn_type = cfg.rnn_type
                 cfg.rnn_type = "gru"
-                log.warning(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{cfg.rnn_type}'")
+                log.warning(f"QMIX/VDN/QPLEX RNN only supports rnn_type='gru', got '{old_rnn_type}'")
             if cfg.rollout < 2:
                 raise ValueError(f"QMIX/VDN/QPLEX RNN requires rollout >= 2, got {cfg.rollout}")
             if getattr(cfg, "per", False):
                 log.warning("QMIX/VDN/QPLEX RNN: forcing per=False (uniform sequence sampling)")
                 cfg.per = False
             if not getattr(cfg, "actor_critic_share_weights", True):
-                cfg.actor_critic_share_weights = False
+                cfg.actor_critic_share_weights = True
                 log.warning("QMIX/VDN/QPLEX RNN requires actor_critic_share_weights=True")
             if algo_upper == "QPLEX":
                 mini_bs = getattr(cfg, 'qplex_grad_accum_mini_bs', 16)
@@ -317,7 +318,8 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
                     raise ValueError(f"QPLEX requires qplex_grad_accum_mini_bs > 0, got {mini_bs}")
 
         num_agents = getattr(cfg, 'num_agents', 2)
-        if "replay_buffer_size" not in cli_args and cfg.replay_buffer_size >= 500000:
+        replay_buffer_size = getattr(cfg, 'replay_buffer_size', 0)
+        if "replay_buffer_size" not in cli_args and replay_buffer_size >= 500000:
             obs_space = env_info.obs_space
             bytes_per_obs = 0
             if hasattr(obs_space, "spaces"):
@@ -333,23 +335,25 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             bytes_per_transition = bytes_per_obs * 2 * num_agents
             if bytes_per_transition > 0:
                 max_size = max(1000, int(1_000_000_000 // bytes_per_transition))
-                if max_size < cfg.replay_buffer_size:
+                if max_size < replay_buffer_size:
                     log.warning(f"QMIX/VDN/QPLEX: Cap replay_buffer_size to {max_size}")
                     cfg.replay_buffer_size = max_size
+                    replay_buffer_size = max_size
 
         # learning_starts validation but per sequence for RNN
-        if cfg.use_rnn:
-            transitions_per_seq = num_agents * cfg.rollout
-            effective_capacity = (cfg.replay_buffer_size // transitions_per_seq) * transitions_per_seq
-        else:
-            effective_capacity = (cfg.replay_buffer_size // num_agents) * num_agents
-        if cfg.learning_starts >= effective_capacity:
-            old_starts = cfg.learning_starts
-            cfg.learning_starts = max(1, effective_capacity // 2)
-            log.warning(f"QMIX/VDN/QPLEX: learning_starts capped from {old_starts} to {cfg.learning_starts} (effective buffer capacity={effective_capacity})")
+        learning_starts = getattr(cfg, 'learning_starts', 0)
+        if replay_buffer_size > 0 and learning_starts > 0:
+            if cfg.use_rnn:
+                transitions_per_seq = num_agents * cfg.rollout
+                effective_capacity = (replay_buffer_size // transitions_per_seq) * transitions_per_seq
+            else:
+                effective_capacity = (replay_buffer_size // num_agents) * num_agents
+            if learning_starts >= effective_capacity:
+                old_starts = learning_starts
+                cfg.learning_starts = max(1, effective_capacity // 2)
+                log.warning(f"QMIX/VDN/QPLEX: learning_starts capped from {old_starts} to {cfg.learning_starts} (effective buffer capacity={effective_capacity})")
 
-        log.info(f"QMIX/VDN/QPLEX: num_agents={num_agents}, mixer={cfg.mixer}, "
-                 f"buffer_size={cfg.replay_buffer_size}")
+        log.info(f"QMIX/VDN/QPLEX: num_agents={num_agents}, mixer={cfg.mixer}, buffer_size={replay_buffer_size}")
 
     if algo_upper == "HAPPO":
         if cfg.use_rnn and not getattr(cfg, "actor_critic_share_weights", True):
