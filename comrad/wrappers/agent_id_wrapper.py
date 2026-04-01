@@ -33,6 +33,7 @@ class AgentIDWrapper(gym.ObservationWrapper):
         self._was_box = isinstance(env.observation_space, gym.spaces.Box)
 
     def observation(self, obs):
+        if obs is None: return None
         if self._was_box:
             obs = {"obs": obs}
         agent_id_onehot = np.zeros(self.num_agents, dtype=np.float32)
