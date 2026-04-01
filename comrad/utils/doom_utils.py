@@ -34,7 +34,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -95,6 +95,7 @@ class DoomSpec:
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
+LAVA_MAZE_ADDITIONAL_INPUT = (LavaMazeAdditionalInput, {})
 FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 DOOM_ENVS = [
 
@@ -184,7 +185,7 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         nofreelook=0,
-        extra_wrappers=[(LavaMazeRewardShaping, {})],
+        extra_wrappers=[LAVA_MAZE_ADDITIONAL_INPUT, (LavaMazeRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -253,16 +254,16 @@ DOOM_ENVS = [
         extra_wrappers=[(RhythmSyncRewardShaping, {})],
     ),
 
-    DoomSpec(
-        "rhythm_sync_dense",
-        "rhythm_sync.cfg",
-        doom_action_space_rhythm_sync(),
-        1.0,
-        3000,
-        num_agents=2,
-        forcerespawn=0,
-        extra_wrappers=[(RhythmSyncRewardShapingDense, {})],
-    ),
+    # DoomSpec(
+    #     "rhythm_sync_dense",
+    #     "rhythm_sync.cfg",
+    #     doom_action_space_rhythm_sync(),
+    #     1.0,
+    #     3000,
+    #     num_agents=2,
+    #     forcerespawn=0,
+    #     extra_wrappers=[(RhythmSyncRewardShapingDense, {})],
+    # ),
 ]
 
 
