@@ -10,4 +10,4 @@ from comrad.wrappers.scenario_wrappers.common_harvest_doom import CommonHarvestR
 from comrad.wrappers.scenario_wrappers.coop_health_gathering import CoopHealthGatheringRewardShaping
 from comrad.wrappers.scenario_wrappers.foraging_commons import ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping
 from comrad.wrappers.scenario_wrappers.rhythm_sync import RhythmSyncRewardShaping
-from comrad.wrappers.scenario_wrappers.rhythm_sync_dense import RhythmSyncRewardShapingDense
+from comrad.wrappers.scenario_wrappers.rhythm_sync_dense import RhythmSyncRewardShapingDense, RhythmSyncAdditionalInput

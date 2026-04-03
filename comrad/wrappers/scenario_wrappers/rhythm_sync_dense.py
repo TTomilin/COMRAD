@@ -1,4 +1,106 @@
 import gymnasium as gym
+import numpy as np
+
+
+class RhythmSyncAdditionalInput(gym.Wrapper):
+    def __init__(self, env, *, max_rel_x=512.0, max_rel_y=256.0, max_distance=768.0):
+        '''
+        current stage fraction
+        completed fraction
+        stage type / 2
+        cue visible self
+        pending self
+        pending other
+        cue owner (-1 regular/jitter, 0 A, 1 B)
+        relative dx to own switch
+        relative dy to own switch
+        normalized Manhattan distance to own switch
+        in switch zone
+        '''
+
+        super().__init__(env)
+        current_obs_space = self.observation_space
+        self.max_rel_x = float(max_rel_x)
+        self.max_rel_y = float(max_rel_y)
+        self.max_distance = float(max_distance)
+
+        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float32)
+        high = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32)
+
+        self.observation_space = gym.spaces.Dict(
+            {
+                "obs": current_obs_space,
+                "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+            }
+        )
+        self.measurements_vec = np.zeros(low.shape[0], dtype=np.float32)
+
+    @property
+    def player_id(self):
+        pid = getattr(self.env.unwrapped, "player_id", 0)
+        return 0 if pid is None or pid < 0 else int(pid)
+
+    def _pending_keys(self):
+        if self.player_id == 0:
+            return "USER27", "USER28"
+        return "USER28", "USER27"
+
+    def _target_keys(self):
+        if self.player_id == 0:
+            return "USER33", "USER34"
+        return "USER35", "USER36"
+
+    def _cue_visible_key(self):
+        return "USER37" if self.player_id == 0 else "USER38"
+
+    def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
+        measurements = obs_dict["measurements"]
+        measurements.fill(0.0)
+
+        if info is None:
+            return obs_dict
+
+        current_stage = max(0.0, float(info.get("USER24", 0.0)))
+        completed = max(0.0, float(info.get("USER25", 0.0)))
+        num_sections = max(1.0, float(info.get("USER32", 1.0)))
+        stage_type = max(0.0, min(2.0, float(info.get("USER26", 0.0))))
+        cue_owner = float(info.get("USER31", -1.0))
+
+        pending_self_key, pending_other_key = self._pending_keys()
+        target_x_key, target_y_key = self._target_keys()
+        target_x = float(info.get(target_x_key, 0.0))
+        target_y = float(info.get(target_y_key, 0.0))
+        pos_x = float(info.get("POSITION_X", 0.0))
+        pos_y = float(info.get("POSITION_Y", 0.0))
+
+        rel_x = np.clip((target_x - pos_x) / self.max_rel_x, -1.0, 1.0)
+        rel_y = np.clip((target_y - pos_y) / self.max_rel_y, -1.0, 1.0)
+        distance = min(1.0, (abs(target_x - pos_x) + abs(target_y - pos_y)) / self.max_distance)
+        in_switch_zone = float(distance * self.max_distance <= 128.0)
+
+        measurements[0] = current_stage / num_sections
+        measurements[1] = completed / num_sections
+        measurements[2] = stage_type / 2.0
+        measurements[3] = float(info.get(self._cue_visible_key(), 0.0) > 0.0)
+        measurements[4] = float(info.get(pending_self_key, 0.0) > 0.0)
+        measurements[5] = float(info.get(pending_other_key, 0.0) > 0.0)
+        measurements[6] = np.clip(cue_owner, -1.0, 1.0)
+        measurements[7] = rel_x
+        measurements[8] = rel_y
+        measurements[9] = distance
+        measurements[10] = in_switch_zone
+        return obs_dict
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        return self._parse_info(obs, info), info
+
+    def step(self, action):
+        obs, rew, terminated, truncated, info = self.env.step(action)
+        if obs is None:
+            return obs, rew, terminated, truncated, info
+        return self._parse_info(obs, info), rew, terminated, truncated, info
 
 
 class RhythmSyncRewardShapingDense(gym.Wrapper):
@@ -29,6 +131,7 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self._switch_zone_rewarded_stage = None
+        self._best_distance_this_stage = None
 
     @property
     def player_id(self):
@@ -102,6 +205,7 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         obs, info = self.env.reset(**kwargs)
         self.orig_env_reward = 0.0
         self._switch_zone_rewarded_stage = None
+        self._best_distance_this_stage = self._distance_to_switch(info)
         self._sync(info)
         return obs, info
 
@@ -122,8 +226,10 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
 
         prev_stage = self.prev_vars.get("USER24", 0)
         curr_stage = int(info.get("USER24", 0))
-        if curr_stage != prev_stage:
+        stage_changed = curr_stage != prev_stage
+        if stage_changed:
             self._switch_zone_rewarded_stage = None
+            self._best_distance_this_stage = self._distance_to_switch(info)
 
         prev_completed = self.prev_vars.get("USER25", 0)
         curr_completed = int(info.get("USER25", 0))
@@ -143,14 +249,15 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
             shaped_reward += self._team_share(self.success_bonus)
 
         pending_self = int(info.get(self._pending_key(), 0))
-        if not curr_failed and not curr_finished and pending_self == 0:
-            prev_distance = self._distance_to_switch(self.prev_vars)
+        if not stage_changed and not curr_failed and not curr_finished and pending_self == 0:
             curr_distance = self._distance_to_switch(info)
-            if prev_distance is not None and curr_distance is not None:
-                distance_delta = prev_distance - curr_distance
-                if distance_delta > 0:
-                    distance_delta = min(distance_delta, self.max_approach_delta)
+            if curr_distance is not None:
+                if self._best_distance_this_stage is None:
+                    self._best_distance_this_stage = curr_distance
+                elif curr_distance < self._best_distance_this_stage:
+                    distance_delta = min(self._best_distance_this_stage - curr_distance, self.max_approach_delta)
                     shaped_reward += distance_delta * self.approach_switch_reward_scale
+                    self._best_distance_this_stage = curr_distance
 
             in_switch_zone = self._in_switch_zone(info)
             if in_switch_zone and self._switch_zone_rewarded_stage != curr_stage:

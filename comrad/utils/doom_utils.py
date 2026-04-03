@@ -34,7 +34,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -244,14 +244,15 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
-        "rhythm_sync",
+        "rhythm_sync", # Unused - NEXP
         "rhythm_sync.cfg",
         doom_action_space_rhythm_sync(),
         1.0,
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncRewardShaping, {})],
+        extra_wrappers=[(RhythmSyncAdditionalInput, {}), (RhythmSyncRewardShaping, {})],
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(
@@ -262,7 +263,8 @@ DOOM_ENVS = [
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncRewardShapingDense, {})],
+        extra_wrappers=[(RhythmSyncAdditionalInput, {}), (RhythmSyncRewardShapingDense, {})],
+        shared_reward_alpha=1.0,
     ),
 ]
 
