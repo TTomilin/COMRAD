@@ -87,7 +87,8 @@ def add_rl_args(p: ArgumentParser):
         "--batched_sampling",
         default=False,
         type=str2bool,
-        help="Batched sampling allows the data to be processed in big batches on the rollout worker."
+        help="NOTE: For Multi-agent, this is always enabled."
+        "Batched sampling allows the data to be processed in big batches on the rollout worker."
         "This is especially important for GPU-accelerated vectorized environments such as Megaverse or IsaacGym. "
         "As a downside, in batched mode we do not support (for now) some of the features, such as population-based self-play "
         "or inactive agents, plus each batched sampler (rollout worker) process only collects data for a single policy. "
