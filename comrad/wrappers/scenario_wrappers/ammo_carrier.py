@@ -1,8 +1,6 @@
 import gymnasium as gym
 import math
 
-import gymnasium as gym
-import math
 
 class AmmoCarrierRewardShaping(gym.Wrapper):
     def __init__(
