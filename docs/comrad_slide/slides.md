@@ -85,6 +85,7 @@ h2 {
 </div>
 
 ---
+TODO: put a gif of those, and explain benchmarks and how it solve before this
 
 <div class="h-full flex flex-col justify-center px-16">
   <h1 class="text-5xl font-bold text-[#1a1a1a] mb-12">The Gap</h1>
@@ -117,6 +118,8 @@ h2 {
 
 ---
 
+# more images
+
 <div class="h-full flex flex-col justify-center px-16">
   <h1 class="text-5xl font-bold text-[#1a1a1a] mb-12">COMRAD</h1>
 
@@ -134,13 +137,14 @@ h2 {
       <p class="text-[#666]">Reproducible scenarios with baseline algorithms</p>
     </div>
     <div class="border-t-4 border-[#e63946] pt-6">
-      <h3 class="text-2xl font-bold text-[#1a1a1a] mb-3">High Throughput</h3>
+      <h3 class="text-2xl font-bold text-[#1a1a1a] mb-3">High Throughput ⚡</h3>
       <p class="text-[#666]">>50,000 FPS -> rapid iteration and research progress</p>
     </div>
   </div>
 
   <p class="text-center text-lg text-[#888] mt-3">
-    Bridging the gap between toy benchmarks and real-world robotics.
+    Bridging the gap between toy benchmarks and real-world robotics. (todo: removed, this is not strong )
+    Say to answer certain questions
   </p>
 </div>
 
@@ -151,7 +155,7 @@ h2 {
 
   <div class="grid grid-cols-3 gap-10 mb-6">
     <div class="text-center p-6 bg-[#fafafa] rounded-lg">
-      <p class="text-5xl font-black text-[#e63946] mb-2">>50K</p>
+      <p class="text-5xl font-black text-[#e63946] mb-2">>50K (todo: compare with other benchmarks)</p>
       <p class="text-sm text-[#666]">Frames per second</p>
       <p class="text-xs text-[#999] mt-2">Train early morning, well-converged result by breakfast</p>
     </div>
@@ -162,7 +166,7 @@ h2 {
     </div>
     <div class="text-center p-6 bg-[#fafafa] rounded-lg">
       <p class="text-5xl font-black text-[#e63946] mb-2">7</p>
-      <p class="text-sm text-[#666]">Baseline algorithms</p>
+      <p class="text-sm text-[#666]">Baseline algorithms (todo: explain  sverbal)e</p>
       <p class="text-xs text-[#999] mt-2">QMIX, MAPPO, HAPPO, + more</p>
     </div>
   </div>
@@ -175,7 +179,7 @@ h2 {
 ---
 
 <div class="h-full flex flex-col justify-center px-16">
-  <h1 class="text-4xl font-bold text-[#1a1a1a]" style="margin-bottom: 3rem;">Scenario Design: Four Property Categories</h1>
+  <h1 class="text-4xl font-bold text-[#1a1a1a]" style="margin-bottom: 3rem;">Scenario Design: Four Property Categories (what is scenarios, explain doom here or above)</h1>
 
   <div class="grid grid-cols-2 gap-8">
     <div class="category-card">
@@ -282,6 +286,7 @@ h2 {
 
 <div class="h-full flex flex-col justify-center px-16">
   <h1 class="text-4xl font-bold text-[#1a1a1a] mb-6">Baseline Algorithms</h1>
+  <!-- TODO: videos of converged and bad algos -->
 
   <div class="grid grid-cols-3 gap-6">
     <div>
