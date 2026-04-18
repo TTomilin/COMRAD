@@ -1,9 +1,18 @@
 import gymnasium as gym
+import math
 import numpy as np
 
 
 class RhythmSyncAdditionalInput(gym.Wrapper):
-    def __init__(self, env, *, max_rel_x=512.0, max_rel_y=256.0, max_distance=768.0):
+    def __init__(
+        self,
+        env,
+        *,
+        max_rel_x=512.0,
+        max_rel_y=256.0,
+        max_distance=768.0,
+        switch_use_range=64.0,
+    ):
         '''
         current stage fraction
         completed fraction
@@ -14,7 +23,7 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         cue owner (-1 regular/jitter, 0 A, 1 B)
         relative dx to own switch
         relative dy to own switch
-        normalized Manhattan distance to own switch
+        normalized Euclidean distance to own switch
         in switch zone
         '''
 
@@ -23,6 +32,7 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         self.max_rel_x = float(max_rel_x)
         self.max_rel_y = float(max_rel_y)
         self.max_distance = float(max_distance)
+        self.switch_use_range = float(switch_use_range)
 
         low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float32)
         high = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32)
@@ -76,8 +86,11 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
 
         rel_x = np.clip((target_x - pos_x) / self.max_rel_x, -1.0, 1.0)
         rel_y = np.clip((target_y - pos_y) / self.max_rel_y, -1.0, 1.0)
-        distance = min(1.0, (abs(target_x - pos_x) + abs(target_y - pos_y)) / self.max_distance)
-        in_switch_zone = float(distance * self.max_distance <= 128.0)
+        dx = target_x - pos_x
+        dy = target_y - pos_y
+        dist = math.hypot(dx, dy)
+        distance = min(1.0, dist / self.max_distance)
+        in_switch_zone = float(abs(dx) <= self.switch_use_range and abs(dy) <= self.switch_use_range)
 
         measurements[0] = current_stage / num_sections
         measurements[1] = completed / num_sections
@@ -115,7 +128,7 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         approach_switch_reward_scale=0.0005,
         max_approach_delta=128.0,
         switch_zone_entry_reward=0.05,
-        switch_use_range=96.0,
+        switch_use_range=64.0,
     ):
         super().__init__(env)
         self.num_agents = int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -175,11 +188,17 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
         px = float(info.get("POSITION_X", 0.0))
         py = float(info.get("POSITION_Y", 0.0))
         target_x, target_y = target_coords
-        return abs(px - target_x) + abs(py - target_y)
+        return math.hypot(px - target_x, py - target_y)
 
     def _in_switch_zone(self, info):
-        distance = self._distance_to_switch(info)
-        return distance is not None and distance <= (2.0 * self.switch_use_range)
+        target_coords = self._target_coords(info)
+        if target_coords is None:
+            return False
+
+        px = float(info.get("POSITION_X", 0.0))
+        py = float(info.get("POSITION_Y", 0.0))
+        target_x, target_y = target_coords
+        return abs(px - target_x) <= self.switch_use_range and abs(py - target_y) <= self.switch_use_range
 
     def _sync(self, info):
         cue_key = self._cue_visible_key()
@@ -220,7 +239,7 @@ class RhythmSyncRewardShapingDense(gym.Wrapper):
 
         if not self.prev_vars:
             self._sync(info)
-            return obs, 0.0, terminated, truncated, info
+            return obs, reward, terminated, truncated, info
 
         shaped_reward = self.step_penalty
 
