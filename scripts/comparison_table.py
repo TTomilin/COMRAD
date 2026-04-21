@@ -46,14 +46,19 @@ properties_data = [
     ("Properties of\nPotential Emergent\nBehaviors", "Flexibility",         [' ', 'x', ' ', ' ', ' ', 'x', 'x', 'x', ' ', ' ', ' ', ' '])
 ]
 
+# Old palette (like melting pot palette)
+    # "Game Theoretic\nProperties": "#FAD9D5",
+    # "Game Design\nProperties": "#FFF2CC",
+    # "Reinforcement\nLearning Properties": "#D5E8D4",
+    # "Properties of\nPotential Emergent\nBehaviors": "#DAE8FC"
 colors = {
-    "Game Theoretic\nProperties": "#FAD9D5",
-    "Game Design\nProperties": "#FFF2CC",
-    "Reinforcement\nLearning Properties": "#D5E8D4",
-    "Properties of\nPotential Emergent\nBehaviors": "#DAE8FC"
+    "Game Theoretic\nProperties": "#E1DEE9",
+    "Game Design\nProperties": "#DDEBF1",
+    "Reinforcement\nLearning Properties": "#E1EAD5",
+    "Properties of\nPotential Emergent\nBehaviors": "#F5E3D7"
 }
-border_color = '#B0B0B0'
-text_color = '#1A1A1A'
+border_color = '#A9B4C2'
+text_color = '#111827'
 plt.rcParams['font.family'] = 'sans-serif'
 
 fig, ax = plt.subplots(figsize=(15, 11))
