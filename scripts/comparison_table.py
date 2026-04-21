@@ -47,12 +47,14 @@ properties_data = [
 ]
 
 colors = {
-    "Game Theoretic\nProperties": "#fcedda",
-    "Game Design\nProperties": "#fbf2cd",
-    "Reinforcement\nLearning Properties": "#e3eed3",
-    "Properties of\nPotential Emergent\nBehaviors": "#dce6f2"
+    "Game Theoretic\nProperties": "#FAD9D5",
+    "Game Design\nProperties": "#FFF2CC",
+    "Reinforcement\nLearning Properties": "#D5E8D4",
+    "Properties of\nPotential Emergent\nBehaviors": "#DAE8FC"
 }
-
+border_color = '#B0B0B0'
+text_color = '#1A1A1A'
+plt.rcParams['font.family'] = 'sans-serif'
 
 fig, ax = plt.subplots(figsize=(15, 11))
 ax.axis('off')
@@ -77,40 +79,40 @@ for i, (cat, prop, marks) in enumerate(properties_data):
     bg_color = colors.get(cat, "#ffffff")
 
     # Draw property name
-    rect = patches.Rectangle((cat_col_w, y), prop_col_w, cell_h, linewidth=0.3, edgecolor='gray', facecolor=bg_color)
+    rect = patches.Rectangle((cat_col_w, y), prop_col_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
     ax.add_patch(rect)
-    ax.text(cat_col_w + 0.15, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color='#222222')
+    ax.text(cat_col_w + 0.15, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color=text_color)
 
     # Draw checkmark
     for j, mark in enumerate(marks):
         x = cat_col_w + prop_col_w + j * cell_w
-        rect = patches.Rectangle((x, y), cell_w, cell_h, linewidth=0.3, edgecolor='gray', facecolor=bg_color)
+        rect = patches.Rectangle((x, y), cell_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
         ax.add_patch(rect)
         if mark.strip():
-            ax.text(x + cell_w/2, y + cell_h/2, 'x', va='center', ha='center', fontsize=11, weight='bold', color='#222222')
+            ax.text(x + cell_w/2, y + cell_h/2, 'x', va='center', ha='center', fontsize=11, weight='bold', color=text_color)
 
     # Category box on the left
     if cat != current_cat:
         if current_cat is not None:
             # Draw last cat. box
             h = cat_start_y - (y + cell_h)
-            rect = patches.Rectangle((0, y + cell_h), cat_col_w, h, linewidth=0.3, edgecolor='gray', facecolor='#ffffff')
+            rect = patches.Rectangle((0, y + cell_h), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
             ax.add_patch(rect)
-            ax.text(cat_col_w/2, y + cell_h + h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color='#111111')
+            ax.text(cat_col_w/2, y + cell_h + h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color=text_color)
         current_cat = cat
         cat_start_y = y + cell_h
 
 # Draw the last category box
 h = cat_start_y - 0
-rect = patches.Rectangle((0, 0), cat_col_w, h, linewidth=0.3, edgecolor='gray', facecolor='#ffffff')
+rect = patches.Rectangle((0, 0), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
 ax.add_patch(rect)
-ax.text(cat_col_w/2, h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color='#111111')
+ax.text(cat_col_w/2, h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color=text_color)
 
 # Draw angled column headers
-header_y = total_height + 0.15
+header_y = total_height + 0.05
 for j, scenario in enumerate(scenarios):
     x = cat_col_w + prop_col_w + j * cell_w + (cell_w/2)
-    ax.text(x, header_y, scenario, rotation=45, va='bottom', ha='left', fontsize=11, color='#111111')
+    ax.text(x, header_y, scenario, rotation=45, va='bottom', ha='left', rotation_mode='anchor', fontsize=11, color=text_color)
 
 ax.set_xlim(0, total_width + 2)
 ax.set_ylim(-0.5, total_height + 3)
