@@ -33,12 +33,15 @@ def doom_action_space_ammo_carrier():
     TURN_LEFT
     TURN_RIGHT
     MOVE_FORWARD
+    MOVE_LEFT
+    MOVE_RIGHT
     ATTACK
     """
     return gym.spaces.Tuple(
         (
             Discrete(3),  # noop, turn left, turn right
             Discrete(2),  # noop, move forward
+            Discrete(3),  # noop, strafe left, strafe right
             Discrete(2),  # noop, attack
         )
     )

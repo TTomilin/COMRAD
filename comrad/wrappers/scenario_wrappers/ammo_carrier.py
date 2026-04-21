@@ -1,325 +1,230 @@
 import gymnasium as gym
-import math
+import numpy as np
+
+
+class AmmoCarrierAdditionalInput(gym.Wrapper):
+    def __init__(self, env, reserve_target=60.0, home_scale=2048.0):
+        super().__init__(env)
+        current_obs_space = self.observation_space
+
+        self.reserve_target = max(float(reserve_target), 1.0)
+        self.home_scale = max(float(home_scale), 1.0)
+
+        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0], dtype=np.float32)
+        high = np.array([200.0, 200.0, 1.0, 200.0, 1.0, 1.0, 32.0, 32.0, 1.0, 1.0], dtype=np.float32)
+
+        self.observation_space = gym.spaces.Dict(
+            {
+                "obs": current_obs_space,
+                "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+            }
+        )
+        self.measurements_vec = np.zeros(10, dtype=np.float32)
+
+    def _player_id(self) -> int:
+        return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
+
+    def _shortage_ratio(self, shooter_ammo: float, low_alert: float) -> float:
+        shortage = max(0.0, self.reserve_target - shooter_ammo)
+        if shortage <= 0.0 and low_alert > 0.0:
+            shortage = min(self.reserve_target, 5.0)
+        return min(1.0, shortage / self.reserve_target)
+
+    def _hub_beacon(self, pos_x: float, pos_y: float, angle_deg: float) -> tuple[float, float]:
+        dx = np.clip(-pos_x / self.home_scale, -1.0, 1.0)
+        dy = np.clip(-pos_y / self.home_scale, -1.0, 1.0)
+
+        theta = np.deg2rad(angle_deg)
+        forward = dx * np.cos(theta) + dy * np.sin(theta)
+        right = -dx * np.sin(theta) + dy * np.cos(theta)
+        return float(np.clip(forward, -1.0, 1.0)), float(np.clip(right, -1.0, 1.0))
+
+    def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
+        if info is None:
+            self.measurements_vec.fill(0.0)
+            return obs_dict
+
+        shooter_ammo = float(max(0.0, info.get("USER41", info.get("AMMO1", 0.0))))
+        low_alert = float(max(0.0, info.get("USER45", 0.0)))
+        pos_x = float(info.get("POSITION_X", 0.0))
+        pos_y = float(info.get("POSITION_Y", 0.0))
+        angle_deg = float(info.get("ANGLE", 0.0))
+        goal_forward, goal_right = self._hub_beacon(pos_x, pos_y, angle_deg)
+
+        self.measurements_vec[0] = float(max(0.0, info.get("HEALTH", 0.0)))
+        self.measurements_vec[1] = float(max(0.0, info.get("AMMO1", 0.0)))
+        self.measurements_vec[2] = float(self._player_id() == 0)
+        self.measurements_vec[3] = shooter_ammo
+        self.measurements_vec[4] = self._shortage_ratio(shooter_ammo, low_alert)
+        self.measurements_vec[5] = float(low_alert > 0.0)
+        self.measurements_vec[6] = float(max(0.0, info.get("USER44", 0.0)))
+        self.measurements_vec[7] = float(max(0.0, info.get("USER43", 0.0)))
+        self.measurements_vec[8] = goal_forward
+        self.measurements_vec[9] = goal_right
+
+        return obs_dict
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.measurements_vec.fill(0.0)
+        return self._parse_info(obs, info), info
+
+    def step(self, action):
+        obs, rew, terminated, truncated, info = self.env.step(action)
+        if obs is None:
+            return obs, rew, terminated, truncated, info
+        return self._parse_info(obs, info), rew, terminated, truncated, info
 
 
 class AmmoCarrierRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        # Shooter rewards (WEAPON=4)
-        kill_reward=1.0,              # Kill an enemy
-        death_penalty=-1.0,           # Penalty for dying
-        health_loss_penalty=0.01,     # Penalty per health point lost
-        survival_bonus=0.005,         # Small reward per step alive
-        # Carrier rewards (WEAPON=-1)
-        exploration_bonus=0.002,      # Reward for moving (exploration)
+        kill_reward=1.0,
+        hit_reward=0.02,
+        damage_reward=0.001,
+        supply_relief_reward=0.04,
+        death_penalty=-1.0,
+        timeout_survival_bonus=0.25,
+        reserve_target=60.0,
+        alert_shortage_floor=5.0,
+        pressure_bonus_per_enemy=0.02,
+        contextual_pickup_reward=0.01,
     ):
         super().__init__(env)
-        self.kill_reward = kill_reward
-        self.death_penalty = death_penalty
-        self.health_loss_penalty = health_loss_penalty
-        self.survival_bonus = survival_bonus
-        self.exploration_bonus = exploration_bonus
+        self.kill_reward = float(kill_reward)
+        self.hit_reward = float(hit_reward)
+        self.damage_reward = float(damage_reward)
+        self.supply_relief_reward = float(supply_relief_reward)
+        self.death_penalty = float(death_penalty)
+        self.timeout_survival_bonus = float(timeout_survival_bonus)
+        self.reserve_target = float(reserve_target)
+        self.alert_shortage_floor = float(alert_shortage_floor)
+        self.pressure_bonus_per_enemy = float(pressure_bonus_per_enemy)
+        self.contextual_pickup_reward = float(contextual_pickup_reward)
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.episode_shaped_return = 0.0
+        self.episode_steps = 0
 
-    def step(self, action):
-        obs, reward, terminated, truncated, info = self.env.step(action)
+    def _player_id(self) -> int:
+        return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
 
+    def _is_defender(self) -> bool:
+        return self._player_id() == 0
+
+    @staticmethod
+    def _float(info, key: str, default: float = 0.0) -> float:
+        return float(info.get(key, default))
+
+    def _ammo_shortage(self, shooter_ammo: float, low_alert: float) -> float:
+        shortage = max(0.0, self.reserve_target - shooter_ammo)
+        if shortage > 0.0:
+            return shortage
+        if low_alert > 0.0:
+            return self.alert_shortage_floor
+        return 0.0
+
+    def _sync(self, info):
         if info is None:
-            return obs, 0.0, terminated, truncated, {}
-        if reward is None:
-            reward = 0.0
+            self.prev_vars = {}
+            return
 
-        reward = float(reward)
-        self.orig_env_reward += reward
-
-        if not self.prev_vars:
-            self.sync_vars(info)
-            return obs, 0.0, terminated, truncated, info
-
-        shaped_reward = 0.0
-
-        curr_health = info.get("HEALTH", 0)
-        curr_kills  = info.get("KILLCOUNT", 0)
-        curr_weapon = info.get("SELECTED_WEAPON", 0)
-        curr_x      = info.get("POSITION_X", 0.0)
-        curr_y      = info.get("POSITION_Y", 0.0)
-
-        prev_health = self.prev_vars.get("HEALTH", 0)
-        prev_kills  = self.prev_vars.get("KILLCOUNT", 0)
-        prev_x      = self.prev_vars.get("POSITION_X", 0.0)
-        prev_y      = self.prev_vars.get("POSITION_Y", 0.0)
-
-        # ── 1. Death penalty (both agents) ────────
-        if curr_health <= 0:
-            terminated = True
-            if prev_health > 0:
-                shaped_reward += self.death_penalty
-            return self._finalize(obs, reward, shaped_reward, terminated, truncated, info)
-
-        # ── 2. Survival bonus (both agents) ───────
-        shaped_reward += self.survival_bonus
-
-        # ── 3. Health loss penalty (both agents) ──
-        health_delta = curr_health - prev_health
-        if health_delta < 0:
-            shaped_reward += health_delta * self.health_loss_penalty
-
-        # ── 4. Kill reward (Shooter only) ─────────
-        # Carrier has WEAPON=-1 so will never get kills
-        delta_kills = curr_kills - prev_kills
-        if delta_kills > 0:
-            shaped_reward += delta_kills * self.kill_reward
-
-        # ── 5. Exploration bonus (Carrier only) ───
-        # Encourage Carrier to keep moving and explore
-        # Shooter is stationary so this naturally only affects Carrier
-        displacement = math.sqrt((curr_x - prev_x)**2 + (curr_y - prev_y)**2)
-        if curr_weapon == -1 and displacement > 2.0:
-            shaped_reward += self.exploration_bonus
-
-        return self._finalize(obs, reward, shaped_reward, terminated, truncated, info)
-
-    def _finalize(self, obs, env_reward, shaped_reward, terminated, truncated, info):
-        self.prev_vars = info.copy()
-        total_reward = env_reward + shaped_reward
-        self.episode_shaped_return += total_reward
-
-        if terminated or truncated:
-            info["true_objective"] = self.episode_shaped_return
-            info["orig_env_reward"] = self.orig_env_reward
-
-        return obs, total_reward, terminated, truncated, info
+        self.prev_vars = {
+            "HEALTH": self._float(info, "HEALTH"),
+            "AMMO1": self._float(info, "AMMO1"),
+            "KILLCOUNT": self._float(info, "KILLCOUNT"),
+            "HITCOUNT": self._float(info, "HITCOUNT"),
+            "DAMAGECOUNT": self._float(info, "DAMAGECOUNT"),
+            "USER41": self._float(info, "USER41"),
+            "USER43": self._float(info, "USER43"),
+            "USER44": self._float(info, "USER44"),
+            "USER45": self._float(info, "USER45"),
+        }
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.episode_shaped_return = 0.0
-        self.sync_vars(info)
+        self.episode_steps = 0
+        self._sync(info)
         return obs, info
 
-    def sync_vars(self, info):
-        self.prev_vars = info.copy()
-# class AmmoCarrierRewardShaping(gym.Wrapper):
-#     def __init__(
-#         self,
-#         env,
-#         ammo_pickup_reward=1.0,       # Reward for picking up ammo (Carrier only)
-#         ammo_give_reward=3.0,         # Reward for giving ammo to Shooter
-#         idle_penalty=-0.02,           # Penalty for staying idle (Carrier only)
-#         idle_steps_threshold=60,      # Steps before idle penalty triggers
-#         idle_distance_threshold=2.0,  # Displacement below this is considered idle
-#         kill_reward=3.0,              # Reward for killing an enemy (Shooter only)
-#         no_ammo_penalty=-0.05,        # Penalty for Shooter having no ammo
-#         death_penalty=-2.0,           # Penalty for dying (both agents)
-#         health_loss_penalty=0.02,     # Penalty coefficient per health point lost
-#         survival_bonus=0.01,          # Small reward per step for staying alive
-#     ):
-#         super().__init__(env)
-#         self.ammo_pickup_reward = ammo_pickup_reward
-#         self.ammo_give_reward = ammo_give_reward
-#         self.idle_penalty = idle_penalty
-#         self.idle_steps_threshold = idle_steps_threshold
-#         self.idle_distance_threshold = idle_distance_threshold
-#         self.kill_reward = kill_reward
-#         self.no_ammo_penalty = no_ammo_penalty
-#         self.death_penalty = death_penalty
-#         self.health_loss_penalty = health_loss_penalty
-#         self.survival_bonus = survival_bonus
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.env.step(action)
 
-#         self.prev_vars = {}
-#         self.orig_env_reward = 0.0
-#         self.episode_shaped_return = 0.0
-#         self._idle_steps = 0
+        if reward is None:
+            reward = 0.0
+        reward = float(reward)
+        self.orig_env_reward += reward
+        self.episode_steps += 1
 
-#     def step(self, action):
-#         obs, reward, terminated, truncated, info = self.env.step(action)
+        if info is None:
+            return obs, reward, terminated, truncated, info
 
-#         if info is None:
-#             return obs, 0.0, terminated, truncated, {}
-#         if reward is None:
-#             reward = 0.0
+        if not self.prev_vars:
+            self._sync(info)
+            if terminated or truncated:
+                info["true_objective"] = float(self.episode_steps)
+                info["orig_env_reward"] = self.orig_env_reward
+            return obs, reward, terminated, truncated, info
 
-#         reward = float(reward)
-#         self.orig_env_reward += reward
+        shaped_reward = 0.0
 
-#         if not self.prev_vars:
-#             self.sync_vars(info)
-#             return obs, 0.0, terminated, truncated, info
+        curr_health = self._float(info, "HEALTH")
+        prev_health = self.prev_vars.get("HEALTH", 0.0)
+        if curr_health <= 0.0 < prev_health:
+            shaped_reward += self.death_penalty
 
-#         shaped_reward = 0.0
+        if self._is_defender():
+            curr_kills = self._float(info, "KILLCOUNT")
+            prev_kills = self.prev_vars.get("KILLCOUNT", 0.0)
+            delta_kills = curr_kills - prev_kills
+            if delta_kills > 0.0:
+                shaped_reward += delta_kills * self.kill_reward
 
-#         curr_health = info.get("HEALTH", 0)
-#         curr_ammo   = info.get("AMMO1", 0)
-#         curr_weapon = info.get("SELECTED_WEAPON", 0)
-#         curr_kills  = info.get("KILLCOUNT", 0)
-#         curr_x      = info.get("POSITION_X", 0.0)
-#         curr_y      = info.get("POSITION_Y", 0.0)
+            curr_hits = self._float(info, "HITCOUNT")
+            prev_hits = self.prev_vars.get("HITCOUNT", 0.0)
+            delta_hits = curr_hits - prev_hits
+            if delta_hits > 0.0:
+                shaped_reward += delta_hits * self.hit_reward
 
-#         prev_health = self.prev_vars.get("HEALTH", 0)
-#         prev_ammo   = self.prev_vars.get("AMMO1", 0)
-#         prev_kills  = self.prev_vars.get("KILLCOUNT", 0)
-#         prev_x      = self.prev_vars.get("POSITION_X", 0.0)
-#         prev_y      = self.prev_vars.get("POSITION_Y", 0.0)
+            curr_damage = self._float(info, "DAMAGECOUNT")
+            prev_damage = self.prev_vars.get("DAMAGECOUNT", 0.0)
+            delta_damage = min(max(0.0, curr_damage - prev_damage), 100.0)
+            if delta_damage > 0.0:
+                shaped_reward += delta_damage * self.damage_reward
+        else:
+            curr_ammo = self._float(info, "AMMO1")
+            prev_ammo = self.prev_vars.get("AMMO1", 0.0)
+            curr_shooter_ammo = self._float(info, "USER41")
+            prev_shooter_ammo = self.prev_vars.get("USER41", 0.0)
+            prev_low_alert = self.prev_vars.get("USER45", 0.0)
+            prev_enemy_count = self.prev_vars.get("USER44", 0.0)
 
-#         # ── 1. Death penalty ──────────────────────
-#         if curr_health <= 0:
-#             terminated = True
-#             if prev_health > 0:
-#                 shaped_reward += self.death_penalty
-#             return self._finalize(obs, reward, shaped_reward, terminated, truncated, info)
+            delta_ammo = curr_ammo - prev_ammo
+            delta_shooter_ammo = curr_shooter_ammo - prev_shooter_ammo
+            shortage = self._ammo_shortage(prev_shooter_ammo, prev_low_alert)
 
-#         # ── 2. Survival bonus ─────────────────────
-#         shaped_reward += self.survival_bonus
+            if shortage > 0.0 and self.contextual_pickup_reward > 0.0 and delta_ammo > 0.0:
+                pickup_units = min(delta_ammo, shortage)
+                shaped_reward += pickup_units * self.contextual_pickup_reward
 
-#         # ── 3. Health loss penalty ────────────────
-#         health_delta = curr_health - prev_health
-#         if health_delta < 0:
-#             shaped_reward += health_delta * self.health_loss_penalty
+            if shortage > 0.0 and delta_ammo < 0.0 and delta_shooter_ammo > 0.0:
+                transferred_ammo = min(-delta_ammo, delta_shooter_ammo)
+                relieved_units = min(transferred_ammo, shortage)
+                pressure_scale = 1.0 + self.pressure_bonus_per_enemy * max(0.0, prev_enemy_count)
+                shaped_reward += relieved_units * self.supply_relief_reward * pressure_scale
 
-#         # ── 4. Ammo pickup / give (Carrier) ───────
-#         delta_ammo = curr_ammo - prev_ammo
-#         if delta_ammo > 0:
-#             # Ammo increased: Carrier picked up ammo
-#             shaped_reward += delta_ammo * self.ammo_pickup_reward
-#         elif delta_ammo < 0:
-#             # Ammo decreased: if not Shooter firing (WEAPON=4), treat as Carrier giving ammo
-#             if curr_weapon != 4:
-#                 shaped_reward += abs(delta_ammo) * self.ammo_give_reward
+        if truncated and not terminated and curr_health > 0.0 and self.timeout_survival_bonus != 0.0:
+            shaped_reward += self.timeout_survival_bonus
 
-#         # ── 5. Kill reward (Shooter) ──────────────
-#         delta_kills = curr_kills - prev_kills
-#         if delta_kills > 0:
-#             shaped_reward += delta_kills * self.kill_reward
+        total_reward = reward + shaped_reward
 
-#         # ── 6. No-ammo penalty (Shooter) ─────────
-#         # Carrier has WEAPON=-1, so this condition never triggers for Carrier
-#         if curr_weapon == 4 and curr_ammo <= 0:
-#             shaped_reward += self.no_ammo_penalty
+        if terminated or truncated:
+            info["true_objective"] = float(self.episode_steps)
+            info["orig_env_reward"] = self.orig_env_reward
 
-#         # ── 7. Idle penalty (Carrier) ─────────────
-#         # Only penalise when carrying ammo to avoid penalising Shooter's natural stillness
-#         displacement = math.sqrt((curr_x - prev_x)**2 + (curr_y - prev_y)**2)
-#         if displacement < self.idle_distance_threshold:
-#             self._idle_steps += 1
-#         else:
-#             self._idle_steps = 0
-
-#         if self._idle_steps > self.idle_steps_threshold and curr_ammo > 0:
-#             shaped_reward += self.idle_penalty
-
-#         return self._finalize(obs, reward, shaped_reward, terminated, truncated, info)
-
-#     def _finalize(self, obs, env_reward, shaped_reward, terminated, truncated, info):
-#         self.prev_vars = info.copy()
-#         total_reward = env_reward + shaped_reward
-#         self.episode_shaped_return += total_reward
-
-#         if terminated or truncated:
-#             info["true_objective"] = self.episode_shaped_return
-#             info["orig_env_reward"] = self.orig_env_reward
-
-#         return obs, total_reward, terminated, truncated, info
-
-#     def reset(self, **kwargs):
-#         obs, info = self.env.reset(**kwargs)
-#         self.prev_vars = {}
-#         self.orig_env_reward = 0.0
-#         self.episode_shaped_return = 0.0
-#         self._idle_steps = 0
-#         self.sync_vars(info)
-#         return obs, info
-
-#     def sync_vars(self, info):
-#         self.prev_vars = info.copy()
-
-# Old version
-# import gymnasium as gym
-
-# class AmmoCarrierRewardShaping(gym.Wrapper):
-#     def __init__(
-#         self,
-#         env,
-#         ammo_pickup_reward=0.5,
-#         ammo_give_reward=2.0,
-#         kill_reward=1.0,
-#         death_penalty=-0.5,
-#     ):
-#         super().__init__(env)
-#         self.ammo_pickup_reward = ammo_pickup_reward
-#         self.ammo_give_reward = ammo_give_reward
-#         self.kill_reward = kill_reward
-#         self.death_penalty = death_penalty
-
-#         self.prev_vars = {}
-#         self.orig_env_reward = 0.0
-#         self.episode_shaped_return = 0.0
-
-#     def step(self, action):
-#         obs, reward, terminated, truncated, info = self.env.step(action)
-
-#         if reward is None or info is None:
-#             return obs, reward, terminated, truncated, info
-
-#         reward = float(reward)
-#         self.orig_env_reward += reward
-
-#         if not self.prev_vars:
-#             self.sync_vars(info)
-#             return obs, 0.0, terminated, truncated, info
-
-#         shaped_reward = 0.0
-
-#         curr_health = info.get("HEALTH", 0)
-#         curr_ammo = info.get("AMMO1", 0)
-#         curr_kills = info.get("KILLCOUNT", 0)
-#         curr_weapon = info.get("SELECTED_WEAPON", 0)
-
-#         prev_health = self.prev_vars.get("HEALTH", 0)
-#         prev_ammo = self.prev_vars.get("AMMO1", 0)
-#         prev_kills = self.prev_vars.get("KILLCOUNT", 0)
-
-#         if curr_health <= 0:
-#             terminated = True
-#             if prev_health > 0:
-#                 shaped_reward += self.death_penalty
-#         else:
-#             delta_ammo = curr_ammo - prev_ammo
-
-#             if delta_ammo > 0:
-#                 shaped_reward += delta_ammo * self.ammo_pickup_reward
-#             elif delta_ammo < 0:
-#                 is_armed_with_ammo1 = (curr_weapon == 4)
-
-#                 if not is_armed_with_ammo1:
-#                      shaped_reward += abs(delta_ammo) * self.ammo_give_reward
-
-#         delta_kills = curr_kills - prev_kills
-#         if delta_kills > 0:
-#            shaped_reward += delta_kills * self.kill_reward
-
-#         self.prev_vars = info.copy()
-
-#         total_reward = reward + shaped_reward
-#         self.episode_shaped_return += total_reward
-
-#         done = terminated | truncated
-#         if done:
-#             info["true_objective"] = self.episode_shaped_return
-
-#         return obs, total_reward, terminated, truncated, info
-
-#     def reset(self, **kwargs):
-#         obs, info = self.env.reset(**kwargs)
-#         self.prev_vars = {}
-#         self.orig_env_reward = 0.0
-#         self.episode_shaped_return = 0.0
-#         self.sync_vars(info)
-#         return obs, info
-
-#     def sync_vars(self, info):
-#         self.prev_vars = info.copy()
+        self._sync(info)
+        return obs, total_reward, terminated, truncated, info

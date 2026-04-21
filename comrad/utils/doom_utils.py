@@ -34,7 +34,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -97,6 +97,7 @@ ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vect
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
 LAVA_MAZE_ADDITIONAL_INPUT = (LavaMazeAdditionalInput, {})
 FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
+AMMO_CARRIER_ADDITIONAL_INPUT = (AmmoCarrierAdditionalInput, {})
 DOOM_ENVS = [
 
     #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
@@ -196,7 +197,7 @@ DOOM_ENVS = [
         2100,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(AmmoCarrierRewardShaping, {})],
+        extra_wrappers=[AMMO_CARRIER_ADDITIONAL_INPUT, (AmmoCarrierRewardShaping, {})],
     ),
 
     DoomSpec(
