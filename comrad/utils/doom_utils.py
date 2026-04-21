@@ -252,7 +252,7 @@ DOOM_ENVS = [
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncAdditionalInput, {}), (RhythmSyncRewardShaping, {})],
+        extra_wrappers=[(RhythmSyncAdditionalInput, {"feature_set": "self_navigation"}), (RhythmSyncRewardShaping, {})],
         shared_reward_alpha=1.0,
     ),
 
@@ -264,7 +264,10 @@ DOOM_ENVS = [
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncAdditionalInput, {}), (RhythmSyncRewardShapingDense, {})],
+        extra_wrappers=[
+            (RhythmSyncAdditionalInput, {"feature_set": "self_navigation"}),
+            (RhythmSyncRewardShapingDense, {}),
+        ],
         shared_reward_alpha=1.0,
     ),
 ]

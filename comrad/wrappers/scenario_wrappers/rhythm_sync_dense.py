@@ -4,38 +4,63 @@ import numpy as np
 
 
 class RhythmSyncAdditionalInput(gym.Wrapper):
+    _FEATURE_BOUNDS = {
+        "self_navigation": (
+            np.array([-1.0, -1.0, 0.0, 0.0], dtype=np.float32),
+            np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+        ),
+        "full": (
+            np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float32),
+            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+        ),
+    }
+
     def __init__(
         self,
         env,
         *,
+        feature_set="self_navigation",
         max_rel_x=512.0,
         max_rel_y=256.0,
         max_distance=768.0,
         switch_use_range=64.0,
     ):
         '''
-        current stage fraction
-        completed fraction
-        stage type / 2
-        cue visible self
-        pending self
-        pending other
-        cue owner (-1 regular/jitter, 0 A, 1 B)
-        relative dx to own switch
-        relative dy to own switch
-        normalized Euclidean distance to own switch
-        in switch zone
+        self_navigation:
+            relative dx to own switch
+            relative dy to own switch
+            normalized Euclidean distance to own switch
+            in switch zone
+
+        full:
+            current stage fraction
+            completed fraction
+            stage type / 2
+            cue visible self
+            pending self
+            pending other
+            cue owner (-1 regular/jitter, 0 A, 1 B)
+            relative dx to own switch
+            relative dy to own switch
+            normalized Euclidean distance to own switch
+            in switch zone
         '''
 
         super().__init__(env)
         current_obs_space = self.observation_space
+        if feature_set not in self._FEATURE_BOUNDS:
+            raise ValueError(
+                f"Unsupported RhythmSyncAdditionalInput feature_set={feature_set!r}. "
+                f"Expected one of {tuple(self._FEATURE_BOUNDS)}"
+            )
+
+        self.feature_set = feature_set
         self.max_rel_x = float(max_rel_x)
         self.max_rel_y = float(max_rel_y)
         self.max_distance = float(max_distance)
         self.switch_use_range = float(switch_use_range)
 
-        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float32)
-        high = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32)
+        low, high = self._FEATURE_BOUNDS[self.feature_set]
 
         self.observation_space = gym.spaces.Dict(
             {
@@ -71,13 +96,6 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         if info is None:
             return obs_dict
 
-        current_stage = max(0.0, float(info.get("USER24", 0.0)))
-        completed = max(0.0, float(info.get("USER25", 0.0)))
-        num_sections = max(1.0, float(info.get("USER32", 1.0)))
-        stage_type = max(0.0, min(2.0, float(info.get("USER26", 0.0))))
-        cue_owner = float(info.get("USER31", -1.0))
-
-        pending_self_key, pending_other_key = self._pending_keys()
         target_x_key, target_y_key = self._target_keys()
         target_x = float(info.get(target_x_key, 0.0))
         target_y = float(info.get(target_y_key, 0.0))
@@ -91,6 +109,20 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         dist = math.hypot(dx, dy)
         distance = min(1.0, dist / self.max_distance)
         in_switch_zone = float(abs(dx) <= self.switch_use_range and abs(dy) <= self.switch_use_range)
+
+        if self.feature_set == "self_navigation":
+            measurements[0] = rel_x
+            measurements[1] = rel_y
+            measurements[2] = distance
+            measurements[3] = in_switch_zone
+            return obs_dict
+
+        current_stage = max(0.0, float(info.get("USER24", 0.0)))
+        completed = max(0.0, float(info.get("USER25", 0.0)))
+        num_sections = max(1.0, float(info.get("USER32", 1.0)))
+        stage_type = max(0.0, min(2.0, float(info.get("USER26", 0.0))))
+        cue_owner = float(info.get("USER31", -1.0))
+        pending_self_key, pending_other_key = self._pending_keys()
 
         measurements[0] = current_stage / num_sections
         measurements[1] = completed / num_sections
