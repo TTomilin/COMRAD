@@ -116,7 +116,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         current_signal = self._safe_int(info.get("USER17", 0), 0)
         prev_signal = self._safe_int(self.prev_vars.get("USER17", 0), 0)
 
-        if current_signal == 1:
+        if current_signal == 1 and prev_signal == 0:
             shaped_reward += self.signal_penalty
 
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
@@ -156,7 +156,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.orig_env_reward += reward
 
         if terminated or truncated:
-            info["true_objective"] = self.orig_env_reward
+            info["true_objective"] = current_levels
 
         self.sync_vars(info)
         return obs, individual_reward, terminated, truncated, info
@@ -206,6 +206,8 @@ class LavaMazeAdditionalInput(gym.Wrapper):
         self.measurements_vec = np.zeros(7, dtype=np.float32)
 
     def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
+        
         if info is None:
             # for blocking vision and using additional vectors only
             # if getattr(self.env.unwrapped, "player_id", -1) == 0:
@@ -213,21 +215,20 @@ class LavaMazeAdditionalInput(gym.Wrapper):
             # return {"obs": obs, "measurements": self.measurements_vec.copy()}
             return obs_dict
 
-        self.measurements_vec[0] = max(0.0, info.get("HEALTH", 0.0))
+        measurements = obs_dict["measurements"]
+        measurements[0] = max(0.0, info.get("HEALTH", 0.0))
         flash_active = bool(info.get("USER17", 0))
-        self.measurements_vec[1:6] = 0.0
+        measurements[1:6] = 0.0
         color = max(0, min(4, int(info.get("USER16", 0))))
         if not flash_active or color == 0:
-            self.measurements_vec[1] = 1.0
+            measurements[1] = 1.0
         else:            
-            self.measurements_vec[1 + color] = 1.0
+            measurements[1 + color] = 1.0
 
-        self.measurements_vec[6] = float(bool(info.get("USER17", 0)))
+        measurements[6] = float(bool(info.get("USER17", 0)))
 
         # if getattr(self.env.unwrapped, "player_id", -1) == 0:
         #     obs = np.zeros_like(obs)
-
-        obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
 
         return obs_dict
 
