@@ -10,6 +10,7 @@ from torch import Tensor
 
 from sample_factory.algo.utils.multiprocessing_utils import get_lock, get_mp_ctx
 from sample_factory.model.actor_critic import create_actor_critic
+from sample_factory.model.model_utils import flatten_rnn_parameters
 from sample_factory.utils.timing import Timing
 from sample_factory.utils.utils import log
 
@@ -108,6 +109,7 @@ class ParameterClientAsync(ParameterClient):
     def _init_local_copy(self, device, cfg, obs_space, action_space):
         self._actor_critic = create_actor_critic(cfg, obs_space, action_space)
         self._actor_critic.model_to_device(device)
+        flatten_rnn_parameters(self._actor_critic)
 
         for p in self._actor_critic.parameters():
             p.requires_grad = False  # we don't train anything here
@@ -125,11 +127,17 @@ class ParameterClientAsync(ParameterClient):
                 self._actor_critic.load_state_dict(state_dict)
                 self._shared_model_weights = state_dict
 
+        # load_state_dict() can invalidate cuDNN RNN packed weights. compact on the private copy
+        flatten_rnn_parameters(self._actor_critic)
+
     def ensure_weights_updated(self):
         server_policy_version = self._get_server_policy_version()
         if self.latest_policy_version < server_policy_version and self._shared_model_weights is not None:
             with self.timing.time_avg("weight_update"), self._policy_lock:
                 self._actor_critic.load_state_dict(self._shared_model_weights)
+
+            # Compact cuDNN RNN weights on the private copy after every weight update
+            flatten_rnn_parameters(self._actor_critic)
 
             self.latest_policy_version = server_policy_version
 

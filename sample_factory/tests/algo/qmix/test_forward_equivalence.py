@@ -5,6 +5,7 @@ import pytest
 import torch
 import torch.nn as nn
 
+from sample_factory.model.model_utils import flatten_rnn_parameters
 from sample_factory.utils.typing import Config
 
 
@@ -367,6 +368,19 @@ class TestFlattenParametersWeightSharing:
         enc_diff = (model.encoder[0].weight.data - state_dict[enc_key]).abs().max().item()
         assert gru_diff > 0.001
         assert enc_diff < 1e-7
+
+    def test_flatten_private_copy_does_not_break_source_sharing(self):
+        model = SimpleQNet()
+        private_copy = copy.deepcopy(model)
+        state_dict = model.state_dict()
+
+        flatten_rnn_parameters(private_copy)
+
+        with torch.no_grad():
+            model.core.weight_ih_l0.data.add_(torch.ones_like(model.core.weight_ih_l0))
+
+        diff = (model.core.weight_ih_l0.data - state_dict['core.weight_ih_l0']).abs().max().item()
+        assert diff < 1e-7
 
     @pytest.mark.skipif(not torch.cuda.is_available(), reason="GPU required")
     def test_gpu_flatten_parameters_breaks_sharing(self):

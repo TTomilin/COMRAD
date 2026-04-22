@@ -74,3 +74,20 @@ def model_device(model: nn.Module) -> Optional[torch.device]:
         return next(model.parameters()).device
     except StopIteration:
         return None
+
+
+def flatten_rnn_parameters(model: nn.Module) -> None:
+    """Compact cuDNN RNN weights to avoid per-call repacking warnings/overhead.
+    NOte: only do this for models that are not shared via ParameterServer/state_dict storage and only when running on CUDA
+    """
+
+    device = model_device(model)
+    if device is None or device.type != "cuda":
+        return
+
+    if not torch.backends.cudnn.is_available() or not torch.backends.cudnn.enabled:
+        return
+
+    for module in model.modules():
+        if isinstance(module, (nn.GRU, nn.LSTM, nn.RNN)):
+            module.flatten_parameters()

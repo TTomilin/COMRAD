@@ -21,7 +21,7 @@ from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.joint_sequence_replay_buffer import JointSequenceReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict, shallow_recursive_copy
 from sample_factory.algo.utils.torch_utils import synchronize, to_scalar
-from sample_factory.model.model_utils import get_rnn_size
+from sample_factory.model.model_utils import flatten_rnn_parameters, get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import Config, InitModelData, PolicyID
 from sample_factory.utils.utils import log
@@ -117,6 +117,7 @@ class QMixLearner(Learner):
 
         # Target net
         self.target_agent_net = copy.deepcopy(self.agent_net)
+        flatten_rnn_parameters(self.target_agent_net)
         self.target_agent_net.eval()
         self.target_mixer = copy.deepcopy(self.mixer)
         self.target_mixer.eval()
@@ -301,6 +302,8 @@ class QMixLearner(Learner):
         else:
             if self.train_step - self.last_target_update_step >= self.cfg.target_update_interval:
                 self.target_agent_net.load_state_dict(self.agent_net.state_dict())
+                # load_state_dict() invalidates cuDNN RNN packed weights. compact on the private target copy
+                flatten_rnn_parameters(self.target_agent_net)
                 self.target_mixer.load_state_dict(self.mixer.state_dict())
                 self.last_target_update_step = self.train_step
                 log.debug(f"Hard updated target networks at step {self.train_step}")
@@ -343,9 +346,6 @@ class QMixLearner(Learner):
         obs_steps = sample_obs.shape[1]
         num_agents = sample_obs.shape[2]
         if num_agents != self.num_agents: raise ValueError(f"Expected num_agents={self.num_agents}, got {num_agents}")
-
-        if hasattr(agent_net, 'flatten_rnn_parameters'):
-            agent_net.flatten_rnn_parameters()
 
         def flatten_step_obs(step_obs: TensorDict) -> TensorDict:
             """Flatten [B, N, ...] -> [B*N, ...] for per step encoding"""
@@ -1241,6 +1241,7 @@ class QMixLearner(Learner):
 
         if 'target_agent_net' in checkpoint_dict and self.target_agent_net is not None:
             self.target_agent_net.load_state_dict(checkpoint_dict['target_agent_net'])
+            flatten_rnn_parameters(self.target_agent_net)
             log.info("Loaded target_agent_net from checkpoint")
         if 'target_mixer' in checkpoint_dict and self.target_mixer is not None:
             self.target_mixer.load_state_dict(checkpoint_dict['target_mixer'])
