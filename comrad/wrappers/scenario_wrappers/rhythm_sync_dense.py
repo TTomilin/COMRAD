@@ -5,13 +5,13 @@ import numpy as np
 
 class RhythmSyncAdditionalInput(gym.Wrapper):
     _FEATURE_BOUNDS = {
-        "self_navigation": (
-            np.array([-1.0, -1.0, 0.0, 0.0], dtype=np.float32),
-            np.array([1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+        "partial": (
+            np.array([0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0], dtype=np.float32),
+            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
         ),
         "full": (
-            np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, -1.0, -1.0, 0.0, 0.0], dtype=np.float32),
-            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
+            np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0], dtype=np.float32),
+            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], dtype=np.float32),
         ),
     }
 
@@ -19,16 +19,20 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         self,
         env,
         *,
-        feature_set="self_navigation",
+        feature_set="partial",
         max_rel_x=512.0,
         max_rel_y=256.0,
         max_distance=768.0,
         switch_use_range=64.0,
     ):
         '''
-        self_navigation:
-            relative dx to own switch
-            relative dy to own switch
+        partial:
+            current stage fraction
+            completed fraction
+            stage type / 2
+            cue visible self
+            pending self
+            cue owner (-1 regular/jitter, 0 A, 1 B)
             normalized Euclidean distance to own switch
             in switch zone
 
@@ -40,8 +44,6 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
             pending self
             pending other
             cue owner (-1 regular/jitter, 0 A, 1 B)
-            relative dx to own switch
-            relative dy to own switch
             normalized Euclidean distance to own switch
             in switch zone
         '''
@@ -102,20 +104,11 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         pos_x = float(info.get("POSITION_X", 0.0))
         pos_y = float(info.get("POSITION_Y", 0.0))
 
-        rel_x = np.clip((target_x - pos_x) / self.max_rel_x, -1.0, 1.0)
-        rel_y = np.clip((target_y - pos_y) / self.max_rel_y, -1.0, 1.0)
         dx = target_x - pos_x
         dy = target_y - pos_y
         dist = math.hypot(dx, dy)
         distance = min(1.0, dist / self.max_distance)
         in_switch_zone = float(abs(dx) <= self.switch_use_range and abs(dy) <= self.switch_use_range)
-
-        if self.feature_set == "self_navigation":
-            measurements[0] = rel_x
-            measurements[1] = rel_y
-            measurements[2] = distance
-            measurements[3] = in_switch_zone
-            return obs_dict
 
         current_stage = max(0.0, float(info.get("USER24", 0.0)))
         completed = max(0.0, float(info.get("USER25", 0.0)))
@@ -124,6 +117,16 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         cue_owner = float(info.get("USER31", -1.0))
         pending_self_key, pending_other_key = self._pending_keys()
 
+        if self.feature_set == "partial":
+            measurements[0] = current_stage / num_sections
+            measurements[1] = completed / num_sections
+            measurements[2] = stage_type / 2.0
+            measurements[3] = float(info.get(self._cue_visible_key(), 0.0) > 0.0)
+            measurements[4] = np.clip(cue_owner, -1.0, 1.0)
+            measurements[5] = distance
+            measurements[6] = in_switch_zone
+            return obs_dict
+
         measurements[0] = current_stage / num_sections
         measurements[1] = completed / num_sections
         measurements[2] = stage_type / 2.0
@@ -131,10 +134,8 @@ class RhythmSyncAdditionalInput(gym.Wrapper):
         measurements[4] = float(info.get(pending_self_key, 0.0) > 0.0)
         measurements[5] = float(info.get(pending_other_key, 0.0) > 0.0)
         measurements[6] = np.clip(cue_owner, -1.0, 1.0)
-        measurements[7] = rel_x
-        measurements[8] = rel_y
-        measurements[9] = distance
-        measurements[10] = in_switch_zone
+        measurements[7] = distance
+        measurements[8] = in_switch_zone
         return obs_dict
 
     def reset(self, **kwargs):

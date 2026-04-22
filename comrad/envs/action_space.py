@@ -135,6 +135,26 @@ def doom_action_space_lavapit2():
         )
     )
 
+
+def doom_action_space_platform_chain():
+    """
+    TURN_LEFT
+    TURN_RIGHT
+    MOVE_FORWARD
+    MOVE_LEFT
+    MOVE_RIGHT
+    JUMP
+    """
+
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, move forward
+            Discrete(3),  # noop, strafe left, strafe right
+            Discrete(2),  # noop, jump
+        )
+    )
+
 def doom_action_space_parallel():
     """
     TURN_LEFT

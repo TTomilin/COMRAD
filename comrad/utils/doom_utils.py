@@ -21,6 +21,7 @@ from comrad.envs.action_space import (
     doom_action_space_parallel,
     doom_action_space_armory_siege,
     doom_action_space_lavapit2,
+    doom_action_space_platform_chain,
     doom_action_space_ammo_carrier,
     doom_action_space_lava_maze,
     doom_action_space_smart_enemies,
@@ -35,7 +36,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -135,6 +136,18 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(LavapitRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "platform_chain",
+        "platform_chain.cfg",
+        doom_action_space_platform_chain(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(PlatformChainRewardShaping, {})],
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(
@@ -264,7 +277,7 @@ DOOM_ENVS = [
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncAdditionalInput, {"feature_set": "self_navigation"}), (RhythmSyncRewardShaping, {})],
+        extra_wrappers=[(RhythmSyncAdditionalInput, {"feature_set": "partial"}), (RhythmSyncRewardShaping, {})],
         shared_reward_alpha=1.0,
     ),
 
@@ -277,7 +290,7 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[
-            (RhythmSyncAdditionalInput, {"feature_set": "self_navigation"}),
+            (RhythmSyncAdditionalInput, {"feature_set": "partial"}),
             (RhythmSyncRewardShapingDense, {}),
         ],
         shared_reward_alpha=1.0,
