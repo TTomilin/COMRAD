@@ -10,8 +10,8 @@ class LavaMazeRewardShaping(gym.Wrapper):
         death_penalty=-5.0,
         step_penalty=-0.005,
         distance_reward_scale=0.5,
-        lava_burn_penalty_scale=0.005,
-        signal_penalty=-0.01,
+        lava_burn_penalty_scale=0.01,
+        signal_penalty=-0.025,
     ):
         super().__init__(env)
         self.grid_size = grid_size
@@ -207,6 +207,10 @@ class LavaMazeAdditionalInput(gym.Wrapper):
 
     def _parse_info(self, obs, info):
         if info is None:
+            # for blocking vision and using additional vectors only
+            # if getattr(self.env.unwrapped, "player_id", -1) == 0:
+            #     obs = np.zeros_like(obs)
+            # return {"obs": obs, "measurements": self.measurements_vec.copy()}
             return obs_dict
 
         self.measurements_vec[0] = max(0.0, info.get("HEALTH", 0.0))
@@ -219,6 +223,9 @@ class LavaMazeAdditionalInput(gym.Wrapper):
             self.measurements_vec[1 + color] = 1.0
 
         self.measurements_vec[6] = float(bool(info.get("USER17", 0)))
+
+        # if getattr(self.env.unwrapped, "player_id", -1) == 0:
+        #     obs = np.zeros_like(obs)
 
         obs_dict = {"obs": obs, "measurements": self.measurements_vec.copy()}
 

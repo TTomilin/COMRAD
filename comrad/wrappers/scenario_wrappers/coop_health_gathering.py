@@ -8,9 +8,9 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
     def __init__(
         self, 
         env,
-        health_reward=0.8,
+        health_reward=0.1,
         health_loss_penalty=-0.05,
-        coop_pickup_reward=0.3,
+        coop_pickup_reward=0.1,
         death_penalty=-3.0,
         chain_penalty=-0.05,
         exploration_reward=0,
@@ -31,12 +31,15 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
+        self.ticks = 0
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
 
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
+
+        self.ticks += 1
 
         if not self.prev_vars:
             self.sync_vars(info)
@@ -90,7 +93,7 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         self.orig_env_reward += reward
 
         if terminated or truncated:
-            info["true_objective"] = self.orig_env_reward
+            info["true_objective"] = self.ticks
 
         self.sync_vars(info)
         return obs, individual_reward, terminated, truncated, info
@@ -102,6 +105,7 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
             self.past_positions.append((info["POSITION_X"], info["POSITION_Y"]))
         self.sync_vars(info)
         self.orig_env_reward = 0.0
+        self.ticks = 0
         return obs, info
 
     def sync_vars(self, info):
