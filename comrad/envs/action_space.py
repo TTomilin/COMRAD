@@ -227,6 +227,25 @@ def doom_action_space_armory_siege():
         )
     )
 
+def doom_action_space_smart_enemies():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    TURN_LEFT
+    TURN_RIGHT
+    ATTACK
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(3),  # noop, turn left, turn right
+            Discrete(2),  # noop, attack
+        )
+    )
+
 def doom_action_space_lava_maze():
     """
     MOVE_FORWARD

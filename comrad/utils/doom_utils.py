@@ -23,6 +23,7 @@ from comrad.envs.action_space import (
     doom_action_space_lavapit2,
     doom_action_space_ammo_carrier,
     doom_action_space_lava_maze,
+    doom_action_space_smart_enemies,
     doom_action_space_common_harvest,
     doom_action_space_coop_health_gathering,
     doom_action_space_foraging_commons,
@@ -34,7 +35,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -187,6 +188,17 @@ DOOM_ENVS = [
         forcerespawn=0,
         nofreelook=0,
         extra_wrappers=[LAVA_MAZE_ADDITIONAL_INPUT, (LavaMazeRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "smart_enemies",
+        "smart_enemies.cfg",
+        doom_action_space_smart_enemies(),
+        1.0,
+        4500,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(SmartEnemiesRewardShaping, {})],
     ),
 
     DoomSpec(
