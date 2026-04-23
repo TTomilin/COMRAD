@@ -6,6 +6,7 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         self,
         env,
         kill_reward=5.0,
+        hit_reward=0.1,
         health_gain_reward=0.1,
         health_loss_penalty=-0.1,
         fast_event_penalty=-0.2,
@@ -15,6 +16,7 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
     ):
         super().__init__(env)
         self.kill_reward = kill_reward
+        self.hit_reward = hit_reward
         self.health_gain_reward = health_gain_reward
         self.health_loss_penalty = health_loss_penalty
         self.fast_event_penalty = fast_event_penalty
@@ -62,6 +64,13 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         if delta_kills > 0:
             shaped_reward += self.kill_reward * delta_kills
 
+        # Hit reward
+        curr_hits = info.get("HITCOUNT", 0)
+        prev_hits = self.prev_vars.get("HITCOUNT", 0)
+        delta_hits = curr_hits - prev_hits
+        if delta_hits > 0:
+            shaped_reward += self.hit_reward * delta_hits
+
         # Fast events penalty (when new enemies become fast)
         curr_fast_events = info.get("USER33", 0)
         prev_fast_events = self.prev_vars.get("USER33", 0)
@@ -104,6 +113,7 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         self.prev_vars = {
             "HEALTH": info.get("HEALTH", 100.0),
             "KILLCOUNT": info.get("KILLCOUNT", 0),
+            "HITCOUNT": info.get("HITCOUNT", 0),
             "USER32": info.get("USER32", 0),
             "USER33": info.get("USER33", 0),
             "AMMO2": info.get("AMMO2", 0),
