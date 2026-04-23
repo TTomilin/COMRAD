@@ -25,6 +25,7 @@ from comrad.envs.action_space import (
     doom_action_space_ammo_carrier,
     doom_action_space_lava_maze,
     doom_action_space_smart_enemies,
+    doom_action_space_dumb_enemies,
     doom_action_space_stealth_labyrinth,
     doom_action_space_stag_hunt,
     doom_action_space_common_harvest,
@@ -38,7 +39,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -214,6 +215,17 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(SmartEnemiesRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "dumb_enemies",
+        "dumb_enemies.cfg",
+        doom_action_space_dumb_enemies(),
+        1.0,
+        4500,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(DumbEnemiesRewardShaping, {})],
     ),
 
     DoomSpec(

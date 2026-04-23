@@ -14,4 +14,5 @@ from comrad.wrappers.scenario_wrappers.rhythm_sync import RhythmSyncRewardShapin
 from comrad.wrappers.scenario_wrappers.rhythm_sync_dense import RhythmSyncRewardShapingDense, RhythmSyncAdditionalInput
 from comrad.wrappers.scenario_wrappers.stag_hunt_arena import StagHuntArenaRewardShaping
 from comrad.wrappers.scenario_wrappers.smart_enemies import SmartEnemiesRewardShaping
+from comrad.wrappers.scenario_wrappers.dumb_enemies import DumbEnemiesRewardShaping
 from comrad.wrappers.scenario_wrappers.stealth_labyrinth import StealthLabyrinthRewardShaping
