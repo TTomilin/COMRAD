@@ -237,5 +237,26 @@ python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes
 
 ### Shared reward
 
-+ If the per-agent reward shaping is already the same team scalar, `shared_reward_alpha=1.0` is unnecessary
-+ If the task is cooperative but the wrapper emits local shaping, `shared_reward_alpha=1.0` is often the better choice for MAPPO/HAPPO
+- If the per-agent reward shaping is already the same team scalar, `shared_reward_alpha=1.0` is unnecessary. Keep `shared_reward_alpha=0.0` for benchmarks where preserving local incentives (e.g. preserving social dilemma aspects) is part of the design, especially `stag_hunt_arena`, `foraging_commons`, and `resource_greed` / `common_harvest_doom`. Leave other scenarios at their scenario default unless you intentionally want to change the benchmark.
+- If the task is cooperative but the wrapper emits local shaping, `shared_reward_alpha=1.0` is often the better choice for MAPPO/HAPPO.
+
+`shared_reward_alpha` only matters for actor-critic multi-agent algos such as `MAPPO` and `HAPPO`. Use `shared_reward_alpha=1.0` only when the benchmark is intended to be fully joint and local incentives are not part of the task definition.
+
+| Scenario | Use `shared_reward_alpha=1.0`? | Why |
+|---|---:|---|
+| `ammo_carrier` | Yes | The intended objective is team defense and resupply; local role-specific shaping should be team-shared for actor-critic runs. |
+| `armory_siege` | Yes | The benchmark objective is protecting one shared defense core. |
+| `lava_maze` | Yes | Navigator and spectator solve one joint traversal task. |
+| `lavapit` | Yes | The bridge-holding / traversal objective is fully cooperative. |
+| `platform_chain` | Yes | Progress is joint and tether-constrained by design. |
+| `rhythm_sync` | Yes | Success/failure is defined by synchronized team timing. |
+| `rhythm_sync_dense` | Yes | Dense shaping still targets the same joint synchronization objective. |
+| `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around one team-clear objective. |
+| `foraging_commons` | No | Preserve the commons incentives; the benchmark is about balancing individual harvesting against shared resource collapse. |
+| `resource_greed` (`common_harvest_doom` in code) | No | Preserve the local ammo-restocking incentive that creates the dilemma. |
+| `stag_hunt_arena` | No | Keep the rabbit option local so the stag-vs-rabbit coordination dilemma remains intact. |
+| `smart_enemies` | No | The wrapper already shapes local combat performance; blanket team-sharing is not the default benchmark contract. |
+| `dumb_enemies` | No | Same local-combat logic as `smart_enemies`; keep the scenario default unless you intentionally want a joint reward. |
+| `coop_puzzle` | Leave default | Treat it as benchmark-only until its wiring defines a reward contract; do not force joint sharing without checking the wrapper. |
+
+Everything not explicitly listed as `Yes` should stay at the scenario default unless you intentionally want to change the benchmark.
