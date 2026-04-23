@@ -5,19 +5,20 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        rabbit_reward=0.1,
-        stag_team_reward=2.0,
+        rabbit_reward=3.0,
+        stag_damage_reward_per_hp=0.01, # average 0.7 per shotgun blast
+        stag_reward=50.0,
     ):
         super().__init__(env)
         self.rabbit_reward = float(rabbit_reward)
-        self.stag_team_reward = float(stag_team_reward)
+        self.stag_damage_reward_per_hp = float(stag_damage_reward_per_hp)
+        self.stag_reward = float(stag_reward)
 
-        self.prev_stag_kills = None
-        self.prev_own_rabbit_kills = None
+        self.best_stag_kills = None
+        self.best_own_rabbit_kills = None
+        self.stag_alive = False
+        self.lowest_stag_health = None
         self.orig_env_reward = 0.0
-
-    def _num_agents(self) -> int:
-        return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
 
     def _player_id(self) -> int:
         return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
@@ -31,12 +32,16 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
 
     def _sync(self, info):
         if info is None:
-            self.prev_stag_kills = None
-            self.prev_own_rabbit_kills = None
+            self.best_stag_kills = None
+            self.best_own_rabbit_kills = None
+            self.stag_alive = False
+            self.lowest_stag_health = None
             return
 
-        self.prev_stag_kills = self._float(info, "USER54")
-        self.prev_own_rabbit_kills = self._float(info, self._own_rabbit_key())
+        self.best_stag_kills = self._float(info, "USER54")
+        self.best_own_rabbit_kills = self._float(info, self._own_rabbit_key())
+        self.stag_alive = self._float(info, "USER55") > 0.0
+        self.lowest_stag_health = self._float(info, "USER51") if self.stag_alive else None
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -53,33 +58,50 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         self.orig_env_reward += reward
 
         if info is None:
-            return obs, reward, terminated, truncated, info
+            return obs, 0.0, terminated, truncated, info
 
+        curr_stag_health = self._float(info, "USER51")
         curr_stag_kills = self._float(info, "USER54")
+        curr_stag_alive = self._float(info, "USER55") > 0.0
         curr_own_rabbit_kills = self._float(info, self._own_rabbit_key())
 
-        if self.prev_stag_kills is None or self.prev_own_rabbit_kills is None:
+        if self.best_stag_kills is None or self.best_own_rabbit_kills is None:
             self._sync(info)
             info["true_objective"] = curr_stag_kills
             if terminated or truncated:
                 info["orig_env_reward"] = self.orig_env_reward
-            return obs, reward, terminated, truncated, info
+            return obs, 0.0, terminated, truncated, info
 
         shaped_reward = 0.0
 
-        delta_own_rabbit_kills = curr_own_rabbit_kills - self.prev_own_rabbit_kills
+        delta_own_rabbit_kills = curr_own_rabbit_kills - self.best_own_rabbit_kills
         if delta_own_rabbit_kills > 0.0:
             shaped_reward += delta_own_rabbit_kills * self.rabbit_reward
 
-        delta_stag_kills = curr_stag_kills - self.prev_stag_kills
+        delta_stag_kills = curr_stag_kills - self.best_stag_kills
         if delta_stag_kills > 0.0:
-            shaped_reward += delta_stag_kills * (self.stag_team_reward / float(self._num_agents()))
+            shaped_reward += delta_stag_kills * self.stag_reward
 
-        total_reward = reward + shaped_reward
+        if curr_stag_alive:
+            if not self.stag_alive or self.lowest_stag_health is None:
+                self.lowest_stag_health = curr_stag_health
+            elif curr_stag_health < self.lowest_stag_health:
+                unique_damage = self.lowest_stag_health - curr_stag_health
+                shaped_reward += unique_damage * self.stag_damage_reward_per_hp
+                self.lowest_stag_health = curr_stag_health
+        else:
+            self.lowest_stag_health = None
 
-        info["true_objective"] = curr_stag_kills
+        if curr_stag_kills < self.best_stag_kills or curr_own_rabbit_kills < self.best_own_rabbit_kills:
+            extra_stats = info.setdefault("episode_extra_stats", {})
+            extra_stats["counter_regression"] = 1
+
+        self.best_stag_kills = max(self.best_stag_kills, curr_stag_kills)
+        self.best_own_rabbit_kills = max(self.best_own_rabbit_kills, curr_own_rabbit_kills)
+        self.stag_alive = curr_stag_alive
+
+        info["true_objective"] = self.best_stag_kills
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
 
-        self._sync(info)
-        return obs, total_reward, terminated, truncated, info
+        return obs, shaped_reward, terminated, truncated, info
