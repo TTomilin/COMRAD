@@ -6,19 +6,26 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         self,
         env,
         rabbit_reward=3.0,
-        stag_damage_reward_per_hp=0.01, # average 0.7 per shotgun blast
+        stag_damage_reward_per_hp=0.005, # 0.01 means average 0.7 reward per shotgun blast
         stag_reward=50.0,
+        damage_taken_penalty_per_hp=-0.01,
+        death_penalty=-2.0,
+        timeout_survival_bonus=1.0,
     ):
         super().__init__(env)
         self.rabbit_reward = float(rabbit_reward)
         self.stag_damage_reward_per_hp = float(stag_damage_reward_per_hp)
         self.stag_reward = float(stag_reward)
+        self.damage_taken_penalty_per_hp = float(damage_taken_penalty_per_hp)
+        self.death_penalty = float(death_penalty)
+        self.timeout_survival_bonus = float(timeout_survival_bonus)
 
         self.best_stag_kills = None
         self.best_own_rabbit_kills = None
         self.stag_alive = False
         self.lowest_stag_health = None
         self.orig_env_reward = 0.0
+        self.prev_health = None
 
     def _player_id(self) -> int:
         return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
@@ -36,12 +43,14 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
             self.best_own_rabbit_kills = None
             self.stag_alive = False
             self.lowest_stag_health = None
+            self.prev_health = None
             return
 
         self.best_stag_kills = self._float(info, "USER54")
         self.best_own_rabbit_kills = self._float(info, self._own_rabbit_key())
         self.stag_alive = self._float(info, "USER55") > 0.0
         self.lowest_stag_health = self._float(info, "USER51") if self.stag_alive else None
+        self.prev_health = self._float(info, "HEALTH")
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -64,6 +73,7 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         curr_stag_kills = self._float(info, "USER54")
         curr_stag_alive = self._float(info, "USER55") > 0.0
         curr_own_rabbit_kills = self._float(info, self._own_rabbit_key())
+        curr_health = self._float(info, "HEALTH")
 
         if self.best_stag_kills is None or self.best_own_rabbit_kills is None:
             self._sync(info)
@@ -73,6 +83,13 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = 0.0
+
+        prev_health = curr_health if self.prev_health is None else self.prev_health
+        damage_taken = max(0.0, prev_health - curr_health)
+        if damage_taken > 0.0:
+            shaped_reward += damage_taken * self.damage_taken_penalty_per_hp
+        if curr_health <= 0.0 < prev_health:
+            shaped_reward += self.death_penalty
 
         delta_own_rabbit_kills = curr_own_rabbit_kills - self.best_own_rabbit_kills
         if delta_own_rabbit_kills > 0.0:
@@ -99,6 +116,10 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         self.best_stag_kills = max(self.best_stag_kills, curr_stag_kills)
         self.best_own_rabbit_kills = max(self.best_own_rabbit_kills, curr_own_rabbit_kills)
         self.stag_alive = curr_stag_alive
+        self.prev_health = curr_health
+
+        if truncated and not terminated and curr_health > 0.0 and self.timeout_survival_bonus != 0.0:
+            shaped_reward += self.timeout_survival_bonus
 
         info["true_objective"] = self.best_stag_kills
         if terminated or truncated:
