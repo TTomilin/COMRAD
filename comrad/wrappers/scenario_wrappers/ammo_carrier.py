@@ -82,27 +82,27 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         self,
         env,
         kill_reward=1.0,
-        hit_reward=0.02,
         damage_reward=0.001,
-        supply_relief_reward=0.04,
+        supply_delivery_reward=0.5,
         death_penalty=-1.0,
         timeout_survival_bonus=0.25,
         reserve_target=60.0,
         alert_shortage_floor=5.0,
         pressure_bonus_per_enemy=0.02,
-        contextual_pickup_reward=0.01,
+        contextual_pickup_reward=0.02,
+        runner_damage_taken_penalty=-0.005,
     ):
         super().__init__(env)
         self.kill_reward = float(kill_reward)
-        self.hit_reward = float(hit_reward)
         self.damage_reward = float(damage_reward)
-        self.supply_relief_reward = float(supply_relief_reward)
+        self.supply_delivery_reward = float(supply_delivery_reward)
         self.death_penalty = float(death_penalty)
         self.timeout_survival_bonus = float(timeout_survival_bonus)
         self.reserve_target = float(reserve_target)
         self.alert_shortage_floor = float(alert_shortage_floor)
         self.pressure_bonus_per_enemy = float(pressure_bonus_per_enemy)
         self.contextual_pickup_reward = float(contextual_pickup_reward)
+        self.runner_damage_taken_penalty = float(runner_damage_taken_penalty)
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -135,9 +135,9 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
             "HEALTH": self._float(info, "HEALTH"),
             "AMMO1": self._float(info, "AMMO1"),
             "KILLCOUNT": self._float(info, "KILLCOUNT"),
-            "HITCOUNT": self._float(info, "HITCOUNT"),
             "DAMAGECOUNT": self._float(info, "DAMAGECOUNT"),
             "USER41": self._float(info, "USER41"),
+            "USER42": self._float(info, "USER42"),
             "USER43": self._float(info, "USER43"),
             "USER44": self._float(info, "USER44"),
             "USER45": self._float(info, "USER45"),
@@ -184,12 +184,8 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
             if delta_kills > 0.0:
                 shaped_reward += delta_kills * self.kill_reward
 
-            curr_hits = self._float(info, "HITCOUNT")
-            prev_hits = self.prev_vars.get("HITCOUNT", 0.0)
-            delta_hits = curr_hits - prev_hits
-            if delta_hits > 0.0:
-                shaped_reward += delta_hits * self.hit_reward
-
+            # DAMAGECOUNT already provides dense combat credit; rewarding HITCOUNT too
+            # overweights the same progress signal and biases pellet-heavy contact spam.
             curr_damage = self._float(info, "DAMAGECOUNT")
             prev_damage = self.prev_vars.get("DAMAGECOUNT", 0.0)
             delta_damage = min(max(0.0, curr_damage - prev_damage), 100.0)
@@ -198,24 +194,29 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         else:
             curr_ammo = self._float(info, "AMMO1")
             prev_ammo = self.prev_vars.get("AMMO1", 0.0)
-            curr_shooter_ammo = self._float(info, "USER41")
             prev_shooter_ammo = self.prev_vars.get("USER41", 0.0)
+            curr_deliveries = self._float(info, "USER42")
+            prev_deliveries = self.prev_vars.get("USER42", 0.0)
             prev_low_alert = self.prev_vars.get("USER45", 0.0)
             prev_enemy_count = self.prev_vars.get("USER44", 0.0)
 
             delta_ammo = curr_ammo - prev_ammo
-            delta_shooter_ammo = curr_shooter_ammo - prev_shooter_ammo
+            delta_deliveries = curr_deliveries - prev_deliveries
+            damage_taken = max(0.0, prev_health - curr_health)
             shortage = self._ammo_shortage(prev_shooter_ammo, prev_low_alert)
 
-            if shortage > 0.0 and self.contextual_pickup_reward > 0.0 and delta_ammo > 0.0:
-                pickup_units = min(delta_ammo, shortage)
+            if self.contextual_pickup_reward > 0.0 and delta_ammo > 0.0:
+                pickup_units = min(delta_ammo, 50.0)
                 shaped_reward += pickup_units * self.contextual_pickup_reward
 
-            if shortage > 0.0 and delta_ammo < 0.0 and delta_shooter_ammo > 0.0:
-                transferred_ammo = min(-delta_ammo, delta_shooter_ammo)
-                relieved_units = min(transferred_ammo, shortage)
+            if damage_taken > 0.0 and self.runner_damage_taken_penalty != 0.0:
+                shaped_reward += damage_taken * self.runner_damage_taken_penalty
+
+            if delta_deliveries > 0.0 and self.supply_delivery_reward > 0.0:
+                # USER42 increments exactly when Script 2 hands ammo to the shooter.
                 pressure_scale = 1.0 + self.pressure_bonus_per_enemy * max(0.0, prev_enemy_count)
-                shaped_reward += relieved_units * self.supply_relief_reward * pressure_scale
+                shortage_scale = 1.0 + min(1.0, shortage / max(self.reserve_target, 1.0))
+                shaped_reward += delta_deliveries * self.supply_delivery_reward * pressure_scale * shortage_scale
 
         if truncated and not terminated and curr_health > 0.0 and self.timeout_survival_bonus != 0.0:
             shaped_reward += self.timeout_survival_bonus
