@@ -142,6 +142,18 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
+        "platform_chain_easy",
+        "platform_chain_easy.cfg",
+        doom_action_space_platform_chain(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(PlatformChainRewardShaping, {})],
+        shared_reward_alpha=1.0,
+    ),
+
+    DoomSpec(
         "platform_chain",
         "platform_chain.cfg",
         doom_action_space_platform_chain(),
