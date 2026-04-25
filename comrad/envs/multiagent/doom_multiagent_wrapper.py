@@ -44,7 +44,12 @@ def retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_r
 
                     # This is done to reset if it is in the step function
                     if should_reset:
-                        multiagent_wrapper_obj.reset()
+                        reset_result = multiagent_wrapper_obj.reset()
+                        if isinstance(reset_result, (tuple, list)) and len(reset_result) >= 2:
+                            multiagent_wrapper_obj._pending_reset_infos = reset_result[1]
+                            multiagent_wrapper_obj._pending_reset_count = (
+                                getattr(multiagent_wrapper_obj, "_pending_reset_count", 0) + 1
+                            )
 
                     if i == num_attempts - 1:
                         raise
@@ -259,6 +264,8 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         self._pending_swap_config: Optional[str] = None
 
         self.render_mode = render_mode
+        self._pending_reset_infos = None
+        self._pending_reset_count = 0
 
     # def wipe_when_one_die(self, terminated, truncated, infos):
     #     """This function is quite specific to pitfall, temrinates when one agent dies to make it 'cooperative'
@@ -401,7 +408,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                 port = find_available_port(port_to_use, increment=1000)
                 log.debug("Using port %d", port)
                 init_info = dict(port=port)
-                
+
                 if self._pending_swap_config is not None:
                     init_info["swap_scenario"] = self._pending_swap_config
 
@@ -445,6 +452,23 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         observation, info = self.await_tasks([kwargs] * self.num_agents, TaskType.RESET, timeout=2.0)
         return observation, info
 
+    def _attach_pending_reset_infos(self, infos):
+        pending_reset_infos = self._pending_reset_infos
+        pending_reset_count = self._pending_reset_count
+        if pending_reset_infos is None or pending_reset_count <= 0:
+            return
+
+        self._pending_reset_infos = None
+        self._pending_reset_count = 0
+        if not isinstance(infos, (list, tuple)):
+            return
+
+        for info, reset_info in zip(infos, pending_reset_infos):
+            if isinstance(info, dict):
+                info["_hidden_reset_count"] = pending_reset_count
+                if "reset_info" not in info:
+                    info["reset_info"] = reset_info
+
     @retry_doom(exception_class=Exception, num_attempts=3, sleep_time=1, should_reset=True)
     def step(self, actions):
         self._ensure_initialized()
@@ -462,6 +486,10 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             obs, reset_infos = self.await_tasks([{}] * self.num_agents, TaskType.RESET, timeout=2.0)
             for i, reset_info in enumerate(reset_infos):
                 infos[i]["reset_info"] = reset_info
+
+        # Crash recovery can reset the game group underneath the outer wrappers.
+        # Surface that reset boundary on the next successful step so wrappers such as VideoLoggerWrapper can advance their episode bookkeeping instead of silently stitching frames across the hidden reset.
+        self._attach_pending_reset_infos(infos)
 
         if self.enable_rendering:
             self.last_obs = obs

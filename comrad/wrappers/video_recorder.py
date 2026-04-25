@@ -114,6 +114,26 @@ def _multi_info_scalars(infos):
 
     return scalars
 
+
+def _hidden_reset_count(info) -> int:
+    if isinstance(info, list):
+        counts = []
+        for item in info:
+            if isinstance(item, dict):
+                try:
+                    counts.append(int(item.get("_hidden_reset_count", 0)))
+                except (TypeError, ValueError):
+                    continue
+        return max(counts, default=0)
+
+    if isinstance(info, dict):
+        try:
+            return int(info.get("_hidden_reset_count", 0))
+        except (TypeError, ValueError):
+            return 0
+
+    return 0
+
 #==================================================
 
 
@@ -238,20 +258,38 @@ class VideoLoggerWrapper(gym.Wrapper):
         else:
             ep_done = bool(term) or bool(trunc)
 
-        # Check if env reseted itself
+        # Check if env reseted itself and returned the next episode's observation
+        # This happens on ordinary auto-reset boundaries and on crash-recovery retries in multiplayer.
         # When the env reset itself, obs is from new ep, so we need to call _maybe_start_ep again
         # But with env didn't auto reset, _maybe_start_ep will be called from next reset()
         # So this check is necessary to not miss starting recording for ep auto reseted
-        end = False
-        if ep_done:
-            if isinstance(info, list):
-                end = any("reset_info" in d for d in info if isinstance(d, dict))
-            elif isinstance(info, dict):
-                end = "reset_info" in info
+        reset_boundary = False
+        if isinstance(info, list):
+            reset_boundary = any("reset_info" in d for d in info if isinstance(d, dict))
+        elif isinstance(info, dict):
+            reset_boundary = "reset_info" in info
+
+        hidden_reset_count = _hidden_reset_count(info)
+        if hidden_reset_count > 0:
+            self._recording = False
+            self._frames.clear()
+
+            skipped_episodes = max(0, hidden_reset_count - 1)
+            if skipped_episodes > 0:
+                self._ep_idx += skipped_episodes
+
+            if not (ep_done and reset_boundary):
+                self._maybe_start_ep(obs)
+                if not ep_done:
+                    return obs, r, term, trunc, info
+            else:
+                # Current observation already belongs to the episode after this terminal transition
+                # So count the hidden current episode but dont start recording the next one until the normal reset boundary handling at the end of the method
+                self._ep_idx += 1
 
         # Multi-agent envs auto-reset before returning on terminal transitions.
         # Do not contaminate the finished episode with the first frame of the next one.
-        if not (ep_done and end):
+        if not (ep_done and reset_boundary):
             self._capture(obs)
 
         # This is the payload to send to video_uploader
@@ -260,7 +298,7 @@ class VideoLoggerWrapper(gym.Wrapper):
             # Logging purpose only.
             metadata = {
                 "recorded_frames": len(self._frames),
-                "reset_boundary": bool(end),
+                "reset_boundary": bool(reset_boundary),
             }
 
             if term_list is not None or trunc_list is not None:
@@ -293,7 +331,7 @@ class VideoLoggerWrapper(gym.Wrapper):
             data = self._save(metadata=metadata)
             self._recording = False
             self._frames.clear()
-            if end or self.done_mode == "any":
+            if reset_boundary or self.done_mode == "any":
                 self._maybe_start_ep(obs)
 
         if data is not None:
