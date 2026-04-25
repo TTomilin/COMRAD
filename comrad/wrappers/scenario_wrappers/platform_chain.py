@@ -9,14 +9,17 @@ class PlatformChainRewardShaping(gym.Wrapper):
         progress_reward_per_level=1.0,
         chain_break_penalty=-0.05,
         drag_penalty=-0.0025,
+        death_penalty=-1.0,
     ):
         super().__init__(env)
         self.progress_reward_per_level = float(progress_reward_per_level)
         self.chain_break_penalty = float(chain_break_penalty)
         self.drag_penalty = float(drag_penalty)
+        self.death_penalty = float(death_penalty)
 
         self.prev_chain_break_events = 0
         self.best_joint_progress = 0.0
+        self.prev_health = 0.0
         self.orig_env_reward = 0.0
 
     def _num_agents(self) -> int:
@@ -42,6 +45,12 @@ class PlatformChainRewardShaping(gym.Wrapper):
     def _checkpoint(progress: float) -> int:
         return max(0, int(math.floor(progress + 1e-6)))
 
+    @staticmethod
+    def _health(info) -> float:
+        if info is None:
+            return 0.0
+        return float(info.get("HEALTH", 0.0))
+
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.orig_env_reward = 0.0
@@ -49,10 +58,12 @@ class PlatformChainRewardShaping(gym.Wrapper):
         if info is None:
             self.prev_chain_break_events = 0
             self.best_joint_progress = 0.0
+            self.prev_health = 0.0
             return obs, info
 
         self.prev_chain_break_events = self._int_stat(info, "USER52")
         self.best_joint_progress = self._joint_progress_levels(info)
+        self.prev_health = self._health(info)
         return obs, info
 
     def step(self, action):
@@ -87,11 +98,18 @@ class PlatformChainRewardShaping(gym.Wrapper):
         if curr_dragged_links > 0 and self.drag_penalty != 0.0:
             shaped_team_reward += curr_dragged_links * self.drag_penalty
 
-        total_reward = reward + shaped_team_reward * self._reward_share()
+        shaped_reward = shaped_team_reward * self._reward_share()
+
+        curr_health = self._health(info)
+        if curr_health <= 0.0 and self.prev_health > 0.0 and self.death_penalty != 0.0:
+            shaped_reward += self.death_penalty
+
+        total_reward = reward + shaped_reward
 
         info["true_objective"] = float(self._checkpoint(self.best_joint_progress))
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
 
         self.prev_chain_break_events = curr_break_events
+        self.prev_health = curr_health
         return obs, total_reward, terminated, truncated, info
