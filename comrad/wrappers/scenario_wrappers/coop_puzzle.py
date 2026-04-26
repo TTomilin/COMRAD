@@ -2,8 +2,6 @@ import gymnasium as gym
 
 
 class CoopPuzzleRewardShaping(gym.Wrapper):
-    shared = {}
-
     def __init__(
         self,
         env,
@@ -13,7 +11,7 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         success_bonus: float = 2.0,
         timeout_penalty: float = -1.0,
         step_penalty: float = -0.002,
-        last_zone: int = 10,
+        last_zone: int | None = None,
     ):
         super().__init__(env)
         self.zone_advance_reward = float(zone_advance_reward)
@@ -21,31 +19,18 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         self.success_bonus = float(success_bonus)
         self.timeout_penalty = float(timeout_penalty)
         self.step_penalty = float(step_penalty)
-        self.last_zone = int(last_zone)
+        self.last_zone_override = None if last_zone is None else int(last_zone)
 
-        self.prev_zone = 0
-        self._ek = None
-        self.pid = getattr(env.unwrapped, "player_id", None)
+        self.prev_team_max_zone = 0
+        self.prev_completed_pairs = 0
         self.orig_env_reward = 0.0
 
-    @property
-    def ek(self):
-        if self._ek is None:
-            worker_index = getattr(self.env.unwrapped, "worker_index", 0)
-            vector_index = getattr(self.env.unwrapped, "vector_index", 0)
-            self._ek = (worker_index, vector_index)
-        return self._ek
+    def _num_agents(self) -> int:
+        return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
 
-    def _shared_state(self):
-        return CoopPuzzleRewardShaping.shared.setdefault(
-            self.ek,
-            {
-                "agents": {},
-                "best_team_max_zone": 0,
-                "best_completed_pairs": 0,
-                "success": False,
-            },
-        )
+    def _reward_share(self) -> float:
+        """Team rewards are surfaced once per player env, so divide before optional shared aggregation."""
+        return 1.0 / float(self._num_agents())
 
     @staticmethod
     def _safe_int(info, key: str, default: int = 0) -> int:
@@ -54,62 +39,47 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         except (TypeError, ValueError, OverflowError, AttributeError):
             return default
 
+    def _has_per_player_progress(self, info) -> bool:
+        # USER6 is exported only by the fixed WAD and acts as the contract
+        # version gate for USER4/USER5 and environment-derived last_zone.
+        return self._safe_int(info, "USER6", 0) > 0
+
+    def _zones(self, info) -> tuple[int, int]:
+        if not self._has_per_player_progress(info):
+            return 0, 0
+
+        zone_a = self._safe_int(info, "USER4", 0)
+        zone_b = self._safe_int(info, "USER5", 0)
+        return zone_a, zone_b
+
+    def _team_max_zone(self, info, zone_a: int, zone_b: int) -> int:
+        if not self._has_per_player_progress(info):
+            return 0
+        return max(zone_a, zone_b)
+
+    def _last_zone(self, info) -> int | None:
+        if self._has_per_player_progress(info):
+            return self._safe_int(info, "USER6", 0)
+        return self.last_zone_override
+
     def _completed_pairs(self, zone_a: int, zone_b: int) -> int:
         return max(0, min(zone_a, zone_b) // 2)
 
-    def _partner_state(self):
-        shared = CoopPuzzleRewardShaping.shared.get(self.ek)
-        if shared is None:
-            return None
-        for agent_id, state in shared["agents"].items():
-            if agent_id != self.pid:
-                return state
-        return None
-
-    def _update_shared_agent(self, info):
-        zone = self._safe_int(info, "USER1", 0)
-        plate_state = self._safe_int(info, "USER2", 0)
-        room_type = self._safe_int(info, "USER3", 0)
-        self._shared_state()["agents"][self.pid] = {
-            "zone": zone,
-            "plate_state": plate_state,
-            "room_type": room_type,
-        }
-
-    def _seed_shared_progress(self):
-        shared = self._shared_state()
-        me = shared["agents"].get(self.pid)
-        if me is None:
-            return
-
-        zone = int(me.get("zone", 0))
-        if zone > shared["best_team_max_zone"]:
-            shared["best_team_max_zone"] = zone
-
-        partner = self._partner_state()
-        if partner is None:
-            return
-
-        partner_zone = int(partner.get("zone", 0))
-        completed_pairs = self._completed_pairs(zone, partner_zone)
-        if completed_pairs > shared["best_completed_pairs"]:
-            shared["best_completed_pairs"] = completed_pairs
-
-    def clear_shared(self):
-        if self.ek not in CoopPuzzleRewardShaping.shared:
-            return
-        shared = CoopPuzzleRewardShaping.shared[self.ek]
-        shared["agents"].pop(self.pid, None)
-        if not shared["agents"]:
-            CoopPuzzleRewardShaping.shared.pop(self.ek, None)
+    def _sync_progress(self, info) -> None:
+        zone_a, zone_b = self._zones(info)
+        self.prev_team_max_zone = self._team_max_zone(info, zone_a, zone_b)
+        if self._has_per_player_progress(info):
+            self.prev_completed_pairs = self._completed_pairs(zone_a, zone_b)
+        else:
+            self.prev_completed_pairs = 0
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.prev_zone = self._safe_int(info, "USER1", 0)
         self.orig_env_reward = 0.0
-        self.clear_shared()
-        self._update_shared_agent(info)
-        self._seed_shared_progress()
+        self.prev_team_max_zone = 0
+        self.prev_completed_pairs = 0
+        if info is not None:
+            self._sync_progress(info)
         return obs, info
 
     def step(self, action):
@@ -123,46 +93,37 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         if info is None:
             return obs, env_reward, terminated, truncated, info
 
-        zone = self._safe_int(info, "USER1", 0)
-        partner = self._partner_state()
-        shaped_reward = self.step_penalty
-        success = False
+        share = self._reward_share()
+        zone_a, zone_b = self._zones(info)
+        team_max_zone = self._team_max_zone(info, zone_a, zone_b)
+        completed_pairs = self._completed_pairs(zone_a, zone_b) if self._has_per_player_progress(info) else 0
+        last_zone = self._last_zone(info)
 
-        if partner is not None:
-            partner_zone = int(partner.get("zone", 0))
-            shared = self._shared_state()
+        shaped_reward = self.step_penalty * share
 
-            team_max_zone = max(zone, partner_zone)
-            if team_max_zone > shared["best_team_max_zone"]:
-                shaped_reward += (team_max_zone - shared["best_team_max_zone"]) * self.zone_advance_reward
-                shared["best_team_max_zone"] = team_max_zone
+        if team_max_zone > self.prev_team_max_zone:
+            shaped_reward += (team_max_zone - self.prev_team_max_zone) * self.zone_advance_reward * share
 
-            completed_pairs = self._completed_pairs(zone, partner_zone)
-            if completed_pairs > shared["best_completed_pairs"]:
-                shaped_reward += (completed_pairs - shared["best_completed_pairs"]) * self.pair_completion_reward
-                shared["best_completed_pairs"] = completed_pairs
+        if completed_pairs > self.prev_completed_pairs:
+            shaped_reward += (completed_pairs - self.prev_completed_pairs) * self.pair_completion_reward * share
 
-            success = bool(
-                terminated
-                and not truncated
-                and zone >= self.last_zone
-                and partner_zone >= self.last_zone
-            )
-            if success and not shared["success"]:
-                shaped_reward += self.success_bonus
-                shared["success"] = True
-
-            info["true_objective"] = float(shared["best_completed_pairs"])
-            info["success"] = shared["success"]
-        else:
-            info["true_objective"] = 0.0
-            info["success"] = False
+        success = bool(
+            terminated
+            and not truncated
+            and last_zone is not None
+            and zone_a >= last_zone
+            and zone_b >= last_zone
+        )
+        if success:
+            shaped_reward += self.success_bonus * share
 
         if truncated and not success:
-            shaped_reward += self.timeout_penalty
+            shaped_reward += self.timeout_penalty * share
 
-        self._update_shared_agent(info)
-        self.prev_zone = zone
+        info["true_objective"] = float(completed_pairs)
+        info["success"] = success
+
+        self._sync_progress(info)
 
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
