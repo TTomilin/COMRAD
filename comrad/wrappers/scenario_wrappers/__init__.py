@@ -1,7 +1,7 @@
 from comrad.wrappers.scenario_wrappers.gathering_reward_shaping import DoomGatheringRewardShaping
 from comrad.wrappers.scenario_wrappers.pitfall_reward_shaping import DoomPitfallRewardShaping
 from comrad.wrappers.scenario_wrappers.mwh_reward_shaping import DoomMWHRewardShaping
-from comrad.wrappers.scenario_wrappers.parallel import ParallelReward
+from comrad.wrappers.scenario_wrappers.coop_puzzle import CoopPuzzleRewardShaping
 from comrad.wrappers.scenario_wrappers.armory_siege import ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput
 from comrad.wrappers.scenario_wrappers.lavapit2_reward_shaping import LavapitRewardShaping
 from comrad.wrappers.scenario_wrappers.ammo_carrier import AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping

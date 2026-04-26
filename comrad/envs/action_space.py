@@ -156,17 +156,20 @@ def doom_action_space_platform_chain():
         )
     )
 
-def doom_action_space_parallel():
+def doom_action_space_coop_puzzle():
     """
     TURN_LEFT
     TURN_RIGHT
     MOVE_FORWARD
+    MOVE_LEFT
+    MOVE_RIGHT
     """
 
     return gym.spaces.Tuple(
         (
             Discrete(3),
             Discrete(2),
+            Discrete(3),
         )
     )
 

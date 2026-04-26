@@ -251,12 +251,12 @@ python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes
 | `platform_chain` | Yes | Progress is joint and tether-constrained by design. |
 | `rhythm_sync` | Yes | Success/failure is defined by synchronized team timing. |
 | `rhythm_sync_dense` | Yes | Dense shaping still targets the same joint synchronization objective. |
-| `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around one team-clear objective. |
+| `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around synchronized relay sabotage and extraction. |
 | `foraging_commons` | No | Preserve the commons incentives; the benchmark is about balancing individual harvesting against shared resource collapse. |
 | `resource_greed` (`common_harvest_doom` in code) | No | Preserve the local ammo-restocking incentive that creates the dilemma. |
 | `stag_hunt_arena` | No | Keep the rabbit option local so the stag-vs-rabbit coordination dilemma remains intact. |
 | `smart_enemies` | No | The wrapper already shapes local combat performance; blanket team-sharing is not the default benchmark contract. |
 | `dumb_enemies` | No | Same local-combat logic as `smart_enemies`; keep the scenario default unless you intentionally want a joint reward. |
-| `coop_puzzle` | Leave default | Treat it as benchmark-only until its wiring defines a reward contract; do not force joint sharing without checking the wrapper. |
+| `coop_puzzle` | Yes | Progress depends on cross-lane plate cooperation and a joint final exit, so actor-critic runs should treat it as a fully shared objective. |
 
 Everything not explicitly listed as `Yes` should stay at the scenario default unless you intentionally want to change the benchmark.

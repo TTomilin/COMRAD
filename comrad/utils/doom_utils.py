@@ -18,7 +18,7 @@ from sample_factory.envs.env_wrappers import (
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
 from comrad.envs.action_space import (
     doom_action_space_pitfall,
-    doom_action_space_parallel,
+    doom_action_space_coop_puzzle,
     doom_action_space_armory_siege,
     doom_action_space_lavapit2,
     doom_action_space_platform_chain,
@@ -39,7 +39,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, DoomMWHRewardShaping, ParallelReward, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -166,22 +166,14 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
-        "doom_mwh",
-        "my_way_home_multi.cfg",
-        doom_action_space_parallel(),
-        num_agents=2, # reward shaping is set only for 2 agents, dont increase
-        extra_wrappers=[(DoomMWHRewardShaping, {})],
-    ),
-
-    DoomSpec(
-        "parallel",
-        "prot_beta_long.cfg",
-        doom_action_space_parallel(),
+        "coop_puzzle",
+        "coop_puzzle.cfg",
+        doom_action_space_coop_puzzle(),
         1.0,
         1200,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(ParallelReward, {})],
+        extra_wrappers=[(CoopPuzzleRewardShaping, {})],
     ),
 
     DoomSpec(
