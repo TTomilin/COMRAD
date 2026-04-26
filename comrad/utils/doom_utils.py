@@ -28,7 +28,6 @@ from comrad.envs.action_space import (
     doom_action_space_dumb_enemies,
     doom_action_space_stealth_labyrinth,
     doom_action_space_stag_hunt,
-    doom_action_space_common_harvest,
     doom_action_space_coop_health_gathering,
     doom_action_space_foraging_commons,
     doom_action_space_rhythm_sync,
@@ -39,7 +38,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CommonHarvestRewardShaping, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -269,16 +268,16 @@ DOOM_ENVS = [
         extra_wrappers=[AMMO_CARRIER_ADDITIONAL_INPUT, (AmmoCarrierRewardShaping, {})],
     ),
 
-    DoomSpec(
-        "common_harvest_doom",
-        "common_harvest_doom.cfg",
-        doom_action_space_common_harvest(),
-        1.0,
-        5250,
-        num_agents=2,
-        forcerespawn=1,
-        extra_wrappers=[(CommonHarvestRewardShaping, {})],
-    ),
+    # DoomSpec(
+    #     "common_harvest_doom",
+    #     "common_harvest_doom.cfg",
+    #     doom_action_space_common_harvest(),
+    #     1.0,
+    #     5250,
+    #     num_agents=2,
+    #     forcerespawn=1,
+    #     extra_wrappers=[(CommonHarvestRewardShaping, {})],
+    # ),
 
     DoomSpec(
         "foraging_commons_vision",
