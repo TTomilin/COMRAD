@@ -6,7 +6,6 @@ from typing import Optional
 
 from comrad.envs.wad_catalog import WadBatch
 from comrad.envs.multi_wad_env import MultiWADEnv
-# from comrad.utils.wad_utils import patch_wad_path
 
 from sample_factory.envs.env_wrappers import (
     PixelFormatChwWrapper,
@@ -610,12 +609,12 @@ def make_doom_env_from_spec(spec, _env_name, cfg, env_config, render_mode: Optio
 class DoomBatchSpec:
     base: DoomSpec
     batch_dir: str
-    swap_every: int = 1
-    strategy: str = "round_robin"
+    swap_every: int = 5
 
 
-def make_doom_env_from_batch(batch_spec: DoomBatchSpec, _env_name, cfg, env_config,
-                             render_mode: Optional[str] = None, **kwargs):
+def make_doom_env_from_batch(batch_spec: DoomBatchSpec, curriculum,
+                              _env_name, cfg, env_config,
+                              render_mode: Optional[str] = None, **kwargs):
     batch = WadBatch.from_dir(batch_spec.batch_dir)
     base_cfg = _resolve_scenario_cfg(batch_spec.base.env_spec_file)
     base_env = make_doom_env_from_spec(
@@ -627,8 +626,8 @@ def make_doom_env_from_batch(batch_spec: DoomBatchSpec, _env_name, cfg, env_conf
         batch=batch,
         base_cfg=base_cfg,
         swap_every=batch_spec.swap_every,
-        strategy=batch_spec.strategy,
         seed=seed,
+        curriculum=curriculum,
     )
 
 def _resolve_scenario_cfg(env_spec_file: str) -> str:

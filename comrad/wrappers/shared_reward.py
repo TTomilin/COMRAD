@@ -11,6 +11,8 @@ class SharedRewardWrapper(gym.Wrapper):
     '''
     def __init__(self, env, *, alpha: float = 1.0, scalarisation: str = "sum"):
         super().__init__(env)
+        self.num_agents = getattr(env, 'num_agents', 1)
+        self.is_multiagent = getattr(env, 'is_multiagent', self.num_agents > 1)
 
         if not 0.0 < alpha <= 1.0:
             raise ValueError(f"alpha must be in (0, 1], not {alpha}")

@@ -53,16 +53,28 @@ def add_doom_env_args(parser):
     )
     p.add_argument(
         "--wad_swap_every",
-        default=1,
+        default=5,
         type=int,
         help="Swap WAD every N episodes (only used with --wad_batch).",
     )
     p.add_argument(
-        "--wad_strategy",
-        default="round_robin",
+        "--wad_curriculum",
+        default="uniform",
         type=str,
-        choices=["round_robin", "random", "weighted"],
-        help="Sampling strategy for --wad_batch.",
+        choices=["uniform", "learning_progress", "plr", "sequential", "omni"],
+        help="Curriculum strategy for sampling WAD batches. "
+            "uniform=equal probability, "
+            "learning_progress=prioritize tasks with highest return variance, "
+            "plr=prioritize lowest-return tasks, "
+            "sequential=advance through tasks in order, "
+            "omni=LP masked by interestingness graph.",
+    )
+    p.add_argument(
+        "--interestingness_graph_path",
+        default=None,
+        type=str,
+        help="Path to JSON file containing the interestingness graph for the omni curriculum strategy. "
+            "The graph should be a dict[int, dict[int, bool]], mapping each task index to a dict that maps other task indices to a boolean indicating whether they are interesting (True) or boring (False) when the key task is mastered. "
     )
 
 def add_wandb_args(parser):

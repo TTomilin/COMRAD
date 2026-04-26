@@ -5,22 +5,286 @@
         "config": {
             "distance": 600,
             "corridor_width": 3,
-            "door_timer": 250,
-            "core_health": 500,
-            "enemy_difficulty": 1.25,
-            "seed": null
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
         }
     },
     {
         "id": "armory_1",
         "filename": "armory_1.wad",
         "config": {
-            "distance": 2000,
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_2",
+        "filename": "armory_2.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_3",
+        "filename": "armory_3.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_4",
+        "filename": "armory_4.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_5",
+        "filename": "armory_5.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_6",
+        "filename": "armory_6.wad",
+        "config": {
+            "distance": 600,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_7",
+        "filename": "armory_7.wad",
+        "config": {
+            "distance": 600,
             "corridor_width": 3,
             "door_timer": 250,
             "core_health": 500,
             "enemy_difficulty": 1.25,
-            "seed": null
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_8",
+        "filename": "armory_8.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_9",
+        "filename": "armory_9.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_10",
+        "filename": "armory_10.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_11",
+        "filename": "armory_11.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_12",
+        "filename": "armory_12.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_13",
+        "filename": "armory_13.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_14",
+        "filename": "armory_14.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_15",
+        "filename": "armory_15.wad",
+        "config": {
+            "distance": 800,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_16",
+        "filename": "armory_16.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_17",
+        "filename": "armory_17.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_18",
+        "filename": "armory_18.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_19",
+        "filename": "armory_19.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 600,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_20",
+        "filename": "armory_20.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_21",
+        "filename": "armory_21.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 1500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_22",
+        "filename": "armory_22.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 0.5,
+            "seed": 42
+        }
+    },
+    {
+        "id": "armory_23",
+        "filename": "armory_23.wad",
+        "config": {
+            "distance": 1100,
+            "corridor_width": 3,
+            "door_timer": 250,
+            "core_health": 500,
+            "enemy_difficulty": 1.25,
+            "seed": 42
         }
     }
 ]

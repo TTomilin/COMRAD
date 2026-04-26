@@ -3,6 +3,7 @@ import os
 import sys
 import datetime
 import wandb
+from typing import Optional
 
 from sample_factory.algo.utils.context import global_model_factory
 from sample_factory.algo.utils.misc import ExperimentStatus
@@ -32,18 +33,35 @@ def register_vizdoom_envs():
 
 
 def register_batch_env(cfg) -> str:
+    from comrad.utils.curriculum import BatchCurriculum
+    from comrad.envs.wad_catalog import WadBatch
+
     base_spec = doom_env_by_name(cfg.env)
-    batch_spec = DoomBatchSpec(
-        base=base_spec,
-        batch_dir=cfg.wad_batch,
-        swap_every=getattr(cfg, "wad_swap_every", 1),
-        strategy=getattr(cfg, "wad_strategy", "round_robin"),
-    )
+    batch_spec = DoomBatchSpec(base=base_spec, batch_dir=cfg.wad_batch, swap_every=getattr(cfg, "wad_swap_every", 5),)
     env_name = f"{cfg.env}_batch"
-    make_env_func = functools.partial(make_doom_env_from_batch, batch_spec)
+
+    batch = WadBatch.from_dir(batch_spec.batch_dir)
+    strategy = getattr(cfg, "wad_curriculum", "uniform")
+    interestingness = None
+    interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
+    if strategy == "omni" and interestingness_graph_path is not None:
+        interestingness = get_intrestingness_graph(interestingness_graph_path)
+    curriculum = BatchCurriculum(len(batch.entries), strategy=strategy, interestingness=interestingness if strategy == "omni" else None)
+
+    make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
     register_env(env_name, make_env_func)
     return env_name
 
+def get_intrestingness_graph(interestingness_graph_path: Optional[str]) -> Optional[dict]:
+    import json
+    if interestingness_graph_path is None:
+        return None
+    with open(interestingness_graph_path, "r") as f:
+        raw = json.load(f)
+    return {
+        int(k): {int(kk): bool(vv) for kk, vv in v.items()}
+        for k, v in raw.items()
+    }
 
 def register_vizdoom_models():
     global_model_factory().register_encoder_factory(make_vizdoom_encoder)
