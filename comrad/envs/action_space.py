@@ -119,11 +119,13 @@ def doom_action_space_pitfall():
         )
     )
 
-def doom_action_space_lavapit2():
+def doom_action_space_lavapit():
     """
     TURN_LEFT
     TURN_RIGHT
     MOVE_FORWARD
+    MOVE_LEFT
+    MOVE_RIGHT
     JUMP
     """
 
@@ -131,6 +133,7 @@ def doom_action_space_lavapit2():
         (
             Discrete(3),
             Discrete(2),
+            Discrete(3),
             Discrete(2),
         )
     )

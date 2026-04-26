@@ -20,7 +20,7 @@ from comrad.envs.action_space import (
     doom_action_space_pitfall,
     doom_action_space_coop_puzzle,
     doom_action_space_armory_siege,
-    doom_action_space_lavapit2,
+    doom_action_space_lavapit,
     doom_action_space_platform_chain,
     doom_action_space_ammo_carrier,
     doom_action_space_lava_maze,
@@ -131,9 +131,9 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
-        "lavapit2",
-        "lavapit2.cfg",
-        doom_action_space_lavapit2(),
+        "lavapit",
+        "lavapit.cfg",
+        doom_action_space_lavapit(),
         1.0,
         1000,
         num_agents=2,
