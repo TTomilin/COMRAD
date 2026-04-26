@@ -6,8 +6,8 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         self,
         env,
         relay_completion_reward=1.0,
-        sync_progress_reward=0.01,
-        extraction_reward=1.5,
+        sync_progress_reward=0.001,
+        extraction_reward=1.0,
         death_penalty=-1.0,
     ):
         super().__init__(env)
