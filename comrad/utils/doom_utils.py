@@ -139,6 +139,7 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(LavapitRewardShaping, {})],
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(
@@ -170,7 +171,7 @@ DOOM_ENVS = [
         "coop_puzzle.cfg",
         doom_action_space_coop_puzzle(),
         1.0,
-        1200,
+        2000,
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(CoopPuzzleRewardShaping, {})],
