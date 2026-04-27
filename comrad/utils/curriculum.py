@@ -138,7 +138,6 @@ class BatchCurriculum:
     def sample(self) -> int:
         with self._lock:
             if self._strategy == "plr":
-                self._running_sample_count[0] += 1
                 task_idx = self._plr_sample()
             else:
                 if self._strategy != "uniform":
