@@ -46,8 +46,22 @@ def register_batch_env(cfg) -> str:
     interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
     if strategy == "omni" and interestingness_graph_path is not None:
         interestingness = get_intrestingness_graph(interestingness_graph_path)
-    curriculum = BatchCurriculum(len(batch.entries), strategy=strategy, interestingness=interestingness if strategy == "omni" else None)
-
+    curriculum = BatchCurriculum(
+        len(batch.entries),
+        strategy=strategy,
+        interestingness=interestingness if strategy == "omni" else None,
+        replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),
+        replay_prob=getattr(cfg, "plr_replay_prob", 0.5),
+        rho=getattr(cfg, "plr_rho", 1.0),
+        staleness_coef=getattr(cfg, "plr_staleness_coef", 0.1),
+        score_transform=getattr(cfg, "plr_score_transform", "rank"),
+        temperature=getattr(cfg, "plr_temperature", 0.1),
+        alpha=getattr(cfg, "plr_alpha", 1.0),
+        staleness_transform=getattr(cfg, "plr_staleness_transform", "power"),
+        staleness_temperature=getattr(cfg, "plr_staleness_temperature", 1.0),
+        plr_score_key=getattr(cfg, "plr_score_key", "mean_value_l1"),
+        max_score_coef=getattr(cfg, "plr_max_score_coef", 0.0),
+    )
     make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
     register_env(env_name, make_env_func)
     return env_name

@@ -30,6 +30,7 @@ from sample_factory.utils.dicts import iterate_recursively
 from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import ActionDistribution, Config, InitModelData, PolicyID
 from sample_factory.utils.utils import ensure_dir_exists, experiment_dir, log
+from comrad.utils.curriculum import BatchCurriculum
 
 
 class LearningRateScheduler:
@@ -668,6 +669,50 @@ class Learner(Configurable):
 
         return action_distribution, policy_loss, exploration_loss, kl_old, kl_loss, value_loss, loss_summaries
 
+    def _compute_plr_task_scores(self, gpu_buffer: TensorDict, experience_size: int) -> None:
+        """
+        Compute per-task PLR scores from the current training batch and push them
+        to the curriculum via update_task_score(). Provides learner-side scoring:
+        value_l1, GAE advantages, and policy entropy aggregated per task.
+
+        Only runs when a curriculum with strategy == "plr" is attached.
+        """
+        curriculum = getattr(self, "curriculum", None)
+        if curriculum is None or getattr(curriculum, "_strategy", None) != "plr":
+            return
+
+        with torch.no_grad():
+            returns  = gpu_buffer["returns"]          # [experience_size]
+            values   = gpu_buffer["values"]           # [experience_size]
+            adv      = gpu_buffer["advantages"]       # [experience_size]
+            valids   = gpu_buffer["valids"].bool()    # [experience_size]
+            task_ids = gpu_buffer["task_idx"].long()  # [experience_size]
+
+            # value_l1: |returns - values|
+            value_l1 = (returns - values).abs()       # [experience_size]
+
+            # Entropy: -sum(p * log p)
+            logits    = gpu_buffer["action_logits"]                 # [experience_size, n_actions]
+            log_probs = torch.log_softmax(logits.float(), dim=-1)   # log p(a)
+            entropy   = -(log_probs.exp() * log_probs).sum(dim=-1)  # [experience_size]
+
+            adv_abs = adv.abs()                                     # [experience_size]
+
+            for tid in task_ids.unique():
+                mask = (task_ids == tid) & valids
+                if mask.sum() == 0:
+                    continue
+
+                score = {
+                    BatchCurriculum.SCORE_MEAN_VALUE_L1:  value_l1[mask].mean().item(),
+                    BatchCurriculum.SCORE_MAX_VALUE_L1:   value_l1[mask].max().item(),
+                    BatchCurriculum.SCORE_MEAN_ADVANTAGE: adv_abs[mask].mean().item(),
+                    BatchCurriculum.SCORE_MAX_ADVANTAGE:  adv_abs[mask].max().item(),
+                    BatchCurriculum.SCORE_MEAN_ENTROPY:   entropy[mask].mean().item(),
+                    BatchCurriculum.SCORE_MAX_ENTROPY:    entropy[mask].max().item(),
+                }
+                curriculum.update_task_score(int(tid.item()), score)
+
     def _train(
         self, gpu_buffer: TensorDict, batch_size: int, experience_size: int, num_invalids: int
     ) -> Optional[AttrDict]:
@@ -703,6 +748,7 @@ class Learner(Configurable):
                 summaries_batch = self.cfg.num_batches_per_epoch - 1
 
             assert self.actor_critic.training
+        self._compute_plr_task_scores(gpu_buffer, experience_size)
 
         for epoch in range(self.cfg.num_epochs):
             with timing.add_time("epoch_init"):

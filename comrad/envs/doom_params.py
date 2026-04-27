@@ -69,6 +69,7 @@ def add_doom_env_args(parser):
             "sequential=advance through tasks in order, "
             "omni=LP masked by interestingness graph.",
     )
+    # omni hyperparameters
     p.add_argument(
         "--interestingness_graph_path",
         default=None,
@@ -76,6 +77,77 @@ def add_doom_env_args(parser):
         help="Path to JSON file containing the interestingness graph for the omni curriculum strategy. "
             "The graph should be a dict[int, dict[int, bool]], mapping each task index to a dict that maps other task indices to a boolean indicating whether they are interesting (True) or boring (False) when the key task is mastered. "
     )
+    # plr hyperparameters
+    p.add_argument(
+        "--plr_replay_schedule",
+        default="proportionate",
+        type=str,
+        choices=["proportionate", "fixed"],
+        help="PLR replay schedule."
+    )
+    p.add_argument(
+        "--plr_replay_prob",
+        default=0.5,
+        type=float,
+        help="PLR probability of sampling a replay level."
+    )
+    p.add_argument(
+        "--plr_rho",
+        default=1.0,
+        type=float,
+        help="PLR proportion of tasks that must be seen before replay starts."
+    )
+    p.add_argument(
+        "--plr_staleness_coef",
+        default=0.1,
+        type=float,
+        help="PLR staleness interpolation coefficient."
+    )
+    p.add_argument(
+        "--plr_score_transform",
+        default="rank",
+        type=str,
+        choices=["rank", "power", "softmax", "max", "constant"],
+        help="PLR score transform."
+        )
+    p.add_argument(
+        "--plr_temperature",
+        default=0.1,
+        type=float,
+        help="PLR score transform temperature."
+    )
+    p.add_argument(
+        "--plr_alpha",
+        default=1.0,
+        type=float,
+        help="PLR score interpolation weight (1.0 = use new score only)."
+        )
+    p.add_argument(
+        "--plr_staleness_transform",
+        default="power",
+        type=str,
+        help="PLR staleness transform."
+    )
+    p.add_argument(
+        "--plr_staleness_temperature",
+        default=1.0,
+        type=float,
+        help="PLR staleness transform temperature."
+    )
+    p.add_argument(
+        "--plr_score_key",
+        default="mean_value_l1",
+        type=str,
+        choices=["mean_value_l1", "mean_advantage", "mean_entropy"],
+        help="PLR score metric (mean signal) used from learner scoring. Max is derived automatically."
+    )
+    p.add_argument(
+        "--plr_max_score_coef",
+        default=0.0,
+        type=float,
+        help="PLR interpolation weight between max score and mean score (0.0 = mean only)."
+    )
+
 
 def add_wandb_args(parser):
     parser.add_argument("--wandb_record_every", default=50, type=int, help="Every N episodes")

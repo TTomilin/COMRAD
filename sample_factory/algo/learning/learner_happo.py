@@ -299,6 +299,8 @@ class HAPPOLearner(Learner):
     def _train(self, gpu_buffer, batch_size, experience_size, num_invalids):
         stats = AttrDict()
         assert self.actor_critic.training
+        
+        self._compute_plr_task_scores(gpu_buffer, experience_size)
 
         # Check if data stale from previous training
         if "policy_version" in gpu_buffer:
