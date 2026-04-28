@@ -83,6 +83,13 @@ def add_doom_env_args(parser):
         help="Maximum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
             "Set per-scenario if returns differ significantly.",
     )
+    p.add_argument(
+        "--lp_min_return",
+        default=-100.0,
+        type=float,
+        help="Minimum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
+            "Set per-scenario if returns differ significantly.",
+    )
     # omni hyperparameters
     p.add_argument(
         "--interestingness_graph_path",

@@ -7,10 +7,11 @@ class LearningProgress(Curriculum):
     Progress is measured by the absolute difference between these EMAs.
     """
 
-    def __init__(self, n_tasks: int, p_theta: float = 0.1, max_return: float = 100.0, **kwargs):
+    def __init__(self, n_tasks: int, p_theta: float = 0.1, max_return: float = 100.0, min_return: float = -100.0, **kwargs):
         super().__init__(n_tasks, **kwargs)
         self.p_theta = p_theta
         self.max_return = max_return
+        self.min_return = min_return
         self._p_fast = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_slow = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_true = self.ctx.Array('d', [0.0] * n_tasks)
@@ -18,7 +19,7 @@ class LearningProgress(Curriculum):
 
     def _normalize(self, episode_return: float) -> float:
         """Map raw return to [0, 1] using [-max_return, +max_return] as the range."""
-        r_min = -self.max_return
+        r_min = self.min_return
         r_max =  self.max_return
         normalized = (episode_return - r_min) / (r_max - r_min)
         return float(np.clip(normalized, 0.0, 1.0))

@@ -66,6 +66,7 @@ class PrioritizedLevelReplay(Curriculum):
             unseen = np.array(self._unseen_task_weights[:])
             if (unseen > 0).any():
                 return self._sample_unseen_level(unseen)
+            return self._sample_replay_level() # fallback to replay if all seen but still under rho
                 
         do_replay = self._sample_replay_decision(proportion_seen)
         if do_replay:
@@ -158,7 +159,11 @@ class PrioritizedLevelReplay(Curriculum):
             scores_ = scores.copy()
             scores_[np.array(self._unseen_task_weights[:]) > 0] = -np.inf
             argmax = self._rng.choice(np.flatnonzero(np.isclose(scores_, scores_.max())))
-            w[argmax] = 1.0 - self._eps
+            w[argmax] = 1.0
+            return w
+        elif transform == "eps_greedy":
+            w = np.zeros_like(scores)
+            w[scores.argmax()] = 1.0 - self._eps
             w += self._eps / self._n
             return w
         return np.ones_like(scores)

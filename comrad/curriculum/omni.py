@@ -8,7 +8,7 @@ class OMNICurriculum(LearningProgress):
     suppressing mathematically boring tasks once prerequisites are met.
     """
     
-    def __init__(self, n_tasks: int, interestingness: Optional[dict] = None, tasks: Optional[list] = None, **kwargs):
+    def __init__(self, n_tasks: int, tasks: list, interestingness: Optional[dict] = None, **kwargs):
         super().__init__(n_tasks, **kwargs)
         self.tasks = tasks or list(range(n_tasks))
         if interestingness is not None:
