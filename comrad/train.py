@@ -41,7 +41,10 @@ def register_batch_env(cfg) -> str:
     env_name = f"{cfg.env}_batch"
 
     batch = WadBatch.from_dir(batch_spec.batch_dir)
-    strategy = getattr(cfg, "wad_curriculum", "uniform")
+    strategy = getattr(cfg, "curriculum", "uniform")
+    if strategy == "plr":
+        assert cfg.algo.upper() in ("APPO", "MAPPO", "IPPO", "HAPPO"), \
+            "PLR curriculum requires a PPO-based algorithm."
     interestingness = None
     interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
     if strategy == "omni" and interestingness_graph_path is not None:
@@ -70,7 +73,7 @@ def register_batch_env(cfg) -> str:
     )
     make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
     register_env(env_name, make_env_func)
-    return env_name
+    return env_name, curriculum
 
 def get_intrestingness_graph(interestingness_graph_path: Optional[str]) -> Optional[dict]:
     import json
@@ -96,7 +99,7 @@ def configure_batch_env_and_agents(cfg):
     # When --wad_batch is given, override cfg.env with the pool name and
     # register the pool environment. Existing DOOM_ENVS are unaffected.
     if getattr(cfg, "wad_batch", None):
-        cfg.env = register_batch_env(cfg)
+        cfg.env, cfg._curriculum = register_batch_env(cfg) 
 
     if cfg.num_agents < 1:
         # Strip "_batch" to lookup standard env base properties.
@@ -167,13 +170,21 @@ def main():
 
     if cfg.num_agents > 1:
         register_model_factory(cfg)
-
+    curriculum = getattr(cfg, "_curriculum", None)
+    if hasattr(cfg, "_curriculum"):
+        del cfg._curriculum  # remove from cfg to avoid JSON serialization errors
+            
     cfg, runner = make_runner(cfg)
-
+            
     if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):
         upload_video(runner, cfg)
 
     status = runner.init()
+    
+    if curriculum is not None:
+        for policy_id, learner_worker in runner.learners.items():
+            learner_worker.learner.curriculum = curriculum
+            
     if status == ExperimentStatus.SUCCESS:
         status = runner.run()
 

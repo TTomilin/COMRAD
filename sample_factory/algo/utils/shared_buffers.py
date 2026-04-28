@@ -111,6 +111,8 @@ def alloc_trajectory_tensors(env_info: EnvInfo, num_traj, rollout, rnn_size, dev
     tensors["time_outs"].fill_(False)  # no timeouts by default
     tensors["env_idx"] = init_tensor([num_traj, rollout], torch.int32, [], device, share)
     tensors["env_idx"].fill_(-1)
+    tensors["task_idx"] = init_tensor([num_traj, rollout], torch.int32, [], device, share)
+    tensors["task_idx"].fill_(-1)
     tensors["agent_idx"] = init_tensor([num_traj, rollout], torch.int32, [], device, share)
     tensors["agent_idx"].fill_(-1)
     tensors["policy_id"] = init_tensor([num_traj, rollout], torch.int, [], device, share)

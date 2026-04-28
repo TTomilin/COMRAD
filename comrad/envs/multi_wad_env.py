@@ -44,7 +44,13 @@ class MultiWADEnv(gym.Wrapper):
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
-
+        # expose current task index so SF can store it in the trajectory buffer
+        if isinstance(info, dict):
+            info["task_idx"] = self._current_task_idx
+        elif isinstance(info, (list, tuple)):
+            for d in info:
+                if isinstance(d, dict):
+                    d["task_idx"] = self._current_task_idx
         r = float(np.mean(reward)) if isinstance(reward, (list, tuple)) else float(reward)
         self._episode_return += r
 
@@ -79,3 +85,13 @@ class MultiWADEnv(gym.Wrapper):
         if isinstance(terminated, (list, tuple)):
             return all(t or tr for t, tr in zip(terminated, truncated))
         return bool(terminated) or bool(truncated)
+    
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        if isinstance(info, dict):
+                info["task_idx"] = self._current_task_idx
+        elif isinstance(info, (list, tuple)):
+            for d in info:
+                if isinstance(d, dict):
+                    d["task_idx"] = self._current_task_idx
+        return obs, info

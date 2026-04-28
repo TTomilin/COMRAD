@@ -58,7 +58,7 @@ def add_doom_env_args(parser):
         help="Swap WAD every N episodes (only used with --wad_batch).",
     )
     p.add_argument(
-        "--wad_curriculum",
+        "--curriculum",
         default="uniform",
         type=str,
         choices=["uniform", "learning_progress", "plr", "sequential", "omni"],

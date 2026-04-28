@@ -31,6 +31,7 @@ from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import ActionDistribution, Config, InitModelData, PolicyID
 from sample_factory.utils.utils import ensure_dir_exists, experiment_dir, log
 from comrad.curriculum.base import Curriculum
+from comrad.curriculum.plr import PrioritizedLevelReplay
 
 
 class LearningRateScheduler:
@@ -175,6 +176,7 @@ class Learner(Configurable):
         self.kl_loss_func: Optional[Callable] = None
 
         self.is_initialized = False
+        self.curriculum = None
 
     def init(self) -> InitModelData:
         if self.cfg.exploration_loss_coeff == 0.0:
@@ -677,8 +679,10 @@ class Learner(Configurable):
 
         Only runs when a curriculum with strategy == "plr" is attached.
         """
-        curriculum = getattr(self, "curriculum", None)
-        if curriculum is None or getattr(curriculum, "_strategy", None) != "plr":
+        if not isinstance(self.curriculum, PrioritizedLevelReplay):
+            return
+
+        if getattr(self.cfg, "with_vtrace", False):
             return
 
         with torch.no_grad():
@@ -699,6 +703,9 @@ class Learner(Configurable):
             adv_abs = adv.abs()                                     # [experience_size]
 
             for tid in task_ids.unique():
+                tid_int = int(tid.item())
+                if tid_int < 0:
+                    continue
                 mask = (task_ids == tid) & valids
                 if mask.sum() == 0:
                     continue
@@ -711,7 +718,7 @@ class Learner(Configurable):
                     Curriculum.SCORE_MEAN_ENTROPY:   entropy[mask].mean().item(),
                     Curriculum.SCORE_MAX_ENTROPY:    entropy[mask].max().item(),
                 }
-                curriculum.update_task_score(int(tid.item()), score)
+                self.curriculum.update_task_score(tid_int, score)
 
     def _train(
         self, gpu_buffer: TensorDict, batch_size: int, experience_size: int, num_invalids: int
