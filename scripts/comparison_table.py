@@ -62,14 +62,14 @@ border_color = '#A9B4C2'
 text_color = '#111827'
 plt.rcParams['font.family'] = 'sans-serif'
 
-fig, ax = plt.subplots(figsize=(17, 11))
+fig, ax = plt.subplots(figsize=(12,8))
 ax.axis('off')
 
 # Grid siz
-cell_w = 0.45
+cell_w = 0.2
 cell_h = 0.35
-prop_col_w = 4.5
-cat_col_w = 2.1
+prop_col_w = 1.75
+cat_col_w = 0.75
 num_cols = len(scenarios)
 num_rows = len(properties_data)
 
@@ -87,7 +87,7 @@ for i, (cat, prop, marks) in enumerate(properties_data):
     # Draw property name
     rect = patches.Rectangle((cat_col_w, y), prop_col_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
     ax.add_patch(rect)
-    ax.text(cat_col_w + 0.15, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color=text_color)
+    ax.text(cat_col_w + 0.05, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color=text_color)
 
     # Draw checkmark
     for j, mark in enumerate(marks):
@@ -115,14 +115,14 @@ ax.add_patch(rect)
 ax.text(cat_col_w/2, h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color=text_color)
 
 # Draw angled column headers
-header_y = total_height + 0.05
+header_y = total_height + 0.03
 for j, scenario in enumerate(scenarios):
     x = cat_col_w + prop_col_w + j * cell_w + (cell_w/2)
-    ax.text(x, header_y, scenario, rotation=45, va='bottom', ha='left', rotation_mode='anchor', fontsize=11, color=text_color)
+    ax.text(x, header_y, scenario, rotation=-45, va='bottom', ha='right', rotation_mode='anchor', fontsize=11, color=text_color)
 
-ax.set_xlim(0, total_width + 2)
+ax.set_xlim(0, total_width)
 ax.set_ylim(-0.5, total_height + 3)
 
-plt.tight_layout()
-plt.savefig("results/categories.png", dpi=300, bbox_inches='tight')
+fig.subplots_adjust(left=0.01, right=0.995, top=0.995, bottom=0.01)
+plt.savefig("results/categories.png", dpi=300, bbox_inches='tight', pad_inches=0.02)
 plt.show()
