@@ -46,11 +46,13 @@ def register_batch_env(cfg) -> str:
     interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
     if strategy == "omni" and interestingness_graph_path is not None:
         interestingness = get_intrestingness_graph(interestingness_graph_path)
+    task_ids = [entry.name for entry in batch.entries]
     curriculum = make_curriculum(
         len(batch.entries),
         strategy=strategy,
         p_theta=getattr(cfg, "lp_p_theta", 0.1),
-        interestingness=interestingness if strategy == "omni" else None,
+        tasks=task_ids,
+        interestingness=interestingness,
         replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),
         replay_prob=getattr(cfg, "plr_replay_prob", 0.5),
         rho=getattr(cfg, "plr_rho", 1.0),
@@ -75,7 +77,7 @@ def get_intrestingness_graph(interestingness_graph_path: Optional[str]) -> Optio
     with open(interestingness_graph_path, "r") as f:
         raw = json.load(f)
     return {
-        int(k): {int(kk): bool(vv) for kk, vv in v.items()}
+        k: {kk: bool(vv) for kk, vv in v.items()}
         for k, v in raw.items()
     }
 

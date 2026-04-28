@@ -12,6 +12,12 @@ class OMNICurriculum(LearningProgress):
         super().__init__(n_tasks, **kwargs)
         self.tasks = tasks or list(range(n_tasks))
         if interestingness is not None:
+            bad = set(interestingness.keys()) - set(self.tasks)
+            if bad:
+                raise ValueError(
+                    f"interestingness keys not in tasks: {bad}. "
+                    f"Use task identifiers only."
+            )
             self._interestingness = interestingness
         else:
             # Default: mastery of a task makes itself boring, but other tasks remain interesting.
@@ -53,6 +59,6 @@ class OMNICurriculum(LearningProgress):
             moi_weight[i] = 0.001
 
         dist = lp_dist * moi_weight
-        norm_dist = dist / dist.sum()
+        norm_dist = dist / dist.sum() if dist.sum() > 0 else np.ones(self._n) / self._n
         
         self._weights[:] = norm_dist.tolist()

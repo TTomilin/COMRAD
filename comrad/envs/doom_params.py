@@ -82,7 +82,7 @@ def add_doom_env_args(parser):
         default=None,
         type=str,
         help="Path to JSON file containing the interestingness graph for the omni curriculum strategy. "
-            "The graph should be a dict[int, dict[int, bool]], mapping each task index to a dict that maps other task indices to a boolean indicating whether they are interesting (True) or boring (False) when the key task is mastered. "
+            "The JSON should be of type dict[str, dict[str, bool]], where the keys of the outer dict are task identifiers (as passed in the batch) and the inner dict maps other task identifiers to booleans indicating whether they remain interesting (True) or become boring (False) once the outer task is mastered.",
     )
     # plr hyperparameters
     p.add_argument(

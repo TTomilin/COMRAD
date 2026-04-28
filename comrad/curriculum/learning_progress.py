@@ -13,15 +13,21 @@ class LearningProgress(Curriculum):
         self._p_fast = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_slow = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_true = self.ctx.Array('d', [0.0] * n_tasks)
+        self._p_seen = self.ctx.Array('d', [0.0] * n_tasks)  # 0.0 = unseen, 1.0 = seen
 
     def _update_logic(self, task_idx: int, episode_return: float) -> None:
         """Update EMAs for task returns."""
         alpha = self.EMA_ALPHA
-        # Fast EMA updates based on actual returns
-        old_fast = self._p_fast[task_idx]
-        self._p_fast[task_idx] = episode_return * alpha + old_fast * (1.0 - alpha)
-        # Slow EMA updates as moving average of fast EMA based on value BEFORE this fast update
-        self._p_slow[task_idx] = old_fast * alpha + self._p_slow[task_idx] * (1.0 - alpha)
+        if self._p_seen[task_idx] == 0.0: # init both EMAs to episode return on first observation to avoid learning progress spike differences
+            self._p_fast[task_idx] = episode_return
+            self._p_slow[task_idx] = episode_return
+            self._p_seen[task_idx] = 1.0
+        else:
+            old_fast = self._p_fast[task_idx]    
+            # Fast EMA updates based on actual returns
+            self._p_fast[task_idx] = episode_return * alpha + old_fast * (1.0 - alpha)
+            # Slow EMA updates as moving average of fast EMA based on value BEFORE this fast update
+            self._p_slow[task_idx] = self._p_fast[task_idx] * alpha + self._p_slow[task_idx] * (1.0 - alpha)
         self._p_true[task_idx] = episode_return
 
     def _reweight(self, p: np.ndarray) -> np.ndarray:
@@ -61,7 +67,7 @@ class LearningProgress(Curriculum):
             task_dist = task_dist / (np.sum(task_dist) + 1e-8)
             self._weights[:] = task_dist.tolist()
         else:
-            if np.sum(subprobs) == 0:
+            if np.sum(subprobs) == 0: # shouldn't happen with sigmoid, but just in case
                 self._weights[:] = (np.ones(self._n) / self._n).tolist()
             else:
                 self._weights[:] = subprobs.tolist()
