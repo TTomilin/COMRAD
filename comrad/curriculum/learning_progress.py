@@ -12,10 +12,24 @@ class LearningProgress(Curriculum):
         self.p_theta = p_theta
         self.max_return = max_return
         self.min_return = min_return
+        self._stale_dist = self.ctx.Value('b', True)
         self._p_fast = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_slow = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_true = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_seen = self.ctx.Array('d', [0.0] * n_tasks)  # 0.0 = unseen, 1.0 = seen
+
+    def _sample_logic(self) -> int:
+        if self._stale_dist.value:
+            self._recompute_weights()
+            self._stale_dist.value = False
+        weights = np.array(self._weights[:])
+        return int(self._rng.choice(self._n, p=weights))
+
+    def update(self, task_idx: int, episode_return: float) -> None:
+        with self._lock:
+            self._counts[task_idx] += 1
+            self._update_logic(task_idx, float(episode_return))
+            self._stale_dist.value = True
 
     def _normalize(self, episode_return: float) -> float:
         """Map raw return to [0, 1] using [-max_return, +max_return] as the range."""
@@ -31,6 +45,7 @@ class LearningProgress(Curriculum):
         if self._p_seen[task_idx] == 0.0: # init both EMAs to episode return on first observation to avoid learning progress spike differences
             self._p_fast[task_idx] = p
             self._p_slow[task_idx] = p
+            self._p_true[task_idx] = p   
             self._p_seen[task_idx] = 1.0
         else:
             old_fast = self._p_fast[task_idx]    
@@ -38,7 +53,8 @@ class LearningProgress(Curriculum):
             self._p_fast[task_idx] = p * alpha + old_fast * (1.0 - alpha)
             # Slow EMA updates as moving average of fast EMA
             self._p_slow[task_idx] = self._p_fast[task_idx] * alpha + self._p_slow[task_idx] * (1.0 - alpha)
-        self._p_true[task_idx] = p
+            self._p_true[task_idx] = p * alpha + self._p_true[task_idx] * (1.0 - alpha)
+
 
     def _reweight(self, p: np.ndarray) -> np.ndarray:
         numerator = p * (1.0 - self.p_theta)
