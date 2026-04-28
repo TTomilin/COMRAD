@@ -8,15 +8,16 @@ class OMNICurriculum(LearningProgress):
     suppressing mathematically boring tasks once prerequisites are met.
     """
     
-    def __init__(self, n_tasks: int, interestingness: Optional[dict[int, dict[int, bool]]] = None, **kwargs):
+    def __init__(self, n_tasks: int, interestingness: Optional[dict] = None, tasks: Optional[list] = None, **kwargs):
         super().__init__(n_tasks, **kwargs)
+        self.tasks = tasks or list(range(n_tasks))
         if interestingness is not None:
             self._interestingness = interestingness
         else:
             # Default: mastery of a task makes itself boring, but other tasks remain interesting.
             self._interestingness = {
-                i: {j: (j != i) for j in range(n_tasks)}
-                for i in range(n_tasks)
+                t: {other: (other != t) for other in self.tasks}
+                for t in self.tasks
             }
 
     def _recompute_weights(self) -> None:
@@ -24,9 +25,9 @@ class OMNICurriculum(LearningProgress):
         super()._recompute_weights() # Update weights purely by LP
         
         lp_dist = np.array(self._weights[:])
-        fast = np.array(self._p_fast[:])
+        true_rates = np.array(self._p_true[:])
         
-        tasks_by_success = np.argsort(fast)[::-1]  # Highest success/return first
+        tasks_by_success = np.argsort(true_rates)[::-1]  # Highest success/return first
         interesting = set()
         boring = set()
 
@@ -35,13 +36,15 @@ class OMNICurriculum(LearningProgress):
                 continue
             interesting.add(task_idx)
 
-            task_map = self._interestingness.get(task_idx, {})
+            task = self.tasks[task_idx]
+            task_map = self._interestingness.get(task, {})
             # Given that we consider task_idx mastered, determine boring consequences
             for other_idx in range(self._n):
                 if other_idx in interesting or other_idx in boring:
                     continue
+                other_task = self.tasks[other_idx]
                 # If map says this task is purely uninteresting knowing the mastered task's proficiency
-                if not task_map.get(other_idx, True):
+                if not task_map.get(other_task, True):
                     boring.add(other_idx)
 
         # Build weight mask where boring items are heavily penalized

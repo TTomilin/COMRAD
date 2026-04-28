@@ -7,28 +7,38 @@ class LearningProgress(Curriculum):
     Progress is measured by the absolute difference between these EMAs.
     """
 
-    def __init__(self, n_tasks: int, **kwargs):
+    def __init__(self, n_tasks: int, p_theta: float = 0.1, **kwargs):
         super().__init__(n_tasks, **kwargs)
+        self.p_theta = p_theta
         self._p_fast = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_slow = self.ctx.Array('d', [0.0] * n_tasks)
+        self._p_true = self.ctx.Array('d', [0.0] * n_tasks)
 
     def _update_logic(self, task_idx: int, episode_return: float) -> None:
         """Update EMAs for task returns."""
         alpha = self.EMA_ALPHA
         # Fast EMA updates based on actual returns
-        self._p_fast[task_idx] = episode_return * alpha + self._p_fast[task_idx] * (1.0 - alpha)
-        # Slow EMA updates as moving average of fast EMA
-        self._p_slow[task_idx] = self._p_fast[task_idx] * alpha + self._p_slow[task_idx] * (1.0 - alpha)
+        old_fast = self._p_fast[task_idx]
+        self._p_fast[task_idx] = episode_return * alpha + old_fast * (1.0 - alpha)
+        # Slow EMA updates as moving average of fast EMA based on value BEFORE this fast update
+        self._p_slow[task_idx] = old_fast * alpha + self._p_slow[task_idx] * (1.0 - alpha)
+        self._p_true[task_idx] = episode_return
+
+    def _reweight(self, p: np.ndarray) -> np.ndarray:
+        numerator = p * (1.0 - self.p_theta)
+        denominator = p + self.p_theta * (1.0 - 2.0 * p)
+        return numerator / denominator
 
     def _recompute_weights(self) -> None:
         fast = np.array(self._p_fast[:])
         slow = np.array(self._p_slow[:])
+        true_rates = np.array(self._p_true[:])
         
-        # Compute learning progress as absolute difference
-        learning_progress = np.abs(fast - slow)
+        # Compute learning progress as absolute difference of reweighted EMAs
+        learning_progress = np.abs(self._reweight(fast) - self._reweight(slow))
         
-        # Consider tasks with progress > 0
-        posidxs = [i for i, lp in enumerate(learning_progress) if lp > 0]
+        # Consider tasks with progress > 0 or true rates > 0
+        posidxs = [i for i, lp in enumerate(learning_progress) if lp > 0 or true_rates[i] > 0]
         any_progress = len(posidxs) > 0
         
         if any_progress:

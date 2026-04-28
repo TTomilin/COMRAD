@@ -69,6 +69,13 @@ def add_doom_env_args(parser):
             "sequential=advance through tasks in order, "
             "omni=LP masked by interestingness graph.",
     )
+    # lp hyperparameters
+    p.add_argument(
+        "--lp_p_theta",
+        default=0.1,
+        type=float,
+        help="LP curriculum p_theta parameter for rescaling success rates before computing the LP difference. (p_theta=0 => tasks with near-zero success stay unintersting, p_theta=1 => tasks close to full mastery are heavily unprioritized).",
+    )
     # omni hyperparameters
     p.add_argument(
         "--interestingness_graph_path",

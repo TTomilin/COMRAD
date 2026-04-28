@@ -49,6 +49,7 @@ def register_batch_env(cfg) -> str:
     curriculum = make_curriculum(
         len(batch.entries),
         strategy=strategy,
+        p_theta=getattr(cfg, "lp_p_theta", 0.1),
         interestingness=interestingness if strategy == "omni" else None,
         replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),
         replay_prob=getattr(cfg, "plr_replay_prob", 0.5),
