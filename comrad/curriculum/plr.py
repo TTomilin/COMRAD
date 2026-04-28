@@ -37,8 +37,9 @@ class PrioritizedLevelReplay(Curriculum):
         self._rho = rho
         self._max_score_coef = max_score_coef
         self._eps = eps
-        
+
         self._task_scores = self.ctx.Array('d', [0.0] * n_tasks)
+        self._task_score_steps = self.ctx.Array('l', [0] * n_tasks)
         self._task_staleness = self.ctx.Array('d', [0.0] * n_tasks)
         self._unseen_task_weights = self.ctx.Array('d', [1.0] * n_tasks)
 
@@ -46,28 +47,30 @@ class PrioritizedLevelReplay(Curriculum):
         """Called conventionally by workers. PLR relies on central PPO learner metrics natively."""
         pass
 
-    def update_task_score(self, task_idx: int, score: dict) -> None:
+    def update_task_score(self, task_idx: int, score: dict, num_steps: int = 1) -> None:
         """Inject from sample factory using native PLR learner loops."""
         raw = float(score.get(self._plr_score_key, 0.0))
         raw_max = float(score.get(self._plr_score_key.replace("mean_", "max_"), raw))
         total_score = self._max_score_coef * raw_max + (1.0 - self._max_score_coef) * raw
-        
+        num_steps = max(int(num_steps), 1)
+
         with self._lock:
             old = self._task_scores[task_idx]
             self._task_scores[task_idx] = (1.0 - self._alpha) * old + self._alpha * total_score
+            self._task_score_steps[task_idx] += num_steps
             self._unseen_task_weights[task_idx] = 0.0
             self._recompute_weights()
 
     def _sample_logic(self) -> int:
         """Override to implement complex replay schedule logic directly inside lock."""
         proportion_seen = self._proportion_seen()
-        
+
         if proportion_seen < self._rho:
             unseen = np.array(self._unseen_task_weights[:])
             if (unseen > 0).any():
                 return self._sample_unseen_level(unseen)
             return self._sample_replay_level() # fallback to replay if all seen but still under rho
-                
+
         do_replay = self._sample_replay_decision(proportion_seen)
         if do_replay:
             return self._sample_replay_level()
@@ -84,25 +87,24 @@ class PrioritizedLevelReplay(Curriculum):
     def _sample_replay_decision(self, proportion_seen: float) -> bool:
         if self._replay_schedule == "fixed":
             if proportion_seen >= self._rho:
-                if self._rng.random() < self._replay_prob or proportion_seen >= 1.0:
+                if self._random() < self._replay_prob or proportion_seen >= 1.0:
                     return True
             return False
         else:  # proportionate
-            if proportion_seen >= self._rho and self._rng.random() < min(proportion_seen, self._replay_prob):
+            if proportion_seen >= self._rho and self._random() < min(proportion_seen, self._replay_prob):
                 return True
             return False
 
     def _sample_replay_level(self) -> int:
         weights = self._calculate_score_weights()
-        task_idx = int(self._rng.choice(self._n, p=weights))
+        task_idx = self._choice(self._n, p=weights)
         self._update_staleness(task_idx)
         return task_idx
 
     def _sample_unseen_level(self, unseen: np.ndarray) -> int:
         unseen_w = unseen / unseen.sum()
-        task_idx = int(self._rng.choice(self._n, p=unseen_w))
+        task_idx = self._choice(self._n, p=unseen_w)
         self._update_staleness(task_idx)
-        self._unseen_task_weights[task_idx] = 0.0
         return task_idx
 
     def _update_staleness(self, selected_idx: int) -> None:
@@ -111,6 +113,7 @@ class PrioritizedLevelReplay(Curriculum):
             staleness += 1.0
             staleness[selected_idx] = 0.0
             self._task_staleness[:] = staleness.tolist()
+            self._recompute_weights()
 
     def _calculate_score_weights(self) -> np.ndarray:
         scores = np.array(self._task_scores[:])
@@ -143,6 +146,9 @@ class PrioritizedLevelReplay(Curriculum):
         total = weights.sum()
         return weights / total if total > 0 else weights
 
+    def _recompute_weights(self) -> None:
+        self._weights[:] = self._calculate_score_weights().tolist()
+
     def _apply_score_transform(self, transform: str, temperature: float, scores: np.ndarray) -> np.ndarray:
         if transform == "rank":
             temp = np.flip(scores.argsort())
@@ -158,7 +164,8 @@ class PrioritizedLevelReplay(Curriculum):
             w = np.zeros_like(scores)
             scores_ = scores.copy()
             scores_[np.array(self._unseen_task_weights[:]) > 0] = -np.inf
-            argmax = self._rng.choice(np.flatnonzero(np.isclose(scores_, scores_.max())))
+            argmax_candidates = np.flatnonzero(np.isclose(scores_, scores_.max()))
+            argmax = argmax_candidates[self._choice(len(argmax_candidates))]
             w[argmax] = 1.0
             return w
         elif transform == "eps_greedy":
@@ -177,7 +184,25 @@ class PrioritizedLevelReplay(Curriculum):
             unseen = np.array(self._unseen_task_weights[:])
             return {
                 "task_scores": np.array(self._task_scores[:]),
+                "task_score_steps": np.array(self._task_score_steps[:]),
                 "unseen_task_weights": unseen,
                 "task_staleness": np.array(self._task_staleness[:]),
                 "proportion_seen": self._proportion_seen(),
             }
+
+    def _state_dict_locked(self) -> dict:
+        return {
+            "task_scores": list(self._task_scores[:]),
+            "task_score_steps": list(self._task_score_steps[:]),
+            "task_staleness": list(self._task_staleness[:]),
+            "unseen_task_weights": list(self._unseen_task_weights[:]),
+        }
+
+    def _load_state_dict_locked(self, state: dict) -> None:
+        self._task_scores[:] = [float(value) for value in state.get("task_scores", self._task_scores[:])]
+        self._task_score_steps[:] = [int(value) for value in state.get("task_score_steps", self._task_score_steps[:])]
+        self._task_staleness[:] = [float(value) for value in state.get("task_staleness", self._task_staleness[:])]
+        self._unseen_task_weights[:] = [
+            float(value) for value in state.get("unseen_task_weights", self._unseen_task_weights[:])
+        ]
+        self._recompute_weights()

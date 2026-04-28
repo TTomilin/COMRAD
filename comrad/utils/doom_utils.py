@@ -614,7 +614,7 @@ def make_doom_env_from_spec(spec, _env_name, cfg, env_config, render_mode: Optio
 class DoomBatchSpec:
     base: DoomSpec
     batch_dir: str
-    swap_every: int = 5
+    swap_every: int = 1
 
 
 def make_doom_env_from_batch(batch_spec: DoomBatchSpec, curriculum,
