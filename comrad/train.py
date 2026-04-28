@@ -33,7 +33,7 @@ def register_vizdoom_envs():
 
 
 def register_batch_env(cfg) -> str:
-    from comrad.utils.curriculum import BatchCurriculum
+    from comrad.curriculum import make_curriculum
     from comrad.envs.wad_catalog import WadBatch
 
     base_spec = doom_env_by_name(cfg.env)
@@ -46,7 +46,7 @@ def register_batch_env(cfg) -> str:
     interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
     if strategy == "omni" and interestingness_graph_path is not None:
         interestingness = get_intrestingness_graph(interestingness_graph_path)
-    curriculum = BatchCurriculum(
+    curriculum = make_curriculum(
         len(batch.entries),
         strategy=strategy,
         interestingness=interestingness if strategy == "omni" else None,
@@ -61,6 +61,7 @@ def register_batch_env(cfg) -> str:
         staleness_temperature=getattr(cfg, "plr_staleness_temperature", 1.0),
         plr_score_key=getattr(cfg, "plr_score_key", "mean_value_l1"),
         max_score_coef=getattr(cfg, "plr_max_score_coef", 0.0),
+        eps=getattr(cfg, "plr_eps", 0.05),
     )
     make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
     register_env(env_name, make_env_func)

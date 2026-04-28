@@ -30,7 +30,7 @@ from sample_factory.utils.dicts import iterate_recursively
 from sample_factory.utils.timing import Timing
 from sample_factory.utils.typing import ActionDistribution, Config, InitModelData, PolicyID
 from sample_factory.utils.utils import ensure_dir_exists, experiment_dir, log
-from comrad.utils.curriculum import BatchCurriculum
+from comrad.curriculum.base import Curriculum
 
 
 class LearningRateScheduler:
@@ -704,12 +704,12 @@ class Learner(Configurable):
                     continue
 
                 score = {
-                    BatchCurriculum.SCORE_MEAN_VALUE_L1:  value_l1[mask].mean().item(),
-                    BatchCurriculum.SCORE_MAX_VALUE_L1:   value_l1[mask].max().item(),
-                    BatchCurriculum.SCORE_MEAN_ADVANTAGE: adv_abs[mask].mean().item(),
-                    BatchCurriculum.SCORE_MAX_ADVANTAGE:  adv_abs[mask].max().item(),
-                    BatchCurriculum.SCORE_MEAN_ENTROPY:   entropy[mask].mean().item(),
-                    BatchCurriculum.SCORE_MAX_ENTROPY:    entropy[mask].max().item(),
+                    Curriculum.SCORE_MEAN_VALUE_L1:  value_l1[mask].mean().item(),
+                    Curriculum.SCORE_MAX_VALUE_L1:   value_l1[mask].max().item(),
+                    Curriculum.SCORE_MEAN_ADVANTAGE: adv_abs[mask].mean().item(),
+                    Curriculum.SCORE_MAX_ADVANTAGE:  adv_abs[mask].max().item(),
+                    Curriculum.SCORE_MEAN_ENTROPY:   entropy[mask].mean().item(),
+                    Curriculum.SCORE_MAX_ENTROPY:    entropy[mask].max().item(),
                 }
                 curriculum.update_task_score(int(tid.item()), score)
 

@@ -147,6 +147,12 @@ def add_doom_env_args(parser):
         type=float,
         help="PLR interpolation weight between max score and mean score (0.0 = mean only)."
     )
+    p.add_argument(
+        "--plr_eps",
+        default=0.05,
+        type=float,
+        help="PLR epsilon for minimum replay probability."
+    )
 
 
 def add_wandb_args(parser):
