@@ -374,6 +374,7 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
                 env_idx=self.env_idx_buffer,
                 agent_idx=self.agent_idx_buffer,
                 policy_id=self.policy_id_buffer,
+                task_idx=self._get_task_idx_buffer(infos),
             )
 
             # reset next-step hidden states to zero if we encountered an episode boundary
@@ -402,6 +403,29 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
 
         self.env_step_ready = True
         return complete_rollouts, episodic_stats
+    
+    def _get_task_idx_buffer(self, infos) -> torch.Tensor:
+        """Extract task_idx from infos into a [num_agents] int32 tensor."""
+        buf = torch.full(
+            (self.vec_env.num_agents,),
+            fill_value=-1,
+            dtype=torch.int32,
+            device=self.device,
+        )
+        if isinstance(infos, dict):
+            # env emits task_idx as a tensor or scalar
+            val = infos.get("task_idx", None)
+            if val is not None:
+                if isinstance(val, torch.Tensor):
+                    buf[:] = val.to(dtype=torch.int32, device=self.device)
+                else:
+                    buf.fill_(int(val))
+        elif isinstance(infos, (list, tuple)):
+            # list of per-agent dicts
+            for i, agent_info in enumerate(infos):
+                if isinstance(agent_info, dict) and "task_idx" in agent_info:
+                    buf[i] = int(agent_info["task_idx"])
+        return buf
 
     def update_trajectory_buffers(self, timing) -> bool:
         if self.curr_traj_slice is not None and self.curr_traj is not None:

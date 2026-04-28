@@ -53,17 +53,128 @@ def add_doom_env_args(parser):
     )
     p.add_argument(
         "--wad_swap_every",
-        default=1,
+        default=5,
         type=int,
         help="Swap WAD every N episodes (only used with --wad_batch).",
     )
     p.add_argument(
-        "--wad_strategy",
-        default="round_robin",
+        "--curriculum",
+        default="uniform",
         type=str,
-        choices=["round_robin", "random", "weighted"],
-        help="Sampling strategy for --wad_batch.",
+        choices=["uniform", "learning_progress", "plr", "sequential", "omni"],
+        help="Curriculum strategy for sampling WAD batches. "
+            "uniform=equal probability, "
+            "learning_progress=prioritize tasks with highest return variance, "
+            "plr=prioritize lowest-return tasks, "
+            "sequential=advance through tasks in order, "
+            "omni=LP masked by interestingness graph.",
     )
+    # lp hyperparameters
+    p.add_argument(
+        "--lp_p_theta",
+        default=0.1,
+        type=float,
+        help="LP curriculum p_theta parameter for rescaling success rates before computing the LP difference. (p_theta=0 => tasks with near-zero success stay unintersting, p_theta=1 => tasks close to full mastery are heavily unprioritized).",
+    )
+    p.add_argument(
+        "--lp_max_return",
+        default=100.0,
+        type=float,
+        help="Maximum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
+            "Set per-scenario if returns differ significantly.",
+    )
+    p.add_argument(
+        "--lp_min_return",
+        default=-100.0,
+        type=float,
+        help="Minimum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
+            "Set per-scenario if returns differ significantly.",
+    )
+    # omni hyperparameters
+    p.add_argument(
+        "--interestingness_graph_path",
+        default=None,
+        type=str,
+        help="Path to JSON file containing the interestingness graph for the omni curriculum strategy. "
+            "The JSON should be of type dict[str, dict[str, bool]], where the keys of the outer dict are task identifiers (as passed in the batch) and the inner dict maps other task identifiers to booleans indicating whether they remain interesting (True) or become boring (False) once the outer task is mastered.",
+    )
+    # plr hyperparameters
+    p.add_argument(
+        "--plr_replay_schedule",
+        default="proportionate",
+        type=str,
+        choices=["proportionate", "fixed"],
+        help="PLR replay schedule."
+    )
+    p.add_argument(
+        "--plr_replay_prob",
+        default=0.5,
+        type=float,
+        help="PLR probability of sampling a replay level."
+    )
+    p.add_argument(
+        "--plr_rho",
+        default=1.0,
+        type=float,
+        help="PLR proportion of tasks that must be seen before replay starts."
+    )
+    p.add_argument(
+        "--plr_staleness_coef",
+        default=0.1,
+        type=float,
+        help="PLR staleness interpolation coefficient."
+    )
+    p.add_argument(
+        "--plr_score_transform",
+        default="rank",
+        type=str,
+        choices=["rank", "power", "softmax", "max", "constant"],
+        help="PLR score transform."
+        )
+    p.add_argument(
+        "--plr_temperature",
+        default=0.1,
+        type=float,
+        help="PLR score transform temperature."
+    )
+    p.add_argument(
+        "--plr_alpha",
+        default=1.0,
+        type=float,
+        help="PLR score interpolation weight (1.0 = use new score only)."
+        )
+    p.add_argument(
+        "--plr_staleness_transform",
+        default="power",
+        type=str,
+        help="PLR staleness transform."
+    )
+    p.add_argument(
+        "--plr_staleness_temperature",
+        default=1.0,
+        type=float,
+        help="PLR staleness transform temperature."
+    )
+    p.add_argument(
+        "--plr_score_key",
+        default="mean_value_l1",
+        type=str,
+        choices=["mean_value_l1", "mean_advantage", "mean_entropy"],
+        help="PLR score metric (mean signal) used from learner scoring. Max is derived automatically."
+    )
+    p.add_argument(
+        "--plr_max_score_coef",
+        default=0.0,
+        type=float,
+        help="PLR interpolation weight between max score and mean score (0.0 = mean only)."
+    )
+    p.add_argument(
+        "--plr_eps",
+        default=0.05,
+        type=float,
+        help="PLR epsilon for minimum replay probability."
+    )
+
 
 def add_wandb_args(parser):
     parser.add_argument("--wandb_record_every", default=50, type=int, help="Every N episodes")

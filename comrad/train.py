@@ -3,6 +3,7 @@ import os
 import sys
 import datetime
 import wandb
+from typing import Optional
 
 from sample_factory.algo.utils.context import global_model_factory
 from sample_factory.algo.utils.misc import ExperimentStatus
@@ -32,18 +33,58 @@ def register_vizdoom_envs():
 
 
 def register_batch_env(cfg) -> str:
-    base_spec = doom_env_by_name(cfg.env)
-    batch_spec = DoomBatchSpec(
-        base=base_spec,
-        batch_dir=cfg.wad_batch,
-        swap_every=getattr(cfg, "wad_swap_every", 1),
-        strategy=getattr(cfg, "wad_strategy", "round_robin"),
-    )
-    env_name = f"{cfg.env}_batch"
-    make_env_func = functools.partial(make_doom_env_from_batch, batch_spec)
-    register_env(env_name, make_env_func)
-    return env_name
+    from comrad.curriculum import make_curriculum
+    from comrad.envs.wad_catalog import WadBatch
 
+    base_spec = doom_env_by_name(cfg.env)
+    batch_spec = DoomBatchSpec(base=base_spec, batch_dir=cfg.wad_batch, swap_every=getattr(cfg, "wad_swap_every", 5),)
+    env_name = f"{cfg.env}_batch"
+
+    batch = WadBatch.from_dir(batch_spec.batch_dir)
+    strategy = getattr(cfg, "curriculum", "uniform")
+    if strategy == "plr":
+        assert cfg.algo.upper() in ("APPO", "MAPPO", "IPPO", "HAPPO"), \
+            "PLR curriculum requires a PPO-based algorithm."
+    interestingness = None
+    interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
+    if strategy == "omni" and interestingness_graph_path is not None:
+        interestingness = get_intrestingness_graph(interestingness_graph_path)
+    task_ids = [entry.name for entry in batch.entries]
+    curriculum = make_curriculum(
+        len(batch.entries),
+        strategy=strategy,
+        p_theta=getattr(cfg, "lp_p_theta", 0.1),
+        max_return=getattr(cfg, "lp_max_return", 100.0),
+        min_return=getattr(cfg, "lp_min_return", -100.0),
+        tasks=task_ids,
+        interestingness=interestingness,
+        replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),
+        replay_prob=getattr(cfg, "plr_replay_prob", 0.5),
+        rho=getattr(cfg, "plr_rho", 1.0),
+        staleness_coef=getattr(cfg, "plr_staleness_coef", 0.1),
+        score_transform=getattr(cfg, "plr_score_transform", "rank"),
+        temperature=getattr(cfg, "plr_temperature", 0.1),
+        alpha=getattr(cfg, "plr_alpha", 1.0),
+        staleness_transform=getattr(cfg, "plr_staleness_transform", "power"),
+        staleness_temperature=getattr(cfg, "plr_staleness_temperature", 1.0),
+        plr_score_key=getattr(cfg, "plr_score_key", "mean_value_l1"),
+        max_score_coef=getattr(cfg, "plr_max_score_coef", 0.0),
+        eps=getattr(cfg, "plr_eps", 0.05),
+    )
+    make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
+    register_env(env_name, make_env_func)
+    return env_name, curriculum
+
+def get_intrestingness_graph(interestingness_graph_path: Optional[str]) -> Optional[dict]:
+    import json
+    if interestingness_graph_path is None:
+        return None
+    with open(interestingness_graph_path, "r") as f:
+        raw = json.load(f)
+    return {
+        k: {kk: bool(vv) for kk, vv in v.items()}
+        for k, v in raw.items()
+    }
 
 def register_vizdoom_models():
     global_model_factory().register_encoder_factory(make_vizdoom_encoder)
@@ -58,7 +99,7 @@ def configure_batch_env_and_agents(cfg):
     # When --wad_batch is given, override cfg.env with the pool name and
     # register the pool environment. Existing DOOM_ENVS are unaffected.
     if getattr(cfg, "wad_batch", None):
-        cfg.env = register_batch_env(cfg)
+        cfg.env, cfg._curriculum = register_batch_env(cfg) 
 
     if cfg.num_agents < 1:
         # Strip "_batch" to lookup standard env base properties.
@@ -129,13 +170,21 @@ def main():
 
     if cfg.num_agents > 1:
         register_model_factory(cfg)
-
+    curriculum = getattr(cfg, "_curriculum", None)
+    if hasattr(cfg, "_curriculum"):
+        del cfg._curriculum  # remove from cfg to avoid JSON serialization errors
+            
     cfg, runner = make_runner(cfg)
-
+            
     if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):
         upload_video(runner, cfg)
 
     status = runner.init()
+    
+    if curriculum is not None:
+        for policy_id, learner_worker in runner.learners.items():
+            learner_worker.learner.curriculum = curriculum
+            
     if status == ExperimentStatus.SUCCESS:
         status = runner.run()
 

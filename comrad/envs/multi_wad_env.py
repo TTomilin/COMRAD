@@ -1,16 +1,14 @@
 import os
 import random
 import tempfile
+import shutil
 from typing import Optional
 
+import numpy as np
 import gymnasium as gym
 
 from comrad.envs.wad_catalog import WadBatch, WadInfo
 from comrad.utils.wad_utils import patch_wad_path
-import shutil
-
-# if TYPE_CHECKING:
-#     from comrad.curriculum.scheduler import CurriculumScheduler
 
 
 class MultiWADEnv(gym.Wrapper):
@@ -19,24 +17,25 @@ class MultiWADEnv(gym.Wrapper):
         env: gym.Env,
         batch: WadBatch,
         base_cfg: str,
-        swap_every: int = 1,
-        strategy: str = "round_robin",
+        swap_every: int = 5,
         seed: int = 0,
-        # scheduler: Optional["CurriculumScheduler"] = None,
+        curriculum=None,
     ):
         super().__init__(env)
+        self.num_agents = getattr(env, 'num_agents', None) or getattr(env.unwrapped, 'num_agents', 1)
+        self.is_multiagent = getattr(env, 'is_multiagent', self.num_agents > 1)
         self.batch = batch
         self.base_cfg = base_cfg
         self.swap_every = max(1, swap_every)
-        self.strategy = strategy
         self._rng = random.Random(seed)
         self._eps = 0
-        self.scheduler = None  # set later via set_scheduler() when curriculum is enabled
+        self.curriculum = curriculum
+        self._episode_return = 0.0
         self._cfg_dir = tempfile.mkdtemp(prefix="comrad_wad_")
         self._current: Optional[WadInfo] = None
-        initial_wad = batch.sample(strategy, self._rng)
-        self._apply_swap(initial_wad)
-        
+        self._current_task_idx = self._sample_wad_idx()
+        self._apply_swap(self.batch.entries[self._current_task_idx])
+
     def close(self):
         super().close()
         if self._cfg_dir and os.path.isdir(self._cfg_dir):
@@ -45,24 +44,39 @@ class MultiWADEnv(gym.Wrapper):
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
+        # expose current task index so SF can store it in the trajectory buffer
+        if isinstance(info, dict):
+            info["task_idx"] = self._current_task_idx
+        elif isinstance(info, (list, tuple)):
+            for d in info:
+                if isinstance(d, dict):
+                    d["task_idx"] = self._current_task_idx
+        r = float(np.mean(reward)) if isinstance(reward, (list, tuple)) else float(reward)
+        self._episode_return += r
 
         if self._did_inner_env_auto_reset(terminated, truncated, info):
             self._eps += 1
+            if self.curriculum is not None:
+                self.curriculum.update(self._current_task_idx, self._episode_return)
+            self._episode_return = 0.0
             if self._should_swap_before_next_episode():
-                self._swap_to_next_wad()
+                next_idx = self._sample_wad_idx()
+                if next_idx != self._current_task_idx:
+                    self._current_task_idx = next_idx
+                    self._apply_swap(self.batch.entries[next_idx])
 
         return obs, reward, terminated, truncated, info
+    
+    def _sample_wad_idx(self) -> int:
+        if self.curriculum is not None:
+            return self.curriculum.sample()
+        return self._rng.randrange(len(self.batch.entries))
 
     def _apply_swap(self, wad: WadInfo) -> None:
         cfg_out = os.path.join(self._cfg_dir, f"{wad.name}.cfg")
         patch_wad_path(self.base_cfg, wad.wad_path, cfg_out)
         self._current = wad
         self.env.unwrapped.swap_scenario(cfg_out)
-
-    def _swap_to_next_wad(self) -> None:
-        if self.scheduler:
-            self.batch.set_weights(self.scheduler.get_weights())
-        self._apply_swap(self.batch.sample(self.strategy, self._rng))
 
     def _should_swap_before_next_episode(self) -> bool:
         return self._eps > 0 and self._eps % self.swap_every == 0
@@ -71,3 +85,13 @@ class MultiWADEnv(gym.Wrapper):
         if isinstance(terminated, (list, tuple)):
             return all(t or tr for t, tr in zip(terminated, truncated))
         return bool(terminated) or bool(truncated)
+    
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        if isinstance(info, dict):
+                info["task_idx"] = self._current_task_idx
+        elif isinstance(info, (list, tuple)):
+            for d in info:
+                if isinstance(d, dict):
+                    d["task_idx"] = self._current_task_idx
+        return obs, info
