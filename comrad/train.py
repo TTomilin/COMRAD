@@ -51,6 +51,7 @@ def register_batch_env(cfg) -> str:
         len(batch.entries),
         strategy=strategy,
         p_theta=getattr(cfg, "lp_p_theta", 0.1),
+        max_return=getattr(cfg, "lp_max_return", 100.0),
         tasks=task_ids,
         interestingness=interestingness,
         replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),

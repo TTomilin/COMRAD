@@ -76,6 +76,13 @@ def add_doom_env_args(parser):
         type=float,
         help="LP curriculum p_theta parameter for rescaling success rates before computing the LP difference. (p_theta=0 => tasks with near-zero success stay unintersting, p_theta=1 => tasks close to full mastery are heavily unprioritized).",
     )
+    p.add_argument(
+        "--lp_max_return",
+        default=100.0,
+        type=float,
+        help="Maximum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
+            "Set per-scenario if returns differ significantly.",
+    )
     # omni hyperparameters
     p.add_argument(
         "--interestingness_graph_path",

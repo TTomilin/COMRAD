@@ -7,28 +7,37 @@ class LearningProgress(Curriculum):
     Progress is measured by the absolute difference between these EMAs.
     """
 
-    def __init__(self, n_tasks: int, p_theta: float = 0.1, **kwargs):
+    def __init__(self, n_tasks: int, p_theta: float = 0.1, max_return: float = 100.0, **kwargs):
         super().__init__(n_tasks, **kwargs)
         self.p_theta = p_theta
+        self.max_return = max_return
         self._p_fast = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_slow = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_true = self.ctx.Array('d', [0.0] * n_tasks)
         self._p_seen = self.ctx.Array('d', [0.0] * n_tasks)  # 0.0 = unseen, 1.0 = seen
 
+    def _normalize(self, episode_return: float) -> float:
+        """Map raw return to [0, 1] using [-max_return, +max_return] as the range."""
+        r_min = -self.max_return
+        r_max =  self.max_return
+        normalized = (episode_return - r_min) / (r_max - r_min)
+        return float(np.clip(normalized, 0.0, 1.0))
+
     def _update_logic(self, task_idx: int, episode_return: float) -> None:
         """Update EMAs for task returns."""
+        p = self._normalize(episode_return)
         alpha = self.EMA_ALPHA
         if self._p_seen[task_idx] == 0.0: # init both EMAs to episode return on first observation to avoid learning progress spike differences
-            self._p_fast[task_idx] = episode_return
-            self._p_slow[task_idx] = episode_return
+            self._p_fast[task_idx] = p
+            self._p_slow[task_idx] = p
             self._p_seen[task_idx] = 1.0
         else:
             old_fast = self._p_fast[task_idx]    
             # Fast EMA updates based on actual returns
-            self._p_fast[task_idx] = episode_return * alpha + old_fast * (1.0 - alpha)
-            # Slow EMA updates as moving average of fast EMA based on value BEFORE this fast update
+            self._p_fast[task_idx] = p * alpha + old_fast * (1.0 - alpha)
+            # Slow EMA updates as moving average of fast EMA
             self._p_slow[task_idx] = self._p_fast[task_idx] * alpha + self._p_slow[task_idx] * (1.0 - alpha)
-        self._p_true[task_idx] = episode_return
+        self._p_true[task_idx] = p
 
     def _reweight(self, p: np.ndarray) -> np.ndarray:
         numerator = p * (1.0 - self.p_theta)
@@ -58,19 +67,14 @@ class LearningProgress(Curriculum):
         # sigmoid
         subprobs = 1.0 / (1.0 + np.exp(-subprobs))
         # normalize
-        subprobs = subprobs / (np.sum(subprobs) + 1e-8)
+        subprobs = subprobs / (np.sum(subprobs))
 
         if any_progress:
             task_dist = np.zeros(self._n)
             task_dist[posidxs] = subprobs
-            # normalize just in case
-            task_dist = task_dist / (np.sum(task_dist) + 1e-8)
             self._weights[:] = task_dist.tolist()
         else:
-            if np.sum(subprobs) == 0: # shouldn't happen with sigmoid, but just in case
-                self._weights[:] = (np.ones(self._n) / self._n).tolist()
-            else:
-                self._weights[:] = subprobs.tolist()
+            self._weights[:] = subprobs.tolist()
 
     def task_returns(self) -> np.ndarray:
         with self._lock:
