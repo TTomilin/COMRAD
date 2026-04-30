@@ -5,21 +5,20 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        relay_completion_reward=1.0,
-        sync_progress_reward=0.001,
-        extraction_reward=1.0,
+        room_discovery_reward=0.3,
+        kill_reward=2.0,
+        damage_taken_penalty_per_hp=-0.02,
         death_penalty=-1.0,
     ):
         super().__init__(env)
-        self.relay_completion_reward = float(relay_completion_reward)
-        self.sync_progress_reward = float(sync_progress_reward)
-        self.extraction_reward = float(extraction_reward)
+        self.room_discovery_reward = float(room_discovery_reward)
+        self.kill_reward = float(kill_reward)
+        self.damage_taken_penalty_per_hp = float(damage_taken_penalty_per_hp)
         self.death_penalty = float(death_penalty)
 
-        self.prev_relays_done = None
-        self.prev_p1_alive = None
-        self.prev_p2_alive = None
-        self.best_progress_by_objective = {}
+        self.best_destroyed = None
+        self.best_rooms_seen = None
+        self.prev_team_hp = None
         self.orig_env_reward = 0.0
 
     def _num_agents(self) -> int:
@@ -35,30 +34,35 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         except (TypeError, ValueError, OverflowError):
             return default
 
-    def _sync(self, info):
+    @staticmethod
+    def _float(info, key: str, default: float = 0.0) -> float:
+        try:
+            return float(info.get(key, default))
+        except (TypeError, ValueError, OverflowError):
+            return default
+
+    def _true_objective(self, info) -> float:
+        total = max(0, self._int(info, "USER47"))
+        destroyed = max(0, self._int(info, "USER46"))
+        if total <= 0:
+            return 0.0
+        return min(1.0, destroyed / float(total))
+
+    def _sync(self, info) -> None:
         if info is None:
-            self.prev_relays_done = None
-            self.prev_p1_alive = None
-            self.prev_p2_alive = None
+            self.best_destroyed = None
+            self.best_rooms_seen = None
+            self.prev_team_hp = None
             return
-
-        self.prev_relays_done = max(0, self._int(info, "USER44"))
-        active_objective = self._int(info, "USER45", -1)
-        objective_progress = max(0, self._int(info, "USER46"))
-        self.prev_p1_alive = max(0, self._int(info, "USER41"))
-        self.prev_p2_alive = max(0, self._int(info, "USER42"))
-
-        if active_objective >= 0 and objective_progress > 0:
-            best_progress = max(0, int(self.best_progress_by_objective.get(active_objective, 0)))
-            if objective_progress > best_progress:
-                self.best_progress_by_objective[active_objective] = objective_progress
+        self.best_destroyed = max(0, self._int(info, "USER46"))
+        self.best_rooms_seen = max(0, self._int(info, "USER48"))
+        self.prev_team_hp = max(0.0, self._float(info, "USER50"))
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.prev_relays_done = None
-        self.prev_p1_alive = None
-        self.prev_p2_alive = None
-        self.best_progress_by_objective = {}
+        self.best_destroyed = None
+        self.best_rooms_seen = None
+        self.prev_team_hp = None
         self.orig_env_reward = 0.0
         self._sync(info)
         return obs, info
@@ -74,60 +78,55 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         if info is None:
             return obs, reward, terminated, truncated, info
 
-        curr_relays_done = max(0, self._int(info, "USER44"))
-        curr_active_objective = self._int(info, "USER45", -1)
-        curr_objective_progress = max(0, self._int(info, "USER46"))
-        curr_extraction_unlocked = max(0, self._int(info, "USER47"))
-        curr_sync_state = max(0, self._int(info, "USER48"))
-        curr_p1_alive = max(0, self._int(info, "USER41"))
-        curr_p2_alive = max(0, self._int(info, "USER42"))
+        destroyed = max(0, self._int(info, "USER46"))
+        rooms_seen = max(0, self._int(info, "USER48"))
+        remaining = max(0, self._int(info, "USER44"))
+        total = max(0, self._int(info, "USER47"))
+        team_hp = max(0.0, self._float(info, "USER50"))
+        p1_alive = max(0, self._int(info, "USER41"))
+        p2_alive = max(0, self._int(info, "USER42"))
 
-        if (
-            self.prev_relays_done is None
-            or self.prev_p1_alive is None
-            or self.prev_p2_alive is None
-        ):
-            info["true_objective"] = float(curr_relays_done)
+        if self.best_destroyed is None or self.best_rooms_seen is None or self.prev_team_hp is None:
+            self._sync(info)
+            info["true_objective"] = self._true_objective(info)
+            info["success"] = False
             if terminated or truncated:
                 info["orig_env_reward"] = self.orig_env_reward
-            self._sync(info)
             return obs, reward, terminated, truncated, info
 
+        delta_destroyed = max(0, destroyed - self.best_destroyed)
+        delta_rooms_seen = max(0, rooms_seen - self.best_rooms_seen)
+        delta_team_damage = max(0.0, self.prev_team_hp - team_hp)
+
         shaped_team_reward = 0.0
+        shaped_team_reward += delta_rooms_seen * self.room_discovery_reward
+        shaped_team_reward += delta_destroyed * self.kill_reward
+        shaped_team_reward += delta_team_damage * self.damage_taken_penalty_per_hp
 
-        delta_relays = curr_relays_done - self.prev_relays_done
-        if delta_relays > 0:
-            shaped_team_reward += delta_relays * self.relay_completion_reward
-
-        # ACS progress resets to zero when agents leave the valid room, so rewarding raw
-        # deltas would let policies farm shaping by repeatedly partial-holding and resetting.
-        # Reward only new best progress achieved on each objective within the episode.
-        if curr_sync_state > 0 and curr_active_objective >= 0:
-            best_progress = max(0, int(self.best_progress_by_objective.get(curr_active_objective, 0)))
-            if curr_objective_progress > best_progress:
-                progress_delta = curr_objective_progress - best_progress
-                shaped_team_reward += progress_delta * self.sync_progress_reward
-                self.best_progress_by_objective[curr_active_objective] = curr_objective_progress
-
-        prev_team_alive = self.prev_p1_alive > 0 and self.prev_p2_alive > 0
-        curr_team_alive = curr_p1_alive > 0 and curr_p2_alive > 0
-        if prev_team_alive and not curr_team_alive:
+        if terminated and (p1_alive <= 0 or p2_alive <= 0):
             shaped_team_reward += self.death_penalty
+
+        total_reward = reward + shaped_team_reward * self._reward_share()
 
         success = bool(
             terminated
             and not truncated
-            and curr_team_alive
-            and curr_extraction_unlocked > 0
+            and total > 0
+            and remaining == 0
+            and p1_alive > 0
+            and p2_alive > 0
         )
-        if success:
-            shaped_team_reward += self.extraction_reward
 
-        total_reward = reward + shaped_team_reward * self._reward_share()
+        if destroyed < self.best_destroyed or rooms_seen < self.best_rooms_seen:
+            info.setdefault("episode_extra_stats", {})["counter_regression"] = 1
 
-        info["true_objective"] = float(curr_relays_done + (1 if success else 0))
+        self.best_destroyed = max(self.best_destroyed, destroyed)
+        self.best_rooms_seen = max(self.best_rooms_seen, rooms_seen)
+        self.prev_team_hp = team_hp
+
+        info["true_objective"] = self._true_objective(info)
+        info["success"] = success
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
 
-        self._sync(info)
         return obs, total_reward, terminated, truncated, info
