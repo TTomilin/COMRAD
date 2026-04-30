@@ -1,4 +1,42 @@
 import gymnasium as gym
+import numpy as np
+
+
+class LavapitAdditionalInput(gym.Wrapper):
+    def __init__(self, env):
+        super().__init__(env)
+        current_obs_space = self.observation_space
+
+        low = np.array([0.0], dtype=np.float32)
+        high = np.array([1.0], dtype=np.float32)
+
+        self.observation_space = gym.spaces.Dict(
+            {
+                "obs": current_obs_space,
+                "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+            }
+        )
+        self.measurements_vec = np.zeros(1, dtype=np.float32)
+
+    def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
+        if info is None:
+            self.measurements_vec.fill(0.0)
+            return obs_dict
+
+        self.measurements_vec[0] = float(bool(info.get("USER23", 0)))
+        return obs_dict
+
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
+        self.measurements_vec.fill(0.0)
+        return self._parse_info(obs, info), info
+
+    def step(self, action):
+        obs, rew, terminated, truncated, info = self.env.step(action)
+        if obs is None:
+            return obs, rew, terminated, truncated, info
+        return self._parse_info(obs, info), rew, terminated, truncated, info
 
 
 class LavapitRewardShaping(gym.Wrapper):

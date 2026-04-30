@@ -37,7 +37,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -101,6 +101,7 @@ ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo
 LAVA_MAZE_ADDITIONAL_INPUT = (LavaMazeAdditionalInput, {})
 FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 AMMO_CARRIER_ADDITIONAL_INPUT = (AmmoCarrierAdditionalInput, {})
+LAVAPIT_ADDITIONAL_INPUT = (LavapitAdditionalInput, {})
 DOOM_ENVS = [
 
     #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
@@ -136,7 +137,7 @@ DOOM_ENVS = [
         1000,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(LavapitRewardShaping, {})],
+        extra_wrappers=[LAVAPIT_ADDITIONAL_INPUT, (LavapitRewardShaping, {})],
         shared_reward_alpha=1.0,
     ),
 
