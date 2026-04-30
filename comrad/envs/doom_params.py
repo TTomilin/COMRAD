@@ -53,7 +53,7 @@ def add_doom_env_args(parser):
     )
     p.add_argument(
         "--wad_swap_every",
-        default=5,
+        default=1,
         type=int,
         help="Swap WAD every N episodes (only used with --wad_batch).",
     )
@@ -64,8 +64,8 @@ def add_doom_env_args(parser):
         choices=["uniform", "learning_progress", "plr", "sequential", "omni"],
         help="Curriculum strategy for sampling WAD batches. "
             "uniform=equal probability, "
-            "learning_progress=prioritize tasks with highest return variance, "
-            "plr=prioritize lowest-return tasks, "
+            "learning_progress=prioritize tasks with highest true_objective success progress, "
+            "plr=prioritize tasks with highest learner-side PLR score (value error, advantage magnitude, or entropy), "
             "sequential=advance through tasks in order, "
             "omni=LP masked by interestingness graph.",
     )
@@ -80,15 +80,21 @@ def add_doom_env_args(parser):
         "--lp_max_return",
         default=100.0,
         type=float,
-        help="Maximum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
-            "Set per-scenario if returns differ significantly.",
+        help="Maximum expected episode `true_objective` used to normalize LP/OMNI success rates to [0, 1]. "
+            "Set per-scenario if objective scales differ significantly.",
     )
     p.add_argument(
         "--lp_min_return",
         default=-100.0,
         type=float,
-        help="Minimum expected episode return used to normalize returns to [0, 1] for LP/OMNI curriculum. "
-            "Set per-scenario if returns differ significantly.",
+        help="Minimum expected episode `true_objective` used to normalize LP/OMNI success rates to [0, 1]. "
+            "Set per-scenario if objective scales differ significantly.",
+    )
+    p.add_argument(
+        "--lp_uniform_prob",
+        default=0.25,
+        type=float,
+        help="Uniform exploration mass mixed into LP/OMNI sampling to keep hard tasks from becoming unsampleable.",
     )
     # omni hyperparameters
     p.add_argument(
@@ -97,6 +103,25 @@ def add_doom_env_args(parser):
         type=str,
         help="Path to JSON file containing the interestingness graph for the omni curriculum strategy. "
             "The JSON should be of type dict[str, dict[str, bool]], where the keys of the outer dict are task identifiers (as passed in the batch) and the inner dict maps other task identifiers to booleans indicating whether they remain interesting (True) or become boring (False) once the outer task is mastered.",
+    )
+    # sequential hyperparameters
+    p.add_argument(
+        "--seq_threshold",
+        default=0.8,
+        type=float,
+        help="Sequential curriculum promotion threshold on the rolling mean of the curriculum success signal.",
+    )
+    p.add_argument(
+        "--seq_max_return",
+        default=1.0,
+        type=float,
+        help="Sequential curriculum normalization scale for the rolling mean of episode `true_objective`.",
+    )
+    p.add_argument(
+        "--seq_window",
+        default=100,
+        type=int,
+        help="Sequential curriculum rolling window size in episodes.",
     )
     # plr hyperparameters
     p.add_argument(

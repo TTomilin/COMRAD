@@ -7,10 +7,11 @@ from typing import Optional
 
 from sample_factory.algo.utils.context import global_model_factory
 from sample_factory.algo.utils.misc import ExperimentStatus
-from sample_factory.cfg.arguments import parse_full_cfg, parse_sf_args
+from sample_factory.cfg.arguments import maybe_load_from_checkpoint, parse_full_cfg, parse_sf_args
 from sample_factory.envs.env_utils import register_env
 from sample_factory.train import make_runner
 
+from comrad.curriculum.observer import CurriculumObserver, restore_curriculum_state
 from comrad.models.doom_model import make_vizdoom_encoder
 from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
 from comrad.utils.doom_utils import (
@@ -32,19 +33,34 @@ def register_vizdoom_envs():
         register_env(env_spec.name, make_env_func)
 
 
+def batch_base_env_name(cfg) -> str:
+    base_env = getattr(cfg, "_batch_base_env", None)
+    if base_env:
+        return base_env
+
+    env_name = str(cfg.env)
+    if env_name.endswith("_batch"):
+        return env_name[: -len("_batch")]
+    return env_name
+
+
 def register_batch_env(cfg) -> str:
     from comrad.curriculum import make_curriculum
     from comrad.envs.wad_catalog import WadBatch
 
-    base_spec = doom_env_by_name(cfg.env)
-    batch_spec = DoomBatchSpec(base=base_spec, batch_dir=cfg.wad_batch, swap_every=getattr(cfg, "wad_swap_every", 5),)
-    env_name = f"{cfg.env}_batch"
+    base_env = batch_base_env_name(cfg)
+    cfg._batch_base_env = base_env
+    base_spec = doom_env_by_name(base_env)
+    batch_spec = DoomBatchSpec(base=base_spec, batch_dir=cfg.wad_batch, swap_every=getattr(cfg, "wad_swap_every", 1),)
+    env_name = f"{base_env}_batch"
 
     batch = WadBatch.from_dir(batch_spec.batch_dir)
     strategy = getattr(cfg, "curriculum", "uniform")
     if strategy == "plr":
         assert cfg.algo.upper() in ("APPO", "MAPPO", "IPPO", "HAPPO"), \
             "PLR curriculum requires a PPO-based algorithm."
+        assert not getattr(cfg, "with_vtrace", False), \
+            "PLR curriculum requires --with_vtrace=False because learner-side PLR scoring is disabled under V-trace."
     interestingness = None
     interestingness_graph_path = getattr(cfg, "interestingness_graph_path", None)
     if strategy == "omni" and interestingness_graph_path is not None:
@@ -56,6 +72,8 @@ def register_batch_env(cfg) -> str:
         p_theta=getattr(cfg, "lp_p_theta", 0.1),
         max_return=getattr(cfg, "lp_max_return", 100.0),
         min_return=getattr(cfg, "lp_min_return", -100.0),
+        uniform_prob=getattr(cfg, "lp_uniform_prob", 0.25),
+        seed=getattr(cfg, "seed", None),
         tasks=task_ids,
         interestingness=interestingness,
         replay_schedule=getattr(cfg, "plr_replay_schedule", "proportionate"),
@@ -70,6 +88,9 @@ def register_batch_env(cfg) -> str:
         plr_score_key=getattr(cfg, "plr_score_key", "mean_value_l1"),
         max_score_coef=getattr(cfg, "plr_max_score_coef", 0.0),
         eps=getattr(cfg, "plr_eps", 0.05),
+        seq_threshold=getattr(cfg, "seq_threshold", 0.8),
+        seq_max_return=getattr(cfg, "seq_max_return", 1.0),
+        seq_window=getattr(cfg, "seq_window", 100),
     )
     make_env_func = functools.partial(make_doom_env_from_batch, batch_spec, curriculum)
     register_env(env_name, make_env_func)
@@ -99,11 +120,19 @@ def configure_batch_env_and_agents(cfg):
     # When --wad_batch is given, override cfg.env with the pool name and
     # register the pool environment. Existing DOOM_ENVS are unaffected.
     if getattr(cfg, "wad_batch", None):
-        cfg.env, cfg._curriculum = register_batch_env(cfg) 
+        cfg.env, cfg._curriculum = register_batch_env(cfg)
 
     if cfg.num_agents < 1:
-        # Strip "_batch" to lookup standard env base properties.
-        cfg.num_agents = get_num_agents(cfg, cfg.env.replace("_batch", ""))
+        cfg.num_agents = get_num_agents(cfg, batch_base_env_name(cfg))
+
+
+def prepare_cfg_for_training(cfg):
+    if cfg.restart_behavior == "resume":
+        cfg = maybe_load_from_checkpoint(cfg)
+
+    configure_batch_env_and_agents(cfg)
+    restore_curriculum_state(cfg, getattr(cfg, "_curriculum", None))
+    return cfg
 
 
 def register_model_factory(cfg):
@@ -165,26 +194,29 @@ def parse_args(argv=None, evaluation=False):
 
 def main():
     register_vizdoom_components()
-    cfg = parse_args()
-    configure_batch_env_and_agents(cfg)
+    cfg = prepare_cfg_for_training(parse_args())
 
     if cfg.num_agents > 1:
         register_model_factory(cfg)
     curriculum = getattr(cfg, "_curriculum", None)
-    if hasattr(cfg, "_curriculum"):
-        del cfg._curriculum  # remove from cfg to avoid JSON serialization errors
-            
-    cfg, runner = make_runner(cfg)
-            
+    if isinstance(cfg, dict):
+        cfg.pop("_curriculum", None)  # remove from cfg to avoid JSON serialization errors
+    elif hasattr(cfg, "_curriculum"):
+        delattr(cfg, "_curriculum")
+
+    cfg, runner = make_runner(cfg, load_checkpoint_cfg=False)
+    if curriculum is not None:
+        runner.register_observer(CurriculumObserver(curriculum))
+
     if not (not getattr(cfg, "with_wandb", False) or getattr(cfg, "wandb_record_every", 0) <= 0 or getattr(wandb, "run", None) is None):
         upload_video(runner, cfg)
 
     status = runner.init()
-    
+
     if curriculum is not None:
         for policy_id, learner_worker in runner.learners.items():
             learner_worker.learner.curriculum = curriculum
-            
+
     if status == ExperimentStatus.SUCCESS:
         status = runner.run()
 

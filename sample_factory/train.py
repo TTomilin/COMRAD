@@ -9,8 +9,8 @@ from sample_factory.pbt.population_based_training import PopulationBasedTraining
 from sample_factory.utils.typing import Config
 
 
-def make_runner(cfg: Config) -> Tuple[Config, Runner]:
-    if cfg.restart_behavior == "resume":
+def make_runner(cfg: Config, load_checkpoint_cfg: bool = True) -> Tuple[Config, Runner]:
+    if load_checkpoint_cfg and cfg.restart_behavior == "resume":
         # if we're resuming from checkpoint, we load all of the config parameters from the checkpoint
         # unless they're explicitly specified in the command line
         cfg = maybe_load_from_checkpoint(cfg)

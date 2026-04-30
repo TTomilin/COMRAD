@@ -7,6 +7,7 @@ from abc import ABC, abstractmethod
 from os.path import join
 from typing import Callable, Dict, Optional, Tuple
 
+import gymnasium as gym
 import numpy as np
 import torch
 from torch import Tensor
@@ -177,6 +178,7 @@ class Learner(Configurable):
 
         self.is_initialized = False
         self.curriculum = None
+        self._plr_partial_scores = {}
 
     def init(self) -> InitModelData:
         if self.cfg.exploration_loss_coeff == 0.0:
@@ -297,6 +299,7 @@ class Learner(Configurable):
         self.actor_critic.load_state_dict(checkpoint_dict["model"])
         self.optimizer.load_state_dict(checkpoint_dict["optimizer"])
         self.curr_lr = checkpoint_dict.get("curr_lr", self.cfg.learning_rate)
+        self._plr_partial_scores = {}
 
         log.info(f"Loaded experiment state at {self.train_step=}, {self.env_steps=}")
 
@@ -332,6 +335,8 @@ class Learner(Configurable):
             "optimizer": self.optimizer.state_dict(),
             "curr_lr": self.curr_lr,
         }
+        if self.curriculum is not None:
+            checkpoint["curriculum_state"] = self.curriculum.state_dict()
         return checkpoint
 
     def _save_impl(self, name_prefix, name_suffix, keep_checkpoints, verbose=True) -> bool:
@@ -688,37 +693,219 @@ class Learner(Configurable):
         with torch.no_grad():
             returns  = gpu_buffer["returns"]          # [experience_size]
             values   = gpu_buffer["values"]           # [experience_size]
-            adv      = gpu_buffer["advantages"]       # [experience_size]
+            advantages = gpu_buffer["advantages"]     # [experience_size]
             valids   = gpu_buffer["valids"].bool()    # [experience_size]
             task_ids = gpu_buffer["task_idx"].long()  # [experience_size]
+            env_ids  = gpu_buffer["env_idx"].long()   # [experience_size]
+            agent_ids = gpu_buffer["agent_idx"].long() # [experience_size]
 
             # value_l1: |returns - values|
             value_l1 = (returns - values).abs()       # [experience_size]
+            advantage_l1 = advantages.abs()           # [experience_size]
 
-            # Entropy: -sum(p * log p)
             logits    = gpu_buffer["action_logits"]                 # [experience_size, n_actions]
-            log_probs = torch.log_softmax(logits.float(), dim=-1)   # log p(a)
-            entropy   = -(log_probs.exp() * log_probs).sum(dim=-1)  # [experience_size]
+            action_mask = None
+            if "normalized_obs" in gpu_buffer and "action_mask" in gpu_buffer["normalized_obs"]:
+                action_mask = gpu_buffer["normalized_obs"]["action_mask"]
+            entropy = get_action_distribution(
+                self.actor_critic.action_space,
+                logits.float(),
+                action_mask=action_mask,
+            ).entropy()
+            max_entropy = self._plr_max_entropy(self.actor_critic.action_space)
+            if max_entropy is not None and max_entropy > 0.0:
+                entropy = entropy / max_entropy
 
-            adv_abs = adv.abs()                                     # [experience_size]
+            batch_partials: Dict[Optional[int], Dict[str, float]] = {}
+            for task_idx, chunk_mask, chunk_done in self._iter_plr_task_chunks(gpu_buffer, task_ids, valids):
+                if chunk_mask.sum() == 0:
+                    continue
 
+                chunk_indices = torch.nonzero(chunk_mask, as_tuple=False).squeeze(-1)
+                first_idx = int(chunk_indices[0].item())
+                num_steps = int(chunk_indices.numel())
+                source_key = self._plr_source_key(env_ids[first_idx], agent_ids[first_idx])
+                score = {
+                    Curriculum.SCORE_MEAN_VALUE_L1:  value_l1[chunk_mask].mean().item(),
+                    Curriculum.SCORE_MAX_VALUE_L1:   value_l1[chunk_mask].max().item(),
+                    Curriculum.SCORE_MEAN_ADVANTAGE: advantage_l1[chunk_mask].mean().item(),
+                    Curriculum.SCORE_MAX_ADVANTAGE:  advantage_l1[chunk_mask].max().item(),
+                    Curriculum.SCORE_MEAN_ENTROPY:   entropy[chunk_mask].mean().item(),
+                    Curriculum.SCORE_MAX_ENTROPY:    entropy[chunk_mask].max().item(),
+                }
+                partial = batch_partials.get(source_key)
+                if partial is not None and partial["task_idx"] != task_idx:
+                    self._accumulate_plr_task_score(
+                        source_key,
+                        int(partial["task_idx"]),
+                        self._finalize_plr_partial_score(partial),
+                        num_steps=int(partial["num_steps"]),
+                        done=bool(partial["done"]),
+                    )
+                    partial = None
+
+                if partial is None:
+                    partial = {
+                        "task_idx": task_idx,
+                        "num_steps": 0,
+                        "mean_value_l1_sum": 0.0,
+                        "mean_advantage_sum": 0.0,
+                        "mean_entropy_sum": 0.0,
+                        "max_value_l1": float("-inf"),
+                        "max_advantage": float("-inf"),
+                        "max_entropy": float("-inf"),
+                        "done": False,
+                    }
+
+                partial["num_steps"] += num_steps
+                partial["mean_value_l1_sum"] += score[Curriculum.SCORE_MEAN_VALUE_L1] * num_steps
+                partial["mean_advantage_sum"] += score[Curriculum.SCORE_MEAN_ADVANTAGE] * num_steps
+                partial["mean_entropy_sum"] += score[Curriculum.SCORE_MEAN_ENTROPY] * num_steps
+                partial["max_value_l1"] = max(partial["max_value_l1"], score[Curriculum.SCORE_MAX_VALUE_L1])
+                partial["max_advantage"] = max(partial["max_advantage"], score[Curriculum.SCORE_MAX_ADVANTAGE])
+                partial["max_entropy"] = max(partial["max_entropy"], score[Curriculum.SCORE_MAX_ENTROPY])
+                partial["done"] = bool(partial["done"]) or chunk_done
+                batch_partials[source_key] = partial
+
+            for source_key, partial in batch_partials.items():
+                self._accumulate_plr_task_score(
+                    source_key,
+                    int(partial["task_idx"]),
+                    self._finalize_plr_partial_score(partial),
+                    num_steps=int(partial["num_steps"]),
+                    done=bool(partial["done"]),
+                )
+
+    @staticmethod
+    def _plr_max_entropy(action_space) -> Optional[float]:
+        if isinstance(action_space, gym.spaces.Discrete):
+            return float(np.log(action_space.n))
+        if isinstance(action_space, gym.spaces.Tuple):
+            total = 0.0
+            for subspace in action_space.spaces:
+                subspace_max = Learner._plr_max_entropy(subspace)
+                if subspace_max is None:
+                    return None
+                total += subspace_max
+            return total
+        return None
+
+    def _iter_plr_task_chunks(self, gpu_buffer: TensorDict, task_ids: Tensor, valids: Tensor):
+        rollout = getattr(self.cfg, "rollout", None)
+        dones = gpu_buffer.get("dones", None)
+        if rollout is None or dones is None or task_ids.numel() % rollout != 0:
             for tid in task_ids.unique():
                 tid_int = int(tid.item())
                 if tid_int < 0:
                     continue
-                mask = (task_ids == tid) & valids
-                if mask.sum() == 0:
-                    continue
+                yield tid_int, (task_ids == tid) & valids, True
+            return
 
-                score = {
-                    Curriculum.SCORE_MEAN_VALUE_L1:  value_l1[mask].mean().item(),
-                    Curriculum.SCORE_MAX_VALUE_L1:   value_l1[mask].max().item(),
-                    Curriculum.SCORE_MEAN_ADVANTAGE: adv_abs[mask].mean().item(),
-                    Curriculum.SCORE_MAX_ADVANTAGE:  adv_abs[mask].max().item(),
-                    Curriculum.SCORE_MEAN_ENTROPY:   entropy[mask].mean().item(),
-                    Curriculum.SCORE_MAX_ENTROPY:    entropy[mask].max().item(),
-                }
-                self.curriculum.update_task_score(tid_int, score)
+        num_traj = task_ids.numel() // rollout
+        task_ids_2d = task_ids.view(num_traj, rollout)
+        valids_2d = valids.view(num_traj, rollout)
+        dones_2d = dones.view(num_traj, rollout).bool()
+
+        for traj_idx in range(num_traj):
+            step = 0
+            while step < rollout:
+                while (
+                    step < rollout
+                    and (not bool(valids_2d[traj_idx, step]) or int(task_ids_2d[traj_idx, step].item()) < 0)
+                ):
+                    step += 1
+
+                if step >= rollout:
+                    break
+
+                task_idx = int(task_ids_2d[traj_idx, step].item())
+                end = step
+                while end + 1 < rollout:
+                    if bool(dones_2d[traj_idx, end]):
+                        break
+                    if not bool(valids_2d[traj_idx, end + 1]):
+                        break
+                    if int(task_ids_2d[traj_idx, end + 1].item()) != task_idx:
+                        break
+                    end += 1
+
+                chunk_mask = torch.zeros_like(task_ids, dtype=torch.bool)
+                flat_start = traj_idx * rollout + step
+                flat_end = traj_idx * rollout + end + 1
+                chunk_mask[flat_start:flat_end] = valids[flat_start:flat_end]
+                yield task_idx, chunk_mask, bool(dones_2d[traj_idx, end])
+
+                step = end + 1
+
+    @staticmethod
+    def _plr_source_key(env_idx: Tensor, agent_idx: Tensor) -> Optional[int]:
+        env_id = int(env_idx.item())
+        if env_id < 0 or int(agent_idx.item()) < 0:
+            return None
+        return env_id
+
+    def _accumulate_plr_task_score(
+        self,
+        source_key: Optional[int],
+        task_idx: int,
+        score: Dict[str, float],
+        num_steps: int,
+        done: bool,
+    ) -> None:
+        if source_key is None:
+            self.curriculum.update_task_score(task_idx, score, num_steps=num_steps)
+            return
+
+        partial = self._plr_partial_scores.get(source_key)
+        if partial is not None and partial["task_idx"] != task_idx:
+            self.curriculum.update_task_score(
+                partial["task_idx"],
+                self._finalize_plr_partial_score(partial),
+                num_steps=int(partial["num_steps"]),
+            )
+            partial = None
+
+        if partial is None:
+            partial = {
+                "task_idx": task_idx,
+                "num_steps": 0,
+                "mean_value_l1_sum": 0.0,
+                "mean_advantage_sum": 0.0,
+                "mean_entropy_sum": 0.0,
+                "max_value_l1": float("-inf"),
+                "max_advantage": float("-inf"),
+                "max_entropy": float("-inf"),
+            }
+
+        partial["num_steps"] += num_steps
+        partial["mean_value_l1_sum"] += score[Curriculum.SCORE_MEAN_VALUE_L1] * num_steps
+        partial["mean_advantage_sum"] += score[Curriculum.SCORE_MEAN_ADVANTAGE] * num_steps
+        partial["mean_entropy_sum"] += score[Curriculum.SCORE_MEAN_ENTROPY] * num_steps
+        partial["max_value_l1"] = max(partial["max_value_l1"], score[Curriculum.SCORE_MAX_VALUE_L1])
+        partial["max_advantage"] = max(partial["max_advantage"], score[Curriculum.SCORE_MAX_ADVANTAGE])
+        partial["max_entropy"] = max(partial["max_entropy"], score[Curriculum.SCORE_MAX_ENTROPY])
+
+        if done:
+            self.curriculum.update_task_score(
+                task_idx,
+                self._finalize_plr_partial_score(partial),
+                num_steps=int(partial["num_steps"]),
+            )
+            self._plr_partial_scores.pop(source_key, None)
+        else:
+            self._plr_partial_scores[source_key] = partial
+
+    @staticmethod
+    def _finalize_plr_partial_score(partial: Dict[str, float]) -> Dict[str, float]:
+        num_steps = max(int(partial["num_steps"]), 1)
+        return {
+            Curriculum.SCORE_MEAN_VALUE_L1: partial["mean_value_l1_sum"] / num_steps,
+            Curriculum.SCORE_MAX_VALUE_L1: partial["max_value_l1"],
+            Curriculum.SCORE_MEAN_ADVANTAGE: partial["mean_advantage_sum"] / num_steps,
+            Curriculum.SCORE_MAX_ADVANTAGE: partial["max_advantage"],
+            Curriculum.SCORE_MEAN_ENTROPY: partial["mean_entropy_sum"] / num_steps,
+            Curriculum.SCORE_MAX_ENTROPY: partial["max_entropy"],
+        }
 
     def _train(
         self, gpu_buffer: TensorDict, batch_size: int, experience_size: int, num_invalids: int

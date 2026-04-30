@@ -146,7 +146,7 @@ class HAPPOLearner(Learner):
 
     def _get_checkpoint_dict(self):
         """save per agent, critic optimizer states"""
-        return {
+        checkpoint = {
             "model": self.actor_critic.state_dict(),
             "agent_optimizers": [opt.state_dict() for opt in self.agent_optimizers],
             "critic_optimizer": self.critic_optimizer.state_dict(),
@@ -155,6 +155,9 @@ class HAPPOLearner(Learner):
             "curr_lr": self.curr_lr,
             "best_performance": self.best_performance,
         }
+        if self.curriculum is not None:
+            checkpoint["curriculum_state"] = self.curriculum.state_dict()
+        return checkpoint
 
     def _load_state(self, checkpoint_dict, load_progress=True):
         """restore per agent,critic optimizer states"""
@@ -180,6 +183,7 @@ class HAPPOLearner(Learner):
             self.best_performance = checkpoint_dict.get("best_performance", -1e9)
         if "curr_lr" in checkpoint_dict:
             self.curr_lr = checkpoint_dict["curr_lr"]
+        self._plr_partial_scores = {}
         log.info(f"Loaded HAPPO experiment state at {self.train_step=}, {self.env_steps=}")
 
     def _optimizer_lr(self):
@@ -299,7 +303,7 @@ class HAPPOLearner(Learner):
     def _train(self, gpu_buffer, batch_size, experience_size, num_invalids):
         stats = AttrDict()
         assert self.actor_critic.training
-        
+
         self._compute_plr_task_scores(gpu_buffer, experience_size)
 
         # Check if data stale from previous training
