@@ -6,26 +6,35 @@ class LavapitRewardShaping(gym.Wrapper):
         self,
         env,
         *,
-        joint_progress_reward: float = 1.0,
+        entry_support_reward: float = 0.05,
+        outbound_bridge_reward: float = 0.10,
+        exit_support_reward: float = 0.10,
+        return_bridge_reward: float = 0.10,
+        joint_progress_reward: float = 0.75,
         success_bonus: float = 2.0,
-        failure_penalty: float = -1.0,
-        no_progress_failure_penalty: float = -0.5,
-        step_penalty: float = -0.001,
-        frontier_stall_grace_steps: int = 12,
-        frontier_stall_penalty: float = -0.03,
-        timeout_penalty: float = -0.75,
+        failure_penalty: float = -1.25,
+        unfinished_bridge_penalty: float = -0.12,
+        step_penalty: float = -0.002,
+        frontier_stall_grace_steps: int = 16,
+        frontier_stall_penalty: float = -0.02,
+        timeout_penalty: float = -1.50,
     ):
         super().__init__(env)
+        self.entry_support_reward = float(entry_support_reward)
+        self.outbound_bridge_reward = float(outbound_bridge_reward)
+        self.exit_support_reward = float(exit_support_reward)
+        self.return_bridge_reward = float(return_bridge_reward)
         self.joint_progress_reward = float(joint_progress_reward)
         self.success_bonus = float(success_bonus)
         self.failure_penalty = float(failure_penalty)
-        self.no_progress_failure_penalty = float(no_progress_failure_penalty)
+        self.unfinished_bridge_penalty = float(unfinished_bridge_penalty)
         self.step_penalty = float(step_penalty)
         self.frontier_stall_grace_steps = max(0, int(frontier_stall_grace_steps))
         self.frontier_stall_penalty = float(frontier_stall_penalty)
         self.timeout_penalty = float(timeout_penalty)
 
         self.prev_joint_platform = 0
+        self.frontier_stage_claimed = 0
         self.frontier_stall_steps = 0
         self.orig_env_reward = 0.0
 
@@ -52,15 +61,14 @@ class LavapitRewardShaping(gym.Wrapper):
         num_agents = self._num_agents()
         return [max(0, self._int(info, f"USER{15 + agent_idx}", 0)) for agent_idx in range(num_agents)]
 
-    def _current_platforms(self, info) -> list[int]:
-        num_agents = self._num_agents()
-        return [max(0, self._int(info, f"USER{18 + agent_idx}", 0)) for agent_idx in range(num_agents)]
-
     def _frontier_entry_held(self, info) -> bool:
         return bool(self._int(info, "USER20", 0))
 
     def _frontier_bridge_occupied(self, info) -> bool:
         return bool(self._int(info, "USER21", 0))
+
+    def _frontier_exit_held(self, info) -> bool:
+        return bool(self._int(info, "USER22", 0))
 
     def _joint_platform(self, info) -> int:
         if info is None or not self._has_progress_contract(info):
@@ -74,20 +82,40 @@ class LavapitRewardShaping(gym.Wrapper):
     def _true_objective(self, info) -> float:
         return float(max(0, self._joint_platform(info) - 1))
 
-    def _frontier_engaged(self, info, joint_platform: int, goal_platform: int) -> bool:
+    def _remaining_bridges(self, joint_platform: int, goal_platform: int) -> int:
+        return max(0, goal_platform - max(1, joint_platform))
+
+    def _frontier_stage(self, info, joint_platform: int, goal_platform: int) -> int:
         if not (0 < joint_platform < goal_platform):
-            return False
+            return 0
 
-        current_platforms = self._current_platforms(info)
-        split_state = False
-        if len(current_platforms) >= 2:
-            sorted_platforms = sorted(current_platforms[:2])
-            split_state = sorted_platforms == [joint_platform, joint_platform + 1]
+        entry_held = self._frontier_entry_held(info)
+        bridge_occupied = self._frontier_bridge_occupied(info)
+        exit_held = self._frontier_exit_held(info)
 
-        return self._frontier_entry_held(info) or self._frontier_bridge_occupied(info) or split_state
+        if exit_held:
+            return 4 if bridge_occupied else 3
+        if entry_held:
+            return 2 if bridge_occupied else 1
+        return 0
+
+    def _frontier_engaged(self, info, joint_platform: int, goal_platform: int) -> bool:
+        return self._frontier_stage(info, joint_platform, goal_platform) > 0
+
+    def _frontier_stage_reward(self, stage: int) -> float:
+        if stage == 1:
+            return self.entry_support_reward
+        if stage == 2:
+            return self.outbound_bridge_reward
+        if stage == 3:
+            return self.exit_support_reward
+        if stage == 4:
+            return self.return_bridge_reward
+        return 0.0
 
     def _reset_episode_state(self) -> None:
         self.prev_joint_platform = 0
+        self.frontier_stage_claimed = 0
         self.frontier_stall_steps = 0
 
     def _sync(self, info) -> None:
@@ -120,19 +148,26 @@ class LavapitRewardShaping(gym.Wrapper):
 
         curr_joint_platform = self._joint_platform(info)
         goal_platform = self._goal_platform(info)
-
         shaped_team_reward = self.step_penalty
 
         joint_delta = curr_joint_platform - self.prev_joint_platform
         if joint_delta > 0:
             shaped_team_reward += joint_delta * self.joint_progress_reward
+            self.frontier_stage_claimed = 0
             self.frontier_stall_steps = 0
-        elif self._frontier_engaged(info, curr_joint_platform, goal_platform):
-            self.frontier_stall_steps += 1
-            if self.frontier_stall_steps > self.frontier_stall_grace_steps:
-                shaped_team_reward += self.frontier_stall_penalty
         else:
-            self.frontier_stall_steps = 0
+            frontier_stage = self._frontier_stage(info, curr_joint_platform, goal_platform)
+            if frontier_stage > self.frontier_stage_claimed:
+                for stage in range(self.frontier_stage_claimed + 1, frontier_stage + 1):
+                    shaped_team_reward += self._frontier_stage_reward(stage)
+                self.frontier_stage_claimed = frontier_stage
+                self.frontier_stall_steps = 0
+            elif self._frontier_engaged(info, curr_joint_platform, goal_platform):
+                self.frontier_stall_steps += 1
+                if self.frontier_stall_steps > self.frontier_stall_grace_steps:
+                    shaped_team_reward += self.frontier_stall_penalty
+            else:
+                self.frontier_stall_steps = 0
 
         success = bool(
             terminated
@@ -143,15 +178,13 @@ class LavapitRewardShaping(gym.Wrapper):
         if success:
             shaped_team_reward += self.success_bonus
 
-        if terminated and not success:
-            shaped_team_reward += self.failure_penalty
-            if curr_joint_platform <= 1:
-                shaped_team_reward += self.no_progress_failure_penalty
-
-        if truncated and not success:
-            shaped_team_reward += self.timeout_penalty
-            if curr_joint_platform <= 1:
-                shaped_team_reward += self.no_progress_failure_penalty
+        if (terminated or truncated) and not success:
+            shaped_team_reward += (
+                self.failure_penalty if terminated else self.timeout_penalty
+            )
+            shaped_team_reward += self._remaining_bridges(
+                curr_joint_platform, goal_platform
+            ) * self.unfinished_bridge_penalty
 
         total_reward = reward + shaped_team_reward * self._reward_share()
 

@@ -126,7 +126,6 @@ def doom_action_space_lavapit():
     MOVE_FORWARD
     MOVE_LEFT
     MOVE_RIGHT
-    JUMP
     """
 
     return gym.spaces.Tuple(
@@ -134,7 +133,6 @@ def doom_action_space_lavapit():
             Discrete(3),
             Discrete(2),
             Discrete(3),
-            Discrete(2),
         )
     )
 
