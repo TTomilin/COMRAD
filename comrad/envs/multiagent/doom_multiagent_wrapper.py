@@ -365,7 +365,6 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         # This only improves notably for more agents
         # Comparison runs with 4 agents (check the tag: non_parallel vs parallel collection):
-        # https://wandb.ai/khoi-eindhoven-university-of-technology/marl_vizdoom/table
         # Sync: fps=2.608,0653061224
         # Async: fps=3.305,1611185087
         #
