@@ -497,7 +497,8 @@ class VizdoomEnv(gym.Env):
             observation = self._black_screen()
 
             # when done=True Doom does not allow us to call get_info, so we provide info from the last frame
-            info.update(self._prev_info)
+            if isinstance(self._prev_info, dict):
+                info.update(self._prev_info)
             info.update(self._terminal_status_info())
 
         self._vizdoom_variables_bug_workaround(info, done)
