@@ -1,5 +1,7 @@
 import gymnasium as gym
 from collections import deque
+import numpy as np
+
 
 class LavaMazeRewardShaping(gym.Wrapper):
     def __init__(
@@ -182,8 +184,6 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "HEALTH": self._safe_int(info.get("HEALTH", 100), 100),
         }
 
-import numpy as np
-
 class LavaMazeAdditionalInput(gym.Wrapper):
     """
     health
@@ -207,7 +207,7 @@ class LavaMazeAdditionalInput(gym.Wrapper):
 
     def _parse_info(self, obs, info):
         obs_dict = {"obs": obs, "measurements": self.measurements_vec}
-        
+
         if info is None:
             # for blocking vision and using additional vectors only
             # if getattr(self.env.unwrapped, "player_id", -1) == 0:
@@ -222,7 +222,7 @@ class LavaMazeAdditionalInput(gym.Wrapper):
         color = max(0, min(4, int(info.get("USER16", 0))))
         if not flash_active or color == 0:
             measurements[1] = 1.0
-        else:            
+        else:
             measurements[1 + color] = 1.0
 
         measurements[6] = float(bool(info.get("USER17", 0)))

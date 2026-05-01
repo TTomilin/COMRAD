@@ -6,12 +6,14 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         self,
         env,
         room_discovery_reward=0.3,
+        first_room_discovery_reward=0.8,
         kill_reward=2.0,
         damage_taken_penalty_per_hp=-0.02,
         death_penalty=-1.0,
     ):
         super().__init__(env)
         self.room_discovery_reward = float(room_discovery_reward)
+        self.first_room_discovery_reward = float(first_room_discovery_reward)
         self.kill_reward = float(kill_reward)
         self.damage_taken_penalty_per_hp = float(damage_taken_penalty_per_hp)
         self.death_penalty = float(death_penalty)
@@ -98,16 +100,6 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         delta_rooms_seen = max(0, rooms_seen - self.best_rooms_seen)
         delta_team_damage = max(0.0, self.prev_team_hp - team_hp)
 
-        shaped_team_reward = 0.0
-        shaped_team_reward += delta_rooms_seen * self.room_discovery_reward
-        shaped_team_reward += delta_destroyed * self.kill_reward
-        shaped_team_reward += delta_team_damage * self.damage_taken_penalty_per_hp
-
-        if terminated and (p1_alive <= 0 or p2_alive <= 0):
-            shaped_team_reward += self.death_penalty
-
-        total_reward = reward + shaped_team_reward * self._reward_share()
-
         success = bool(
             terminated
             and not truncated
@@ -116,6 +108,19 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
             and p1_alive > 0
             and p2_alive > 0
         )
+
+        shaped_team_reward = 0.0
+        if self.best_rooms_seen < 1 and rooms_seen >= 1:
+            shaped_team_reward += self.first_room_discovery_reward
+            delta_rooms_seen = max(0, delta_rooms_seen - 1)
+        shaped_team_reward += delta_rooms_seen * self.room_discovery_reward
+        shaped_team_reward += delta_destroyed * self.kill_reward
+        shaped_team_reward += delta_team_damage * self.damage_taken_penalty_per_hp
+
+        if terminated and not success:
+            shaped_team_reward += self.death_penalty
+
+        total_reward = reward + shaped_team_reward * self._reward_share()
 
         if destroyed < self.best_destroyed or rooms_seen < self.best_rooms_seen:
             info.setdefault("episode_extra_stats", {})["counter_regression"] = 1
