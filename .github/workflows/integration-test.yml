@@ -1,11 +1,11 @@
 on:
   pull_request:
-      paths: ['sample-factory/**']
+      paths: ['sample_factory/**']
   push:
     branches:
       - main
     paths:
-      - 'sample-factory/**'
+      - 'sample_factory/**'
 
 jobs:
   test:
