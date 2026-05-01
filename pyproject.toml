@@ -52,6 +52,10 @@ sample-factory = [
     "huggingface_hub>=0.36.0",
     "scipy>=1.16.3",
 ]
+visual = [
+    "pillow>=11.3.0",
+    "pypng>=0.20220715.0",
+]
 
 [dependency-groups]
 dev = [
