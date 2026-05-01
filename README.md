@@ -237,7 +237,7 @@ python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes
 
 ### Shared reward
 
-- If the per-agent reward shaping is already the same team scalar, `shared_reward_alpha=1.0` is unnecessary. Keep `shared_reward_alpha=0.0` for benchmarks where preserving local incentives (e.g. preserving social dilemma aspects) is part of the design, especially `stag_hunt_arena`, `foraging_commons`, and `resource_greed` / `common_harvest_doom`. Leave other scenarios at their scenario default unless you intentionally want to change the benchmark.
+- If the per-agent reward shaping is already the same team scalar, `shared_reward_alpha=1.0` is unnecessary. Keep `shared_reward_alpha=0.0` for benchmarks where preserving local incentives (e.g. preserving social dilemma aspects) is part of the design, especially `stag_hunt_arena` and `foraging_commons`. Leave other scenarios at their scenario default unless you intentionally want to change the benchmark.
 - If the task is cooperative but the wrapper emits local shaping, `shared_reward_alpha=1.0` is often the better choice for MAPPO/HAPPO.
 
 `shared_reward_alpha` only matters for actor-critic multi-agent algos such as `MAPPO` and `HAPPO`. Use `shared_reward_alpha=1.0` only when the benchmark is intended to be fully joint and local incentives are not part of the task definition.
@@ -253,7 +253,7 @@ python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes
 | `rhythm_sync_dense` | Yes | Dense shaping still targets the same joint synchronization objective. |
 | `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around one synchronized relay objective followed by extraction. |
 | `foraging_commons` | No | Preserve the commons incentives; the benchmark is about balancing individual harvesting against shared resource collapse. |
-| `resource_greed` (`common_harvest_doom` in code) | No | Preserve the local ammo-restocking incentive that creates the dilemma. |
+| `coop_health_gathering` | No | Scenario is about resource sharing, so no. |
 | `stag_hunt_arena` | No | Keep the rabbit option local so the stag-vs-rabbit coordination dilemma remains intact. |
 | `smart_enemies` | No | The wrapper already shapes local combat performance; blanket team-sharing is not the default benchmark contract. |
 | `dumb_enemies` | No | Same local-combat logic as `smart_enemies`; keep the scenario default unless you intentionally want a joint reward. |
