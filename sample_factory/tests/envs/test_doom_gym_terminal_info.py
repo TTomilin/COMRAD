@@ -36,3 +36,21 @@ def test_process_game_step_done_overlays_terminal_status():
     assert info["episode_time_tics"] == 176
     assert info["episode_timeout_tics"] == 5250
     assert info["player_dead"] is True
+
+
+def test_process_game_step_done_without_prev_info_does_not_crash():
+    env = object.__new__(VizdoomEnv)
+    env.game = _DummyGame()
+    env.black_screen = None
+    env.observation_space = SimpleNamespace(shape=(3, 4, 4))
+    env._prev_info = None
+    env._last_episode_info = None
+
+    obs, done, info = VizdoomEnv._process_game_step(env, state=None, done=True, info={})
+
+    assert done is True
+    assert obs.shape == (3, 4, 4)
+    assert np.all(obs == 0)
+    assert info["episode_time_tics"] == 176
+    assert info["episode_timeout_tics"] == 5250
+    assert info["player_dead"] is True
