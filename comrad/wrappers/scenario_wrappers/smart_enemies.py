@@ -1,5 +1,4 @@
 import gymnasium as gym
-import math
 
 class SmartEnemiesRewardShaping(gym.Wrapper):
     def __init__(
@@ -27,6 +26,12 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.ticks = 0
+        self.episode_start_kills = None
+
+    def _true_objective(self, info) -> float:
+        curr_kills = info.get("KILLCOUNT", 0)
+        start_kills = 0 if self.episode_start_kills is None else int(self.episode_start_kills)
+        return float(max(0, curr_kills - start_kills))
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -34,11 +39,16 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
 
+        if self.episode_start_kills is None:
+            self.episode_start_kills = info.get("KILLCOUNT", 0)
+
         self.ticks += 1
         reward = float(reward)
 
         if not self.prev_vars:
             self.sync_vars(info)
+            if terminated or truncated:
+                info["true_objective"] = self._true_objective(info)
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = 0.0
@@ -46,13 +56,13 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         # Health reward and penalty
         curr_health = info.get("HEALTH", 0.0)
         prev_health = self.prev_vars.get("HEALTH", 0.0)
-        
+
         delta_health = curr_health - prev_health
         if delta_health > 0:
             shaped_reward += self.health_gain_reward * delta_health
         elif delta_health < 0:
             shaped_reward += self.health_loss_penalty * abs(delta_health)
-            
+
         # Death penalty
         if curr_health <= 0 and prev_health > 0:
             shaped_reward += self.death_penalty
@@ -93,7 +103,7 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         self.orig_env_reward += float(reward)
 
         if terminated or truncated:
-            info["true_objective"] = self.ticks
+            info["true_objective"] = self._true_objective(info)
 
         self.sync_vars(info)
         return obs, final_reward, terminated, truncated, info
@@ -103,8 +113,10 @@ class SmartEnemiesRewardShaping(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.ticks = 0
-        
+        self.episode_start_kills = None
+
         if info is not None:
+            self.episode_start_kills = info.get("KILLCOUNT", 0)
             self.sync_vars(info)
 
         return obs, info
