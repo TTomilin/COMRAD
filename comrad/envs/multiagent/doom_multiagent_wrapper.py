@@ -172,11 +172,6 @@ class MultiAgentEnvWorker:
         while True:
             data, task_type = safe_get(self.task_queue)
 
-            if task_type == TaskType.INIT:
-                env = self._init(data)
-                self.result_queue.put(None)  # signal we're done
-                continue
-
             if task_type == TaskType.TERMINATE:
                 self._terminate(env)
                 break
@@ -187,7 +182,9 @@ class MultiAgentEnvWorker:
             # https://github.com/Farama-Foundation/ViZDoom/issues/693
             try:
                 results = None
-                if task_type == TaskType.RESET:
+                if task_type == TaskType.INIT:
+                    env = self._init(data)
+                elif task_type == TaskType.RESET:
                     results = env.reset(**data) if data else env.reset()
                 elif task_type == TaskType.INFO:
                     results = self._get_info(env)
@@ -266,6 +263,12 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         self.render_mode = render_mode
         self._pending_reset_infos = None
         self._pending_reset_count = 0
+
+    def _spawn_workers(self):
+        self.workers = [
+            MultiAgentEnvWorker(i, self.make_env_func, self.env_config, reset_on_init=self.reset_on_init)
+            for i in range(self.num_agents)
+        ]
 
     # def wipe_when_one_die(self, terminated, truncated, infos):
     #     """This function is quite specific to pitfall, temrinates when one agent dies to make it 'cooperative'
@@ -394,16 +397,13 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         if self.initialized:
             return
 
-        self.workers = [
-            MultiAgentEnvWorker(i, self.make_env_func, self.env_config, reset_on_init=self.reset_on_init)
-            for i in range(self.num_agents)
-        ]
-
         init_attempt = 0
+        max_init_attempts = 5
         while True:
             init_attempt += 1
+            self._spawn_workers()
             try:
-                port_to_use = udp_port_num(self.env_config)
+                port_to_use = udp_port_num(self.env_config) + 1000 * (init_attempt - 1)
                 port = find_available_port(port_to_use, increment=1000)
                 log.debug("Using port %d", port)
                 init_info = dict(port=port)
@@ -422,13 +422,32 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                             time.sleep(0.05)
 
                     for i, worker in enumerate(self.workers):
-                        result = worker.result_queue.get(timeout=70)
+                        result = safe_get(
+                            worker.result_queue,
+                            timeout=2.0,
+                            msg="Takes a surprisingly long time to initialize multiplayer env, retry...",
+                            max_retries=35,
+                        )
                         if result is _CRASHED:
                             raise _GameGroupCrashError(f"Worker {i} crashed during initialization")
 
             except filelock.Timeout:
+                self.close()
+                continue
+            except _GameGroupCrashError as exc:
+                log.error(
+                    "Multiplayer initialization attempt %d/%d failed, recreating workers on a fresh port: %s",
+                    init_attempt,
+                    max_init_attempts,
+                    exc,
+                )
+                self.close()
+                if init_attempt >= max_init_attempts:
+                    raise RuntimeError(f"Critical error: worker stuck on initialization. Abort! {exc}")
+                time.sleep(min(1.0, 0.1 * init_attempt))
                 continue
             except Exception as exc:
+                self.close()
                 raise RuntimeError(f"Critical error: worker stuck on initialization. Abort! {exc}")
             else:
                 break
