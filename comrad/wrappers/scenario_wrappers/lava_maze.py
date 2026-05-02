@@ -26,7 +26,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
 
         self.flash_window = 5
         self.sender_bonus_scale = 0.2
-        self.no_progress_penalty = -0.015
+        self.no_progress_penalty = -0.005
         self.flash_timer = 0
         self.progress_occurred = False
 
@@ -189,7 +189,6 @@ class LavaMazeRewardShaping(gym.Wrapper):
                 prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, goal_x, goal_y)
 
                 if current_dist != 999 and prev_dist != 999:
-                    self.flash_timer = 0
                     dist_diff = prev_dist - current_dist
                     shaped_reward += dist_diff * self.distance_reward_scale
 
