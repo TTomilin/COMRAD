@@ -5,7 +5,7 @@ class DumbEnemiesRewardShaping(gym.Wrapper):
         self,
         env,
         kill_reward=5.0,
-        hit_reward=0.1,
+        hit_reward=0.3,
         health_gain_reward=0.1, 
         health_loss_penalty=-0.1,
         slow_event_reward=0.2,
