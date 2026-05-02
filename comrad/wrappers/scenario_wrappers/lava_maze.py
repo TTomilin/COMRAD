@@ -7,7 +7,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
     def __init__(
         self,
         env,
-        grid_size=6,
+        grid_size=8,
         goal_reward=10.0,
         death_penalty=-5.0,
         step_penalty=-0.005,
@@ -23,6 +23,12 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.distance_reward_scale = distance_reward_scale
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
         self.signal_penalty = signal_penalty
+
+        self.flash_window = 5
+        self.sender_bonus_scale = 0.2
+        self.no_progress_penalty = -0.015
+        self.flash_timer = 0
+        self.progress_occurred = False
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
@@ -124,6 +130,39 @@ class LavaMazeRewardShaping(gym.Wrapper):
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
         prev_hp = self._safe_int(self.prev_vars.get("HEALTH", 0), 0)
 
+        # Sender bonus logic
+        player_id = getattr(self.env.unwrapped, "player_id", -1)
+        if player_id == 0:
+            if current_signal == 1 and prev_signal == 0:
+                self.flash_timer = self.flash_window
+                self.progress_occurred = False
+
+            if self.flash_timer > 0:
+                self.flash_timer -= 1
+                if (p1_x != -1 and p1_y != -1 and goal_x != -1 and goal_y != -1 and
+                    prev_p1_x != -1 and prev_p1_y != -1 and
+                    goal_x == prev_goal_x and goal_y == prev_goal_y):
+
+                    grid = self._decode_maze_grid(
+                        self._safe_int(info.get("USER19", 0), 0),
+                        self._safe_int(info.get("USER20", 0), 0),
+                        self._safe_int(info.get("USER21", 0), 0)
+                    )
+
+                    current_dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
+                    prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, goal_x, goal_y)
+
+                    if current_dist != 999 and prev_dist != 999:
+                        dist_diff = prev_dist - current_dist
+                        if dist_diff > 0:
+                            # Sender gets a fraction of the progress reward
+                            sender_progress_bonus = dist_diff * self.distance_reward_scale * self.sender_bonus_scale
+                            shaped_reward += sender_progress_bonus
+                            self.progress_occurred = True
+
+                if self.flash_timer == 0 and not self.progress_occurred:
+                    shaped_reward += self.no_progress_penalty
+
         hp_loss = max(0, prev_hp - current_hp)
         if hp_loss > 0:
             shaped_reward -= hp_loss * self.lava_burn_penalty_scale
@@ -137,7 +176,6 @@ class LavaMazeRewardShaping(gym.Wrapper):
         # Shortest-Path Distance Reward
         if (p1_x != -1 and p1_y != -1 and goal_x != -1 and goal_y != -1 and
             prev_p1_x != -1 and prev_p1_y != -1):
-
             # Ensure the maze hasn't reset this exact frame
             if goal_x == prev_goal_x and goal_y == prev_goal_y:
 
@@ -151,6 +189,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
                 prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, goal_x, goal_y)
 
                 if current_dist != 999 and prev_dist != 999:
+                    self.flash_timer = 0
                     dist_diff = prev_dist - current_dist
                     shaped_reward += dist_diff * self.distance_reward_scale
 
