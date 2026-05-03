@@ -48,8 +48,8 @@ The primary training script is `comrad.train`.
 
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
-    --algo=APPO \
+    --env=stag_hunt_arena \
+    --algo=IPPO \
     --train_for_env_steps=5000
 ```
 
@@ -59,7 +59,7 @@ python -m comrad.train \
 
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
+    --env=stag_hunt_arena \
     --algo=MAPPO \
     --train_for_env_steps=5000
 ```
@@ -70,7 +70,7 @@ python -m comrad.train \
 
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
+    --env=stag_hunt_arena \
     --algo=HAPPO \
     --num_agents=N \
     --max_policy_lag=1000*(N+1) \
@@ -88,8 +88,8 @@ python -m comrad.train \
 
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
-    --algo=DQN \
+    --env=stag_hunt_arena \
+    --algo=IDQN \
     --use_rnn=False \
     --target_update_tau=1.0 \
     --train_for_env_steps=5000
@@ -98,7 +98,7 @@ python -m comrad.train \
 For training on HPC, I tuned with these parameters (this config technically edges 32GB RAM):
 ```bash
 # Single agent
-python -m comrad.train --env=doom_pitfall --algo=DQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=50000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --dqn_reward_clip=1.0 --train_frequency=8
+python -m comrad.train --env=stag_hunt_arena --algo=IDQN --train_for_seconds=21600 --num_workers=16 --num_envs_per_worker=16 --batch_size=2048 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=marl_vizdoom --use_rnn=False --learning_starts=50000 --dqn_batch_size=256 --replay_buffer_size=200000 --target_update_interval=2500 --epsilon_decay_steps=4000000 --epsilon_end=0.005 --per_beta_frames=2000000 --num_agents=1 --dqn_max_updates_per_batch=4 --target_update_tau=0.005 --dqn_reward_clip=1.0 --train_frequency=8
 
 # Multi agent
 # Same thing but num_agents=2
@@ -122,7 +122,7 @@ Note:
 #### VDN
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
+    --env=stag_hunt_arena \
     --algo=VDN \
     --use_rnn=False \
     --train_for_env_steps=5000
@@ -135,7 +135,7 @@ This automatically set `--mixer="vdn"`. One can also use `--algo=QMIX --mixer=vd
 #### QMIX
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
+    --env=stag_hunt_arena \
     --algo=QMIX \
     --use_rnn=False \
     --train_for_env_steps=5000
@@ -148,7 +148,7 @@ This automatically set `--mixer="qmix"` as that's the default value.
 #### VDN/QMIX + RNN (GRU)
 ```bash
 python -m comrad.train \
-    --env=doom_pitfall \
+    --env=stag_hunt_arena \
     --algo=QMIX \
     --use_rnn=True --rnn_type=gru --rnn_size=64 --rollout=16 \
     --actor_critic_share_weights=True --per=False \
@@ -165,6 +165,7 @@ python -m comrad.train \
 - `--device=cpu`: Train on CPU, use if no CUDA
 - `--with_wandb=True`: Enable WB logging
 - `--wandb_record_every=N`: Record video every N episodes
+- `--use_additional_input=True`: Use optional additional measurement vector to accelerate training
 
 ## 3. HPC Configuration
 
@@ -202,14 +203,14 @@ train_dir/<experiment>/
 
 ```bash
 # 1 episode at 720p
-python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment
+python -m comrad.record_video --env=stag_hunt_arena --experiment=my_experiment
 
 # 1080p with deterministic actions
-python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment \
+python -m comrad.record_video --env=stag_hunt_arena --experiment=my_experiment \
     --resolution=1920x1080 --eval_deterministic=True
 
 # Best checkpoint, 5 episodes, custom output
-python -m comrad.record_video --env=doom_pitfall --experiment=my_experiment \
+python -m comrad.record_video --env=stag_hunt_arena --experiment=my_experiment \
     --load_checkpoint_kind=best --max_num_episodes=5 --output_dir=./videos
 
 # Output: `{output_dir}/{video_prefix}_{ENV_INITIALS}_{ALGO}_{resolution}.mp4`
