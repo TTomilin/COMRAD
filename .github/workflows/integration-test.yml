@@ -24,4 +24,4 @@ jobs:
         run: uv sync --frozen --all-extras
 
       - name: Run pytest
-        run: uv run pytest sample-factory/ -v
+        run: uv run pytest sample_factory/ -v
