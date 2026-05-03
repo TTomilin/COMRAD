@@ -19,10 +19,11 @@ TRAIN_FOR_ENV_STEPS = 125000000
 
 BENCHMARK_SCENARIOS = [
     BenchmarkScenario("Stag Hunt Arena", "stag_hunt_arena", False),
-    BenchmarkScenario("Rhythm Sync", "rhythm_sync", True),
+    BenchmarkScenario("Rhythm Sync", "rhythm_sync_dense", True),
     BenchmarkScenario("Foraging Commons", "foraging_commons", False),
     BenchmarkScenario("Co-op Puzzle", "coop_puzzle", True),
     BenchmarkScenario("Platform Chain", "platform_chain", True),
+    BenchmarkScenario("Platform Chain Easy", "platform_chain_easy", True),
     BenchmarkScenario("Armory Siege", "armory_siege", False),
     BenchmarkScenario("Co-op Health Gathering", "coop_health_gathering", False),
     BenchmarkScenario("Lava Pit", "lavapit", True),
