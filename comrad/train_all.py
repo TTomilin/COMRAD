@@ -30,7 +30,7 @@ BENCHMARK_SCENARIOS = [
     BenchmarkScenario("Foraging Commons", "foraging_commons", False),
     BenchmarkScenario("Co-op Puzzle", "coop_puzzle", True),
     BenchmarkScenario("Platform Chain", "platform_chain", True),
-    BenchmarkScenario("Platform Chain Easy", "platform_chain_easy", True),
+    # BenchmarkScenario("Platform Chain Easy", "platform_chain_easy", True),
     BenchmarkScenario("Armory Siege", "armory_siege", False),
     BenchmarkScenario("Co-op Health Gathering", "coop_health_gathering", False),
     BenchmarkScenario("Lava Pit", "lavapit", True),
@@ -44,42 +44,42 @@ BENCHMARK_SCENARIOS = [
 ALGORITHMS = [
     AlgorithmSpec(
         "IPPO",
-        f"python -m comrad.train --algo=IPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --num_agents=2 --num_epochs=4 --rnn_type=lstm",
+        f"python -m comrad.train --algo=IPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
         True,
     ),
     AlgorithmSpec(
         "MAPPO",
-        f"python -m comrad.train --algo=MAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --num_agents=2 --num_epochs=4 --rnn_type=lstm",
+        f"python -m comrad.train --algo=MAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
         True,
     ),
     AlgorithmSpec(
         "HAPPO",
-        f"python -m comrad.train --algo=HAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --num_agents=2",
+        f"python -m comrad.train --algo=HAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2",
         True,
     ),
     AlgorithmSpec(
         "IDQN",
-        f"python -m comrad.train --algo=IDQN --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
+        f"python -m comrad.train --algo=IDQN --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
         False,
     ),
     AlgorithmSpec(
         "VDN",
-        f"python -m comrad.train --algo=VDN --mixer=vdn --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
+        f"python -m comrad.train --algo=VDN --mixer=vdn --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
         False,
     ),
     AlgorithmSpec(
         "QMIX",
-        f"python -m comrad.train --algo=QMIX --mixer=qmix --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=comrad_jr --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
+        f"python -m comrad.train --algo=QMIX --mixer=qmix --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --qmix_sequence_batch_size=64 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True",
         False,
     ),
     AlgorithmSpec(
         "QPLEX_dmaq",
-        f"python -m comrad.train --algo=QPLEX --mixer=dmaq --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=comrad_jr --wandb_record_every=10 --qmix_sequence_batch_size=16 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=16 --qplex_state_bias=False",
+        f"python -m comrad.train --algo=QPLEX --mixer=dmaq --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=COMRAD --wandb_record_every=10 --qmix_sequence_batch_size=16 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=16 --qplex_state_bias=False",
         False,
     ),
     AlgorithmSpec(
         "QPLEX_dmaq_qatten",
-        f"python -m comrad.train --algo=QPLEX --mixer=dmaq_qatten --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=comrad_jr --wandb_record_every=10 --qmix_sequence_batch_size=16 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=16 --qplex_state_bias=False",
+        f"python -m comrad.train --algo=QPLEX --mixer=dmaq_qatten --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_project=COMRAD --wandb_record_every=10 --qmix_sequence_batch_size=16 --num_agents=2 --dqn_max_updates_per_batch=4 --batched_sampling=True --qplex_grad_accum_mini_bs=16 --qplex_state_bias=False",
         False,
     ),
 ]
