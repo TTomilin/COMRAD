@@ -1,0 +1,13 @@
+There are people who helped with wad2image that I'd like to thank.
+
+* A big thanks to the Omgifol project, and particularly drawmaps.py, which
+  this program is based on.
+
+* As far as I know the idea of using animated GIF files to illustrate
+  differences between revisions of a map originated from Linguica at DoomWorld.
+  Here's an example of such GIFs he created manually:
+    https://www.doomworld.com/linguica/romerofiles/mapgifs/
+  wad2image automates creating such GIFs.
+
+* And last but not least my partner Erikalin Ashton who helped me test
+  wad2image and gave me feedback on it.

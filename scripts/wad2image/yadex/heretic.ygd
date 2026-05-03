@@ -1,0 +1,339 @@
+# Yadex game definition file version 4
+#
+#	heretic.ygd
+#	Yadex Game Definitions for Heretic
+#	See doc/ygd.html for the specs.
+#	AYM 1998-10-20
+#
+
+# With help from Barry Mead.
+
+level_format    doom
+level_name      e1m1
+picture_format  normal
+sky_flat        f_sky1
+texture_format  normal
+texture_lumps   normal
+
+#
+#	Definition of linedef type groups
+#	Format is : ldtgroup <ldtgroup> <description>
+#
+
+ldtgroup d "Door"
+ldtgroup y "Door (yellow key)"
+ldtgroup g "Door (green key)"
+ldtgroup b "Door (blue key)"
+ldtgroup l "Lift"
+ldtgroup F "Floor (raise)"
+ldtgroup f "Floor (lower)"
+ldtgroup c "Ceiling"
+ldtgroup C "Crushing ceiling"
+ldtgroup t "Teleport"
+ldtgroup L "Light"
+ldtgroup e "End level"
+ldtgroup m "Moving floor"
+ldtgroup s "Raising stairs"
+ldtgroup x "Misc."
+
+#
+#	Definition of linedef types
+#	Format is : ldt <number> <ldtgroup> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 16 characters.
+#
+
+ldt   0 x "-- Normal"        "--  Normal"
+ldt   1 d "DR Open door"     "DR  Open  door"
+ldt   2 d "W1 Open door (O)" "W1  Open  door (stays open)"
+ldt   3 d "W1 Close door"    "W1  Close door"
+ldt   4 d "W1 Open door"     "W1  Open  door"
+ldt   5 F "W1 Floor up LIC"  "W1  Raise floor to LIC"
+ldt   6 C "W1 Crush FF"      "W1  Start fast crushing, fast hurt"
+ldt   7 s "S1 Raise stairs"  "S1  Raise stairs (several sectors 0/999)"
+ldt   8 s "W1 Raise stairs"  "W1  Raise stairs (several sectors 0/999)"
+ldt   9 x "S1 Donut"         "S1  Lower floor, raise Ne. floor (NXP) 'Donut'"
+ldt  10 l "W1 Lower lift"    "W1  Lower lift"
+ldt  11 e "S- End level"     "S-  End level, go to next level"
+ldt  12 L "W1 Light to HE"   "W1  Light level goes to HE"
+ldt  13 L "W1 Light to 255"  "W1  Light level goes to 255"
+ldt  14 F "S1& F. up 32 TX"  "S1& Raise floor by 32 (TX)"
+ldt  15 F "S1& F. up 24 TX"  "S1& Raise floor by 24 (TX)"
+ldt  16 d "W1 Close for 30s" "W1  Close door for 30 seconds"
+ldt  17 L "W1 Start blink"   "W1  Start blinking lights"
+ldt  18 F "S1 Floor up nhEF" "S1  Raise floor to nhEF"
+ldt  19 f "W1 Floor dn HEF"  "W1  Lower floor to HEF"
+ldt  20 F "S1& F up nhEF TX" "S1& Raise floor to nhEF (TX)"
+ldt  21 l "S1 Lower lift"    "S1  Lower lift"
+ldt  22 F "W1& F up nhEF TX" "W1& Raise floor to nhEF (TX)"
+ldt  23 f "S1 Floor dn LEF"  "S1  Lower floor to LEF"
+ldt  24 F "G1 Floor up LIC"  "G1  Raise floor to LIC"
+ldt  25 C "W1 Crush FS"      "W1  Start fast crushing, slow hurt"
+ldt  26 b "DR Open blue dr"  "DR  Open  door, blue key"
+ldt  27 y "DR Open yel dr"   "DR  Open  door, yellow key"
+ldt  28 g "DR Open green dr" "DR  Open  door, green key"
+ldt  29 d "S1 Open door"     "S1  Open  door"
+ldt  30 F "W1 Floor up SLT"  "W1  Raise floor by ShortestLowerTexture"
+ldt  31 d "D1 Open door (O)" "D1  Open  door (stays open)"
+ldt  32 b "D1 Open blu (O)"  "D1  Open  door (stays open), blue key"
+ldt  33 g "D1 Open grn (O)"  "D1  Open  door (stays open), green key"
+ldt  34 y "D1 Open yel (O)"  "D1  Open  door (stays open), yellow key"
+ldt  35 L "W1 Light to 35"   "W1  Light level goes to 35"
+ldt  36 f "W1 F. DN HEF+8"   "W1  Lower turbo floor to HEF + 8"
+ldt  37 f "W1 F. dn LEF NXP" "W1  Lower floor to LEF (NXP)"
+ldt  38 f "W1 Floor dn LEF"  "W1  Lower floor to LEF"
+ldt  39 t "W1 Teleport"      "W1  Teleport to another sector"
+ldt  40 c "W1 CuHEC FdLEF"   "W1  Raise ceiling to HEC, lower floor to LEF"
+ldt  41 c "S1 Ceil dn floor" "S1  Lower ceiling to floor"
+ldt  42 d "SR Close door"    "SR  Close door"
+ldt  43 c "SR Ceil dn floor" "SR  Lower ceiling to floor"
+ldt  44 c "W1 C. dn f+8 cru" "W1  Lower ceiling to floor + 8"
+ldt  45 f "SR Floor dn HEF"  "SR  Lower floor to HEF"
+ldt  46 d "GR Open door (O)" "GR  Open  door (stays open)"
+ldt  47 F "G1 F. up nhEF TX" "G1  Raise floor to nhEF (TX)"
+ldt  48 x "-- Scroll left"   "--  Animated wall (scrolls left)"
+ldt  49 c "S1 C. dn f+8 cru" "S1  Lower ceiling to floor + 8"
+ldt  50 d "S1 Close door"    "S1  Close door"
+ldt  51 e "S- Secret level"  "S-  End level, go to secret level"
+ldt  52 e "W- End level"     "W-  End level, go to next level"
+ldt  53 m "W1 Start moving"  "W1  Start moving floor"
+ldt  54 m "W1 Stop moving f" "W1  Stop  moving floor"
+ldt  55 F "S1 F. up LIC-8"   "S1  Raise floor to LIC - 8, crush"
+ldt  56 F "W1& F. up LIC-8"  "W1& Raise floor to LIC - 8, crush"
+ldt  57 C "W1& Stop crush"   "W1& Stop  crushing"
+ldt  58 F "W1 Floor up 24"   "W1  Raise floor by 24"
+ldt  59 F "W1 F. up 24 TXP"  "W1  Raise floor by 24 (TXP)"
+ldt  60 f "SR Floor dn LEF"  "SR  Lower floor to LEF"
+ldt  61 d "SR Open door (O)" "SR  Open  door (stays open)"
+ldt  62 l "SR Lower lift"    "SR  Lower lift"
+ldt  63 d "SR Open door"     "SR  Open  door"
+ldt  64 F "SR Floor up LIC"  "SR  Raise floor to LIC"
+ldt  65 F "SR F. up LIC-8"   "SR  Raise floor to LIC - 8, crush"
+ldt  66 F "SR& F. up 24 TX"  "SR& Raise floor by 24 (TX)"
+ldt  67 F "SR& F. up 32 TX"  "SR& Raise floor by 32 (TX)"
+ldt  68 f "SR& F up nhEF TX" "SR& Raise floor to nhEF (TX)"
+ldt  69 F "SR F. up nhEF"    "SR  Raise floor to nhEF"
+ldt  70 f "SR F. DN HEF+8"   "SR  Lower turbo floor to HEF + 8"
+ldt  71 f "S1 F. DN HEF+8"   "S1  Lower turbo floor to HEF + 8"
+ldt  72 c "WR C. dn f+8 cru" "WR  Lower ceiling to floor + 8"
+ldt  73 C "WR& Crush SS"     "WR& Start slow crushing, slow hurt"
+ldt  74 C "WR& Stop crush"   "WR& Stop  crushing"
+ldt  75 d "WR Close door"    "WR  Close door"
+ldt  76 d "WR Close for 30s" "WR  Close door for 30 seconds"
+ldt  77 C "WR& Crush FF"     "WR& Start fast crushing, fast hurt"
+#ldt 78 x "-- Unimplemented" "--  Unimplemented"
+ldt  79 L "WR Light to 35"   "WR  Light level goes to 35"
+ldt  80 L "WR Light to HE"   "WR  Light level goes to HE"
+ldt  81 L "WR Light to 255"  "WR  Light level goes to 255"
+ldt  82 f "WR Floor dn LEF"  "WR  Lower floor to LEF"
+ldt  83 f "WR Floor dn HEF"  "WR  Lower floor to HEF"
+ldt  84 f "WR F. dn LEF NXP" "WR  Lower floor to LEF (NXP)"
+#ldt 85 x "-- Unimplemented" "--  Unimplemented"
+ldt  86 d "WR Open door (O)" "WR  Open  door (stays open)"
+ldt  87 m "WR& Start moving" "WR& Start moving floor"
+ldt  88 l "WR Lower lift"    "WR  Lower lift"
+ldt  89 m "WR& Stop moving"  "WR& Stop  moving floor"
+ldt  90 d "WR Open door"     "WR  Open  door"
+ldt  91 F "WR Floor up LIC"  "WR  Raise floor to LIC"
+ldt  92 F "WR Floor up 24"   "WR  Raise floor by 24"
+ldt  93 F "WR F. up 24 TXP"  "WR  Raise floor by 24 (TXP)"
+ldt  94 F "WR F. up LIC-8"   "WR  Raise floor to LIC - 8, crush"
+ldt  95 F "WR F. up nhEF TX" "WR  Raise floor to nhEF (TX)"
+ldt  96 F "WR Floor up SLT"  "WR  Raise floor by ShortestLowerTexture"
+ldt  97 t "WR Teleport"      "WR  Teleport to another sector"
+ldt  98 f "WR F. DN HEF+8"   "WR  Lower turbo floor to HEF + 8"
+ldt  99 x "-- Scroll right"  "--  Animated wall (scrolls right)"
+ldt 100 d "WR OPEN door"     "WR  Open  turbo door"
+ldt 101 F "S1 Floor up LIC"  "S1  Raise floor to LIC"
+ldt 102 f "S1 Floor dn HEF"  "S1  Lower floor to HEF"
+ldt 103 d "S1 Open door (O)" "S1  Open  door (stays open)"
+ldt 104 L "W1 Light to LE"   "W1  Light level goes to LE"
+ldt 105 e "W- Secret level"  "W-  End level, go to secret level"
+ldt 106 s "W1 Raise stairs"  "W1  Raise stairs, step 16"
+ldt 107 s "S1 Raise stairs"  "S1  Raise stairs, step 16"
+
+#
+#	Definition of sector types
+#	Format is : st <number> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 14 characters.
+#
+
+st  0 "X Normal"       "X Normal"
+st  1 "  Blinks rand"  "  Light blinks randomly"
+st  2 "  Flashes 2 Hz" "  Light flashes 2 Hz"
+st  3 "  Flashes 1 Hz" "  Light flashes 1 Hz"
+st  4 "P -10% flow E"  "P -5/10% health, floor scrolls eastward 28, flash 2 Hz"
+st  5 "P -10% health"  "P -5/10% health"
+st  6 "? Crush raise"  "? Ceiling crush and raise"
+st  7 "P -4% health"   "P -2/4% health"
+st  8 "  Oscillates"   "  Light oscillates"
+st  9 "P Secret"       "P Secret"
+st 10 "  Closes 30 s"  "  30 s after level start, ceiling closes like a door"
+st 12 "  Flash1Hz syn" "  Light flashes 1 Hz, synchronized"
+st 13 "  Flash2Hz syn" "  Light flashes 2 Hz, synchronized"
+st 14 "  Opens 300 s"  "  300 s after level start, ceiling opens like a door"
+st 15 "? Ice low fric" "? Ice low friction"
+st 16 "P -16% health"  "P -8/16% health"
+st 20 "? Flow E  5"    "? Floor scrolls eastward  5"
+st 21 "? Flow E 10"    "? Floor scrolls eastward 10"
+st 22 "? Flow E 25"    "? Floor scrolls eastward 25"
+st 23 "? Flow E 30"    "? Floor scrolls eastward 30"
+st 24 "? Flow E 35"    "? Floor scrolls eastward 35"
+st 25 "? Flow N  5"    "? Floor scrolls northward  5"
+st 26 "? Flow N 10"    "? Floor scrolls northward 10"
+st 27 "? Flow N 25"    "? Floor scrolls northward 25"
+st 28 "? Flow N 30"    "? Floor scrolls northward 30"
+st 29 "? Flow N 35"    "? Floor scrolls northward 35"
+st 30 "? Flow S  5"    "? Floor scrolls southward  5"
+st 31 "? Flow S 10"    "? Floor scrolls southward 10"
+st 32 "? Flow S 25"    "? Floor scrolls southward 25"
+st 33 "? Flow S 30"    "? Floor scrolls southward 30"
+st 34 "? Flow S 35"    "? Floor scrolls southward 35"
+st 35 "? Flow W  5"    "? Floor scrolls westward  5"
+st 36 "? Flow W 10"    "? Floor scrolls westward 10"
+st 37 "? Flow W 25"    "? Floor scrolls westward 25"
+st 38 "? Flow W 30"    "? Floor scrolls westward 30"
+st 39 "? Flow W 35"    "? Floor scrolls westward 35"
+st 40 "? Wind E slow"  "? Wind blows eastward slowly"
+st 41 "? Wind E mid"   "? Wind blows eastward"
+st 42 "? Wind E fast"  "? Wind blows eastward fast"
+st 43 "? Wind N slow"  "? Wind blows northward slowly"
+st 44 "? Wind N mid"   "? Wind blows northward"
+st 45 "? Wind N fast"  "? Wind blows northward fast"
+st 46 "? Wind S slow"  "? Wind blows southward slowly"
+st 47 "? Wind S mid"   "? Wind blows southward"
+st 48 "? Wind S fast"  "? Wind blows southward fast"
+st 49 "? Wind W slow"  "? Wind blows westward slowly"
+st 50 "? Wind W mid"   "? Wind blows westward"
+st 51 "? Wind W fast"  "? Wind blows westward fast"
+
+#
+#	Definition of thing groups
+#	Format is : thinggroup <thinggroup> <colour> <description>
+#
+
+thinggroup p rgb:4/f/4 "Player"
+thinggroup m rgb:f/0/0 "Monster"
+thinggroup w rgb:f/a/0 "Weapon"
+thinggroup a rgb:8/5/0 "Ammunition"
+thinggroup h rgb:2/8/0 "Health & armour"
+thinggroup b rgb:2/8/0 "Misc. bonus"
+thinggroup k rgb:f/0/f "Key"
+thinggroup d rgb:6/6/c "Misc. decoration"
+#thinggroup l rgb:6/6/c "Light source"
+#thinggroup g rgb:6/6/c "Gory decoration"
+#thinggroup c rgb:6/6/c "Corpse"
+thinggroup e rgb:0/b/d "Environment sound"
+thinggroup s rgb:0/b/d "Ambient sound"
+
+#
+#	Definition of things
+#	Format is :
+#	thing <number> <thinggroup> <flags> <radius> <desc> [<sprite>]
+#	<desc> must not exceed 19 characters.
+#
+
+thing    1 p -   16 "Player 1 start"		PLAY
+thing    2 p -   16 "Player 2 start"		PLAY
+thing    3 p -   16 "Player 3 start"		PLAY
+thing    4 p -   16 "Player 4 start"		PLAY
+thing   11 p -   16 "Deathmatch start"		PLAYF1
+thing   14 p -   20 "Teleport exit"		TELE
+
+thing   66 m -   16 "Gargoyle"			IMPX
+thing    5 m -   16 "Gargoyle leader"		IMPXD
+thing   68 m -   22 "Golem"			MUMM
+thing   69 m s   22 "Golem ghost"		MUMM
+thing   45 m -   22 "Golem leader"		MUMMY
+thing   46 m s   22 "Golem leader ghost"	MUMMY
+thing   64 m -   24 "Undead warrior"		KNIG
+thing   65 m s   24 "Undead warrior ghost"	KNIG
+thing   15 m -   16 "Disciple"			WZRD
+thing   70 m -   32 "Weredragon"		BEAS
+thing   90 m -   20 "Sabre claw"		CLNK
+thing    6 m -   40 "Ironlich"			HEAD
+thing    9 m -   28 "Maulotaur"			MNTR
+thing   92 m -   22 "Ophidian"			SNKE
+thing    7 m -   28 "D'Sparil"			SRCR
+thing   56 m -   17 "D'Sparil spot"		SOR2H
+
+thing 2005 w -   20 "Gauntlets"			WGNT
+thing 2001 w -   20 "Ethereal cross bow"	WBOW
+thing   53 w -   20 "Dragon claw"		WBLS
+thing 2004 w -   20 "Hellstaff"			WSKL
+thing 2003 w -   20 "Phoenix rod"		WPHX
+thing 2002 w -   20 "Mace"			WMCE
+
+thing   10 a -   20 "Wand crystal"		AMG1
+thing   12 a -   20 "Wand geode"		AMG2
+thing   18 a -   20 "Ethereal arrows"		AMC1
+thing   19 a -   20 "Ethereal quiver"		AMC2
+thing   54 a -   20 "Claw orb"			AMB1
+thing   55 a -   20 "Energy orb"		AMB2
+thing   20 a -   20 "Lesser runes"		AMS1
+thing   21 a -   20 "Greater runes"		AMS2
+thing   22 a -   20 "Flame orb"			AMP1
+thing   23 a -   20 "Inferno orb"		AMP2
+thing   13 a -   20 "Mace spheres"		AMM1
+thing   16 a -   20 "Pile of mace spheres"	AMM2
+
+thing   32 h -   20 "Mystic urn"		SPHL
+thing   81 h -   20 "Crystal vial"		PTN1
+thing   82 h -   20 "Quartz flask"		PTN2
+thing   85 h -   20 "Silver shield"		SHLD
+thing   31 h -   20 "Enchanted shield"		SHD2
+
+thing    8 b -   20 "Bag of holding"		BAGH
+thing   30 b -   20 "Morph ovum"		EGGC
+thing   34 b -   20 "Time bomb"			FBMB
+thing   83 b -   20 "Wings of wrath"		SOAR
+thing   75 b -   20 "Shadowsphere"		INVS
+thing   84 b -   20 "Ring of invuln."		INVU
+thing   35 b -   20 "Map scroll"		SPMP
+thing   36 b -   20 "Chaos device"		ATLP
+thing   86 b -   20 "Tome of power"		PWBK
+thing   33 b -   20 "Torch"			TRCH
+
+thing   73 k -   20 "Green key"			AKYY
+thing   79 k -   20 "Blue key	"		BKYY
+thing   80 k -   20 "Yellow key"		CKYY
+
+thing   44 d -   12 "Barrel"			BARL
+thing   47 d -   14 "Brown pillar"		BRPL
+thing   28 d -   20 "Chandelier"		CHDL
+thing   76 d -   16 "Fire brazier"		KFR1
+thing   51 d -    8 "Hanging corpse"		HCOR
+thing   94 d -   16 "Blue key statue"		KGZB
+thing   95 d -   16 "Green key statue"		KGZG
+thing   96 d -   16 "Yellow key statue"		KGZY
+thing   48 d -   20 "Moss 1"			MOS1
+thing   49 d -   20 "Moss 2"			MOS2
+thing   27 d -   12 "Serpent torch"		SRTC
+thing   26 d -   20 "Hanging skull 35"		SKH4
+thing   25 d -   20 "Hanging skull 45"		SKH3
+thing   24 d -   20 "Hanging skull 60"		SKH2
+thing   17 d -   20 "Hanging skull 70"		SKH1
+thing   29 d -   16 "Small pillar"		SMPL
+thing   50 d -   20 "Wall torch"		WTRH
+thing   74 d -   20 "Teleport glitter"		TGLTA
+thing   52 d -   20 "Exit glitter"		TGLTF
+thing   87 d -   12 "Volcano"			VLCO
+thing   37 d -    8 "Small stalagmite"		STGS
+thing   38 d -   12 "Large stalagmite"		STGL
+thing   39 d -    8 "Small stalactite"		STCS
+thing   40 d -   12 "Large stalactite"		STCL
+thing 2035 d -   16 "Pod"			PPOD
+thing   43 d -   20 "Pod generator"
+
+thing   41 e -   20 "Waterfall"
+thing   42 e -   20 "Wind"
+
+thing 1200 s -   16 "Scream"
+thing 1201 s -   16 "Squish"
+thing 1202 s -   16 "Water drip"
+thing 1203 s -   16 "Slow footsteps"
+thing 1204 s -   16 "Heart beat"
+thing 1205 s -   16 "Bells"
+thing 1206 s -   16 "Growl"
+thing 1207 s -   16 "Magic"
+thing 1208 s -   16 "Laughter"
+thing 1209 s -   16 "Fast footsteps"

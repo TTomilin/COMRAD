@@ -1,0 +1,24 @@
+If you're interested in how wad2image works or in contributing to it this
+document may be helpful.
+
+wad2image is a Python program that should work on most systems with a
+reasonably recent version of Pillow installed. It uses Devin Acker's fork of
+Omgifol, which is bundled in third-party/omg.
+
+To submit a change to wad2image fork it and send a pull request. It's github
+page is https://github.com/selliott512/wad2image . If it's a lot of work and
+you'd like to discuss it first you can reach me at selliott512@gmail.com
+
+The organization and style of wad2image should be clear, but here are a few
+highlights that apply to bin/wad2image.py:
+1) Code is indented 4 spaces (no tabs).
+2) Methods and variable names are lower case with underscores ("_").
+3) It's divided into three sections:
+    // Globals
+    // Functions
+    // Main entry
+4) The functions are in alphabetical order.
+5) The long version of command line options are in alphabetical order.
+
+TODO: Add more information about how wad2image works. For now hopefully the
+comments will be helpful.

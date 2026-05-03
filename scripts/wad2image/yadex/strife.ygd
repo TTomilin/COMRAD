@@ -1,0 +1,417 @@
+# Yadex game definition file version 4
+#
+#	strife.ygd
+#	Yadex Game Definitions for Strife (version 1.1 and above)
+#	AYM 1999-02-27
+#	mattm 2000.05.05 05.29
+#
+
+# FIXME this file contains many inaccuracies and
+# errors ;
+# - most things types are missing
+# - most new (w.r.t. Doom) linedef types are
+#   missing.
+# - some redefined (w.r.t. Doom) linedef types
+#   still have the Doom definition.
+# - some sector types may be missing (or wrong).
+# Anyone who knows Strife want to fix it ?
+
+level_format    doom
+level_name      map01
+picture_format  normal
+sky_flat        f_sky001
+texture_format  strife11
+texture_lumps   normal
+
+#
+#	Definition of linedef type groups
+#	Format is : ldtgroup <ldtgroup> <description>
+#
+
+ldtgroup d "Door"
+ldtgroup r "Door (red key)"
+ldtgroup y "Door (yellow key)"
+ldtgroup b "Door (blue key)"
+ldtgroup D "Door (turbo)"
+ldtgroup a "Door (animated)"
+ldtgroup l "Lift"
+ldtgroup F "Floor (raise)"
+ldtgroup f "Floor (lower)"
+ldtgroup c "Ceiling"
+ldtgroup C "Crushing ceiling"
+ldtgroup t "Teleport"
+ldtgroup L "Light"
+ldtgroup e "End level"
+ldtgroup m "Moving floor"
+ldtgroup s "Raising stairs"
+#ldtgroup B "Force fields"
+ldtgroup x "Misc."
+
+#
+#	Definition of linedef types
+#	Format is : ldt <number> <ldtgroup> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 16 characters.
+#
+
+ldt   0 x "-- Normal"        "--  Normal"
+ldt   1 d "DR Open door"     "DR  Open  door"
+ldt   2 d "W1 Open door (O)" "W1  Open  door (stays open)"
+ldt   3 d "W1 Close door"    "W1  Close door"
+ldt   4 d "W1 Open door"     "W1  Open  door"
+ldt   5 F "W1 Floor up LIC"  "W1  Raise floor to LIC"
+ldt   6 C "W1 Crush FF"      "W1  Start fast crushing, fast hurt"
+ldt   7 s "S1 Raise stairs"  "S1  Raise stairs (several sectors 0/999)"
+ldt   8 s "W1 Raise stairs"  "W1  Raise stairs (several sectors 0/999)"
+ldt   9 x "S1 Donut"         "S1  Lower floor, raise Ne. floor (NXP) 'Donut'"
+ldt  10 l "W1 Lower lift"    "W1  Lower lift"
+ldt  11 e "S- End level"     "S-  End level, go to next level"
+ldt  12 L "W1 Light to HE"   "W1  Light level goes to HE"
+ldt  13 L "W1 Light to 255"  "W1  Light level goes to 255"
+ldt  14 F "S1& F. up 32 TX"  "S1& Raise floor by 32 (TX)"
+ldt  15 F "S1& F. up 24 TX"  "S1& Raise floor by 24 (TX)"
+ldt  16 d "W1 Close for 30s" "W1  Close door for 30 seconds"
+ldt  17 L "W1 Start blink"   "W1  Start blinking lights"
+ldt  18 F "S1 Floor up nhEF" "S1  Raise floor to nhEF"
+ldt  19 f "W1 Floor dn HEF"  "W1  Lower floor to HEF"
+ldt  20 F "S1& F up nhEF TX" "S1& Raise floor to nhEF (TX)"
+ldt  21 l "S1 Lower lift"    "S1  Lower lift"
+ldt  22 F "W1& F up nhEF TX" "W1& Raise floor to nhEF (TX)"
+ldt  23 f "S1 Floor dn LEF"  "S1  Lower floor to LEF"
+ldt  24 F "G1 Floor up LIC"  "G1  Raise floor to LIC"
+ldt  25 C "W1 Crush FS"      "W1  Start fast crushing, slow hurt"
+ldt  26 b "DR Open blue dr"  "DR  Open  door, blue key"
+ldt  27 y "DR Open yel dr"   "DR  Open  door, yellow key"
+ldt  28 r "DR Open red dr"   "DR  Open  door, red key"
+ldt  29 d "S1 Open door"     "S1  Open  door"
+ldt  30 F "W1 Floor up SLT"  "W1  Raise floor by ShortestLowerTexture"
+ldt  31 d "D1 Open door (O)" "D1  Open  door (stays open)"
+ldt  32 b "D1 Open blu (O)"  "D1  Open  door (stays open), blue key"
+ldt  33 r "D1 Open red (O)"  "D1  Open  door (stays open), red key"
+ldt  34 y "D1 Open yel (O)"  "D1  Open  door (stays open), yellow key"
+ldt  35 L "W1 Light to 35"   "W1  Light level goes to 35"
+ldt  36 f "W1 F. DN HEF+8"   "W1  Lower turbo floor to HEF + 8"
+ldt  37 f "W1 F. dn LEF NXP" "W1  Lower floor to LEF (NXP)"
+ldt  38 f "W1 Floor dn LEF"  "W1  Lower floor to LEF"
+ldt  39 t "W1 Teleport"      "W1  Teleport to another sector"
+ldt  40 c "W1 Ceil up HEC"   "W1  Raise ceiling to HEC"
+ldt  41 c "S1 Ceil dn floor" "S1  Lower ceiling to floor"
+ldt  42 d "SR Close door"    "SR  Close door"
+ldt  43 c "SR Ceil dn floor" "SR  Lower ceiling to floor"
+ldt  44 c "W1 Ceil dn flr+8" "W1  Lower ceiling to floor + 8"
+ldt  45 f "SR Floor dn HEF"  "SR  Lower floor to HEF"
+ldt  46 d "GR Open door (O)" "GR  Open  door (stays open)"
+ldt  47 F "G1 F. up nhEF TX" "G1  Raise floor to nhEF (TX)"
+ldt  48 x "-- Scroll left"   "--  Animated wall (scrolls leftward)"
+ldt  49 c "S1 Ceil dn flr+8" "S1  Lower ceiling to floor + 8"
+ldt  50 d "S1 Close door"    "S1  Close door"
+ldt  51 e "S- Secret level"  "S-  End level, go to secret level"
+ldt  52 e "W- End level"     "W-  End level, go to next level"
+ldt  53 m "W1 Start moving"  "W1  Start moving floor"
+ldt  54 m "W1 Stop moving f" "W1  Stop  moving floor"
+ldt  55 F "S1 F. up LIC-8"   "S1  Raise floor to LIC - 8, crush"
+ldt  56 F "W1& F. up LIC-8"  "W1& Raise floor to LIC - 8, crush"
+ldt  57 C "W1& Stop crush"   "W1& Stop  crushing"
+ldt  58 F "W1 Floor up 24"   "W1  Raise floor by 24"
+ldt  59 F "W1 F. up 24 TXP"  "W1  Raise floor by 24 (TXP)"
+ldt  60 f "SR Floor dn LEF"  "SR  Lower floor to LEF"
+ldt  61 d "SR Open door (O)" "SR  Open  door (stays open)"
+ldt  62 l "SR Lower lift"    "SR  Lower lift"
+ldt  63 d "SR Open door"     "SR  Open  door"
+ldt  64 F "SR Floor up LIC"  "SR  Raise floor to LIC"
+ldt  65 F "SR F. up LIC-8"   "SR  Raise floor to LIC - 8, crush"
+ldt  66 F "SR& F. up 24 TX"  "SR& Raise floor by 24 (TX)"
+ldt  67 F "SR& F. up 32 TX"  "SR& Raise floor by 32 (TX)"
+ldt  68 f "SR& F up nhEF TX" "SR& Raise floor to nhEF (TX)"
+ldt  69 F "SR F. up nhEF"    "SR  Raise floor to nhEF"
+ldt  70 f "SR F. DN HEF+8"   "SR  Lower turbo floor to HEF + 8"
+ldt  71 f "S1 F. DN HEF+8"   "S1  Lower turbo floor to HEF + 8"
+ldt  72 c "WR Ceil dn flr+8" "WR  Lower ceiling to floor + 8"
+ldt  73 C "WR& Crush SS"     "WR& Start slow crushing, slow hurt"
+ldt  74 C "WR& Stop crush"   "WR& Stop  crushing"
+ldt  75 d "WR Close door"    "WR  Close door"
+ldt  76 d "WR Close for 30s" "WR  Close door for 30 seconds"
+ldt  77 C "WR& Crush FF"     "WR& Start fast crushing, fast hurt"
+#ldt 78 x "-- Unimplemented" "--  Unimplemented"
+ldt  79 L "WR Light to 35"   "WR  Light level goes to 35"
+ldt  80 L "WR Light to HE"   "WR  Light level goes to HE"
+ldt  81 L "WR Light to 255"  "WR  Light level goes to 255"
+ldt  82 f "WR Floor dn LEF"  "WR  Lower floor to LEF"
+ldt  83 f "WR Floor dn HEF"  "WR  Lower floor to HEF"
+ldt  84 f "WR F. dn LEF NXP" "WR  Lower floor to LEF (NXP)"
+#ldt 85 x "-- Unimplemented" "--  Unimplemented"
+ldt  86 d "WR Open door (O)" "WR  Open  door (stays open)"
+ldt  87 m "WR& Start moving" "WR& Start moving floor"
+ldt  88 l "WR Lower lift"    "WR  Lower lift"
+ldt  89 m "WR& Stop moving"  "WR& Stop  moving floor"
+ldt  90 d "WR Open door"     "WR  Open  door"
+ldt  91 F "WR Floor up LIC"  "WR  Raise floor to LIC"
+ldt  92 F "WR Floor up 24"   "WR  Raise floor by 24"
+ldt  93 F "WR F. up 24 TXP"  "WR  Raise floor by 24 (TXP)"
+ldt  94 F "WR F. up LIC-8"   "WR  Raise floor to LIC - 8, crush"
+ldt  95 F "WR F. up nhEF TX" "WR  Raise floor to nhEF (TX)"
+ldt  96 F "WR Floor up SLT"  "WR  Raise floor by ShortestLowerTexture"
+ldt  97 t "WR Teleport"      "WR  Teleport to another sector"
+ldt  98 f "WR F. DN HEF+8"   "WR  Lower turbo floor to HEF + 8"
+ldt  99 b "SR OPEN blu door" "SR  Open  turbo door, blue key [v1.6]"
+ldt 100 s "W1 RaiseStairs16" "W1  Raise stairs (step=16), crush [v1.6]"
+ldt 101 F "S1 Floor up LIC"  "S1  Raise floor to LIC"
+ldt 102 f "S1 Floor dn HEF"  "S1  Lower floor to HEF"
+ldt 103 d "S1 Open door (O)" "S1  Open  door (stays open)"
+ldt 104 L "W1 Light to LE"   "W1  Light level goes to LE"
+ldt 105 D "WR OPEN door"     "WR  Open  turbo door [v1.6]"
+ldt 106 D "WR OPEN door (O)" "WR  Open  turbo door (stays open) [v1.6]"
+ldt 107 D "WR CLOSE door"    "WR  Close turbo door [v1.6]"
+ldt 108 D "W1 OPEN door"     "W1  Open  turbo door [v1.6]"
+ldt 109 D "W1 OPEN door (O)" "W1  Open  turbo door (stays open) [v1.6]"
+ldt 110 D "W1 CLOSE door"    "W1  Close turbo door [v1.6]"
+ldt 111 D "S1 OPEN door"     "S1  Open  turbo door [v1.6]"
+ldt 112 D "S1 OPEN door (O)" "S1  Open  turbo door (stays open) [v1.6]"
+ldt 113 D "S1 CLOSE door"    "S1  Close turbo door [v1.6]"
+ldt 114 D "SR OPEN door"     "SR  Open  turbo door [v1.6]"
+ldt 115 D "SR OPEN door (O)" "SR  Open  turbo door (stays open) [v1.6]"
+ldt 116 D "SR CLOSE door"    "SR  Close turbo door [v1.6]"
+ldt 117 D "DR OPEN door"     "DR  Open  turbo door [v1.6]"
+ldt 118 D "D1 OPEN door (O)" "D1  Open  turbo door (stays open) [v1.6]"
+ldt 119 F "W1 Floor up nhEF" "W1  Raise floor to nhEF [v1.6]"
+ldt 120 l "WR LOWER lift"    "WR  Lower turbo lift [v1.6]"
+ldt 121 l "W1 LOWER lift"    "W1  Lower turbo lift [v1.6]"
+ldt 122 l "S1 LOWER lift"    "S1  Lower turbo lift [v1.6]"
+ldt 123 l "SR LOWER lift"    "SR  Lower turbo lift [v1.6]"
+ldt 124 e "W- Secret level"  "W-  End level, go to secret level [v1.6]"
+ldt 125 t "W1 Teleport mons" "W1  Teleport monsters only [v1.6]"
+ldt 126 t "WR Teleport mons" "WR  Teleport monsters only [v1.6]"
+ldt 127 s "S1 RaiseStairs16" "S1  Raise stairs (step=16), crush [v1.6]"
+ldt 128 F "WR Floor up nhEF" "WR  Raise floor to nhEF [v1.6]"
+ldt 129 F "WR Floor UP nhEF" "WR  Raise turbo floor to nhEF [v1.6]"
+ldt 130 F "W1 Floor UP nhEF" "W1  Raise turbo floor to nhEF [v1.6]"
+ldt 131 F "S1 Floor UP nhEF" "S1  Raise turbo floor to nhEF [v1.6]"
+ldt 132 F "SR Floor UP nhEF" "SR  Raise turbo floor to nhEF [v1.6]"
+ldt 133 b "S1 OPEN blu door" "S1  Open  turbo door, blue key [v1.6]"
+ldt 134 r "SR OPEN red door" "SR  Open  turbo door, red key [v1.6]"
+ldt 135 r "S1 OPEN red door" "S1  Open  turbo door, red key [v1.6]"
+ldt 136 y "SR OPEN yel door" "SR  Open  turbo door, yellow key [v1.6]"
+ldt 137 y "S1 OPEN yel door" "S1  Open  turbo door, yellow key [v1.6]"
+ldt 138 L "SR Light to 255"  "SR  Light level goes to 255 [v1.6]"
+ldt 139 L "SR Light to 0"    "SR  Light level goes to 0 [v1.6]"
+ldt 140 F "S1 Floor up 512"  "S1  Raise floor by 512, medium speed [v1.6]"
+ldt 141 C "W1& Crush SS sil" "W1& Start slow crushing, slow hurt, silent [v1.6]"
+ldt 143 x "-- Scroll down"   "--  Animated wall (scrolls downward)"
+ldt 144 a "XR Open animated" "XR  Open animated door"
+ldt 147 x "S1 Deac. FField"  "S1  Deactivate force field"
+ldt 148 x "-- Force Field"   "--  Force field, attempting to 'use' hurts"
+ldt 150 x "WR Sound alarms"  "WR  Sound alarms; alert Acolytes, Templars, etc"
+ldt 155 l "SR Raise lift"    "SR  Raise lift"
+ldt 165 x "-- Doesn't work"  "--  Print 'That doesn't seem to work' message"
+ldt 182 x "G1 Smashable"     "--  Smashable"
+ldt 185 t "W? STport ?"      "W?  Silent teleport <?>"
+ldt 195 t "W? STport, Aco."  "W?  Silent teleport <?>, become dummy Acolyte"
+ldt 205 x "SR 'Reg. only'"   "SR  Print 'registered version only' message"
+
+#
+#	Definition of sector types
+#	Format is : st <number> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 14 characters.
+#
+
+st  0 "X Normal"       "X Normal"
+st  1 "  Blinks rand"  "  Light blinks randomly"
+st  2 "  Flashes 2 Hz" "  Light flashes 2 Hz"
+st  3 "  Flashes 1 Hz" "  Light flashes 1 Hz"
+st  4 "P -20% & 2Hz"   "P -10/20% health, flashes 2 Hz"
+st  5 "P -10% health"  "P -5/10% health"
+st  7 "P -5% health"   "P -2/5% health"
+st  8 "  Oscillates"   "  Light oscillates"
+st  9 "P Secret"       "P Secret"
+st 10 "  Closes 30 s"  "  30 s after level start, ceiling closes like a door"
+st 11 "P -20% & end"   "P -10/20% health and end level when health <= 10%"
+st 12 "  Flash1Hz syn" "  Light flashes 1 Hz, synchronized"
+st 13 "  Flash2Hz syn" "  Light flashes 2 Hz, synchronized"
+st 14 "  Opens 300 s"  "  300 s after level start, ceiling opens like a door"
+st 15 "  Instant kill" "  Things standing on the sector are killed instantly"
+st 16 "P -20% health"  "P -10/20% health"
+st 17 "  Flicker rand" "  Light flickers on and off randomly [v1.6]"
+st 18 "  Push objects" "  Push objects (speed and angle depend on tag)"
+
+#
+#	Definition of thing groups
+#	Format is : thinggroup <thinggroup> <colour> <description>
+#
+
+thinggroup p rgb:0/f/0 "Player"
+thinggroup f rgb:0/b/0 "Friend"
+thinggroup e rgb:f/0/0 "Enemy"
+#thinggroup E rgb:f/8/8 "Enemy w/key"
+thinggroup n rgb:d/d/0 "Other character"
+thinggroup h rgb:2/8/0 "Health & armour"
+thinggroup w rgb:f/a/0 "Weapon"
+thinggroup a rgb:8/5/0 "Ammunition"
+thinggroup b rgb:2/8/0 "Misc. bonus"
+thinggroup k rgb:f/0/f "Key/trinket"
+thinggroup t rgb:0/a/0 "Cross-map teleport"
+#thinggroup s rgb:0/b/d "Special"
+thinggroup d rgb:6/6/c "Decoration"
+thinggroup l rgb:6/6/c "Lighting"
+thinggroup c rgb:6/6/c "Corpse"
+
+#
+#	Definition of things
+#	Format is : thing <number> <thinggroup> <flags> <radius> <description>
+#	<description> must not exceed 19 characters  --mattm
+#
+
+thing   22 d -   10 "Crusader wreck"		ROB2P
+thing   24 d -   10 "Siren"			KLAX
+thing   33 d -   16 "Dead tree"			TRE1
+thing   44 d -   16 "Statue"			STAT
+thing   46 d -   17 "Lantern"			LANT
+thing   48 d -   16 "Electrical column"		MONI
+thing   50 d -   17 "Torch on a stand"		LOGS
+thing   51 d -   16 "Palm tree"			TREEA
+thing   60 d -   10 "Small shrub"		BUSH
+thing   62 d -   10 "Shrub"			SHRB
+thing   82 d -   10 "Wood barrel"		BARW
+thing   94 d -   10 "Barrel"			BART
+thing  112 d -   10 "Fountain"			WTFT
+thing  165 d -   10 "Mug"			MUGG
+thing  194 d -   20 "Anvil"			ANVL
+thing  202 d -   16 "Tree"			TREEB
+thing  215 d -   16 "Wood in water"		LOGG
+#thing widths below are guesses  --mattm
+# Mine are even worse: they're just random. --AYM
+thing   23 d -   32 "Teleporter marker"		TELP
+thing   70 d -   16 "Flaming barrel?"		BARL
+thing  103 d -    4 "Dripping water pt 1?"	DRIPC
+thing   53 d -    4 "Dripping water pt 2?"	DRIPC
+thing  204 d -   16 "Holographic monk"		NEAL
+thing  208 d -   16 "Gun range target"		HOGN
+thing   85 d -   12 "Rat"			RATTB2B8
+thing  189 d -   16 "Three-Legged stool"	STOL
+thing  117 d -   16 "Medical device"		CRAB
+
+thing 2011 h -   20 "Med patch"			STMP
+thing 2012 h -   20 "Medical kit"		MDKT
+thing 2018 h -   17 "Leather armor"		ARM2
+thing 2019 h -   17 "Metal armor"		ARM1
+thing 2024 h -   20 "Shadow armor"		SHD1
+
+thing   34 l -   16 "Candle"			CNDL
+thing   95 l -    8 "Grey FT lamp"		LITS
+thing  107 l -    8 "Wall torch"		TRCH
+#thing widths below are guesses  --mattm
+thing  225 l -   16 "Alien lamp"		SPDL
+thing  106 l -   16 "Brazier"			BRAZ
+thing  105 l -   16 "Bowl with fire"		BOWL
+
+thing   58 e -   20 "Beige Acolyte"		AGRD
+thing  147 e -   20 "Green Acolyte"		AGRD
+thing  148 e -   20 "Acolyte (red ?)"		AGRD
+thing 3002 e -   20 "Beige Acolyte"		AGRD
+thing  143 e -   20 "Brown Acolyte"		AGRD
+#thing widths below are guesses  --mattm
+thing  146 e -   20 "Aggressive Acolyte"	AGRDF8
+thing  142 e -   20 "Acolyte w/key"		AGRD
+thing  186 e -   16 "Stalker"			SPIDJ #1st rightsideup --mattm
+thing 3006 e -   20 "Sentinel"			SEWRC1
+thing 3003 e -   20 "Templar"			PGRD
+thing 3001 e -   20 "Reaver"			ROB1
+thing 3005 e -   24 "Crusader"			ROB2
+thing   16 e -   32 "Inquisitor"		ROB3
+thing   71 e -   20 "Programmer?"		PRGRH0
+thing  187 e -   20 "Bishop?"			MLDR
+thing   76 e -   20 "Oracle's specter"		ALN1
+thing   12 e -   20 "Loremaster"		PRST
+thing   26 e -   20 "Entity nest? (pod?)"	NEST
+thing  198 e -   20 "Entity pod? (nest?)"	PODD
+thing   27 e -   17 "Turret"			TURT
+
+thing   72 n -   16 "Bar keeper"		MRBD # Brownish, sandy brown
+thing   73 n -   16 "Armourer"			MRBD # Nat, nat
+thing  116 n -   16 "Bowyer/Feris"		MRBD # Green, black
+thing   65 n -   20 "Harris"			PEAS # Red
+thing  130 n -   20 "Peasant (beige)"		PEAS # Default (beige)
+thing  132 n -   20 "Harris"			PEAS # Red
+thing  137 n -   20 "Peasant (brown)"		PEAS # Brown
+thing  169 n -   20 "Spawned peasant"		PEAS # Red
+thing  170 n -   20 "Peasant spawner"		PEAS # Red
+thing  173 n -   20 "Peasant (green)"		PEAS # Green
+thing  181 n -   20 "Governor Mourel"		PEAS # Cyan
+thing 3004 n -   20 "Peasant (beige)"		PEAS # Default (beige)
+thing  172 n -   20 "Richter"			PEAS # Dark green
+#Thing widths below are guesses  --mattm
+thing  141 n -   20 "MacGuffin/beggar"		BEGR
+thing  199 n -   20 "Oracle"			ORCL
+
+thing    9 f -   20 "Rebel"			HMN1
+thing   64 f -   20 "Macil (unkillable)"	LEDR
+thing  200 f -   20 "Macil (killable)"		LEAD
+thing   66 f -   20 "Advisor"			PEAS # Grey
+thing   67 f -   20 "Person"			PEAS # Brown
+thing   74 f -   20 "Gerard"			MRBD # Beige ?
+thing  134 f -   20 "Macil's advisor"		PEAS # Grey
+thing  135 f -   20 "Advisor"			PEAS # Grey
+thing  136 f -   20 "Person"			PEAS # Brown
+thing  144 f -   20 "Rebel (operator?)"		HMN1
+thing  145 f -   20 "Rebel"			HMN1
+thing  150 f -   20 "Rebel"			HMN1
+
+thing    1 p -   16 "Player 1 start"		PLAYA1
+thing    2 p -   16 "Player 2 start"		PLAYB1
+thing    3 p -   16 "Player 3 start"		PLAYC1
+thing    4 p -   16 "Player 4 start"		PLAYD1
+thing   11 p -   16 "Deathmatch start"		PLAYF1
+thing   14 p -   16 "Teleport exit"		TFOG
+
+#thing widths below are guesses  --mattm
+thing   69 t -   16 "Level-change marker"	PLAYA5
+thing  118 t -   16 "Scoot spot 1"		PLAYE1
+thing  119 t -   16 "Scoot spot 2"		PLAYE2
+thing  120 t -   16 "Scoot spot 3"		PLAYE3
+thing  121 t -   16 "Scoot spot 4"		PLAYE4
+thing  122 t -   16 "Scoot spot 5"		PLAYE5
+thing  123 t -   16 "Scoot spot 6"		PLAYE6
+thing  124 t -   16 "Scoot spot 7"		PLAYE7
+thing  125 t -   16 "Scoot spot 8"		PLAYE8
+
+thing 2001 w -   16 "Cross bow"			CBOW
+thing 2002 w -   16 "Assault gun"		RIFL
+thing 2003 w -   16 "Mini-missile launcher"	MMSL
+thing 2005 w -   16 "Flame thrower"		FLAM
+thing  154 w -   16 "Grenade launcher"		GRND
+thing 2004 w -   16 "Mauler"			TRPD
+thing 2006 w -   16 "Pulse rifle"		RIFLB0
+thing   81 w -   17 "Sigil (assembled)"		SIGLE0
+
+thing 2007 a -   16 "Clip of bullets"		BLIT
+thing 2048 a -   16 "Ammo"			BBOX
+thing  115 a -   16 "Poison bolts"		PQRL
+thing  114 a -   16 "Electric bolts"		XQRL
+thing  152 a -   16 "He-grenade rounds"		GRN1
+thing  153 a -   16 "Phosphorous grenades"	GRN2
+thing 2010 a -   16 "Rocket"			MSSL
+thing 2046 a -   16 "Box of rockets"		ROKT
+thing 2047 a -   16 "Energy pod"		BRY1 #ok
+#thing widths below are guesses  --mattm
+thing   17 a -   16 "Energy pack"		CPAC
+
+thing  138 b -   17 "10 gold"			CRED
+thing   10 b -   17 "Teleporter beacon"		BEAC
+thing  207 b -   20 "Targeter"			TARG
+thing 2025 b -   20 "Environmental suit"	MASK
+thing 2026 b -   17 "Map"			PMAP
+
+#Thing widths below are guesses  --mattm
+thing   59 k -   20 "Degnin ore"		XPRK
+thing  205 k -   20 "Chalice"			RELC
+thing  220 k -   20 "The Front's coupling"	COUPA0
+thing  226 k -   20 "Junked coupling"		COUPC0
+thing   52 k -   20 "Officer's uniform"		OFIC
+
+#thing widths below are guesses  --mattm
+thing  113 c -   16 "Preserved hearts"		HERT
+thing  213 c -   16 "Preserved spine"		TNK4
+thing  229 c -   16 "Preserved brain"		TNK6
+thing  201 c -   16 "Partial Acolyte"		ARMR
+#sprites below are *also* guesses, but they look similar anyway
+thing  209 c -   20 "Tank of bodies 1"		TNK1
+thing  210 c -   20 "Tank of bodies 2"		TNK2
+thing  211 c -   20 "Tank of bodies 3"		TNK3

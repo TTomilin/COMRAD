@@ -1,0 +1,469 @@
+# Yadex game definition file version 4
+#
+#	hexen.ygd
+#	Yadex Game Definitions for Hexen
+#	See doc/ygd.html for the specs.
+#	AYM 1999-02-25
+#
+
+# FIXME lots of things are missing, some are even wrong.
+
+level_format    hexen
+level_name      map01
+picture_format  normal
+sky_flat        f_sky
+texture_format  normal
+texture_lumps   normal
+
+#
+#	Definition of linedef type groups
+#	Format is : ldtgroup <ldtgroup> <description>
+#
+
+ldtgroup d "Door"
+ldtgroup l "Lift"
+ldtgroup e "Elevator"
+ldtgroup f "Floor"
+ldtgroup c "Ceiling"
+ldtgroup t "Teleport"
+ldtgroup L "Light"
+ldtgroup p "Polyobj"
+ldtgroup P "Pillar"
+ldtgroup q "Quake"
+ldtgroup t "Teleport"
+ldtgroup T "Things"
+ldtgroup s "Stairs"
+ldtgroup a "ACS"
+ldtgroup x "Misc."
+
+#
+#	Definition of linedef types
+#	Format is : ldt <number> <ldtgroup> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 16 characters.
+#
+
+ldt   0 x "-- Normal"        "--  Normal"
+ldt   1 p "?? Polyobj start" "??  Polyobj_StartLine"
+ldt   2 p "?? Rol polyobj"   "??  Polyobj_RotateLeft"
+ldt   3 p "?? Ror polyobj"   "??  Polyobj_RotateRight"
+ldt   4 p "?? Move poly"     "??  Polyobj_Move"
+ldt   5 p "?? Poly explicit" "??  Polyobj_ExplicitLine"
+ldt   6 p "?? Move8x poly"   "??  Polyobj_MoveTimes8"
+ldt   7 p "?? Polyobj swing" "??  Polyobj_DoorSwing"
+ldt   8 p "?? Polyobj slide" "??  Polyobj_DoorSlide"
+ldt  10 d "?? Close door"    "??  Door_Close"
+ldt  11 d "?? Open door"     "??  Door_Open"
+ldt  12 d "?? Raise door"    "??  Door_Raise"
+ldt  13 d "?? Raise locked"  "??  Door_LockedRaise"
+ldt  20 f "?? Lower floor"   "??  Floor_LowerByValue"
+ldt  21 f "?? Lower floor L" "??  Floor_LowerToLowest"
+ldt  22 f "?? Lower fl nl"   "??  Floor_LowerToNearest"
+ldt  23 f "?? Raise floor"   "??  Floor_RaiseByValue"
+ldt  24 f "?? Raise floor H" "??  Floor_RaiseToHighest"
+ldt  25 f "?? Raise fl nh"   "??  Floor_RaiseToNearest"
+ldt  26 s "?? Stairs down"   "??  Stairs_BuildDown"
+ldt  27 s "?? Stairs up"     "??  Stairs_BuildUp"
+ldt  28 f "?? Raise f crush" "??  Floor_RaiseAndCrush"
+ldt  29 P "?? Build pillar"  "??  Pillar_Build"
+ldt  30 P "?? Open pillar"   "??  Pillar_Open"
+ldt  31 s "?? Stairs dn syn" "??  Stairs_BuildDownSync"
+ldt  32 s "?? Stairs up syn" "??  Stairs_BuildUpSync"
+ldt  35 f "?? Raise8x floor" "??  Floor_RaiseByValueTimes8"
+ldt  36 f "?? Lower8x floor" "??  Floor_LowerByValueTimes8"
+ldt  40 c "?? Lower ceil va" "??  Ceiling_LowerByValue"
+ldt  41 c "?? Raise ceil va" "??  Ceiling_RaiseByValue"
+ldt  42 c "?? Ceil crush 1"  "??  Ceiling_CrushAndRaise"
+ldt  43 c "?? Ceil crush 2"  "??  Ceiling_LowerAndCrush"
+ldt  44 c "?? Stop ceilcrsh" "??  Ceiling_CrushStop"
+ldt  45 c "?? Ceil crush 3"  "??  Ceiling_CrushRaiseAndStay"
+ldt  46 f "?? Stop fl crush" "??  Floor_CrushStop"
+ldt  60 l "?? Raise plat"    "??  Plat_PerpetualRaise"
+ldt  61 l "?? Stop plat"     "??  Plat_Stop"
+ldt  62 l "?? Lower lift"    "??  Plat_DownWaitUpStay"
+ldt  63 l "?? Plat down"     "??  Plat_DownByValue"
+ldt  64 l "?? Raise lift"    "??  Plat_UpWaitDownStay"
+ldt  65 l "?? Plat up"       "??  Plat_UpByValue"
+ldt  66 f "?? Lower F insta" "??  Floor_LowerInstant"
+ldt  67 f "?? Raise F insta" "??  Floor_RaiseInstant"
+ldt  68 f "?? Move8x floor"  "??  Floor_MoveToValueTimes8"
+ldt  69 c "?? Move8x ceilng" "??  Ceiling_MoveToValueTimes8"
+ldt  70 t "?? Teleport"      "??  Teleport"
+ldt  71 t "?? Telept no fog" "??  Teleport_NoFog"
+ldt  72 T "?? Thrush thing"  "??  ThrustThing"
+ldt  73 T "?? Damage thing"  "??  DamageThing"
+ldt  74 x "?? Teleport map"  "??  Teleport_NewMap"
+ldt  75 x "?? Teleport end"  "??  Teleport_EndGame"
+ldt  80 a "?? Execute ACS"   "??  ACS_Execute"
+ldt  81 a "?? Suspend ACS"   "??  ACS_Suspend"
+ldt  82 a "?? Terminate ACS" "??  ACS_Terminate"
+ldt  83 a "?? Lock-exec ACS" "??  ACS_LockedExecute"
+ldt  90 p "?? Rol poly OR"   "??  Polyobj_OR_RotateLeft"
+ldt  91 p "?? Ror poly OR"   "??  Polyobj_OR_RotateRight"
+ldt  92 p "?? Move poly OR"  "??  Polyobj_OR_Move"
+ldt  93 p "?? Mov8x poly OR" "??  Polyobj_OR_MoveTimes8"
+ldt  94 P "?? Crush pillar"  "??  Pillar_BuildAndCrush"
+ldt  95 e "?? Lower fl+ceil" "??  FloorAndCeiling_LowerByValue"
+ldt  96 e "?? Raise fl+ceil" "??  FloorAndCeiling_RaiseByValue"
+ldt 100 x "?? Scroll left"   "??  Scroll_Texture_Left"
+ldt 101 x "?? Scroll right"  "??  Scroll_Texture_Right"
+ldt 102 x "?? Scroll up"     "??  Scroll_Texture_Up"
+ldt 103 x "?? Scroll down"   "??  Scroll_Texture_Down"
+ldt 109 L "?? Force lightng" "??  Light_ForceLightning"
+ldt 110 L "?? Raise light"   "??  Light_RaiseByValue"
+ldt 111 L "?? Lower light"   "??  Light_LowerByValue"
+ldt 112 L "?? Set light"     "??  Light_ChangeToValue"
+ldt 113 L "?? Fade light"    "??  Light_Fade"
+ldt 114 L "?? Glow light"    "??  Light_Glow"
+ldt 115 L "?? Flicker light" "??  Light_Flicker"
+ldt 116 L "?? Strobe light"  "??  Light_Strobe"
+ldt 120 q "?? Radius quake"  "??  Radius_Quake"
+ldt 121 x "?? Set line id"   "??  Line_SetIdentification"
+ldt 129 x "?? Use pzzl item" "??  UsePuzzleItem"
+ldt 130 T "?? Activate thng" "??  Thing_Activate"
+ldt 131 T "?? Deact. thing"  "??  Thing_Deactivate"
+ldt 132 T "?? Remove thing"  "??  Thing_Remove"
+ldt 133 T "?? Destroy thing" "??  Thing_Destroy"
+ldt 134 T "?? Projectile th" "??  Thing_Projectile"
+ldt 135 T "?? Spawn thing"   "??  Thing_Spawn"
+ldt 136 T "?? Gravity thing" "??  Thing_ProjectileGravity"
+ldt 137 T "?? Spawn no fog"  "??  Thing_SpawnNoFog"
+ldt 138 q "?? Waggle floor"  "??  Floor_Waggle"
+ldt 140 x "?? Change sound"  "??  Sector_ChangeSound"
+
+#
+#	Definition of sector types
+#	Format is : st <number> <shortdesc> <longdesc>
+#	<shortdesc> must not exceed 14 characters.
+#
+
+st   0 "  Normal"       "Normal"
+st   1 "  Phased light" "light phased"
+st   2 "  Light start"  "lightsequencestart"
+st   3 "  Light specl1" "lightsequencespecial1"
+st   4 "  Light specl2" "lightsequencespecial2"
+st  26 "  Stairs1"      "Stairs special 1"
+st  27 "  Stairs2"      "Stairs special 2"
+st 198 "  Lightning 64" "Indoor lightning, +64 units"
+st 199 "  Lightning 32" "Indoor lightning, +32 units"
+st 200 "  Sky2"         "Use MAPINFO sky2"
+st 201 "  Scroll N slo" "Scroll north slow"
+st 202 "  Scroll N med" "Scroll north medium"
+st 203 "  Scroll N fas" "Scroll north fast"
+st 204 "  Scroll E slo" "Scroll east slow"
+st 205 "  Scroll E med" "Scroll east medium"
+st 206 "  Scroll E fas" "Scroll east fast"
+st 207 "  Scroll S slo" "Scroll south slow"
+st 208 "  Scroll S med" "Scroll south medium"
+st 209 "  Scroll S fas" "Scroll south fast"
+st 210 "  Scroll W slo" "Scroll west slow"
+st 211 "  Scroll W med" "Scroll west medium"
+st 212 "  Scroll W fas" "Scroll west fast"
+st 213 "  Scroll NW S"  "Scroll northwest slow"
+st 214 "  Scroll NW M"  "Scroll northwest medium"
+st 215 "  Scroll NW F"  "Scroll northwest fast"
+st 216 "  Scroll NE S"  "Scroll northeast slow"
+st 217 "  Scroll NE M"  "Scroll northeast medium"
+st 218 "  Scroll NE F"  "Scroll northeast fast"
+st 219 "  Scroll SE S"  "Scroll southeast slow"
+st 220 "  Scroll SE M"  "Scroll southeast medium"
+st 221 "  Scroll SE F"  "Scroll southeast fast"
+st 222 "  Scroll SW S"  "Scroll southwest slow"
+st 223 "  Scroll SW M"  "Scroll southwest medium"
+st 224 "  Scroll SW F"  "Scroll southwest fast"
+
+#
+#	Definition of thing groups
+#	Format is : thinggroup <thinggroup> <colour> <description>
+#
+
+thinggroup p rgb:4/f/4 "Player"
+thinggroup m rgb:f/0/0 "Monster"
+thinggroup w rgb:f/a/0 "Weapon"
+thinggroup a rgb:8/5/0 "Mana"
+thinggroup h rgb:2/8/0 "Health & armour"
+thinggroup A rgb:2/8/0 "Artifacts"
+thinggroup q rgb:2/8/0 "Quest items"
+thinggroup b rgb:2/8/0 "Misc. bonus"
+thinggroup k rgb:f/0/f "Key"
+thinggroup P rgb:6/6/c "Plants"
+thinggroup t rgb:6/6/c "Stalagm. & stalact."
+thinggroup g rgb:6/6/c "Gargoyle statues"
+thinggroup T rgb:6/6/c "Table stuff"
+thinggroup D rgb:6/6/c "Dungeon stuff"
+thinggroup d rgb:6/6/c "Misc. decoration"
+thinggroup l rgb:6/6/c "Light source"
+thinggroup s rgb:0/b/d "Sound"
+thinggroup S rgb:0/b/d "Special"
+
+#
+#	Definition of things
+#	Format is :
+#	thing <number> <thinggroup> <flags> <radius> <desc> [<sprite>]
+#	<desc> must not exceed 19 characters.
+#
+
+thing     1 p -   16 "Player 1 start *"		PLAY
+thing     2 p -   16 "Player 2 start *"		PLAY
+thing     3 p -   16 "Player 3 start *"		PLAY
+thing     4 p -   16 "Player 4 start *"		PLAY
+thing    11 p -   16 "Deathmatch start"		PLAYF1
+thing    14 p -   16 "Teleport exit"		TELE
+thing  9100 p -   16 "Player 5 start *"		PLAY
+thing  9101 p -   16 "Player 6 start *"		PLAY
+thing  9102 p -   16 "Player 7 start *"		PLAY
+thing  9103 p -   16 "Player 8 start *"		PLAY
+
+thing    31 m -   32 "Chaos serpent"		DEMN
+thing    34 m -   40 "Reiver"			WRTH
+thing   107 m -   20 "Centaur"			CENT
+thing   114 m -   44 "Dark bishop"		BISH
+thing   115 m -   20 "Centaur leader"		CENTF
+thing   120 m -   17 "Stalker leader"		SSPTK
+thing   121 m -   17 "Stalker"			SSDV
+thing   254 m -   40 "Death wyvern *"		DRAG
+thing  8020 m -   22 "Wendigo"			ICEY
+thing  8080 m -   64 "Chaos serpent (gas)"	DEM2
+thing 10011 m -   40 "Reiver leader"		WRTH
+thing 10030 m -   25 "Ettin"			ETTN
+thing 10060 m -   20 "Fire gargoyle"		FDMN
+thing 10080 m -   80 "Heresiarch"		SORC
+thing 10100 m -   32 "Zedek (fighter)"		PLAYA8
+thing 10101 m -   32 "Traductus (cleric)"	CLERA8
+thing 10102 m -   32 "Menelkir (mage)"		MAGEA8
+thing 10200 m -   20 "Korax"			KORX
+
+thing    10 w -   17 "Serpent staff"		WCSS
+thing    12 w -   20 "Quietus blade"		WFR1
+thing    13 w -   20 "Quietus guard"		WFR2
+thing    16 w -   20 "Quietus hilt"		WFR3
+thing    18 w -   20 "Wraithverge head"		WCH1
+thing    19 w -   20 "Wraithverge center"	WCH2
+thing    20 w -   20 "Wraithverge grip"		WCH3
+thing    21 w -   20 "Bloodscourge head"	WMS1
+thing    22 w -   20 "Bloodscourge center"	WMS2
+thing    23 w -   20 "Bloodscourge grip"	WMS3
+thing    53 w -   17 "Frost chards"		WMCS
+thing   123 w -   10 "Hammer of retributn"	WFHM
+thing  8009 w -   10 "Firestorm"		WCFM
+thing  8010 w -   17 "Timon's axe"		WFAX
+thing  8040 w -   20 "Arc of death"		WMLG
+
+thing   122 a -   17 "Blue manna"		MAN1
+thing   124 a -   17 "Green manna"		MAN2
+thing  8004 a -   17 "Combined manna"		MAN3
+
+thing    81 h -   17 "Crystal vial"		PTN1
+thing  8005 h -   10 "Mesh armor"		ARM1
+thing  8006 h -   20 "Falcon shield"		ARM2
+thing  8007 h -   17 "Platinum helmet"		ARM3
+thing  8008 h -   20 "Amulet of warding"	ARM4
+
+thing    30 A -   20 "Porkalator"		ARTIPORK
+thing    32 A -   20 "Mystic urn"		ARTISPHL
+thing    33 A -   20 "Torch"			ARTITRCH
+thing    36 A -   20 "Chaos device"		ARTIATLP
+thing    82 A -   17 "Quartz flask"		PTN2
+thing    83 A -   20 "Wings of wrath"		SOAR
+thing    84 A -   20 "Icon of defender"		INVU
+thing    86 A -   15 "Dark servant"		ARTISUMN
+thing  8000 A -   17 "Flechette"		PSBG
+thing  8002 A -   20 "Boots of speed"		ARTISPED
+thing  8003 A -   20 "Krater of might"		ARTIBMAN
+thing  8041 A -   20 "Dragonskin bracers"	ARTIBRAC
+thing 10040 A -   20 "Banishment device"	ARTITELO
+thing 10110 A -   20 "Disc of repulsion"	ARTIBLST
+thing 10120 A -   20 "Mystic ambient inc"	ARTIHRAD
+
+thing  9002 q -   20 "Yorick's skull"		ARTISKLL
+thing  9003 q -   20 "Heart of D'Sparil"	ARTIBGEM
+thing  9004 q -   20 "Ruby planet"		ARTIGEMR
+thing  9005 q -   20 "Emerald planet 1"		ARTIGEMG
+thing  9006 q -   20 "Sapphire planet 1"	ARTIGEMB
+thing  9007 q -   20 "Daemon codex"		ABK1
+thing  9008 q -   20 "Liber oscura"		ABK2
+thing  9009 q -   20 "Emerald planet 2"		ARTIGMG2
+thing  9010 q -   20 "Sapphire planet 2"	ARTIGMB2
+thing  9014 q -   20 "Flame mask"		ARTISKL2
+thing  9015 q -   20 "Glaive seal"		ARTIFWEP
+thing  9016 q -   20 "Holy relic"		ARTICWEP
+thing  9017 q -   20 "Sigil of the Magus"	ARTIMWEP
+thing  9018 q -   20 "Clock gear 1"		ARTIGEAR
+thing  9019 q -   20 "Clock gear 2"		ARTIGER2
+thing  9020 q -   20 "Clock gear 3"		ARTIGER3
+thing  9021 q -   20 "Clock gear 4"		ARTIGER4
+
+thing  8030 k -   10 "Steel key"		KEY1
+thing  8031 k -   10 "Cave key"			KEY2
+thing  8032 k -   10 "Axe key"			KEY3
+thing  8033 k -   10 "Fire key"			KEY4
+thing  8034 k -   10 "Emerald key"		KEY5
+thing  8035 k -   10 "Dungeon key"		KEY6
+thing  8036 k -   10 "Silver key"		KEY7
+thing  8037 k -   10 "Rusted key"		KEY8
+thing  8038 k -   10 "Horn key"			KEY9
+thing  8039 k -   10 "Swamp key"		KEYA
+thing  8200 k -   10 "Castle key"		KEYB
+
+thing    24 P -   20 "Tree trunk (brown)"	TRE1
+thing    25 P -   20 "Tree trunk (brownD)"	TRE1
+thing    26 P -   17 "Swamp tree tall"		TRE2
+thing    27 P -   17 "Swamp tree short"		TRE3
+thing    28 P -   20 "Tree stump (splint)"	STM1
+thing    29 P -   20 "Tree stump"		STM2
+thing    39 P -   20 "Mushroom (large, L)"	MSH1
+thing    40 P -   20 "Mushroom (large, R)"	MSH2
+thing    41 P -   20 "Mushroom (med, L)"	MSH3
+thing    42 P -   20 "Mushroom (small, R)"	MSH4
+thing    44 P -   20 "Mushroom (small)"		MSH5
+thing    45 P -   20 "Mushroom (small, F)"	MSH6
+thing    46 P -   20 "Mushroom (small, B)"	MSH7
+thing    47 P -   20 "Mushroom (small, M)"	MSH8
+thing    60 P -   20 "Vine"			TRE3
+thing    78 P -   17 "Tree leaning right"	TRE4
+thing    79 P -   17 "Tree leaning left"	TRE5
+thing    80 P -   17 "Gnarled tree right"	TRE6
+thing    87 P -   17 "Gnarled tree left"	TRE7
+thing   113 P -   10 "Blowing leaves"		LEF1
+thing  8062 P -   17 "Dead tree"		TRDT
+thing  8068 P -   17 "Conic tree"		XMAS
+thing  8101 P -   20 "Shrub (small)"		SHB1
+thing  8102 P -   20 "Shrub (large)"		SHB2
+thing  8103 P -   20 "Bucket (hanging)"		BCKT
+thing  8104 P -   20 "Mushroom (explodng)"	SHRM
+
+thing    48 t -   17 "Stalactite+gmite"		SGMP
+thing    49 t -   20 "Stalagmite (large)"	SGM1
+thing    50 t -   20 "Stalagmite (medium)"	SGM2
+thing    51 t -   20 "Stalagmite (small)"	SGM3
+thing    52 t -   20 "Stalactite (large)"	SLC1
+thing    56 t -   20 "Stalactite (medium)"	SLC2
+thing    57 t -   20 "Stalactite (small)"	SLC3
+thing    89 t -   20 "Ice stalactite(lrg)"	ICT1
+thing    90 t -   20 "Ice stalactite(med)"	ICT2
+thing    91 t -   20 "Ice stalactite(sml)"	ICT3
+thing    92 t -   20 "Ice stalactite(tny)"	ICT4
+thing    93 t -   20 "Ice stalagmite(lrg)"	ICM1
+thing    94 t -   20 "Ice stalagmite(med)"	ICM2
+thing    95 t -   20 "Ice stalagmite(sml)"	ICM3
+thing    96 t -   20 "Ice stalagmite(tny)"	ICM4
+
+thing     5 g -   20 "Gargoyle statue w/s"	STTW
+thing    72 g -   17 "Stone gargoyle tall"	STT2
+thing    73 g -   20 "Ice gargoyle tall"	STT3
+thing    74 g -   17 "Stone gargoyle shrt"	STT4
+thing    76 g -   20 "Ice gargoyle short"	STT5
+thing  8044 g -   20 "Wooden gargoyle tal"	GAR1
+thing  8045 g -   20 "Fire gargoyle tall"	GAR2
+thing  8046 g -   20 "Red gargoyle tall"	GAR3
+thing  8047 g -   20 "Wooden gargoyle tal"	GAR4
+thing  8048 g -   20 "Metal gargoyle tall"	GAR5
+thing  8049 g -   20 "Fire gargoyle short"	GAR6
+thing  8050 g -   20 "Red gargoyle short"	GAR7
+thing  8051 g -   20 "Wooden gargoyle srt"	GAR8
+thing  8052 g -   20 "Metal gargoyle shrt"	GAR9
+thing  9011 g -   20 "Gargoyle statue"		STWN
+
+thing  8500 T -   20 "Stein (tall)"		TST1
+thing  8501 T -   20 "Stein (short)"		TST2
+thing  8502 T -   20 "Candle w/spider web"	TST3
+thing  8503 T -   20 "Candle (short)"		TST4
+thing  8504 T -   20 "Candle (tall)"		TST5
+thing  8505 T -   20 "Goblet (spilled)"		TST6
+thing  8506 T -   20 "Goblet (tall)"		TST7
+thing  8507 T -   20 "Goblet (short)"		TST8
+thing  8508 T -   20 "Goblet w/silver bnd"	TST9
+thing  8509 T -   20 "Meat cleaver"		TST0
+
+thing    61 D -   20 "Corpse impaled"		CPS1
+thing    62 D -   20 "Corpse sleeping"		CPS2
+thing    71 D -   20 "Corpse hung legs"		CPS3
+thing   108 D -   20 "Corpse hung"		CPS4
+thing   109 D -   20 "Corpse bleeding"		CPS5
+thing   110 D -   20 "Corpse chained"		CPS6
+thing   111 D -   10 "Pool of blood"		BDPL
+thing  8067 D -   20 "Iron maiden"		IRON
+thing  8071 D -   20 "Chain (short)"		CHNS
+thing  8072 D -   20 "Chain (long)"		CHNSB0
+thing  8073 D -   20 "Chain heart on hook"	CHNSC0
+thing  8074 D -   20 "Chain w/large hook"	CHNSD0
+thing  8075 D -   20 "Chain w/small hook"	CHNSE0
+thing  8076 D -   20 "Chain w/spiked ball"	CHNSF0
+thing  8077 D -   20 "Chain skull on hook"	CHNSG0
+
+thing     6 d -   20 "Rock w/moss (tiny)"	RCK1
+thing     7 d -   20 "Rock w/moss (small)"	RCK2
+thing     9 d -   20 "Rock w/moss (medium)"	RCK3
+thing    15 d -   20 "Rock w/moss (large)"	RCK4
+thing    37 d -   20 "Stump w/moss (short)"	STM3
+thing    38 d -   20 "Stump w/moss (tall)"	STM4
+thing    58 d -   20 "Moss (three strands)"	MSS1
+thing    59 d -   20 "Moss (one strand)"	MSS2
+thing    63 d -   20 "Tombstone (R.I.P.)"	TMS1
+thing    64 d -   20 "Tombstone (Shane)"	TMS2
+thing    65 d -   20 "Tombstone (large cross)"	TMS3
+thing    66 d -   20 "Tombstone (Brian R.)"	TMS4
+thing    67 d -   20 "Tombstone (circular cross)"	TMS5
+thing    68 d -   20 "Tombstone (small cross on pedestal)"	TMS6
+thing    69 d -   20 "Tombstone (Brian P.)"	TMS7
+thing    77 d -   17 "Banner"			BNR1
+thing    88 d -   20 "Log"			LOGG
+thing    97 d -   20 "Rock formation (large, brown)"	RKBL
+thing    98 d -   20 "Rock formation (small, brown)"	RKBS
+thing    99 d -   20 "Rock formation (small, gray)"	RKBK
+thing   100 d -   20 "Rubble (large)"		RBL1
+thing   101 d -   20 "Rubble (small)"		RBL2
+thing   102 d -   20 "Rubble (medium)"		RBL3
+thing   103 d -   20 "Vase on pedestal"		VASE
+thing   104 d -   20 "Pot (tall, skinny) *"	POT1
+thing   105 d -   20 "Pot (medium, skinny) *"	POT2
+thing   106 d -   20 "Pot (short, chipped) *"	POT3
+thing   140 d -   20 "Sparkling red smoke"	TSMK
+thing  8064 d -   20 "Suit of armor *"		SUIT
+thing  8065 d -   40 "Bell"			BBLL
+thing  8100 d -   20 "Barrel"			BARL
+thing  9012 d -   20 "Pedestal"			GMPD
+thing 10001 d -   20 "Fog (small) *"		FOGS
+thing 10002 d -   20 "Fog (medium) *"		FOGM
+thing 10003 d -   20 "Fog (large) *"		FOGL
+thing 10090 d -   20 "Spike (down)"		TSPKC0
+thing 10091 d -   20 "Spike (up)"		TSPK
+
+thing    17 l -   20 "Chandelier w/flame"	CDLR
+thing    54 l -   17 "Wall torch w/flame"	WLTR
+thing    55 l -   20 "Wall torch"		WLTRI0
+thing   116 l -   10 "Brazier w/flame"		TWTR
+thing   117 l -   10 "Brazier"			TWTRI0
+thing   119 l -   20 "Candles"			CNDL
+thing  8042 l -   20 "Minotaur statue f"	FBUL
+thing  8043 l -   20 "Minotaur statue"		FBULH0
+thing  8060 l -   20 "Fire skull"		FSKL
+thing  8061 l -   17 "Brazier w/flame sm"	BRTR
+thing  8063 l -   20 "Chandelier"		CDLRD0
+thing  8066 l -   20 "Candle (blue)"		CAND
+thing  8069 l -   20 "Cauldron (w/flame)"	CDRNB0
+thing  8070 l -   20 "Cauldron"			CDRN
+thing 10500 l -   20 "Flame (small, t) *"	FFSM
+thing 10501 l -   20 "Flame (small, cnt)"	FFSMC0
+thing 10502 l -   20 "Flame (large, t) *"	FFLG
+thing 10503 l -   20 "Flame (large, cnt)"	FFLGF0
+
+thing  1400 s -   20 "Stone"			TELE
+thing  1401 s -   20 "Heavy"			TELE
+thing  1402 s -   20 "Metal"			TELE
+thing  1403 s -   20 "Creak"			TELE
+thing  1404 s -   20 "Silent"			TELE
+thing  1405 s -   20 "Lava"			TELE
+thing  1406 s -   20 "Water"			TELE
+thing  1407 s -   20 "Ice"			TELE
+thing  1408 s -   20 "Earth crack"		TELE
+thing  1409 s -   20 "Metal2"			TELE
+thing  1410 s -   20 "Wind blowing"		TELE
+
+thing   118 S -   10 "Magic step"		TLGL
+thing  3000 S -   20 "Polyobject anchor"	ICPRD0
+thing  3001 S -   20 "Start spot"		SBFXH0
+thing  3002 S -   20 "Start spot w/crush"	SBFXC0
+thing  9001 S -   10 "Map spot *"		TELEC0
+thing  9013 S -   10 "Map spot w/gravity"	TELED0
+thing 10000 S -   20 "Spawn fog *"		SPIRK0
+thing 10225 S -   20 "Spawn bat *"		ABATC3C7

@@ -1,0 +1,12 @@
+*.bak
+*.orig
+*.swp
+*~
+/gen-src/
+/images/*.bmp
+/images/*.gif
+/images/*.jpg
+/images/*.png
+/images/*.tiff
+/tmp/
+/wads/*.wad

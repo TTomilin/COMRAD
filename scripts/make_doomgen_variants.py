@@ -21,7 +21,7 @@ DIVERSE_CONFIGS = [
     {"seed": 11, "distance": 600, "corridor_width": 4, "door_timer": 600, "core_health": 1500, "enemy_difficulty": 0.5},
     {"seed": 42, "distance": 800, "corridor_width": 2, "door_timer": 300, "core_health": 1000, "enemy_difficulty": 0.75},
     {"seed": 68, "distance": 1100, "corridor_width": 4, "door_timer": 200, "core_health": 700, "enemy_difficulty": 1.0},
-    {"seed": 97, "distance": 1100, "corridor_width": 2, "door_timer": 120, "core_health": 500, "enemy_difficulty": 1.25},
+    {"seed": 151, "distance": 1500, "corridor_width": 2, "door_timer": 120, "core_health": 500, "enemy_difficulty": 1.25},
 ]
 
 
