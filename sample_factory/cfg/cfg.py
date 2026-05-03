@@ -465,7 +465,7 @@ def add_rl_args(p: ArgumentParser):
     )
     p.add_argument(
         "--stats_avg",
-        default=100,
+        default=1,
         type=int,
         help="How many episodes to average to measure performance (avg. reward etc)",
     )
@@ -531,7 +531,7 @@ def add_rl_args(p: ArgumentParser):
     )
     p.add_argument(
         "--save_best_metric",
-        default="reward",
+        default="true_objective",
         help='Save "best" policies based on this metric (just env reward by default)',
     )
     p.add_argument(
