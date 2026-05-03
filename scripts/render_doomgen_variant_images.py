@@ -8,7 +8,7 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from omg import MapEditor, WAD
 
 
@@ -18,6 +18,7 @@ DEFAULT_IWAD = REPO_ROOT / "DoomGen" / "examples" / "play" / "freedoom2.wad"
 DEFAULT_VARIANTS_DIR = REPO_ROOT / "results" / "variants"
 DEFAULT_OUTPUT_DIR = DEFAULT_VARIANTS_DIR / "images"
 DEFAULT_REGISTRY_PATH = DEFAULT_VARIANTS_DIR / "variants_registry.json"
+DEFAULT_MONTAGE_PATH = REPO_ROOT / "results" / "armory_seige_variants.png"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -47,6 +48,12 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_REGISTRY_PATH,
         help="JSON registry mapping variant filenames to generation configs.",
     )
+    parser.add_argument(
+        "--montage-path",
+        type=Path,
+        default=DEFAULT_MONTAGE_PATH,
+        help="Path for the final 2x2 montage PNG.",
+    )
     parser.add_argument("--width", type=int, default=1800, help="Image width in pixels.")
     parser.add_argument("--thickness", type=int, default=3, help="Line thickness.")
     parser.add_argument("--margin", type=int, default=24, help="Image margin.")
@@ -72,13 +79,13 @@ def render_variant_base(wad_path: Path, tmp_root: Path, iwad_path: Path, width: 
         "--width",
         str(width),
         "--background-color",
-        "#0b1020",
+        "#ffffff",
         "--line-default-color",
-        "#f8fafc",
+        "#1f2937",
         "--line-colors",
         "none",
         "--line-colors",
-        "two_sided=#475569",
+        "two_sided=#94a3b8",
         "--thickness",
         str(thickness),
         "--thing-type",
@@ -343,6 +350,59 @@ def add_preview_sprites(
         paste_scaled_sprite(base, sprite, pixel, sprite_scale)
 
 
+def variant_label_from_path(path: Path) -> str:
+    suffix = path.stem.split("_")[-1]
+    return f"Variant {suffix}"
+
+
+def build_montage(image_paths: list[Path], output_path: Path) -> None:
+    if len(image_paths) != 4:
+        raise ValueError(f"Expected exactly 4 images for montage, found {len(image_paths)}")
+
+    images = [Image.open(path).convert("RGBA") for path in image_paths]
+    labels = [variant_label_from_path(path) for path in image_paths]
+    font = ImageFont.load_default()
+
+    panel_padding = 20
+    label_height = 34
+    gap = 28
+    outer_padding = 32
+    bg = (255, 255, 255, 255)
+    text_fill = (17, 24, 39, 255)
+
+    panel_width = max(image.width for image in images) + panel_padding * 2
+    panel_height = max(image.height for image in images) + panel_padding * 2 + label_height
+
+    canvas_width = outer_padding * 2 + panel_width * 2 + gap
+    canvas_height = outer_padding * 2 + panel_height * 2 + gap
+    canvas = Image.new("RGBA", (canvas_width, canvas_height), bg)
+    draw = ImageDraw.Draw(canvas)
+
+    for index, (image, label) in enumerate(zip(images, labels)):
+        row = index // 2
+        col = index % 2
+        origin_x = outer_padding + col * (panel_width + gap)
+        origin_y = outer_padding + row * (panel_height + gap)
+
+        draw.rounded_rectangle(
+            (origin_x, origin_y, origin_x + panel_width, origin_y + panel_height),
+            radius=18,
+            fill=(255, 255, 255, 255),
+            outline=(203, 213, 225, 255),
+            width=2,
+        )
+        text_x = origin_x + panel_padding
+        text_y = origin_y + 10
+        draw.text((text_x, text_y), label, font=font, fill=text_fill)
+
+        image_x = origin_x + (panel_width - image.width) // 2
+        image_y = origin_y + label_height
+        canvas.alpha_composite(image, (image_x, image_y))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    canvas.convert("RGB").save(output_path)
+
+
 def postprocess_armory_preview(base_png: Path, output_path: Path, wad_path: Path, iwad_path: Path, config: dict, margin: int) -> None:
     base = Image.open(base_png).convert("RGBA")
     iwad = WAD(str(iwad_path))
@@ -361,6 +421,7 @@ def main() -> None:
     output_dir = args.output_dir.resolve()
     iwad_path = args.iwad.resolve()
     registry_path = args.registry.resolve()
+    montage_path = args.montage_path.resolve()
 
     if not WAD2IMAGE_SCRIPT.exists():
         raise FileNotFoundError(f"Missing wad2image script: {WAD2IMAGE_SCRIPT}")
@@ -375,6 +436,7 @@ def main() -> None:
     if not wad_paths:
         raise FileNotFoundError(f"No WAD variants found in {variants_dir}")
 
+    rendered_images: list[Path] = []
     for wad_path in wad_paths:
         output_path = output_dir / f"{wad_path.stem}.png"
         if wad_path.name not in registry:
@@ -399,8 +461,11 @@ def main() -> None:
                 config=registry[wad_path.name],
                 margin=args.margin,
             )
+        rendered_images.append(output_path)
 
+    build_montage(rendered_images, montage_path)
     print(f"Wrote {len(wad_paths)} images to {output_dir}")
+    print(f"Wrote montage to {montage_path}")
 
 
 if __name__ == "__main__":
