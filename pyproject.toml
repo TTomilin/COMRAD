@@ -53,8 +53,10 @@ sample-factory = [
     "scipy>=1.16.3",
 ]
 visual = [
+    "omgifol>=0.5.1",
     "pillow>=11.3.0",
     "pypng>=0.20220715.0",
+    "shapely>=2.1.2",
 ]
 
 [dependency-groups]
@@ -71,7 +73,7 @@ include = ["comrad*", "sample_factory*"]
 
 [tool.ruff]
 line-length = 120
-extend-exclude = ["vizdoom.pyi"]
+extend-exclude = ["vizdoom.pyi", "make_doomgen_variants.py"]
 
 [tool.ruff.lint]
 ignore = ["E701"]
