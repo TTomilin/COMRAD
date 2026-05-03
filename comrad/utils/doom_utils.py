@@ -14,9 +14,8 @@ from sample_factory.envs.env_wrappers import (
     RewardScalingWrapper,
     TimeLimitWrapper,
 )
-from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir
+from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir, log
 from comrad.envs.action_space import (
-    doom_action_space_pitfall,
     doom_action_space_coop_puzzle,
     doom_action_space_armory_siege,
     doom_action_space_lavapit,
@@ -30,30 +29,20 @@ from comrad.envs.action_space import (
     doom_action_space_coop_health_gathering,
     doom_action_space_foraging_commons,
     doom_action_space_rhythm_sync,
-    doom_action_space_full_discretized,
 )
 from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    DoomPitfallRewardShaping, CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
-from comrad.wrappers.reward_shaping import (
-    REWARD_SHAPING_DEATHMATCH_V1,
-    DoomRewardShapingWrapper,
-    true_objective_winning_the_game,
-)
-
-DEATHMATCH_REWARD_SHAPING = (
-    DoomRewardShapingWrapper,
-    dict(reward_shaping_scheme=REWARD_SHAPING_DEATHMATCH_V1, true_objective_func=true_objective_winning_the_game),
-)
 
 OFF_POLICY = {"DQN", "VDN", "QMIX", "QPLEX"}
 ON_POLICY = {"APPO", "MAPPO", "HAPPO"}
+_WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS = set()
 
 class DoomSpec:
     def __init__(
@@ -69,6 +58,8 @@ class DoomSpec:
         nofreelook=1,
         respawn_delay=0,
         timelimit=10.0,
+        additional_input_wrapper=None,
+        use_additional_input=False,
         extra_wrappers=None,
         shared_reward_alpha=0.0,
         shared_reward_scalarisation="sum",
@@ -89,6 +80,8 @@ class DoomSpec:
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
 
+        self.additional_input_wrapper = additional_input_wrapper
+        self.use_additional_input = use_additional_input
         # expect list of tuples (wrapper_cls, wrapper_kwargs)
         self.extra_wrappers = extra_wrappers
         # reward wrappers before rewards are collected into joint env step
@@ -103,32 +96,6 @@ FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 AMMO_CARRIER_ADDITIONAL_INPUT = (AmmoCarrierAdditionalInput, {})
 LAVAPIT_ADDITIONAL_INPUT = (LavapitAdditionalInput, {})
 DOOM_ENVS = [
-
-    #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
-
-    DoomSpec(
-        "doom_duel",
-        "ssl2.cfg",
-        doom_action_space_full_discretized(with_use=True),
-        1.0,
-        int(1e9),
-        num_agents=2,
-        num_bots=0,
-        respawn_delay=2,
-        extra_wrappers=[ADDITIONAL_INPUT, DEATHMATCH_REWARD_SHAPING],
-    ),
-
-    DoomSpec(
-        "doom_pitfall",
-        "pitfall.cfg",
-        doom_action_space_pitfall(),
-        1.0,
-        1000,
-        num_agents=2,
-        forcerespawn=1,
-        extra_wrappers=[(DoomPitfallRewardShaping, {})],
-    ),
-
     DoomSpec(
         "lavapit",
         "lavapit.cfg",
@@ -137,7 +104,8 @@ DOOM_ENVS = [
         1000,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[LAVAPIT_ADDITIONAL_INPUT, (LavapitRewardShaping, {})],
+        additional_input_wrapper=LAVAPIT_ADDITIONAL_INPUT,
+        extra_wrappers=[(LavapitRewardShaping, {})],
         shared_reward_alpha=1.0,
     ),
 
@@ -178,17 +146,6 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
-        "armory_siege_vision",
-        "armory_siege.cfg",
-        doom_action_space_armory_siege(),
-        1.0,
-        4500,
-        num_agents=2, # I find 2 agents learn better than 3 agents
-        respawn_delay=1,
-        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
-    ),
-
-    DoomSpec(
         "armory_siege",
         "armory_siege.cfg",
         doom_action_space_armory_siege(),
@@ -196,7 +153,8 @@ DOOM_ENVS = [
         4500,
         num_agents=2, # I find 2 agents learn better than 3 agents
         respawn_delay=1,
-        extra_wrappers=[ARMORY_SIEGE_ADDITIONAL_INPUT, (ArmorySiegeRewardShaping, {})],
+        additional_input_wrapper=ARMORY_SIEGE_ADDITIONAL_INPUT,
+        extra_wrappers=[(ArmorySiegeRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -208,7 +166,8 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         nofreelook=0,
-        extra_wrappers=[LAVA_MAZE_ADDITIONAL_INPUT, (LavaMazeRewardShaping, {})],
+        additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
+        extra_wrappers=[(LavaMazeRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -265,7 +224,8 @@ DOOM_ENVS = [
         2100,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[AMMO_CARRIER_ADDITIONAL_INPUT, (AmmoCarrierRewardShaping, {})],
+        additional_input_wrapper=AMMO_CARRIER_ADDITIONAL_INPUT,
+        extra_wrappers=[(AmmoCarrierRewardShaping, {})],
     ),
 
     # DoomSpec(
@@ -287,6 +247,7 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
+        additional_input_wrapper=FORAGING_COMMONS_ADDITIONAL_INPUT,
         extra_wrappers=[(ForagingCommonsRewardShaping, {})],
     ),
 
@@ -298,7 +259,8 @@ DOOM_ENVS = [
         5250,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[FORAGING_COMMONS_ADDITIONAL_INPUT, (ForagingCommonsRewardShaping, {})],
+        additional_input_wrapper=FORAGING_COMMONS_ADDITIONAL_INPUT,
+        extra_wrappers=[(ForagingCommonsRewardShaping, {})],
     ),
 
     DoomSpec(
@@ -313,18 +275,20 @@ DOOM_ENVS = [
     ),
 
     DoomSpec(
-        "rhythm_sync", # Unused - NEXP
+        "rhythm_sync", # NEXP
         "rhythm_sync.cfg",
         doom_action_space_rhythm_sync(),
         1.0,
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[(RhythmSyncAdditionalInput, {"feature_set": "partial"}), (RhythmSyncRewardShaping, {})],
+        additional_input_wrapper=(RhythmSyncAdditionalInput, {"feature_set": "partial"}),
+        extra_wrappers=[(RhythmSyncRewardShaping, {})],
         shared_reward_alpha=1.0,
     ),
 
     DoomSpec(
+        # Dense shaping learns better than sparse shaping
         "rhythm_sync_dense",
         "rhythm_sync.cfg",
         doom_action_space_rhythm_sync(),
@@ -332,10 +296,8 @@ DOOM_ENVS = [
         1750,
         num_agents=2,
         forcerespawn=0,
-        extra_wrappers=[
-            (RhythmSyncAdditionalInput, {"feature_set": "partial"}),
-            (RhythmSyncRewardShapingDense, {}),
-        ],
+        additional_input_wrapper=(RhythmSyncAdditionalInput, {"feature_set": "partial"}),
+        extra_wrappers=[(RhythmSyncRewardShapingDense, {})],
         shared_reward_alpha=1.0,
     ),
 ]
@@ -362,6 +324,33 @@ def get_scalarisation(cfg, doom_spec) -> str:
     override = getattr(cfg, "shared_reward_scalarisation", None)
     if override is None: return doom_spec.shared_reward_scalarisation
     return override
+
+
+def get_use_additional_input(cfg, doom_spec) -> bool:
+    override = getattr(cfg, "use_additional_input", None)
+    if override is None:
+        return doom_spec.use_additional_input
+    return override
+
+
+def get_extra_wrappers(cfg, doom_spec):
+    wrappers = []
+    use_additional_input = get_use_additional_input(cfg, doom_spec)
+
+    if doom_spec.additional_input_wrapper is not None and use_additional_input:
+        wrappers.append(doom_spec.additional_input_wrapper)
+    elif use_additional_input and doom_spec.additional_input_wrapper is None:
+        if doom_spec.name not in _WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS:
+            log.warning(
+                "Scenario %s does not define an additional input wrapper, ignoring --use_additional_input=True",
+                doom_spec.name,
+            )
+            _WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS.add(doom_spec.name)
+
+    if doom_spec.extra_wrappers is not None:
+        wrappers.extend(doom_spec.extra_wrappers)
+
+    return wrappers
 
 # noinspection PyUnusedLocal
 def make_doom_env_impl(
@@ -446,15 +435,15 @@ def make_doom_env_impl(
     if episode_horizon is not None and episode_horizon > 0:
         timeout = episode_horizon
     if timeout > 0:
+        #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
         env = TimeLimitWrapper(env, limit=timeout, random_variation_steps=0)
 
     pixel_format = cfg.pixel_format if "pixel_format" in cfg else "HWC"
     if pixel_format == "CHW":
         env = PixelFormatChwWrapper(env)
 
-    if doom_spec.extra_wrappers is not None:
-        for wrapper_cls, wrapper_kwargs in doom_spec.extra_wrappers:
-            env = wrapper_cls(env, **wrapper_kwargs)
+    for wrapper_cls, wrapper_kwargs in get_extra_wrappers(cfg, doom_spec):
+        env = wrapper_cls(env, **wrapper_kwargs)
 
     if doom_spec.reward_scaling != 1.0:
         env = RewardScalingWrapper(env, doom_spec.reward_scaling)

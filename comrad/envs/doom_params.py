@@ -7,6 +7,14 @@ def add_doom_env_args(parser):
     p = parser
 
     p.add_argument(
+        "--use_additional_input",
+        default=False,
+        type=str2bool,
+        help="Override whether Doom scenarios use their optional additional measurement vector. "
+        "If unset, each scenario keeps its default behavior.",
+    )
+
+    p.add_argument(
         "--num_agents",
         default=-1,
         type=int,
