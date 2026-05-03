@@ -85,9 +85,11 @@ def run_slurm(run_description, args):
 
     log.info("Sbatch template: %s", sbatch_template)
 
-    partition = ""
+    partition_name = ""
+    partition_arg = ""
     if args.slurm_partition is not None:
-        partition = f"-p {args.slurm_partition} "
+        partition_name = args.slurm_partition
+        partition_arg = f"-p {partition_name} "
 
     mem = ""
     if args.slurm_mem is not None:
@@ -107,7 +109,7 @@ def run_slurm(run_description, args):
         file_content = Template(sbatch_template).safe_substitute(
             CMD=cmd,
             FILENAME=sbatch_fname,
-            PARTITION=partition,
+            PARTITION=partition_name,
             GPU=args.slurm_gpus_per_job,
             CPU=num_cpus,
             TIMEOUT=args.slurm_timeout,
@@ -122,7 +124,7 @@ def run_slurm(run_description, args):
     for sbatch_file in sbatch_files:
         idx += 1
         sbatch_fname = os.path.basename(sbatch_file)
-        cmd = f"sbatch {partition}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} {mem}--parsable --output {workdir}/{sbatch_fname}-slurm-%j.out {sbatch_file}"
+        cmd = f"sbatch {partition_arg}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} {mem}--parsable --output {workdir}/{sbatch_fname}-slurm-%j.out {sbatch_file}"
         log.info("Executing %s...", cmd)
 
         if args.slurm_print_only:

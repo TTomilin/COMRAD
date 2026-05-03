@@ -1,12 +1,15 @@
 import logging
 import shutil
 from os.path import join, split
+from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
 from sample_factory.launcher.run import launcher_argparser
 from sample_factory.launcher.run_description import Experiment, ParamGrid, ParamList, RunDescription
 from sample_factory.launcher.run_processes import run
+from sample_factory.launcher.run_slurm import run_slurm
 from sample_factory.utils.utils import ensure_dir_exists, project_tmp_dir
 
 
@@ -103,3 +106,72 @@ class TestLauncher:
         logging.disable(logging.NOTSET)
 
         shutil.rmtree(join(train_dir, root_dir_name))
+
+    def test_slurm_resource_propagation(self, tmp_path, monkeypatch):
+        template = "\n".join(
+            [
+                "#!/bin/bash",
+                "#SBATCH --partition=$PARTITION",
+                "#SBATCH --gres=gpu:$GPU",
+                "#SBATCH --cpus-per-task=$CPU",
+                "#SBATCH --time=$TIMEOUT",
+                "#SBATCH --output=$FILENAME-slurm-%j.out",
+                "$CMD",
+                "",
+            ]
+        )
+        template_path = Path(tmp_path) / "sbatch_template.sh"
+        template_path.write_text(template)
+
+        workdir = Path(tmp_path) / "slurm_workdir"
+        train_dir = Path(tmp_path) / "train_dir"
+        run_description = RunDescription(
+            "slurm_test", [Experiment("exp", "python train.py")], customize_experiment_name=False
+        )
+        args = SimpleNamespace(
+            slurm_workdir=str(workdir),
+            pause_between=0,
+            slurm_sbatch_template=str(template_path),
+            slurm_partition="gpu_a100",
+            slurm_mem="120G",
+            slurm_cpus_per_gpu=18,
+            slurm_gpus_per_job=1,
+            slurm_timeout="2:00:00",
+            train_dir=str(train_dir),
+            slurm_print_only=False,
+        )
+
+        submitted_cmds = []
+
+        class FakePopen:
+            def __init__(self, cmd_tokens, stdout=None):
+                submitted_cmds.append(cmd_tokens)
+
+            def communicate(self):
+                return b"12345", None
+
+            def wait(self):
+                return 0
+
+        monkeypatch.setattr("sample_factory.launcher.run_slurm.Popen", FakePopen)
+
+        run_slurm(run_description, args)
+
+        generated_scripts = list(workdir.glob("sbatch_*.sh"))
+        assert len(generated_scripts) == 1
+        rendered = generated_scripts[0].read_text()
+        assert "#SBATCH --partition=gpu_a100" in rendered
+        assert "#SBATCH --partition=-p gpu_a100" not in rendered
+        assert "#SBATCH --gres=gpu:1" in rendered
+        assert "#SBATCH --cpus-per-task=18" in rendered
+        assert "#SBATCH --time=2:00:00" in rendered
+
+        assert len(submitted_cmds) == 1
+        sbatch_cmd = submitted_cmds[0]
+        assert "-p" in sbatch_cmd
+        assert "gpu_a100" in sbatch_cmd
+        assert "--gres=gpu:1" in sbatch_cmd
+        assert "-c" in sbatch_cmd
+        assert "18" in sbatch_cmd
+        assert "--mem" in sbatch_cmd
+        assert "120G" in sbatch_cmd
