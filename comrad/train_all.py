@@ -44,17 +44,17 @@ BENCHMARK_SCENARIOS = [
 ALGORITHMS = [
     AlgorithmSpec(
         "IPPO",
-        f"python -m comrad.train --algo=IPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
+        f"python -m comrad.train --algo=IPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
         True,
     ),
     AlgorithmSpec(
         "MAPPO",
-        f"python -m comrad.train --algo=MAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
+        f"python -m comrad.train --algo=MAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
         True,
     ),
     AlgorithmSpec(
         "HAPPO",
-        f"python -m comrad.train --algo=HAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2",
+        f"python -m comrad.train --algo=HAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=4096 --env_frameskip=4 --use_rnn=True --happo_critic_rnn=True --max_policy_lag=3000 --lr_schedule=linear_decay --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2",
         True,
     ),
     AlgorithmSpec(
