@@ -40,8 +40,8 @@ from comrad.wrappers.scenario_wrappers import (
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
-OFF_POLICY = {"DQN", "VDN", "QMIX", "QPLEX"}
-ON_POLICY = {"APPO", "MAPPO", "HAPPO"}
+OFF_POLICY = {"IDQN", "VDN", "QMIX", "QPLEX"}
+ON_POLICY = {"APPO", "IPPO", "MAPPO", "HAPPO"}
 _WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS = set()
 
 class DoomSpec:

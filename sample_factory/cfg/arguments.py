@@ -219,17 +219,17 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
     auto_adjust_marl_config(cfg, env_info)
 
-    if str(cfg.algo).upper() == "DQN":
+    if str(cfg.algo).upper() == "IDQN":
         dqn_batch_size = getattr(cfg, "dqn_batch_size", 0)
         if dqn_batch_size <= 0:
             cfg.dqn_batch_size = min(cfg.batch_size, 256)
-            log.info(f"DQN: Use batch_size {cfg.dqn_batch_size}")
+            log.info(f"IDQN: Use batch_size {cfg.dqn_batch_size}")
         if cfg.dqn_batch_size < cfg.rollout:
-            log.warning("DQN: Set dqn_batch_size to rollout")
+            log.warning("IDQN: Set dqn_batch_size to rollout")
             cfg.dqn_batch_size = cfg.rollout
         if cfg.dqn_batch_size % cfg.rollout != 0:
             adjusted = max(cfg.rollout, (cfg.dqn_batch_size // cfg.rollout) * cfg.rollout)
-            log.warning(f"DQN: dqn_batch_size ({cfg.dqn_batch_size}) not divisible by rollout ({cfg.rollout}), dqn_batch_size={adjusted}")
+            log.warning(f"IDQN: dqn_batch_size ({cfg.dqn_batch_size}) not divisible by rollout ({cfg.rollout}), dqn_batch_size={adjusted}")
             cfg.dqn_batch_size = adjusted
 
         # Big replay buffer causes overhead in memory allocation
@@ -252,14 +252,14 @@ def preprocess_cfg(cfg: Config, env_info: EnvInfo) -> bool:
             if bytes_per_transition > 0:
                 max_size = max(1000, int(1_000_000_000 // bytes_per_transition)) # Approx 1GB
                 if max_size < cfg.replay_buffer_size:
-                    log.warning(f"DQN: Cap replay_buffer_size to {max_size}")
+                    log.warning(f"IDQN: Cap replay_buffer_size to {max_size}")
                     cfg.replay_buffer_size = max_size
 
         # learning_starts cant exceed buffer size
         if cfg.learning_starts > cfg.replay_buffer_size:
             old_learning_starts = cfg.learning_starts
             cfg.learning_starts = max(1000, cfg.replay_buffer_size // 2)
-            log.warning(f"DQN: learning_starts ({old_learning_starts}) > replay_buffer_size ({cfg.replay_buffer_size}), capped to {cfg.learning_starts}")
+            log.warning(f"IDQN: learning_starts ({old_learning_starts}) > replay_buffer_size ({cfg.replay_buffer_size}), capped to {cfg.learning_starts}")
 
     # copy pasting from DQN but modify a bit for qmix/vdn
     # TODO: refactor merge w DQN
@@ -458,7 +458,7 @@ def verify_cfg(cfg: Config, env_info: EnvInfo) -> bool:
 
     sync_rl = not cfg.async_rl
     batch_size = cfg.batch_size
-    if str(cfg.algo).upper() == "DQN":
+    if str(cfg.algo).upper() == "IDQN":
         dqn_batch_size = getattr(cfg, "dqn_batch_size", 0)
         if dqn_batch_size > 0:
             batch_size = dqn_batch_size

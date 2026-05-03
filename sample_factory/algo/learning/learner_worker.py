@@ -74,7 +74,7 @@ class LearnerWorker(HeartbeatStoppableEventLoopObject, Configurable):
 
         # TODO: Maybe use hashmap to scale up with more algo
         algo = getattr(cfg, "algo", "APPO").upper()
-        if algo == "DQN":
+        if algo == "IDQN":
             self.learner: Learner = DQNLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)
         elif algo in ("QMIX", "VDN", "QPLEX"):
             self.learner: Learner = QMixLearner(cfg, env_info, policy_versions_tensor, policy_id, self.param_server, global_env_steps_tensor)

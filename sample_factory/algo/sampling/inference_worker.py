@@ -140,7 +140,7 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
         # Global env steps tensor for epsilon schedule synchronization
         self.global_env_steps_tensor = getattr(buffer_mgr, 'global_env_steps', None)
         algo = getattr(cfg, "algo", "APPO").upper()
-        if algo in ("DQN", "QMIX", "VDN", "QPLEX"):
+        if algo in ("IDQN", "QMIX", "VDN", "QPLEX"):
             self.epsilon_schedule = EpsilonSchedule(
                 epsilon_start=cfg.epsilon_start,
                 epsilon_end=cfg.epsilon_end,

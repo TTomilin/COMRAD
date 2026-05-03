@@ -14,7 +14,7 @@ from sample_factory.utils.typing import Config
 
 
 def _get_batch_size(cfg: Config) -> int:
-    if str(cfg.algo).upper() == "DQN":
+    if str(cfg.algo).upper() == "IDQN":
         dqn_batch_size = getattr(cfg, "dqn_batch_size", 0)
         if dqn_batch_size > 0: return dqn_batch_size
     return cfg.batch_size

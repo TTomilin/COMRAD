@@ -388,10 +388,11 @@ def test_make_doom_multiplayer_env_uses_any_done_mode_for_on_policy_only(monkeyp
         "train_dir": "/tmp/video-test",
     }
 
+    make_doom_multiplayer_env(doom_spec, cfg=AttrDict({**cfg_base, "algo": "IPPO"}), env_config=None)
     make_doom_multiplayer_env(doom_spec, cfg=AttrDict({**cfg_base, "algo": "MAPPO"}), env_config=None)
     make_doom_multiplayer_env(doom_spec, cfg=AttrDict({**cfg_base, "algo": "QMIX"}), env_config=None)
 
-    assert captured == ["any", "all"]
+    assert captured == ["any", "any", "all"]
 
 
 def test_retry_doom_stashes_reset_info_after_hidden_reset():
