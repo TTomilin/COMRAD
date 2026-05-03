@@ -36,7 +36,7 @@ SCENARIOS = [
         "y": 2.85,
         "color": "#0284c7",
         "label_dx": 0.25,
-        "label_dy": 0.34,
+        "label_dy": 0.25,
         "ha": "left",
     },
     {
@@ -97,13 +97,13 @@ def add_axis_background(ax: plt.Axes) -> None:
 
 def add_quadrant_labels(ax: plt.Axes) -> None:
     labels = [
-        (1.75, 5.38, "Spatially Mild"),
-        (4.25, 5.38, "Spatially Demanding"),
-        (0.35, 1.75, "Mechanically Easier"),
-        (0.35, 4.25, "Mechanically Harder"),
+        (1.75, 5.25, "Spatially Mild"),
+        (4.25, 5.25, "Spatially Demanding"),
+        (0.67, 1.75, "Mechanically Easier"),
+        (0.67, 4.25, "Mechanically Harder"),
     ]
     for x, y, text in labels:
-        rotation = 90 if x < 0.5 else 0
+        rotation = 90 if x < 1.0 else 0
         ax.text(
             x,
             y,
@@ -181,8 +181,8 @@ def make_figure() -> None:
     ax.spines["left"].set_linewidth(1.4)
     ax.spines["bottom"].set_linewidth(1.4)
 
-    ax.set_xlabel("Task-mechanical difficulty", fontsize=12.5, weight="bold", color="#111827", labelpad=18)
-    ax.set_ylabel("Spatial difficulty", fontsize=12.5, weight="bold", color="#111827", labelpad=18)
+    ax.set_xlabel("Task-mechanical difficulty", fontsize=12.5, weight="bold", color="#111827", labelpad=10)
+    ax.set_ylabel("Spatial difficulty", fontsize=12.5, weight="bold", color="#111827", labelpad=3)
 
     add_quadrant_labels(ax)
     add_scenarios(ax)
