@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from queue import Queue
+from pathlib import Path
 
 import gymnasium as gym
+from filelock import FileLock
 from sample_factory.utils.attr_dict import AttrDict
 
+import comrad.envs.multiagent.doom_multiagent as doom_multiagent
 import comrad.envs.multiagent.doom_multiagent_wrapper as doom_multiagent_wrapper
 
 
@@ -76,11 +80,108 @@ def test_multiagent_worker_reports_crashed_when_init_raises():
     assert worker.result_queue.get_nowait() is doom_multiagent_wrapper._CRASHED
 
 
+def test_reserve_available_port_skips_locked_candidate(tmp_path, monkeypatch):
+    monkeypatch.setattr(doom_multiagent, "project_tmp_dir", lambda: str(tmp_path))
+    monkeypatch.setattr(doom_multiagent, "is_udp_port_available", lambda port: True)
+
+    first_lock = FileLock(str(Path(tmp_path) / "doom_udp_port_40300.lockfile"))
+    first_lock.acquire(timeout=1)
+    try:
+        with doom_multiagent.reserve_available_port(40300, increment=1000, lock_timeout=0.01) as port:
+            assert port == 41300
+    finally:
+        first_lock.release()
+
+
+def test_multiagent_init_skips_reserved_port(tmp_path, monkeypatch):
+    monkeypatch.setattr(doom_multiagent_wrapper, "get_default_reward_shaping", lambda env: {})
+    monkeypatch.setattr(doom_multiagent_wrapper, "sleep", lambda _: None)
+    monkeypatch.setattr(doom_multiagent_wrapper.time, "sleep", lambda _: None)
+    monkeypatch.setattr(doom_multiagent, "project_tmp_dir", lambda: str(tmp_path))
+    monkeypatch.setattr(doom_multiagent, "is_udp_port_available", lambda port: True)
+
+    class _DummyLock:
+        def acquire(self, timeout=10):
+            class _Ctx:
+                def __enter__(self_inner):
+                    return self_inner
+
+                def __exit__(self_inner, exc_type, exc, tb):
+                    return False
+
+            return _Ctx()
+
+    monkeypatch.setattr(doom_multiagent_wrapper, "FileLock", lambda path: _DummyLock())
+    monkeypatch.setattr(doom_multiagent_wrapper, "doom_lock_file", lambda max_parallel: "/tmp/dummy.lock")
+
+    env = doom_multiagent_wrapper.MultiAgentEnv(
+        num_agents=2,
+        make_env_func=lambda player_id: _TinyEnv(),
+        env_config=AttrDict(worker_index=0, vector_index=0, safe_init=False),
+        skip_frames=1,
+        render_mode=None,
+    )
+
+    init_ports = []
+
+    class _DummyProcess:
+        def join(self, timeout=None):
+            return None
+
+        def is_alive(self):
+            return False
+
+    class _DummyWorker:
+        def __init__(self, player_id, make_env_func, env_config, use_multiprocessing=False, reset_on_init=True):
+            self.player_id = player_id
+            self.task_queue = Queue()
+            self.result_queue = Queue()
+            self.process = _DummyProcess()
+
+    class _InitAwareQueue(Queue):
+        def __init__(self, owner):
+            super().__init__()
+            self.owner = owner
+
+        def put(self, item, block=True, timeout=None):
+            super().put(item, block=block, timeout=timeout)
+            data, task_type = item
+            if task_type == doom_multiagent_wrapper.TaskType.INIT:
+                init_ports.append(data["port"])
+                self.owner.result_queue.put(None)
+            elif task_type == doom_multiagent_wrapper.TaskType.TERMINATE:
+                self.owner.result_queue.put(None)
+
+    def _spawn_workers_with_init_queue():
+        env.workers = []
+        for i in range(env.num_agents):
+            worker = _DummyWorker(i, env.make_env_func, env.env_config, reset_on_init=env.reset_on_init)
+            worker.task_queue = _InitAwareQueue(worker)
+            env.workers.append(worker)
+
+    monkeypatch.setattr(env, "_spawn_workers", _spawn_workers_with_init_queue)
+
+    first_lock = FileLock(str(Path(tmp_path) / "doom_udp_port_40300.lockfile"))
+    first_lock.acquire(timeout=1)
+    try:
+        env._ensure_initialized()
+    finally:
+        first_lock.release()
+
+    assert env.initialized is True
+    assert init_ports == [41300, 41300]
+
+
 def test_multiagent_init_retries_after_init_crash(monkeypatch):
     monkeypatch.setattr(doom_multiagent_wrapper, "get_default_reward_shaping", lambda env: {})
     monkeypatch.setattr(doom_multiagent_wrapper, "sleep", lambda _: None)
     monkeypatch.setattr(doom_multiagent_wrapper.time, "sleep", lambda _: None)
-    monkeypatch.setattr(doom_multiagent_wrapper, "find_available_port", lambda start_port, increment=1000: start_port)
+
+    @contextmanager
+    def _reserve_port(start_port, increment=1000, lock_timeout=0.1):
+        yield start_port
+
+    monkeypatch.setattr(doom_multiagent_wrapper, "reserve_available_port", _reserve_port)
 
     class _DummyLock:
         def acquire(self, timeout=10):

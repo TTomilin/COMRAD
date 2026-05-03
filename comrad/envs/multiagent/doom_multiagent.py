@@ -1,8 +1,11 @@
 import os
+from contextlib import contextmanager
+from os.path import join
 from typing import Optional
 
+from filelock import FileLock, Timeout
 from sample_factory.utils.network import is_udp_port_available
-from sample_factory.utils.utils import log
+from sample_factory.utils.utils import log, project_tmp_dir
 from comrad.envs.doom_gym import VizdoomEnv
 
 DEFAULT_UDP_PORT = int(os.environ.get("DOOM_DEFAULT_UDP_PORT", 40300))
@@ -22,6 +25,43 @@ def find_available_port(start_port, increment=1000):
 
     log.debug("Port %r is available", port)
     return port
+
+
+def udp_port_reservation_file(port: int) -> str:
+    return join(project_tmp_dir(), f"doom_udp_port_{port}.lockfile")
+
+
+@contextmanager
+def reserve_available_port(start_port, increment=1000, lock_timeout=0.1):
+    """
+    Reserve a multiplayer UDP port cooperatively across COMRAD jobs.
+
+    We cannot keep a probe socket bound until VizDoom starts because the host process
+    itself must bind that port. Instead we hold a per-port file lock from selection
+    through worker initialization so another job using the same allocator cannot steal
+    the same candidate between probe and bind.
+    """
+
+    port = start_port
+    while port < 65535:
+        port_lock = FileLock(udp_port_reservation_file(port))
+        try:
+            port_lock.acquire(timeout=lock_timeout)
+        except Timeout:
+            port += increment
+            continue
+
+        try:
+            if is_udp_port_available(port):
+                log.debug("Reserved UDP port %r", port)
+                yield port
+                return
+        finally:
+            port_lock.release()
+
+        port += increment
+
+    raise RuntimeError(f"Could not reserve an available UDP port starting from {start_port}")
 
 
 class VizdoomEnvMultiplayer(VizdoomEnv):

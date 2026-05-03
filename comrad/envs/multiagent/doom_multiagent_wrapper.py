@@ -18,7 +18,7 @@ from sample_factory.envs.env_utils import RewardShapingInterface, get_default_re
 from sample_factory.utils.utils import log
 from comrad.envs.doom_gym import doom_lock_file
 from comrad.utils.doom_render import concat_grid
-from comrad.envs.multiagent.doom_multiagent import DEFAULT_UDP_PORT, find_available_port
+from comrad.envs.multiagent.doom_multiagent import DEFAULT_UDP_PORT, find_available_port, reserve_available_port
 
 _CRASHED = object() # await_tasks() checks for this to check if the whole game group is dead
 class _GameGroupCrashError(Exception):
@@ -403,33 +403,33 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             init_attempt += 1
             self._spawn_workers()
             try:
-                port_to_use = udp_port_num(self.env_config) + 1000 * (init_attempt - 1)
-                port = find_available_port(port_to_use, increment=1000)
-                log.debug("Using port %d", port)
-                init_info = dict(port=port)
-
-                if self._pending_swap_config is not None:
-                    init_info["swap_scenario"] = self._pending_swap_config
-
                 lock_file = doom_lock_file(max_parallel=20)
                 lock = FileLock(lock_file)
                 with lock.acquire(timeout=10):
-                    for i, worker in enumerate(self.workers):
-                        worker.task_queue.put((init_info, TaskType.INIT))
-                        if self.safe_init:
-                            time.sleep(1.0)  # just in case
-                        else:
-                            time.sleep(0.05)
+                    port_to_use = udp_port_num(self.env_config) + 1000 * (init_attempt - 1)
+                    with reserve_available_port(port_to_use, increment=1000) as port:
+                        log.debug("Using reserved port %d", port)
+                        init_info = dict(port=port)
 
-                    for i, worker in enumerate(self.workers):
-                        result = safe_get(
-                            worker.result_queue,
-                            timeout=2.0,
-                            msg="Takes a surprisingly long time to initialize multiplayer env, retry...",
-                            max_retries=35,
-                        )
-                        if result is _CRASHED:
-                            raise _GameGroupCrashError(f"Worker {i} crashed during initialization")
+                        if self._pending_swap_config is not None:
+                            init_info["swap_scenario"] = self._pending_swap_config
+
+                        for i, worker in enumerate(self.workers):
+                            worker.task_queue.put((init_info, TaskType.INIT))
+                            if self.safe_init:
+                                time.sleep(1.0)  # just in case
+                            else:
+                                time.sleep(0.05)
+
+                        for i, worker in enumerate(self.workers):
+                            result = safe_get(
+                                worker.result_queue,
+                                timeout=2.0,
+                                msg="Takes a surprisingly long time to initialize multiplayer env, retry...",
+                                max_retries=35,
+                            )
+                            if result is _CRASHED:
+                                raise _GameGroupCrashError(f"Worker {i} crashed during initialization")
 
             except filelock.Timeout:
                 self.close()
