@@ -115,7 +115,8 @@ class TestLauncher:
                 "#SBATCH --gres=gpu:$GPU",
                 "#SBATCH --cpus-per-task=$CPU",
                 "#SBATCH --time=$TIMEOUT",
-                "#SBATCH --output=$FILENAME-slurm-%j.out",
+                "#SBATCH --output=$STDOUT",
+                "#SBATCH --error=$STDERR",
                 "$CMD",
                 "",
             ]
@@ -126,7 +127,9 @@ class TestLauncher:
         workdir = Path(tmp_path) / "slurm_workdir"
         train_dir = Path(tmp_path) / "train_dir"
         run_description = RunDescription(
-            "slurm_test", [Experiment("exp", "python train.py")], customize_experiment_name=False
+            "slurm_test",
+            [Experiment("IPPO_env_ammo_carrier", "python train.py", root_dir_name="ammo_carrier")],
+            customize_experiment_name=False,
         )
         args = SimpleNamespace(
             slurm_workdir=str(workdir),
@@ -159,12 +162,17 @@ class TestLauncher:
 
         generated_scripts = list(workdir.glob("sbatch_*.sh"))
         assert len(generated_scripts) == 1
+        experiment_dir = train_dir / "slurm_test" / "ammo_carrier" / "00_IPPO_env_ammo_carrier"
+        assert experiment_dir.is_dir()
+
         rendered = generated_scripts[0].read_text()
         assert "#SBATCH --partition=gpu_a100" in rendered
         assert "#SBATCH --partition=-p gpu_a100" not in rendered
         assert "#SBATCH --gres=gpu:1" in rendered
         assert "#SBATCH --cpus-per-task=18" in rendered
         assert "#SBATCH --time=2:00:00" in rendered
+        assert f"#SBATCH --output={experiment_dir / 'slurm-%j.out'}" in rendered
+        assert f"#SBATCH --error={experiment_dir / 'slurm-%j.err'}" in rendered
 
         assert len(submitted_cmds) == 1
         sbatch_cmd = submitted_cmds[0]
@@ -175,3 +183,7 @@ class TestLauncher:
         assert "18" in sbatch_cmd
         assert "--mem" in sbatch_cmd
         assert "120G" in sbatch_cmd
+        assert "--output" in sbatch_cmd
+        assert str(experiment_dir / "slurm-%j.out") in sbatch_cmd
+        assert "--error" in sbatch_cmd
+        assert str(experiment_dir / "slurm-%j.err") in sbatch_cmd

@@ -99,12 +99,18 @@ def run_slurm(run_description, args):
 
     experiments = run_description.generate_experiments(args.train_dir)
     sbatch_files = []
+    experiment_log_paths = []
     for experiment in experiments:
-        cmd, name, *_ = experiment
+        cmd, name, root_dir, *_ = experiment
 
         sbatch_fname = f"sbatch_{name}.sh"
         sbatch_fname = join(workdir, sbatch_fname)
         sbatch_fname = os.path.abspath(sbatch_fname)
+        experiment_dir = os.path.abspath(join(args.train_dir, root_dir, name))
+        stdout_path = join(experiment_dir, "slurm-%j.out")
+        stderr_path = join(experiment_dir, "slurm-%j.err")
+
+        os.makedirs(experiment_dir, exist_ok=True)
 
         file_content = Template(sbatch_template).safe_substitute(
             CMD=cmd,
@@ -113,18 +119,24 @@ def run_slurm(run_description, args):
             GPU=args.slurm_gpus_per_job,
             CPU=num_cpus,
             TIMEOUT=args.slurm_timeout,
+            STDOUT=stdout_path,
+            STDERR=stderr_path,
         )
         with open(sbatch_fname, "w") as sbatch_f:
             sbatch_f.write(file_content)
 
         sbatch_files.append(sbatch_fname)
+        experiment_log_paths.append((stdout_path, stderr_path))
 
     job_ids = []
     idx = 0
-    for sbatch_file in sbatch_files:
+    for sbatch_file, (stdout_path, stderr_path) in zip(sbatch_files, experiment_log_paths):
         idx += 1
         sbatch_fname = os.path.basename(sbatch_file)
-        cmd = f"sbatch {partition_arg}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} {mem}--parsable --output {workdir}/{sbatch_fname}-slurm-%j.out {sbatch_file}"
+        cmd = (
+            f"sbatch {partition_arg}--gres=gpu:{args.slurm_gpus_per_job} -c {num_cpus} "
+            f"{mem}--parsable --output {stdout_path} --error {stderr_path} {sbatch_file}"
+        )
         log.info("Executing %s...", cmd)
 
         if args.slurm_print_only:
@@ -145,8 +157,8 @@ def run_slurm(run_description, args):
 
         time.sleep(pause_between)
 
-    tail_cmd = f"tail -f {workdir}/*.out"
-    log.info("Monitor log files using\n\n\t %s \n\n", tail_cmd)
+    run_root = os.path.abspath(join(args.train_dir, run_description.run_name))
+    log.info("SLURM stdout/stderr files are stored under\n\n\t %s \n\n", run_root)
 
     scancel_cmd = f'scancel {" ".join(job_ids)}'
 

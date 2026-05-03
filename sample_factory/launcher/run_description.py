@@ -87,7 +87,7 @@ class ParamGrid(ParamGenerator):
 
 
 class Experiment:
-    def __init__(self, name, cmd, param_generator=(), env_vars=None):
+    def __init__(self, name, cmd, param_generator=(), env_vars=None, root_dir_name=None):
         """
         :param cmd: base command to append the parameters to
         :param param_generator: iterable of parameter dicts
@@ -96,6 +96,7 @@ class Experiment:
         self.cmd = cmd
         self.params = list(param_generator)
         self.env_vars = env_vars
+        self.root_dir_name = root_dir_name
 
     def generate_experiments(self, experiment_arg_name, customize_experiment_name, param_prefix):
         """Yields tuples of (cmd, experiment_name)"""
@@ -174,7 +175,13 @@ class RunDescription:
     def generate_experiments(self, train_dir, makedirs=True):
         """Yields tuples (final cmd for experiment, experiment_name, root_dir)."""
         for experiment in self.experiments:
-            root_dir = join(self.run_name, f"{experiment.base_name}_{self.experiment_suffix}")
+            root_dir_name = experiment.root_dir_name
+            if root_dir_name is None:
+                root_dir_name = f"{experiment.base_name}_{self.experiment_suffix}"
+            elif self.experiment_suffix:
+                root_dir_name = f"{root_dir_name}_{self.experiment_suffix}"
+
+            root_dir = join(self.run_name, root_dir_name)
 
             experiment_cmds = experiment.generate_experiments(
                 self.experiment_arg_name, self.customize_experiment_name, self.param_prefix
