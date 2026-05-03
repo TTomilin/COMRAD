@@ -228,29 +228,6 @@ DOOM_ENVS = [
         extra_wrappers=[(AmmoCarrierRewardShaping, {})],
     ),
 
-    # DoomSpec(
-    #     "common_harvest_doom",
-    #     "common_harvest_doom.cfg",
-    #     doom_action_space_common_harvest(),
-    #     1.0,
-    #     5250,
-    #     num_agents=2,
-    #     forcerespawn=1,
-    #     extra_wrappers=[(CommonHarvestRewardShaping, {})],
-    # ),
-
-    DoomSpec(
-        "foraging_commons_vision",
-        "foraging_commons.cfg",
-        doom_action_space_foraging_commons(),
-        1.0,
-        5250,
-        num_agents=2,
-        forcerespawn=0,
-        additional_input_wrapper=FORAGING_COMMONS_ADDITIONAL_INPUT,
-        extra_wrappers=[(ForagingCommonsRewardShaping, {})],
-    ),
-
     DoomSpec(
         "foraging_commons",
         "foraging_commons.cfg",

@@ -23,6 +23,18 @@ Global observation variables exposed through cfg (available to the agent):
   USER53  ch_shared_ammo_global - total ammo held by P1+P2 (equalized every 4 tics)
   USER54  ch_world_ammo_global  - ammo items currently on the ground
   USER55  ch_enemy_count_global - live enemy count
+
+
+    DoomSpec(
+        "common_harvest_doom",
+        "common_harvest_doom.cfg",
+        doom_action_space_common_harvest(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=1,
+        extra_wrappers=[(CommonHarvestRewardShaping, {})],
+    ),
 """
 
 import gymnasium as gym
