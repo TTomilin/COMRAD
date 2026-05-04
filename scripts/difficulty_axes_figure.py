@@ -99,8 +99,8 @@ def add_quadrant_labels(ax: plt.Axes) -> None:
     labels = [
         (1.75, 5.25, "Spatially Mild"),
         (4.25, 5.25, "Spatially Demanding"),
-        (0.67, 1.75, "Mechanically Easier"),
-        (0.67, 4.25, "Mechanically Harder"),
+        (0.63, 1.75, "Mechanically Easier"),
+        (0.63, 4.25, "Mechanically Harder"),
     ]
     for x, y, text in labels:
         rotation = 90 if x < 1.0 else 0
