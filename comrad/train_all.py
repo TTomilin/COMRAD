@@ -1,5 +1,3 @@
-# python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes --max_parallel=1 --pause_between=1
-
 import os
 from dataclasses import dataclass
 
@@ -84,6 +82,14 @@ ALGORITHMS = [
     ),
 ]
 
+# Rerun only the jobs that failed in main results (server error)
+# FAILED_BENCHMARK_RUNS = {
+#     ("rhythm_sync_dense", "IPPO"),
+#     ("rhythm_sync_dense", "VDN"),
+#     ("rhythm_sync_dense", "QPLEX_dmaq"),
+#     ("coop_health_gathering", "QPLEX_dmaq"),
+# }
+
 
 def _params_for_scenario(scenario: BenchmarkScenario, algorithm: AlgorithmSpec):
     if algorithm.uses_shared_reward:
@@ -104,6 +110,9 @@ def _experiment_name_for_scenario(scenario: BenchmarkScenario, algorithm: Algori
 _experiments = []
 for scenario in BENCHMARK_SCENARIOS:
     for algorithm in ALGORITHMS:
+        # if (scenario.env, algorithm.name) not in FAILED_BENCHMARK_RUNS:
+        #     continue
+
         _experiments.append(
             Experiment(
                 _experiment_name_for_scenario(scenario, algorithm),
