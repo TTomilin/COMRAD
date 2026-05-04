@@ -46,3 +46,7 @@ comrad/send.sh
 
 # misc
 asdf.py
+
+results/mode3_comrad_benchmark_20260503_134649/
+download_baseline_results.sh
+baseline_results.py
