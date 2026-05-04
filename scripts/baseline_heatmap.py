@@ -186,17 +186,6 @@ def plot_heatmap(summary: dict[str, object], output_pdf: Path, output_png: Path)
     annotate_heatmap(ax_top, overall[np.newaxis, :], overall_bests, fontsize=9.2)
     annotate_heatmap(ax_main, matrix, row_bests, fontsize=8.8)
 
-    fig.suptitle("COMRAD Baseline Heatmap at 100M Environment Steps", y=0.985, fontweight="semibold")
-    fig.text(
-        0.5,
-        0.018,
-        "Scenario-normalized final true_objective scores clipped to [0, 1]. "
-        "Proxy ceilings: Armory Siege = 100, Lava Maze = 6.",
-        ha="center",
-        va="bottom",
-        fontsize=8.8,
-        color="#3a3a3a",
-    )
     fig.subplots_adjust(left=0.16, right=0.90, top=0.88, bottom=0.10, hspace=0.07)
     fig.savefig(output_pdf, bbox_inches="tight")
     fig.savefig(output_png, bbox_inches="tight")
