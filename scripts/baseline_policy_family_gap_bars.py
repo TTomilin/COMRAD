@@ -246,22 +246,12 @@ def plot_grouped_bars(summary: dict[str, object], output_pdf: Path, output_png: 
     on_wins = int(np.sum(gaps > 0))
     off_wins = int(np.sum(gaps < 0))
     ties = int(np.sum(np.isclose(gaps, 0.0)))
-    ax.set_title("Best On-Policy vs Best Off-Policy per COMRAD Scenario", pad=14, fontweight="semibold")
 
     legend = ax.legend(loc="upper right", ncol=2, frameon=True, fontsize=9)
     legend.get_frame().set_edgecolor("#cccccc")
     legend.get_frame().set_linewidth(0.8)
 
-    fig.text(
-        0.5,
-        0.02,
-        f"Gap labels show on-policy minus off-policy. Mean gap = {mean_gap:+.2f}; "
-        f"scenario wins: on-policy {on_wins}, off-policy {off_wins}, ties {ties}.",
-        ha="center",
-        va="bottom",
-        fontsize=8.6,
-        color="#3a3a3a",
-    )
+    print(f"Mean gap = {mean_gap:+.2f}, on-policy {on_wins}, off-policy {off_wins}, ties {ties}.")
 
     fig.subplots_adjust(left=0.08, right=0.99, top=0.87, bottom=0.29)
     fig.savefig(output_pdf, bbox_inches="tight")
