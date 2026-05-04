@@ -19,8 +19,8 @@ scenario_order = [
     "Lava Pit",
     "Smart Enemies",
     "Dumb Enemies",
-    "Stealth Labyrinth",
     "Ammo Carrier",
+    "Stealth Labyrinth",
     "Lava Maze",
 ]
 
