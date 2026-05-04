@@ -1,13 +1,5 @@
 # COMRAD
 
-## 0. to be removed
-+ https://wandb.ai/comrad/marl_vizdoom/table/ (and [this project for fair comparison runs](https://wandb.ai/comrad/comrad_jr))
-+ https://wandb.ai/mitko-zh-eindhoven-university-of-technology/COMRAD/table/
-+ https://wandb.ai/christinespring2020-eindhoven-university-of-technology/vizdoom_hpc/table
-+ https://wandb.ai/loucorto-buring-eindhoven-university-of-technology/marl_vizdoom/table
-+ https://wandb.ai/andrei-s-moise-eindhoven-university-of-technology/projects
-
-
 ## 1. Installation
 
 Note on python version: You should use python 3.11 and wandb 0.22.x, as there are some issues with wandb 0.24.0 (which is not compatible with python 3.11) in syncing between tensorboard and weave dashboard
