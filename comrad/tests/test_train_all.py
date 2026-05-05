@@ -69,6 +69,11 @@ def test_benchmark_uses_fixed_env_step_budget():
         assert "--train_for_seconds=" not in cmd
 
 
+def test_full_benchmark_keeps_two_agent_contract():
+    for cmd, _, _, _ in _generated_runs():
+        assert "--num_agents=2" in cmd
+
+
 def test_actor_critic_shared_reward_matches_benchmark_contract():
     expected_shared = {
         scenario.env: scenario.actor_critic_shared_reward for scenario in train_all.BENCHMARK_SCENARIOS

@@ -1,3 +1,7 @@
+'''
+Run agent full benchmark experiment (default): export COMRAD_TRAIN_ALL_PROFILE=benchmark && python -m sample_factory.launcher.run
+Run agent scaling experiment: export COMRAD_TRAIN_ALL_PROFILE=agent_scaling && python -m sample_factory.launcher.run
+'''
 import os
 from dataclasses import dataclass
 
@@ -18,8 +22,12 @@ class AlgorithmSpec:
     uses_shared_reward: bool
 
 
-BENCHMARK_NAME = "comrad_benchmark"
+FULL_BENCHMARK_NAME = "comrad_benchmark"
+AGENT_SCALING_NAME = "comrad_agent_scaling"
+PROFILE_FULL_BENCHMARK = "benchmark"
+PROFILE_AGENT_SCALING = "agent_scaling"
 SEEDS = [42]
+# SEEDS = [42, 68, 81, 97, 154]
 TRAIN_FOR_ENV_STEPS = 125000000
 
 BENCHMARK_SCENARIOS = [
@@ -82,6 +90,15 @@ ALGORITHMS = [
     ),
 ]
 
+AGENT_SCALING_SCENARIO = BenchmarkScenario("Armory Siege", "armory_siege", False)
+AGENT_SCALING_ALGORITHM = AlgorithmSpec(
+    "QMIX",
+    f"python -m comrad.train --algo=QMIX --mixer=qmix --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2304 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --qmix_sequence_batch_size=32 --dqn_max_updates_per_batch=4 --batched_sampling=True",
+    False,
+)
+AGENT_SCALING_AGENT_COUNTS = [2, 3, 4, 6, 8]
+AGENT_SCALING_ROOT_DIR = "armory_siege_agent_scaling"
+
 # Rerun only the jobs that failed in main results (server error)
 # FAILED_BENCHMARK_RUNS = {
 #     ("rhythm_sync_dense", "IPPO"),
@@ -107,20 +124,60 @@ def _experiment_name_for_scenario(scenario: BenchmarkScenario, algorithm: Algori
     return f"{algorithm.name}_env_{scenario.env}"
 
 
-_experiments = []
-for scenario in BENCHMARK_SCENARIOS:
-    for algorithm in ALGORITHMS:
-        # if (scenario.env, algorithm.name) not in FAILED_BENCHMARK_RUNS:
-        #     continue
+def _full_benchmark_experiments():
+    experiments = []
+    for scenario in BENCHMARK_SCENARIOS:
+        for algorithm in ALGORITHMS:
+            # if (scenario.env, algorithm.name) not in FAILED_BENCHMARK_RUNS:
+            #     continue
 
-        _experiments.append(
-            Experiment(
-                _experiment_name_for_scenario(scenario, algorithm),
-                _command_for_scenario(scenario, algorithm),
-                _params_for_scenario(scenario, algorithm).generate_params(randomize=False),
-                root_dir_name=scenario.env,
+            experiments.append(
+                Experiment(
+                    _experiment_name_for_scenario(scenario, algorithm),
+                    _command_for_scenario(scenario, algorithm),
+                    _params_for_scenario(scenario, algorithm).generate_params(randomize=False),
+                    root_dir_name=scenario.env,
+                )
             )
+
+    return experiments
+
+
+def _agent_scaling_experiments():
+    return [
+        Experiment(
+            "QMIX_env_armory_siege_agent_scaling",
+            _command_for_scenario(AGENT_SCALING_SCENARIO, AGENT_SCALING_ALGORITHM),
+            ParamGrid(
+                [
+                    ("num_agents", AGENT_SCALING_AGENT_COUNTS),
+                    ("seed", SEEDS),
+                ]
+            ).generate_params(randomize=False),
+            root_dir_name=AGENT_SCALING_ROOT_DIR,
         )
+    ]
+
+
+def _active_profile() -> str:
+    profile = os.environ.get("COMRAD_TRAIN_ALL_PROFILE", PROFILE_FULL_BENCHMARK).strip().lower()
+    valid_profiles = {PROFILE_FULL_BENCHMARK, PROFILE_AGENT_SCALING}
+    if profile not in valid_profiles:
+        raise ValueError(
+            f"Unsupported COMRAD_TRAIN_ALL_PROFILE={profile!r}. "
+            f"Expected one of {sorted(valid_profiles)}."
+        )
+    return profile
+
+
+ACTIVE_PROFILE = _active_profile()
+
+if ACTIVE_PROFILE == PROFILE_AGENT_SCALING:
+    BENCHMARK_NAME = AGENT_SCALING_NAME
+    _experiments = _agent_scaling_experiments()
+else:
+    BENCHMARK_NAME = FULL_BENCHMARK_NAME
+    _experiments = _full_benchmark_experiments()
 
 TOTAL_RUNS = sum(max(1, len(experiment.params)) for experiment in _experiments)
 
