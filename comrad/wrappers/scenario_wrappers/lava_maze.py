@@ -12,7 +12,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         death_penalty=-5.0,
         step_penalty=-0.005,
         distance_reward_scale=0.5,
-        lava_burn_penalty_scale=0.01,
+        lava_burn_penalty_scale=0.02,
         signal_penalty=-0.025,
     ):
         super().__init__(env)

@@ -1,0 +1,847 @@
+[
+    {
+        "id": "lava_maze_0",
+        "filename": "lava_maze_0.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_1",
+        "filename": "lava_maze_1.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_2",
+        "filename": "lava_maze_2.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_3",
+        "filename": "lava_maze_3.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_4",
+        "filename": "lava_maze_4.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_5",
+        "filename": "lava_maze_5.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 3,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_6",
+        "filename": "lava_maze_6.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_7",
+        "filename": "lava_maze_7.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_8",
+        "filename": "lava_maze_8.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_9",
+        "filename": "lava_maze_9.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_10",
+        "filename": "lava_maze_10.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_11",
+        "filename": "lava_maze_11.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 5,
+            "max_maze_size": 6,
+            "lava_damage": 25,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_12",
+        "filename": "lava_maze_12.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_13",
+        "filename": "lava_maze_13.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_14",
+        "filename": "lava_maze_14.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_15",
+        "filename": "lava_maze_15.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_16",
+        "filename": "lava_maze_16.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_17",
+        "filename": "lava_maze_17.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_18",
+        "filename": "lava_maze_18.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_19",
+        "filename": "lava_maze_19.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_20",
+        "filename": "lava_maze_20.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_21",
+        "filename": "lava_maze_21.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_22",
+        "filename": "lava_maze_22.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_23",
+        "filename": "lava_maze_23.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_24",
+        "filename": "lava_maze_24.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_25",
+        "filename": "lava_maze_25.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_26",
+        "filename": "lava_maze_26.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_27",
+        "filename": "lava_maze_27.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_28",
+        "filename": "lava_maze_28.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_29",
+        "filename": "lava_maze_29.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_30",
+        "filename": "lava_maze_30.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_31",
+        "filename": "lava_maze_31.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_32",
+        "filename": "lava_maze_32.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_33",
+        "filename": "lava_maze_33.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_34",
+        "filename": "lava_maze_34.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_35",
+        "filename": "lava_maze_35.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_36",
+        "filename": "lava_maze_36.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_37",
+        "filename": "lava_maze_37.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_38",
+        "filename": "lava_maze_38.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_39",
+        "filename": "lava_maze_39.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_40",
+        "filename": "lava_maze_40.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_41",
+        "filename": "lava_maze_41.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_42",
+        "filename": "lava_maze_42.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_43",
+        "filename": "lava_maze_43.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_44",
+        "filename": "lava_maze_44.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 25,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_45",
+        "filename": "lava_maze_45.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_46",
+        "filename": "lava_maze_46.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_47",
+        "filename": "lava_maze_47.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 24,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_48",
+        "filename": "lava_maze_48.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_49",
+        "filename": "lava_maze_49.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_50",
+        "filename": "lava_maze_50.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_51",
+        "filename": "lava_maze_51.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_52",
+        "filename": "lava_maze_52.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_53",
+        "filename": "lava_maze_53.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 6,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_54",
+        "filename": "lava_maze_54.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_55",
+        "filename": "lava_maze_55.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_56",
+        "filename": "lava_maze_56.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_57",
+        "filename": "lava_maze_57.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_58",
+        "filename": "lava_maze_58.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_59",
+        "filename": "lava_maze_59.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    },
+    {
+        "id": "lava_maze_60",
+        "filename": "lava_maze_60.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_61",
+        "filename": "lava_maze_61.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 12,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_63",
+        "filename": "lava_maze_63.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 0
+        }
+    },
+    {
+        "id": "lava_maze_64",
+        "filename": "lava_maze_64.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 1
+        }
+    },
+    {
+        "id": "lava_maze_65",
+        "filename": "lava_maze_65.wad",
+        "config": {
+            "physical_size": 8,
+            "cell_size": 128,
+            "initial_maze_size": 10,
+            "max_maze_size": 20,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "seed": 2
+        }
+    }
+]
