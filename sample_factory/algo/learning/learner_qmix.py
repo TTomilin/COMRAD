@@ -177,6 +177,7 @@ class QMixLearner(Learner):
         self.optimizer = torch.optim.Adam(params, lr=self.cfg.learning_rate)
 
         self.curr_lr = self.cfg.learning_rate
+        self.is_initialized = True
         return self._get_init_model_data()
 
     def _get_init_model_data(self) -> InitModelData:
