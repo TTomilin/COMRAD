@@ -87,10 +87,22 @@ def add_topdown_args(parser) -> None:
     parser.add_argument("--video_fps", default=35, type=int, help="Output video FPS")
     parser.add_argument("--output_dir", default="results/videos", type=str, help="Output directory for mp4/png files")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing outputs")
-    parser.add_argument("--heatmap_radius", default=12, type=int, help="Heatmap stamp radius in pixels")
+    parser.add_argument("--heatmap_radius", default=64, type=int, help="Heatmap stamp radius in pixels")
     parser.add_argument("--heatmap_alpha", default=0.72, type=float, help="Max alpha for the heatmap overlay")
     parser.add_argument("--line_thickness", default=4, type=int, help="Trajectory line thickness in pixels")
     parser.add_argument("--marker_radius", default=8, type=int, help="Current-position marker radius in pixels")
+    parser.add_argument(
+        "--density_grid_resolution",
+        default="200x150",
+        type=str,
+        help="Grid resolution for the automap-aligned density heatmap. Must keep the automap aspect ratio.",
+    )
+    parser.add_argument(
+        "--density_heatmap_alpha",
+        default=0.82,
+        type=float,
+        help="Max alpha for the grid-density heatmap overlay",
+    )
     parser.set_defaults(
         max_num_episodes=1,
         max_num_frames=None,
@@ -154,6 +166,10 @@ def algo_label(cfg: Config) -> str:
 
 def output_stem(cfg: Config, episode_idx: int) -> str:
     return f"{cfg.env}_{algo_label(cfg)}_topdown_heatmap_best_ep{episode_idx:02d}_{cfg.resolution}"
+
+
+def density_output_stem(cfg: Config, episode_idx: int) -> str:
+    return f"{output_stem(cfg, episode_idx)}_grid_density"
 
 
 def make_env(cfg: Config):
@@ -942,6 +958,30 @@ def resize_automap_calibration(calibration: AutomapCalibration, resolution: str)
     return AutomapCalibration(background_rgb=resized_bg, world_to_map=scaled_transform, walkable_mask=resized_walkable)
 
 
+def project_trace_positions(
+    trace: EpisodeTrace,
+    cfg: Config,
+    calibration: Optional[AutomapCalibration],
+) -> Tuple[np.ndarray, Dict[str, List[Optional[Tuple[int, int]]]]]:
+    out_w, out_h = parse_resolution(cfg.resolution)
+    if calibration is not None:
+        calibration = resize_automap_calibration(calibration, cfg.resolution)
+        base_map = calibration.background_rgb.copy()
+        projected = {
+            agent_name: [project_with_transform(calibration.world_to_map, point) for point in path]
+            for agent_name, path in trace.positions.items()
+        }
+        return base_map, projected
+
+    base_map = make_textured_background(out_h, out_w)
+    world_bounds = compute_world_bounds(trace.positions)
+    projected = {
+        agent_name: [world_to_canvas(point, world_bounds, out_w, out_h) for point in path]
+        for agent_name, path in trace.positions.items()
+    }
+    return base_map, projected
+
+
 def stamp_heatmap(heatmap: np.ndarray, point: Optional[Tuple[int, int]], radius: int) -> None:
     if point is None:
         return
@@ -995,28 +1035,116 @@ def make_textured_background(height: int, width: int) -> np.ndarray:
     return np.clip(background, 0, 255).astype(np.uint8)
 
 
+def sample_projected_segment_points(
+    start: Optional[Tuple[int, int]],
+    end: Optional[Tuple[int, int]],
+    spacing_px: float,
+) -> np.ndarray:
+    if end is None:
+        return np.zeros((0, 2), dtype=np.float32)
+    if start is None:
+        return np.asarray([[float(end[0]), float(end[1])]], dtype=np.float32)
+
+    dx = float(end[0] - start[0])
+    dy = float(end[1] - start[1])
+    distance = float(np.hypot(dx, dy))
+    steps = max(1, int(np.ceil(distance / max(spacing_px, 1e-6))))
+    samples = np.zeros((steps, 2), dtype=np.float32)
+    for step_idx in range(1, steps + 1):
+        alpha = step_idx / steps
+        samples[step_idx - 1, 0] = float(start[0] + dx * alpha)
+        samples[step_idx - 1, 1] = float(start[1] + dy * alpha)
+    return samples
+
+
+def density_grid_shape(cfg: Config) -> Tuple[int, int]:
+    grid_w, grid_h = parse_resolution(cfg.density_grid_resolution)
+    assert_matching_automap_aspect(cfg.density_grid_resolution)
+    return grid_w, grid_h
+
+
+def accumulate_density_grid(
+    density_grid: np.ndarray,
+    segment_points: np.ndarray,
+    frame_shape: Tuple[int, int],
+) -> None:
+    if segment_points.size == 0:
+        return
+
+    frame_h, frame_w = frame_shape
+    grid_h, grid_w = density_grid.shape
+    xs = np.clip((segment_points[:, 0] * grid_w / max(frame_w, 1)).astype(np.int32), 0, grid_w - 1)
+    ys = np.clip((segment_points[:, 1] * grid_h / max(frame_h, 1)).astype(np.int32), 0, grid_h - 1)
+    np.add.at(density_grid, (ys, xs), 1.0)
+
+
+def render_density_overlay(
+    base_map: np.ndarray,
+    density_grid: np.ndarray,
+    alpha_scale: float,
+    walkable_mask: Optional[np.ndarray] = None,
+) -> np.ndarray:
+    if not np.any(density_grid > 0):
+        return base_map.copy()
+
+    out_h, out_w = base_map.shape[:2]
+    density = np.log1p(density_grid)
+    peak = float(density.max())
+    if peak <= 0.0:
+        return base_map.copy()
+
+    intensity_small = np.power(density / peak, 0.6).astype(np.float32)
+    heat_small = np.clip(np.round(intensity_small * 255.0), 0, 255).astype(np.uint8)
+    heat_large = cv2.resize(heat_small, (out_w, out_h), interpolation=cv2.INTER_LINEAR)
+    colored = cv2.applyColorMap(heat_large, cv2.COLORMAP_INFERNO)
+    colored = cv2.cvtColor(colored, cv2.COLOR_BGR2RGB).astype(np.float32)
+
+    alpha = cv2.resize(intensity_small, (out_w, out_h), interpolation=cv2.INTER_LINEAR)
+    alpha = np.where(alpha > 0.0, 0.18 + 0.82 * alpha, 0.0) * float(alpha_scale)
+    if walkable_mask is not None:
+        alpha *= walkable_mask.astype(np.float32)
+
+    blended = base_map.astype(np.float32) * (1.0 - alpha[..., None]) + colored * alpha[..., None]
+    return np.clip(blended, 0, 255).astype(np.uint8)
+
+
+def render_density_heatmap_trace(
+    trace: EpisodeTrace,
+    cfg: Config,
+    calibration: Optional[AutomapCalibration],
+) -> Tuple[List[np.ndarray], np.ndarray]:
+    base_map, projected = project_trace_positions(trace, cfg, calibration)
+    grid_w, grid_h = density_grid_shape(cfg)
+    density_grid = np.zeros((grid_h, grid_w), dtype=np.float32)
+
+    walkable_mask = None
+    if calibration is not None:
+        calibration = resize_automap_calibration(calibration, cfg.resolution)
+        walkable_mask = calibration.walkable_mask
+
+    frames: List[np.ndarray] = []
+    frame_shape = base_map.shape[:2]
+    spacing_px = max(min(frame_shape) / max(grid_w, grid_h), 1.0)
+
+    for frame_idx in range(trace.env_steps):
+        for agent_name, path in projected.items():
+            current = path[frame_idx]
+            previous = path[frame_idx - 1] if frame_idx > 0 else None
+            segment_points = sample_projected_segment_points(previous, current, spacing_px=spacing_px)
+            accumulate_density_grid(density_grid, segment_points, frame_shape)
+
+        frames.append(render_density_overlay(base_map, density_grid, cfg.density_heatmap_alpha, walkable_mask=walkable_mask))
+
+    return frames, frames[-1].copy()
+
+
 def render_heatmap_trace(
     trace: EpisodeTrace,
     cfg: Config,
     calibration: Optional[AutomapCalibration],
 ) -> Tuple[List[np.ndarray], np.ndarray]:
-    out_w, out_h = parse_resolution(cfg.resolution)
     marker_radius = int(getattr(cfg, "marker_radius", 8))
-
-    if calibration is not None:
-        calibration = resize_automap_calibration(calibration, cfg.resolution)
-        base_map = calibration.background_rgb.copy()
-        projected = {
-            agent_name: [project_with_transform(calibration.world_to_map, point) for point in path]
-            for agent_name, path in trace.positions.items()
-        }
-    else:
-        base_map = make_textured_background(out_h, out_w)
-        world_bounds = compute_world_bounds(trace.positions)
-        projected = {
-            agent_name: [world_to_canvas(point, world_bounds, out_w, out_h) for point in path]
-            for agent_name, path in trace.positions.items()
-        }
+    base_map, projected = project_trace_positions(trace, cfg, calibration)
 
     heatmaps = {
         agent_name: np.zeros(base_map.shape[:2], dtype=np.float32)
@@ -1146,8 +1274,16 @@ def record_topdown_heatmaps(cfg: Config) -> Tuple[StatusCode, float]:
             stem = output_stem(cfg, episode_idx)
             mp4_path = os.path.join(cfg.output_dir, f"{stem}.mp4")
             png_path = os.path.join(cfg.output_dir, f"{stem}.png")
+            density_stem = density_output_stem(cfg, episode_idx)
+            density_mp4_path = os.path.join(cfg.output_dir, f"{density_stem}.mp4")
+            density_png_path = os.path.join(cfg.output_dir, f"{density_stem}.png")
 
-            if not cfg.overwrite and (os.path.exists(mp4_path) or os.path.exists(png_path)):
+            if not cfg.overwrite and (
+                os.path.exists(mp4_path)
+                or os.path.exists(png_path)
+                or os.path.exists(density_mp4_path)
+                or os.path.exists(density_png_path)
+            ):
                 raise FileExistsError(f"Output already exists for {stem}; rerun with --overwrite")
 
             obs, rnn_states, trace = run_episode(cfg, env, env_info, actor_critic, device, obs, rnn_states)
@@ -1158,8 +1294,11 @@ def record_topdown_heatmaps(cfg: Config) -> Tuple[StatusCode, float]:
                 env_name=cfg.env,
             )
             frames, final_frame = render_heatmap_trace(trace, cfg, calibration)
+            density_frames, density_final_frame = render_density_heatmap_trace(trace, cfg, calibration)
             save_video(frames, mp4_path, cfg.video_fps)
             save_image(final_frame, png_path)
+            save_video(density_frames, density_mp4_path, cfg.video_fps)
+            save_image(density_final_frame, density_png_path)
             rewards.append(float(trace.rewards.mean()))
 
     env.close()
