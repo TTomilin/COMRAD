@@ -1,6 +1,7 @@
 '''
 Run agent full benchmark experiment (default): export COMRAD_TRAIN_ALL_PROFILE=benchmark && python -m sample_factory.launcher.run
 Run agent scaling experiment: export COMRAD_TRAIN_ALL_PROFILE=agent_scaling && python -m sample_factory.launcher.run
+Run agent curriculum experiment: export COMRAD_TRAIN_ALL_PROFILE=platform_chain_curriculum && python -m sample_factory.launcher.run
 '''
 import os
 from dataclasses import dataclass
@@ -22,10 +23,20 @@ class AlgorithmSpec:
     uses_shared_reward: bool
 
 
+@dataclass(frozen=True)
+class CurriculumExperimentSpec:
+    suffix: str
+    extra_args: str = ""
+
+
 FULL_BENCHMARK_NAME = "comrad_benchmark"
 AGENT_SCALING_NAME = "comrad_agent_scaling"
+PLATFORM_CHAIN_CURRICULUM_NAME = "platform_chain_curriculum_compare"
+
 PROFILE_FULL_BENCHMARK = "benchmark"
 PROFILE_AGENT_SCALING = "agent_scaling"
+PROFILE_PLATFORM_CHAIN_CURRICULUM = "platform_chain_curriculum"
+
 SEEDS = [42]
 # SEEDS = [42, 68, 81, 97, 154]
 TRAIN_FOR_ENV_STEPS = 125000000
@@ -99,6 +110,62 @@ AGENT_SCALING_ALGORITHM = AlgorithmSpec(
 AGENT_SCALING_AGENT_COUNTS = [2, 3, 4, 6, 8]
 AGENT_SCALING_ROOT_DIR = "armory_siege_agent_scaling"
 
+PLATFORM_CHAIN_CURRICULUM_SCENARIO = BenchmarkScenario("Platform Chain", "platform_chain", True)
+PLATFORM_CHAIN_CURRICULUM_ALGORITHM = AlgorithmSpec(
+    "MAPPO",
+    f"python -m comrad.train --algo=MAPPO --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --num_policies=1 --batch_size=4096 --env_frameskip=4 --use_rnn=True --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --num_agents=2 --num_epochs=4 --rnn_type=lstm",
+    True,
+)
+PLATFORM_CHAIN_CURRICULUM_BATCH_DIR = "comrad/scenarios/batch_platform_chain_curriculum"
+PLATFORM_CHAIN_CURRICULUM_INTERESTINGNESS_PATH = (
+    "comrad/scenarios/batch_platform_chain_curriculum/platform_chain_interestingness.json"
+)
+PLATFORM_CHAIN_CURRICULUM_ROOT_DIR = "platform_chain_curriculum_compare"
+PLATFORM_CHAIN_CURRICULUM_SEQ_THRESHOLD = 0.6
+PLATFORM_CHAIN_CURRICULUM_SEQ_WINDOW = 50
+PLATFORM_CHAIN_CURRICULUM_VARIANTS = [
+    CurriculumExperimentSpec("baseline"),
+    CurriculumExperimentSpec("uniform", f"--wad_batch={PLATFORM_CHAIN_CURRICULUM_BATCH_DIR} --curriculum=uniform"),
+    CurriculumExperimentSpec(
+        "sequential",
+        " ".join(
+            [
+                f"--wad_batch={PLATFORM_CHAIN_CURRICULUM_BATCH_DIR}",
+                "--curriculum=sequential",
+                f"--seq_threshold={PLATFORM_CHAIN_CURRICULUM_SEQ_THRESHOLD}",
+                f"--seq_window={PLATFORM_CHAIN_CURRICULUM_SEQ_WINDOW}",
+            ]
+        ),
+    ),
+    CurriculumExperimentSpec(
+        "learning_progress",
+        " ".join(
+            [
+                f"--wad_batch={PLATFORM_CHAIN_CURRICULUM_BATCH_DIR}",
+                "--curriculum=learning_progress",
+                "--lp_min_return=0.0",
+                "--lp_max_return=1.0",
+            ]
+        ),
+    ),
+    CurriculumExperimentSpec(
+        "plr",
+        f"--wad_batch={PLATFORM_CHAIN_CURRICULUM_BATCH_DIR} --curriculum=plr --with_vtrace=False",
+    ),
+    CurriculumExperimentSpec(
+        "omni",
+        " ".join(
+            [
+                f"--wad_batch={PLATFORM_CHAIN_CURRICULUM_BATCH_DIR}",
+                "--curriculum=omni",
+                "--lp_min_return=0.0",
+                "--lp_max_return=1.0",
+                f"--interestingness_graph_path={PLATFORM_CHAIN_CURRICULUM_INTERESTINGNESS_PATH}",
+            ]
+        ),
+    ),
+]
+
 # Rerun only the jobs that failed in main results (server error)
 # FAILED_BENCHMARK_RUNS = {
 #     ("rhythm_sync_dense", "IPPO"),
@@ -159,9 +226,28 @@ def _agent_scaling_experiments():
     ]
 
 
+def _platform_chain_curriculum_experiments():
+    params = _params_for_scenario(PLATFORM_CHAIN_CURRICULUM_SCENARIO, PLATFORM_CHAIN_CURRICULUM_ALGORITHM)
+    baseline_cmd = _command_for_scenario(PLATFORM_CHAIN_CURRICULUM_SCENARIO, PLATFORM_CHAIN_CURRICULUM_ALGORITHM)
+    experiments = []
+    for variant in PLATFORM_CHAIN_CURRICULUM_VARIANTS:
+        cmd = baseline_cmd
+        if variant.extra_args:
+            cmd = f"{cmd} {variant.extra_args}"
+        experiments.append(
+            Experiment(
+                f"MAPPO_env_platform_chain_{variant.suffix}",
+                cmd,
+                params.generate_params(randomize=False),
+                root_dir_name=PLATFORM_CHAIN_CURRICULUM_ROOT_DIR,
+            )
+        )
+    return experiments
+
+
 def _active_profile() -> str:
     profile = os.environ.get("COMRAD_TRAIN_ALL_PROFILE", PROFILE_FULL_BENCHMARK).strip().lower()
-    valid_profiles = {PROFILE_FULL_BENCHMARK, PROFILE_AGENT_SCALING}
+    valid_profiles = {PROFILE_FULL_BENCHMARK, PROFILE_AGENT_SCALING, PROFILE_PLATFORM_CHAIN_CURRICULUM}
     if profile not in valid_profiles:
         raise ValueError(
             f"Unsupported COMRAD_TRAIN_ALL_PROFILE={profile!r}. "
@@ -175,6 +261,9 @@ ACTIVE_PROFILE = _active_profile()
 if ACTIVE_PROFILE == PROFILE_AGENT_SCALING:
     BENCHMARK_NAME = AGENT_SCALING_NAME
     _experiments = _agent_scaling_experiments()
+elif ACTIVE_PROFILE == PROFILE_PLATFORM_CHAIN_CURRICULUM:
+    BENCHMARK_NAME = PLATFORM_CHAIN_CURRICULUM_NAME
+    _experiments = _platform_chain_curriculum_experiments()
 else:
     BENCHMARK_NAME = FULL_BENCHMARK_NAME
     _experiments = _full_benchmark_experiments()

@@ -109,8 +109,27 @@ class MultiWADEnv(gym.Wrapper):
             return any(isinstance(d, dict) and "reset_info" in d for d in info)
         return False
 
-    @staticmethod
-    def _episode_success_metric(info, fallback: float) -> float:
+    def _normalize_curriculum_metric(self, metric: float) -> float:
+        if self._current is None:
+            return float(metric)
+
+        scale = self._current.metadata.get("curriculum_metric_scale", None)
+        if scale is None:
+            return float(metric)
+
+        scale = float(scale)
+        if scale <= 0.0:
+            return float(metric)
+
+        offset = float(self._current.metadata.get("curriculum_metric_offset", 0.0))
+        normalized = (float(metric) - offset) / scale
+
+        if bool(self._current.metadata.get("curriculum_metric_clip", True)):
+            normalized = float(np.clip(normalized, 0.0, 1.0))
+
+        return float(normalized)
+
+    def _episode_success_metric(self, info, fallback: float) -> float:
         """
         Prefer per-episode `true_objective` as the curriculum success signal.
         Fall back to episodic reward only for scenarios that do not emit it.
@@ -118,8 +137,8 @@ class MultiWADEnv(gym.Wrapper):
         if isinstance(info, dict):
             true_objective = info.get("true_objective", None)
             if true_objective is not None:
-                return float(true_objective)
-            return float(fallback)
+                return self._normalize_curriculum_metric(float(true_objective))
+            return self._normalize_curriculum_metric(float(fallback))
 
         if isinstance(info, (list, tuple)):
             true_objectives = [
@@ -128,9 +147,9 @@ class MultiWADEnv(gym.Wrapper):
                 if isinstance(agent_info, dict) and "true_objective" in agent_info
             ]
             if true_objectives:
-                return float(np.mean(true_objectives))
+                return self._normalize_curriculum_metric(float(np.mean(true_objectives)))
 
-        return float(fallback)
+        return self._normalize_curriculum_metric(float(fallback))
 
     def _should_swap_before_next_episode(self) -> bool:
         return self._eps > 0 and self._eps % self.swap_every == 0

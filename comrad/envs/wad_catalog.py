@@ -30,7 +30,8 @@ class WadBatch:
             entries = []
             for e in data:
                 wad_path = os.path.abspath(os.path.join(batch_dir, e["filename"]))
-                entries.append(WadInfo(e["id"], wad_path, e.get("config", {})))
+                metadata = {key: value for key, value in e.items() if key not in {"id", "filename"}}
+                entries.append(WadInfo(e["id"], wad_path, metadata))
             return cls(entries)
         wads = sorted(glob.glob(os.path.join(batch_dir, "*.wad")))
         if not wads:
