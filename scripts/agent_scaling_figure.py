@@ -68,7 +68,7 @@ def load_run(path: Path) -> dict[str, np.ndarray | float]:
         "env_steps": env_steps,
         "scores": scores,
         "scores_smooth": moving_average(scores),
-        "score_at_50m": scalar_at_or_before(score_events, COMMON_FRONTIER),
+        "score_at_frontier": scalar_at_or_before(score_events, COMMON_FRONTIER),
         "final_frames_m": final_frames / 1_000_000.0,
         "env_steps_s": mean_fps / (int(path.stem.split("n")[-1]) * FRAMESKIP),
     }
@@ -100,7 +100,7 @@ def build_learning_figure(data: dict[int, dict[str, np.ndarray | float]], output
         ax_left.plot(env_steps, scores_smooth, color=color, linewidth=2.2, label=fr"$N={n}$")
         ax_left.scatter(
             [COMMON_FRONTIER / 1_000_000.0],
-            [run["score_at_50m"]],
+            [run["score_at_frontier"]],
             s=28,
             color=color,
             edgecolors="white",
@@ -113,7 +113,7 @@ def build_learning_figure(data: dict[int, dict[str, np.ndarray | float]], output
     ax_left.text(
         COMMON_FRONTIER / 1_000_000.0 + 0.9,
         ax_left.get_ylim()[1] - 0.08 * (ax_left.get_ylim()[1] - ax_left.get_ylim()[0]),
-        "50M frontier",
+        f"{int(COMMON_FRONTIER / 1_000_000)}M frontier",
         color="#4a5568",
         fontsize=8.5,
         va="top",
