@@ -15,3 +15,4 @@ from comrad.wrappers.scenario_wrappers.stag_hunt_arena import StagHuntArenaRewar
 from comrad.wrappers.scenario_wrappers.smart_enemies import SmartEnemiesRewardShaping
 from comrad.wrappers.scenario_wrappers.dumb_enemies import DumbEnemiesRewardShaping
 from comrad.wrappers.scenario_wrappers.stealth_labyrinth import StealthLabyrinthRewardShaping
+from comrad.wrappers.scenario_wrappers.lava_maze_simple import LavaMazeSimpleRewardShaping, LavaMazeSimpleAdditionalInput

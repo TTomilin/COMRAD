@@ -22,6 +22,7 @@ from comrad.envs.action_space import (
     doom_action_space_platform_chain,
     doom_action_space_ammo_carrier,
     doom_action_space_lava_maze,
+    doom_action_space_lava_maze_simple,
     doom_action_space_smart_enemies,
     doom_action_space_dumb_enemies,
     doom_action_space_stealth_labyrinth,
@@ -35,7 +36,7 @@ from comrad.wrappers.additional_input import DoomAdditionalInput
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
-    CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
+    CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, LavaMazeSimpleRewardShaping, LavaMazeSimpleAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
 from comrad.wrappers.shared_reward import SharedRewardWrapper
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -92,6 +93,7 @@ class DoomSpec:
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
 LAVA_MAZE_ADDITIONAL_INPUT = (LavaMazeAdditionalInput, {})
+LAVA_MAZE_SIMPLE_ADDITIONAL_INPUT = (LavaMazeSimpleAdditionalInput, {})
 FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 AMMO_CARRIER_ADDITIONAL_INPUT = (AmmoCarrierAdditionalInput, {})
 LAVAPIT_ADDITIONAL_INPUT = (LavapitAdditionalInput, {})
@@ -155,6 +157,19 @@ DOOM_ENVS = [
         respawn_delay=1,
         additional_input_wrapper=ARMORY_SIEGE_ADDITIONAL_INPUT,
         extra_wrappers=[(ArmorySiegeRewardShaping, {})],
+    ),
+
+    DoomSpec(
+        "lava_maze_simple",
+        "lava_maze_simple.cfg",
+        doom_action_space_lava_maze_simple(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        additional_input_wrapper=LAVA_MAZE_SIMPLE_ADDITIONAL_INPUT,
+        extra_wrappers=[(LavaMazeSimpleRewardShaping, {})],
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(

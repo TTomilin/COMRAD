@@ -349,6 +349,22 @@ def doom_action_space_lava_maze():
         )
     )
 
+def doom_action_space_lava_maze_simple():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    ATTACK
+    SELECT_WEAPON1
+    SELECT_WEAPON2
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(2),  # noop, attack
+            Discrete(3),  # noop, select weapon 1, 2
+        )
+    )
+
 
 def doom_action_space_extended():
     """
