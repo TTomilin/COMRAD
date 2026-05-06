@@ -3,9 +3,13 @@ from __future__ import annotations
 import pytest
 import torch
 import gymnasium as gym
+from types import SimpleNamespace
 
+import sample_factory.algo.utils.shared_buffers as shared_buffers
+from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict
+from sample_factory.utils.attr_dict import AttrDict
 from comrad.models.qmix_model import QMixAgentNet, QMixActorCritic
 from comrad.utils.doom_utils import DOOM_ENVS
 
@@ -293,3 +297,88 @@ class TestSingleHeadBranchInactive:
             f"All {len(DOOM_ENVS)} envs use multi-head Tuple spaces, "
             f"making the single-head branch in get_q_for_actions dead code."
         )
+
+
+class _DummyParamServer:
+    def init(self, *args, **kwargs):
+        return None
+
+
+class _DummyReplayBuffer:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __len__(self):
+        return 0
+
+
+class _TinyAgentNet(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.weight = torch.nn.Parameter(torch.tensor([1.0]))
+        self.encoder_out_size = 4
+
+    @staticmethod
+    def get_rnn_size():
+        return 1
+
+
+class _TinyMixer(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.weight = torch.nn.Parameter(torch.tensor([2.0]))
+
+
+class _TinyQMixActorCritic(torch.nn.Module):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.agent_net = _TinyAgentNet()
+        self.mixer = _TinyMixer()
+        self.obs_normalizer = None
+
+    def model_to_device(self, device):
+        self.to(device)
+
+
+class TestQMixCheckpointSaving:
+    def test_qmix_init_enables_checkpoint_saves(self, monkeypatch, tmp_path):
+        monkeypatch.setattr(shared_buffers, "policy_device", lambda cfg, policy_id: torch.device("cpu"))
+        monkeypatch.setattr("sample_factory.algo.learning.learner_qmix.QMixActorCritic", _TinyQMixActorCritic)
+        monkeypatch.setattr("sample_factory.algo.learning.learner_qmix.JointReplayBuffer", _DummyReplayBuffer)
+        monkeypatch.setattr("sample_factory.algo.learning.learner_qmix.JointSequenceReplayBuffer", _DummyReplayBuffer)
+        monkeypatch.setattr("sample_factory.algo.learning.learner_qmix.flatten_rnn_parameters", lambda module: None)
+
+        cfg = AttrDict(
+            seed=123,
+            num_agents=2,
+            use_rnn=False,
+            mixer="qmix",
+            replay_buffer_size=64,
+            learning_rate=1e-4,
+            adam_beta1=0.9,
+            adam_beta2=0.999,
+            serial_mode=True,
+            train_dir=str(tmp_path),
+            experiment="qmix_save_smoke",
+            load_checkpoint_kind="latest",
+            keep_checkpoints=2,
+        )
+        env_info = SimpleNamespace(obs_space=None, action_space=gym.spaces.Discrete(3))
+        learner = QMixLearner(
+            cfg,
+            env_info,
+            policy_versions_tensor=torch.zeros(1, dtype=torch.int64),
+            policy_id=0,
+            param_server=_DummyParamServer(),
+            global_env_steps_tensor=torch.zeros(1, dtype=torch.int64),
+        )
+
+        learner.init()
+        checkpoint_dir = tmp_path / "qmix_save_smoke" / "checkpoint_p0"
+
+        assert learner.is_initialized is True
+        assert learner.save() is True
+        assert list(checkpoint_dir.glob("checkpoint_*.pth"))
+
+        assert learner.save_best(0, "true_objective", 123.0) is True
+        assert list(checkpoint_dir.glob("best_*.pth"))
