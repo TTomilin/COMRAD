@@ -24,7 +24,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
         self.signal_penalty = signal_penalty
 
-        self.flash_window = 5
+        self.flash_window = 30
         self.sender_bonus_scale = 0.2
         self.no_progress_penalty = -0.005
         self.flash_timer = 0
@@ -54,11 +54,11 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
             
         return obs, info
 
-    def _decode_maze_grid(self, bits_0, bits_1, bits_2):
+    def _decode_maze_grid(self, bits_0, bits_1, bits_2, active_y):
         """
         Reconstructs the grid from the 3 ACS integer chunks.
         Returns a 2D list where 1 is safe, 0 is lava.
-        In this version, it's a 1D corridor (y=0 used for the path).
+        In this version, it's a 1D corridor at fixed Y.
         """
         s = self.grid_size
         grid = [[0 for _ in range(s)] for _ in range(s)]
@@ -70,7 +70,8 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
             shift = bit_idx % 27
 
             is_safe = (chunks[chunk] & (1 << shift)) != 0
-            grid[0][x] = 1 if is_safe else 0
+            if 0 <= active_y < s:
+                grid[active_y][x] = 1 if is_safe else 0
 
         return grid
 
@@ -136,16 +137,20 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         current_levels = self._safe_int(info.get("USER22", 0), 0)
         prev_levels = self._safe_int(self.prev_vars.get("USER22", 0), 0)
 
-        current_signal = self._safe_int(info.get("USER17", 0), 0)
-        prev_signal = self._safe_int(self.prev_vars.get("USER17", 0), 0)
+        current_signal = self._safe_int(info.get("USER16", 0), 0)
+        prev_signal = self._safe_int(self.prev_vars.get("USER16", 0), 0)
+        
+        current_flash_active = self._safe_int(info.get("USER17", 0), 0)
+        prev_flash_active = self._safe_int(self.prev_vars.get("USER17", 0), 0)
 
-        if current_signal == 1 and prev_signal == 0:
+        if current_signal != 0 and prev_signal == 0:
             shaped_reward += self.signal_penalty
 
         grid = self._decode_maze_grid(
             self._safe_int(info.get("USER19", 0), 0),
             self._safe_int(info.get("USER20", 0), 0),
-            self._safe_int(info.get("USER21", 0), 0)
+            self._safe_int(info.get("USER21", 0), 0),
+            goal_y
         )
 
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
@@ -153,7 +158,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
 
         player_id = getattr(self.env.unwrapped, "player_id", -1)
         if player_id == 0:
-            if current_signal == 1 and prev_signal == 0:
+            if current_flash_active == 1 and prev_flash_active == 0:
                 self.flash_timer = self.flash_window
                 self.progress_occurred = False
 
@@ -239,6 +244,10 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
                 shaped_reward += self.death_penalty
 
         self.orig_env_reward += reward
+        
+        if terminated or truncated:
+            info["true_objective"] = current_levels
+
         self.sync_vars(info)
         return obs, shaped_reward, terminated, truncated, info
 
