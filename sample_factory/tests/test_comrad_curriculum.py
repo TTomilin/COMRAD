@@ -1,4 +1,5 @@
 import argparse
+import json
 from types import SimpleNamespace
 
 import gymnasium as gym
@@ -38,6 +39,44 @@ class _SwapOnlyDummyEnv(gym.Env):
 
     def step(self, action):
         return {"obs": np.zeros((1,), dtype=np.float32)}, 0.0, False, False, {"task_idx": 0}
+
+
+class _TerminalDummyEnv(gym.Env):
+    def __init__(self, true_objective: float):
+        self.num_agents = 1
+        self.is_multiagent = False
+        self.observation_space = gym.spaces.Dict(
+            {"obs": gym.spaces.Box(low=0.0, high=1.0, shape=(1,), dtype=np.float32)}
+        )
+        self.action_space = gym.spaces.Discrete(2)
+        self.true_objective = float(true_objective)
+        self.last_cfg = None
+
+    def swap_scenario(self, cfg_path):
+        self.last_cfg = cfg_path
+
+    def reset(self, **kwargs):
+        return {"obs": np.zeros((1,), dtype=np.float32)}, {"task_idx": 0}
+
+    def step(self, action):
+        return (
+            {"obs": np.zeros((1,), dtype=np.float32)},
+            0.0,
+            True,
+            False,
+            {"task_idx": 0, "true_objective": self.true_objective},
+        )
+
+
+class _RecordingCurriculum:
+    def __init__(self):
+        self.calls = []
+
+    def sample(self):
+        return 0
+
+    def update(self, task_idx: int, metric: float):
+        self.calls.append((task_idx, metric))
 
 
 def test_curriculum_state_round_trip(tmp_path):
@@ -435,6 +474,65 @@ def test_multi_wad_env_init_does_not_mutate_live_curriculum_state(tmp_path):
     assert after["rng_counter"] == before["rng_counter"]
     assert after["weights"] == before["weights"]
     assert after["task_staleness"] == before["task_staleness"]
+
+
+def test_wad_batch_from_dir_preserves_curriculum_metadata(tmp_path):
+    batch_dir = tmp_path / "batch"
+    batch_dir.mkdir()
+    wad_path = batch_dir / "task_0.wad"
+    wad_path.write_bytes(b"WAD")
+    registry = [
+        {
+            "id": "task_0",
+            "filename": "task_0.wad",
+            "config": {"level_count": 20},
+            "curriculum_stage": "easy",
+            "curriculum_metric_scale": 19.0,
+        }
+    ]
+    (batch_dir / "batch_registry.json").write_text(json.dumps(registry), encoding="utf-8")
+
+    batch = WadBatch.from_dir(str(batch_dir))
+
+    assert len(batch.entries) == 1
+    assert batch.entries[0].metadata["config"] == {"level_count": 20}
+    assert batch.entries[0].metadata["curriculum_stage"] == "easy"
+    assert batch.entries[0].metadata["curriculum_metric_scale"] == pytest.approx(19.0)
+
+
+def test_multi_wad_env_normalizes_curriculum_metric_from_wad_metadata(tmp_path):
+    base_cfg = tmp_path / "base.cfg"
+    base_cfg.write_text("doom_scenario_path = placeholder.wad\n")
+    wad_path = tmp_path / "task_0.wad"
+    wad_path.write_bytes(b"WAD")
+
+    batch = WadBatch(
+        [
+            WadInfo(
+                "task_0",
+                str(wad_path),
+                {"curriculum_metric_scale": 19.0, "curriculum_stage": "easy"},
+            )
+        ]
+    )
+    curriculum = _RecordingCurriculum()
+    env = MultiWADEnv(
+        env=_TerminalDummyEnv(true_objective=9.5),
+        batch=batch,
+        base_cfg=str(base_cfg),
+        swap_every=1,
+        seed=0,
+        curriculum=curriculum,
+    )
+
+    env.reset()
+    env.step(0)
+    env.close()
+
+    assert len(curriculum.calls) == 1
+    task_idx, metric = curriculum.calls[0]
+    assert task_idx == 0
+    assert metric == pytest.approx(0.5)
 
 
 def test_learner_checkpoint_includes_curriculum_state_but_not_partial_plr_fragments():
