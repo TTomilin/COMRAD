@@ -87,7 +87,7 @@ def add_topdown_args(parser) -> None:
     parser.add_argument("--video_fps", default=35, type=int, help="Output video FPS")
     parser.add_argument("--output_dir", default="results/videos", type=str, help="Output directory for mp4/png files")
     parser.add_argument("--overwrite", action="store_true", help="Overwrite existing outputs")
-    parser.add_argument("--heatmap_radius", default=64, type=int, help="Heatmap stamp radius in pixels")
+    parser.add_argument("--heatmap_radius", default=12, type=int, help="Heatmap stamp radius in pixels")
     parser.add_argument("--heatmap_alpha", default=0.72, type=float, help="Max alpha for the heatmap overlay")
     parser.add_argument("--line_thickness", default=4, type=int, help="Trajectory line thickness in pixels")
     parser.add_argument("--marker_radius", default=8, type=int, help="Current-position marker radius in pixels")
