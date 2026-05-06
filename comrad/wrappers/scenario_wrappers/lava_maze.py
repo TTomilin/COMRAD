@@ -24,7 +24,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.lava_burn_penalty_scale = lava_burn_penalty_scale
         self.signal_penalty = signal_penalty
 
-        self.flash_window = 5
+        self.flash_window = 30
         self.sender_bonus_scale = 0.2
         self.no_progress_penalty = -0.005
         self.flash_timer = 0
@@ -121,10 +121,13 @@ class LavaMazeRewardShaping(gym.Wrapper):
         current_levels = self._safe_int(info.get("USER22", 0), 0)
         prev_levels = self._safe_int(self.prev_vars.get("USER22", 0), 0)
 
-        current_signal = self._safe_int(info.get("USER17", 0), 0)
-        prev_signal = self._safe_int(self.prev_vars.get("USER17", 0), 0)
+        current_signal = self._safe_int(info.get("USER16", 0), 0)
+        prev_signal = self._safe_int(self.prev_vars.get("USER16", 0), 0)
 
-        if current_signal == 1 and prev_signal == 0:
+        current_flash_active = self._safe_int(info.get("USER17", 0), 0)
+        prev_flash_active = self._safe_int(self.prev_vars.get("USER17", 0), 0)
+
+        if current_signal != 0 and prev_signal == 0:
             shaped_reward += self.signal_penalty
 
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
@@ -133,7 +136,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         # Sender bonus logic
         player_id = getattr(self.env.unwrapped, "player_id", -1)
         if player_id == 0:
-            if current_signal == 1 and prev_signal == 0:
+            if current_flash_active == 1 and prev_flash_active == 0:
                 self.flash_timer = self.flash_window
                 self.progress_occurred = False
 
@@ -213,6 +216,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
             "USER13": self._safe_int(info.get("USER13", -1), -1),
             "USER14": self._safe_int(info.get("USER14", -1), -1),
             "USER15": self._safe_int(info.get("USER15", -1), -1),
+            "USER16": self._safe_int(info.get("USER16", 0), 0),
             "USER17": self._safe_int(info.get("USER17", 0), 0),
             "USER18": self._safe_int(info.get("USER18", -1), -1),
             "USER19": self._safe_int(info.get("USER19", 0), 0),
