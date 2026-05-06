@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback
 from enum import Enum
 from functools import wraps
 from multiprocessing import Process
@@ -204,8 +205,8 @@ class MultiAgentEnvWorker:
                 self.result_queue.put(results)
             except Exception as exc:
                 log.error(
-                    "ViZDoom worker player_id=%d crashed during %s: %s",
-                    self.player_id, task_type, exc,
+                    "ViZDoom worker player_id=%d crashed during %s: %s\n%s",
+                    self.player_id, task_type, exc, traceback.format_exc(),
                 )
                 self.result_queue.put(_CRASHED)
                 # Cleanup
