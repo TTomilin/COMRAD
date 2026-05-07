@@ -54,3 +54,6 @@ asdf.py
 results/mode3_comrad_benchmark_20260503_134649/
 download_baseline_results.sh
 baseline_results.py
+
+results/demo
+results/qmix_lr_sensitivity/armory_siege_qmix_lr_sensitivity
