@@ -26,6 +26,7 @@ from sample_factory.utils.utils import experiment_dir, log
 
 from comrad.train import register_vizdoom_components, register_model_factory
 from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
+from comrad.utils.recording_actions import reshape_deterministic_actions
 
 AVAILABLE_RESOLUTIONS = [
     "640x360", "640x480", "800x450", "800x600",
@@ -163,7 +164,7 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
             actions = policy_outputs["actions"]
             if cfg.eval_deterministic:
                 action_distribution = actor_critic.action_distribution()
-                actions = argmax_actions(action_distribution)
+                actions = reshape_deterministic_actions(actions, argmax_actions(action_distribution))
 
             if actions.ndim == 1:
                 actions = unsqueeze_tensor(actions, dim=-1)

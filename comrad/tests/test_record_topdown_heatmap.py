@@ -21,11 +21,11 @@ from comrad.record_topdown_heatmap import (
     project_with_transform,
     render_density_heatmap_trace,
     render_heatmap_trace,
-    reshape_deterministic_actions,
     sample_projected_path_points,
     scrub_colored_automap_artifacts,
     scrub_detected_markers,
 )
+from comrad.utils.recording_actions import reshape_deterministic_actions
 
 
 def _cfg(resolution: str = "1600x1200") -> SimpleNamespace:

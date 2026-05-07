@@ -36,10 +36,14 @@ PLATFORM_CHAIN_CURRICULUM_NAME = "platform_chain_curriculum_compare"
 PROFILE_FULL_BENCHMARK = "benchmark"
 PROFILE_AGENT_SCALING = "agent_scaling"
 PROFILE_PLATFORM_CHAIN_CURRICULUM = "platform_chain_curriculum"
+PROFILE_QMIX_LR_SENSITIVITY_PILOT = "qmix_lr_sensitivity_pilot"
+PROFILE_QMIX_LR_SENSITIVITY_FULL = "qmix_lr_sensitivity_full"
 
 SEEDS = [42]
 # SEEDS = [42, 68, 81, 97, 154]
 TRAIN_FOR_ENV_STEPS = 125000000
+QMIX_LR_SENSITIVITY_PILOT_STEPS = 50000000
+QMIX_LR_SENSITIVITY_FULL_STEPS = TRAIN_FOR_ENV_STEPS
 
 BENCHMARK_SCENARIOS = [
     BenchmarkScenario("Stag Hunt Arena", "stag_hunt_arena", False),
@@ -102,13 +106,23 @@ ALGORITHMS = [
 ]
 
 AGENT_SCALING_SCENARIO = BenchmarkScenario("Armory Siege", "armory_siege", False)
-AGENT_SCALING_ALGORITHM = AlgorithmSpec(
-    "QMIX",
-    f"python -m comrad.train --algo=QMIX --mixer=qmix --train_for_env_steps={TRAIN_FOR_ENV_STEPS} --num_workers=16 --num_envs_per_worker=8 --policy_workers_per_policy=2 --batch_size=2304 --env_frameskip=4 --wide_aspect_ratio=False --with_wandb=True --wandb_dir=. --wandb_record_every=10 --wandb_project=COMRAD --qmix_sequence_batch_size=32 --dqn_max_updates_per_batch=4 --batched_sampling=True",
-    False,
-)
 AGENT_SCALING_AGENT_COUNTS = [2, 3, 4, 6, 8]
 AGENT_SCALING_ROOT_DIR = "armory_siege_agent_scaling"
+AGENT_SCALING_BATCH_SIZE_BY_NUM_AGENTS = {
+    2: 2304,
+    3: 2304,
+    4: 2048,
+    6: 2304,
+    8: 2048,
+}
+
+QMIX_LR_SENSITIVITY_PILOT_NAME = "comrad_qmix_lr_sensitivity_pilot"
+QMIX_LR_SENSITIVITY_FULL_NAME = "comrad_qmix_lr_sensitivity_full"
+QMIX_LR_SENSITIVITY_ROOT_DIR = "armory_siege_qmix_lr_sensitivity"
+QMIX_LR_SENSITIVITY_NUM_AGENTS = 3
+QMIX_LR_SENSITIVITY_BATCH_SIZE = 2304
+QMIX_LR_SENSITIVITY_LR_CANDIDATES = [5e-5, 1e-4, 2e-4, 5e-4]
+QMIX_LR_SENSITIVITY_REPRESENTATIVE_LR = 1e-4
 
 PLATFORM_CHAIN_CURRICULUM_SCENARIO = BenchmarkScenario("Platform Chain", "platform_chain", True)
 PLATFORM_CHAIN_CURRICULUM_ALGORITHM = AlgorithmSpec(
@@ -191,6 +205,31 @@ def _experiment_name_for_scenario(scenario: BenchmarkScenario, algorithm: Algori
     return f"{algorithm.name}_env_{scenario.env}"
 
 
+def _armory_siege_qmix_algorithm(train_for_env_steps: int, batch_size: int, learning_rate: float | None) -> AlgorithmSpec:
+    parts = [
+        "python -m comrad.train",
+        "--algo=QMIX",
+        "--mixer=qmix",
+        f"--train_for_env_steps={train_for_env_steps}",
+        "--num_workers=16",
+        "--num_envs_per_worker=8",
+        "--policy_workers_per_policy=2",
+        f"--batch_size={batch_size}",
+        "--env_frameskip=4",
+        "--wide_aspect_ratio=False",
+        "--with_wandb=True",
+        "--wandb_dir=.",
+        "--wandb_record_every=10",
+        "--wandb_project=COMRAD",
+        "--qmix_sequence_batch_size=32",
+        "--dqn_max_updates_per_batch=4",
+        "--batched_sampling=True",
+    ]
+    if learning_rate is not None:
+        parts.append(f"--learning_rate={learning_rate}")
+    return AlgorithmSpec("QMIX", " ".join(parts), False)
+
+
 def _full_benchmark_experiments():
     experiments = []
     for scenario in BENCHMARK_SCENARIOS:
@@ -211,17 +250,58 @@ def _full_benchmark_experiments():
 
 
 def _agent_scaling_experiments():
+    experiments = []
+    for num_agents in AGENT_SCALING_AGENT_COUNTS:
+        algorithm = _armory_siege_qmix_algorithm(
+            TRAIN_FOR_ENV_STEPS,
+            AGENT_SCALING_BATCH_SIZE_BY_NUM_AGENTS[num_agents],
+            QMIX_LR_SENSITIVITY_REPRESENTATIVE_LR,
+        )
+        experiments.append(
+            Experiment(
+                f"QMIX_env_armory_siege_agent_scaling_n.age_{num_agents}",
+                f"{_command_for_scenario(AGENT_SCALING_SCENARIO, algorithm)} --num_agents={num_agents}",
+                ParamGrid([("seed", SEEDS)]).generate_params(randomize=False),
+                root_dir_name=AGENT_SCALING_ROOT_DIR,
+            )
+        )
+
+    return experiments
+
+
+def _qmix_lr_sensitivity_pilot_experiments():
+    algorithm = _armory_siege_qmix_algorithm(
+        QMIX_LR_SENSITIVITY_PILOT_STEPS,
+        QMIX_LR_SENSITIVITY_BATCH_SIZE,
+        None,
+    )
     return [
         Experiment(
-            "QMIX_env_armory_siege_agent_scaling",
-            _command_for_scenario(AGENT_SCALING_SCENARIO, AGENT_SCALING_ALGORITHM),
+            "QMIX_env_armory_siege_lr_sensitivity_pilot",
+            f"{_command_for_scenario(AGENT_SCALING_SCENARIO, algorithm)} --num_agents={QMIX_LR_SENSITIVITY_NUM_AGENTS}",
             ParamGrid(
                 [
-                    ("num_agents", AGENT_SCALING_AGENT_COUNTS),
+                    ("learning_rate", QMIX_LR_SENSITIVITY_LR_CANDIDATES),
                     ("seed", SEEDS),
                 ]
             ).generate_params(randomize=False),
-            root_dir_name=AGENT_SCALING_ROOT_DIR,
+            root_dir_name=QMIX_LR_SENSITIVITY_ROOT_DIR,
+        )
+    ]
+
+
+def _qmix_lr_sensitivity_full_experiments():
+    algorithm = _armory_siege_qmix_algorithm(
+        QMIX_LR_SENSITIVITY_FULL_STEPS,
+        QMIX_LR_SENSITIVITY_BATCH_SIZE,
+        QMIX_LR_SENSITIVITY_REPRESENTATIVE_LR,
+    )
+    return [
+        Experiment(
+            "QMIX_env_armory_siege_lr_sensitivity_full",
+            f"{_command_for_scenario(AGENT_SCALING_SCENARIO, algorithm)} --num_agents={QMIX_LR_SENSITIVITY_NUM_AGENTS}",
+            ParamGrid([("seed", SEEDS)]).generate_params(randomize=False),
+            root_dir_name=QMIX_LR_SENSITIVITY_ROOT_DIR,
         )
     ]
 
@@ -247,7 +327,13 @@ def _platform_chain_curriculum_experiments():
 
 def _active_profile() -> str:
     profile = os.environ.get("COMRAD_TRAIN_ALL_PROFILE", PROFILE_FULL_BENCHMARK).strip().lower()
-    valid_profiles = {PROFILE_FULL_BENCHMARK, PROFILE_AGENT_SCALING, PROFILE_PLATFORM_CHAIN_CURRICULUM}
+    valid_profiles = {
+        PROFILE_FULL_BENCHMARK,
+        PROFILE_AGENT_SCALING,
+        PROFILE_PLATFORM_CHAIN_CURRICULUM,
+        PROFILE_QMIX_LR_SENSITIVITY_PILOT,
+        PROFILE_QMIX_LR_SENSITIVITY_FULL,
+    }
     if profile not in valid_profiles:
         raise ValueError(
             f"Unsupported COMRAD_TRAIN_ALL_PROFILE={profile!r}. "
@@ -264,6 +350,12 @@ if ACTIVE_PROFILE == PROFILE_AGENT_SCALING:
 elif ACTIVE_PROFILE == PROFILE_PLATFORM_CHAIN_CURRICULUM:
     BENCHMARK_NAME = PLATFORM_CHAIN_CURRICULUM_NAME
     _experiments = _platform_chain_curriculum_experiments()
+elif ACTIVE_PROFILE == PROFILE_QMIX_LR_SENSITIVITY_PILOT:
+    BENCHMARK_NAME = QMIX_LR_SENSITIVITY_PILOT_NAME
+    _experiments = _qmix_lr_sensitivity_pilot_experiments()
+elif ACTIVE_PROFILE == PROFILE_QMIX_LR_SENSITIVITY_FULL:
+    BENCHMARK_NAME = QMIX_LR_SENSITIVITY_FULL_NAME
+    _experiments = _qmix_lr_sensitivity_full_experiments()
 else:
     BENCHMARK_NAME = FULL_BENCHMARK_NAME
     _experiments = _full_benchmark_experiments()
