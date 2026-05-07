@@ -8,7 +8,6 @@ This package contains the benchmark-specific code that sits on top of ViZDoom an
 - `train_all.py`: launcher-owned benchmark, scaling, and curriculum profiles
 - `record_video.py`: high-resolution RGB checkpoint recording
 - `record_topdown_heatmap.py`: automap-aligned trajectory and density rendering
-- `send.sh`: HPC sync and SLURM submission helper
 - `enjoy.py`: interactive or evaluation-time rollout entrypoint
 
 ## Important subdirectories
@@ -18,7 +17,6 @@ This package contains the benchmark-specific code that sits on top of ViZDoom an
 - [`wrappers/`](wrappers/README.md): reward shaping, shared reward, logging, and observation wrappers
 - [`models/`](models/README.md): policy backbones and mixers for the supported MARL algorithms
 - [`curriculum/`](curriculum/README.md): task-pool curriculum strategies and persistence helpers
-- [`templates/`](templates/README.md): SLURM templates rendered by `send.sh`
 - [`tests/`](tests/README.md): unit and integration tests for COMRAD-specific behavior
 - [`examples/`](examples/README.md): exploratory scripts, not the main reproduction surface
 

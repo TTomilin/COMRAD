@@ -117,30 +117,6 @@ In this checkout, `DoomGen/` and `ViZDoom/` may be exposed at the repo root as s
 
 If a scenario generator changes, rebuild the corresponding WAD in `DoomGen/` and copy the regenerated artifact back into `comrad/scenarios/` before training or evaluation.
 
-## HPC workflow
-
-The main SLURM entrypoint is [`comrad/send.sh`](comrad/send.sh). It renders templates from [`comrad/templates/`](comrad/templates/README.md), syncs the repo, and submits jobs to the configured cluster.
-
-Typical workflow:
-
-1. Edit `comrad/.env` and the relevant template command.
-2. Submit either a single run or a profile sweep:
-
-```bash
-./comrad/send.sh 1
-./comrad/send.sh 3
-```
-
-3. Wait briefly before monitoring:
-
-```bash
-sleep 10
-```
-
-4. Inspect queue state and logs using the commands echoed by `send.sh`.
-
-Mode `2` is retained in the templates for historical context but is currently unsupported by the launcher script.
-
 ## Tests
 
 Run COMRAD and Sample Factory tests with `uv`:
