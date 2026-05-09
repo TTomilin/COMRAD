@@ -56,6 +56,21 @@ ALGORITHM_LABELS = {
     "QPLEX_dmaq": "QPLEX-D",
     "QPLEX_dmaq_qatten": "QPLEX-Q",
 }
+SCENARIO_CEILINGS = {
+    "ammo_carrier": 8400.0,
+    "armory_siege": 100.0,
+    "coop_health_gathering": 8400.0,
+    "coop_puzzle": 5.0,
+    "dumb_enemies": 90.0,
+    "foraging_commons": 21000.0,
+    "lava_maze": 6.0,
+    "lavapit": 11.0,
+    "platform_chain": 47.0,
+    "rhythm_sync_dense": 1.0,
+    "smart_enemies": 84.0,
+    "stag_hunt_arena": 36.0,
+    "stealth_labyrinth": 1.0,
+}
 NUM_SEEDS = 5
 T_975_DF4 = 2.7764451051977987
 
@@ -101,6 +116,12 @@ def format_two_decimals(value: float) -> str:
     return f"{value:.2f}"
 
 
+def format_ceiling(value: float) -> str:
+    if math.isclose(value, round(value), rel_tol=0.0, abs_tol=1e-9) and value not in (1.0,):
+        return str(int(round(value)))
+    return f"{value:.2f}"
+
+
 def ci_half_width(std: float, num_seeds: int) -> float:
     if num_seeds != NUM_SEEDS:
         raise ValueError(f"{NUM_SEEDS}-seed summaries are currently supported")
@@ -115,13 +136,13 @@ def build_table_fragment(summary: dict[str, object]) -> str:
     lines.append("  \\scriptsize")
     lines.append("  \\setlength{\\tabcolsep}{3.6pt}")
     lines.append(
-        "  \\caption{Final performance at the common 100M-step budget five-seed mean $\\pm$ 95\\% CI half-width.}"
+        "  \\caption{Final performance at the common 100M-step budget five-seed mean $\\pm$ 95\\% CI half-width. \\textbf{Ceiling} is the theoretical maximum score achievable under optimal play for each scenario.}"
     )
     lines.append("  \\label{tab:baseline_results}")
     lines.append("  \\resizebox{\\textwidth}{!}{%")
-    lines.append("  \\begin{tabular}{lcccccccc}")
+    lines.append("  \\begin{tabular}{lccccccccr}")
     lines.append("    \\toprule")
-    lines.append("    Scenario & IPPO & MAPPO & HAPPO & IDQN & VDN & QMIX & QPLEX-D & QPLEX-Q \\\\")
+    lines.append("    Scenario & IPPO & MAPPO & HAPPO & IDQN & VDN & QMIX & QPLEX-D & QPLEX-Q & \\textbf{Ceiling} \\\\")
     lines.append("    \\midrule")
 
     scenarios = summary["scenarios"]
@@ -141,6 +162,7 @@ def build_table_fragment(summary: dict[str, object]) -> str:
             if bold_enabled and math.isclose(mean, best_mean, rel_tol=1e-9, abs_tol=1e-9):
                 value = f"\\textbf{{{value}}}"
             cells.append(value)
+        cells.append(format_ceiling(SCENARIO_CEILINGS[scenario]))
         lines.append("    " + " & ".join(cells) + " \\\\")
 
     lines.append("    \\bottomrule")

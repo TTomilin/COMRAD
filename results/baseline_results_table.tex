@@ -2,26 +2,26 @@
   \centering
   \scriptsize
   \setlength{\tabcolsep}{3.6pt}
-  \caption{Final performance at the common 100M-step budget five-seed mean $\pm$ 95\% CI half-width.}
+  \caption{Final performance at the common 100M-step budget five-seed mean $\pm$ 95\% CI half-width. \textbf{Ceiling} is the theoretical maximum score achievable under optimal play for each scenario.}
   \label{tab:baseline_results}
   \resizebox{\textwidth}{!}{%
-  \begin{tabular}{lcccccccc}
+  \begin{tabular}{lccccccccr}
     \toprule
-    Scenario & IPPO & MAPPO & HAPPO & IDQN & VDN & QMIX & QPLEX-D & QPLEX-Q \\
+    Scenario & IPPO & MAPPO & HAPPO & IDQN & VDN & QMIX & QPLEX-D & QPLEX-Q & \textbf{Ceiling} \\
     \midrule
-    Stag Hunt Arena & 17.55 $\pm$ 0.22 & \textbf{25.66 $\pm$ 0.32} & 2.58 $\pm$ 0.10 & 14.33 $\pm$ 0.18 & 17.96 $\pm$ 0.39 & 0.28 $\pm$ 0.06 & 1.49 $\pm$ 0.10 & 3.42 $\pm$ 0.20 \\
-    Rhythm Sync & 0.59 $\pm$ 0.05 & \textbf{0.65 $\pm$ 0.05} & 0.22 $\pm$ 0.02 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 \\
-    Foraging Commons & 2355.64 $\pm$ 30.33 & 2510.93 $\pm$ 31.18 & 2199.89 $\pm$ 39.31 & 2190.70 $\pm$ 32.66 & 2327.13 $\pm$ 42.84 & \textbf{2544.89 $\pm$ 46.77} & 1905.26 $\pm$ 23.66 & 2345.75 $\pm$ 39.38 \\
-    Co-op Puzzle & 3.03 $\pm$ 0.07 & \textbf{3.88 $\pm$ 0.09} & 2.23 $\pm$ 0.14 & 0.03 $\pm$ 0.01 & 0.07 $\pm$ 0.02 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.07 $\pm$ 0.03 \\
-    Platform Chain & 2.00 $\pm$ 0.02 & \textbf{4.78 $\pm$ 0.19} & 4.67 $\pm$ 0.18 & 0.68 $\pm$ 0.06 & 1.12 $\pm$ 0.08 & 0.97 $\pm$ 0.02 & 3.40 $\pm$ 0.22 & 0.97 $\pm$ 0.03 \\
-    Armory Siege & 16.71 $\pm$ 2.90 & 19.87 $\pm$ 2.32 & -0.71 $\pm$ 1.07 & 10.97 $\pm$ 0.98 & 18.32 $\pm$ 1.46 & \textbf{23.12 $\pm$ 3.83} & 1.19 $\pm$ 0.89 & 14.13 $\pm$ 2.47 \\
-    Co-op Health Gathering & \textbf{1104.90 $\pm$ 117.30} & 553.96 $\pm$ 27.82 & 197.74 $\pm$ 7.98 & 164.20 $\pm$ 2.12 & 573.83 $\pm$ 27.28 & 166.43 $\pm$ 2.07 & 193.95 $\pm$ 5.10 & 267.78 $\pm$ 18.39 \\
-    Lava Pit & 0.92 $\pm$ 0.01 & \textbf{1.00 $\pm$ 0.01} & \textbf{1.00 $\pm$ 0.01} & 0.92 $\pm$ 0.01 & 0.80 $\pm$ 0.05 & 0.97 $\pm$ 0.03 & 0.00 $\pm$ 0.01 & \textbf{1.00 $\pm$ 0.01} \\
-    Smart Enemies & 11.56 $\pm$ 0.86 & \textbf{14.23 $\pm$ 0.65} & 6.85 $\pm$ 0.38 & 3.30 $\pm$ 0.23 & 4.89 $\pm$ 0.38 & 0.64 $\pm$ 0.08 & 0.00 $\pm$ 0.01 & 0.65 $\pm$ 0.07 \\
-    Dumb Enemies & \textbf{12.44 $\pm$ 1.93} & 2.29 $\pm$ 0.20 & 1.03 $\pm$ 0.13 & 1.07 $\pm$ 0.11 & 2.76 $\pm$ 0.22 & 1.10 $\pm$ 0.15 & 0.00 $\pm$ 0.01 & 1.80 $\pm$ 0.16 \\
-    Ammo Carrier & \textbf{7052.93 $\pm$ 483.17} & 1362.73 $\pm$ 69.09 & 1340.99 $\pm$ 58.07 & 3836.13 $\pm$ 384.96 & 2542.51 $\pm$ 219.25 & 2379.46 $\pm$ 139.55 & 1530.98 $\pm$ 59.06 & 2080.97 $\pm$ 192.02 \\
-    Stealth Labyrinth & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & \textbf{0.21 $\pm$ 0.01} & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 \\
-    Lava Maze & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 \\
+    Stag Hunt Arena & 17.55 $\pm$ 0.22 & \textbf{25.66 $\pm$ 0.32} & 2.58 $\pm$ 0.10 & 14.33 $\pm$ 0.18 & 17.96 $\pm$ 0.39 & 0.28 $\pm$ 0.06 & 1.49 $\pm$ 0.10 & 3.42 $\pm$ 0.20 & 36 \\
+    Rhythm Sync & 0.59 $\pm$ 0.05 & \textbf{0.65 $\pm$ 0.05} & 0.22 $\pm$ 0.02 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 1.00 \\
+    Foraging Commons & 2355.64 $\pm$ 30.33 & 2510.93 $\pm$ 31.18 & 2199.89 $\pm$ 39.31 & 2190.70 $\pm$ 32.66 & 2327.13 $\pm$ 42.84 & \textbf{2544.89 $\pm$ 46.77} & 1905.26 $\pm$ 23.66 & 2345.75 $\pm$ 39.38 & 21000 \\
+    Co-op Puzzle & 3.03 $\pm$ 0.07 & \textbf{3.88 $\pm$ 0.09} & 2.23 $\pm$ 0.14 & 0.03 $\pm$ 0.01 & 0.07 $\pm$ 0.02 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.07 $\pm$ 0.03 & 5 \\
+    Platform Chain & 2.00 $\pm$ 0.02 & \textbf{4.78 $\pm$ 0.19} & 4.67 $\pm$ 0.18 & 0.68 $\pm$ 0.06 & 1.12 $\pm$ 0.08 & 0.97 $\pm$ 0.02 & 3.40 $\pm$ 0.22 & 0.97 $\pm$ 0.03 & 47 \\
+    Armory Siege & 16.71 $\pm$ 2.90 & 19.87 $\pm$ 2.32 & -0.71 $\pm$ 1.07 & 10.97 $\pm$ 0.98 & 18.32 $\pm$ 1.46 & \textbf{23.12 $\pm$ 3.83} & 1.19 $\pm$ 0.89 & 14.13 $\pm$ 2.47 & 100 \\
+    Co-op Health Gathering & \textbf{1104.90 $\pm$ 117.30} & 553.96 $\pm$ 27.82 & 197.74 $\pm$ 7.98 & 164.20 $\pm$ 2.12 & 573.83 $\pm$ 27.28 & 166.43 $\pm$ 2.07 & 193.95 $\pm$ 5.10 & 267.78 $\pm$ 18.39 & 8400 \\
+    Lava Pit & 0.92 $\pm$ 0.01 & \textbf{1.00 $\pm$ 0.01} & \textbf{1.00 $\pm$ 0.01} & 0.92 $\pm$ 0.01 & 0.80 $\pm$ 0.05 & 0.97 $\pm$ 0.03 & 0.00 $\pm$ 0.01 & \textbf{1.00 $\pm$ 0.01} & 11 \\
+    Smart Enemies & 11.56 $\pm$ 0.86 & \textbf{14.23 $\pm$ 0.65} & 6.85 $\pm$ 0.38 & 3.30 $\pm$ 0.23 & 4.89 $\pm$ 0.38 & 0.64 $\pm$ 0.08 & 0.00 $\pm$ 0.01 & 0.65 $\pm$ 0.07 & 84 \\
+    Dumb Enemies & \textbf{12.44 $\pm$ 1.93} & 2.29 $\pm$ 0.20 & 1.03 $\pm$ 0.13 & 1.07 $\pm$ 0.11 & 2.76 $\pm$ 0.22 & 1.10 $\pm$ 0.15 & 0.00 $\pm$ 0.01 & 1.80 $\pm$ 0.16 & 90 \\
+    Ammo Carrier & \textbf{7052.93 $\pm$ 483.17} & 1362.73 $\pm$ 69.09 & 1340.99 $\pm$ 58.07 & 3836.13 $\pm$ 384.96 & 2542.51 $\pm$ 219.25 & 2379.46 $\pm$ 139.55 & 1530.98 $\pm$ 59.06 & 2080.97 $\pm$ 192.02 & 8400 \\
+    Stealth Labyrinth & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & \textbf{0.21 $\pm$ 0.01} & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 1.00 \\
+    Lava Maze & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 0.00 $\pm$ 0.01 & 6 \\
     \bottomrule
   \end{tabular}%
   }

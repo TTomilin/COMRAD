@@ -68,7 +68,7 @@ HEATMAP_NORMALIZATION_CEILINGS = {
     "foraging_commons": 21000.0,
     "lava_maze": 6.0,
     "lavapit": 11.0,
-    "platform_chain": 48.0,
+    "platform_chain": 47.0,
     "rhythm_sync_dense": 1.0,
     "smart_enemies": 84.0,
     "stag_hunt_arena": 36.0,
