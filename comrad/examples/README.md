@@ -5,8 +5,8 @@ This directory contains exploratory scripts for inspecting or poking COMRAD envi
 ## Files
 
 - `single_player.py`: small single-player interaction example
-- `agent_run_env.py`
-- `you_run_env.py`
+- `agent_run_env.py`: debug a multi-player run with agent
+- `you_run_env.py`: debug a multi-player run with you being one of the agent (control with normal keyboard shortcut)
 - `inspect_obs.py`: observation inspection utility
 - `WandB_Scraper/`: older helper code for W&B-based plotting or inspection
 

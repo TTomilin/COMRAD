@@ -10,8 +10,7 @@ COMRAD is a cooperative multi-agent reinforcement learning benchmark built on Vi
 | `sample_factory/` | Modified training engine used by COMRAD. |
 | `scripts/` | Figure-generation, result aggregation, WAD rendering, and experiment helper scripts. |
 | `results/` | Committed figures, tables, result summaries, and selected media artifacts. |
-| `paper/` | NeurIPS manuscript, checklist, bibliography, and paper figures. |
-| `DoomGen/` | Assumed co-located generator checkout used to build and vary scenario WADs. |
+| `DoomGen/` | Procedural generator used to build and vary scenario WADs. |
 
 Directory-level guides are provided in:
 
@@ -19,7 +18,6 @@ Directory-level guides are provided in:
 - [`sample_factory/README.md`](sample_factory/README.md)
 - [`scripts/README.md`](scripts/README.md)
 - [`results/README.md`](results/README.md)
-- [`paper/README.md`](paper/README.md)
 
 ## Setup
 
@@ -30,7 +28,7 @@ uv sync --all-extras
 uv run pre-commit install
 ```
 
-The project requires Python 3.11 or newer. The package metadata and CI workflow are the authoritative sources for dependency resolution.
+The project requires Python 3.10 or newer. The package metadata and CI workflow are the authoritative sources for dependency resolution.
 
 ## Single-run training
 
@@ -88,8 +86,8 @@ COMRAD ships several paper-facing launcher profiles through `comrad/train_all.py
 - `benchmark`: full benchmark suite
 - `agent_scaling`: Armory Siege agent-count sweep
 - `platform_chain_curriculum`: curriculum comparison on Platform Chain
-- `qmix_lr_sensitivity_pilot`
-- `qmix_lr_sensitivity_full`
+- `qmix_lr_sensitivity_pilot`: Short sensitivity study
+- `qmix_lr_sensitivity_full`: Full sensitivity study
 
 Run a launcher profile locally with:
 
@@ -108,12 +106,10 @@ The exact benchmark definitions, algorithms, root directory names, and profile c
 
 Runtime scenario assets are stored in [`comrad/scenarios/`](comrad/scenarios/README.md) as `.cfg` and `.wad` pairs, plus pre-generated batch directories such as `batch_platform_chain_curriculum/`.
 
-Generation workflows assume a co-located `DoomGen/` checkout. The usual split is:
+Generation workflows are in `DoomGen/`. The usual split is:
 
-- `DoomGen/`: source generators and geometry logic
+- `DoomGen/examples/benchmark`: procedural generators and geometry logic
 - `comrad/scenarios/`: runtime WADs and configs consumed by training and evaluation
-
-In this checkout, `DoomGen/` and `ViZDoom/` may be exposed at the repo root as symlinks to sibling directories rather than as fully vendored in-repo trees.
 
 If a scenario generator changes, rebuild the corresponding WAD in `DoomGen/` and copy the regenerated artifact back into `comrad/scenarios/` before training or evaluation.
 

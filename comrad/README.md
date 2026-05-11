@@ -9,6 +9,7 @@ This package contains the benchmark-specific code that sits on top of ViZDoom an
 - `record_video.py`: high-resolution RGB checkpoint recording
 - `record_topdown_heatmap.py`: automap-aligned trajectory and density rendering
 - `enjoy.py`: interactive or evaluation-time rollout entrypoint
+- `utils/doom_utils.py`: scenario declaration and central hub for instantiating all wrappers
 
 ## Important subdirectories
 
