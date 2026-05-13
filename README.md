@@ -129,7 +129,6 @@ Tests in `comrad/tests/` focus on benchmark logic, launchers, and recorder behav
 - `train_dir/`: experiment directories, configs, checkpoints, logs
 - `results/`: committed figures, tables, result summaries, selected media
 - `wandb/`: local W&B run state and uploads
-- `paper/figure/`: manuscript-ready figure copies
 
 See [`results/README.md`](results/README.md) for the structure of the committed artifacts.
 
