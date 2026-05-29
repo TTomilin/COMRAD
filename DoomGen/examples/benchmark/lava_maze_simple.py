@@ -102,6 +102,7 @@ ACTOR LMPistol : Pistol replaces Pistol
     Loop
   Fire:
     PISG A 4
+    PISG B 0 ACS_ExecuteAlways(910, 0, 1)
     PISG B 6 A_FirePistol
     PISG C 4
     PISG B 5
@@ -140,6 +141,7 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
     Loop
   Fire:
     SHTG A 3
+    SHTG A 0 ACS_ExecuteAlways(910, 0, 2)
     SHTG A 0 A_FireShotgun
     SHTG A 4
     SHTG B 5
@@ -442,6 +444,16 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         Exit_Normal(0);
     }}
 
+    script 910 (int signal) {{
+        if (signal < 1 || signal > 2) terminate;
+
+        lm_flash_signal_global = signal;
+        if (signal == 1) {{ g_flash_lump = "S_GREEN"; }}
+        if (signal == 2) {{ g_flash_lump = "S_RED";   }}
+
+        g_flash_timer = 25;
+    }}
+
     script 999 DEATH {{
         if (PlayerNumber() != -1) {{
             ACS_NamedExecuteAlways("EndGame", 0);
@@ -544,13 +556,9 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         GiveInventory("Shell",   50);
         SetWeapon("LMPistol");
 
-        int btns, old_btns;
         int r_fix = PLATFORM_RADIUS << 16;
-        int attack_cooldown = 0;
 
         while(TRUE) {{
-            if (attack_cooldown > 0) attack_cooldown--;
-
             GiveInventory("Clip",  1);
             GiveInventory("Shell", 1);
 
@@ -588,24 +596,6 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
             SetActorAngle(0, target_angle);
             SetActorPitch(0, target_pitch);
 
-            btns = GetPlayerInput(-1, INPUT_BUTTONS);
-
-            if ((btns & BT_ATTACK) && attack_cooldown == 0) {{
-                int signal = 0;
-                str w_name = "";
-                if      (CheckWeapon("LMPistol"))      {{ signal = 1; w_name = "GREEN";  }}
-                else if (CheckWeapon("LMShotgun"))     {{ signal = 2; w_name = "RED";    }}
-
-                if (signal != 0) {{
-                    lm_flash_signal_global = signal;
-                    if (signal == 1) {{ g_flash_lump = "S_GREEN";  }}
-                    if (signal == 2) {{ g_flash_lump = "S_RED";    }}
-
-                    g_flash_timer = 25;
-                    attack_cooldown = 40;
-                }}
-            }}
-            old_btns = btns;
             Delay(1);
         }} // END WHILE
     }}
