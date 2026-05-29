@@ -47,19 +47,19 @@ QMIX_LR_SENSITIVITY_FULL_STEPS = TRAIN_FOR_ENV_STEPS
 
 BENCHMARK_SCENARIOS = [
     BenchmarkScenario("Stag Hunt Arena", "stag_hunt_arena", False),
-    BenchmarkScenario("Rhythm Sync", "rhythm_sync_dense", True),
+    BenchmarkScenario("Rhythm Sync", "rhythm_sync_dense", False),
     BenchmarkScenario("Foraging Commons", "foraging_commons", False),
-    BenchmarkScenario("Co-op Puzzle", "coop_puzzle", True),
-    BenchmarkScenario("Platform Chain", "platform_chain", True),
+    BenchmarkScenario("Co-op Puzzle", "coop_puzzle", False),
+    BenchmarkScenario("Platform Chain", "platform_chain", False),
     # BenchmarkScenario("Platform Chain Easy", "platform_chain_easy", True),
     BenchmarkScenario("Armory Siege", "armory_siege", False),
     BenchmarkScenario("Co-op Health Gathering", "coop_health_gathering", False),
-    BenchmarkScenario("Lava Pit", "lavapit", True),
+    BenchmarkScenario("Lava Pit", "lavapit", False),
     BenchmarkScenario("Smart Enemies", "smart_enemies", False),
     BenchmarkScenario("Dumb Enemies", "dumb_enemies", False),
-    BenchmarkScenario("Stealth Labyrinth", "stealth_labyrinth", False),
+    BenchmarkScenario("Stealth Labyrinth", "stealth_labyrinth", True),
     BenchmarkScenario("Ammo Carrier", "ammo_carrier", False),
-    BenchmarkScenario("Lava Maze", "lava_maze", False),
+    BenchmarkScenario("Lava Maze", "lava_maze", True),
 ]
 
 ALGORITHMS = [

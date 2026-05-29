@@ -390,11 +390,13 @@ ACTOR SLTurretGuard : DoomImp 16000 {{
         acs.add_global_var("sl_rooms_seen", 48, "int")
         acs.add_global_var("sl_total_rooms", 49, "int")
         acs.add_global_var("sl_team_hp", 50, "int")
+        acs.add_global_var("sl_targets_lit", 51, "int")
 
         enemy_state_init_lines = []
         branch_light_lines = []
         branch_logic_lines = []
         room_seen_init_lines = []
+        target_lit_init_lines = []
         for branch_idx, branch in enumerate(branch_specs):
             lit_var = f"branch_attack_lit_{branch_idx}"
             active_room_var = f"branch_active_room_{branch_idx}"
@@ -404,7 +406,9 @@ ACTOR SLTurretGuard : DoomImp 16000 {{
             room_spawn_lines = []
             for room_idx, (room_tag, room_check) in enumerate(zip(branch["room_tags"], branch["room_checks"])):
                 seen_var = f"branch_room_seen_{branch_idx}_{room_idx}"
+                lit_seen_var = f"lit_seen_{branch_idx}_{room_idx}"
                 room_seen_init_lines.append(f"    int {seen_var} = 0;\n")
+                target_lit_init_lines.append(f"    int {lit_seen_var} = 0;\n")
                 room_seen_case_lines.append(
                     f"""
             if (!{seen_var} && {active_room_var} == {room_idx} && sl_p1_alive && sl_p2_alive && ({room_check})) {{
@@ -490,10 +494,15 @@ ACTOR SLTurretGuard : DoomImp 16000 {{
                 )
             lit_case_lines = []
             for room_idx, (room_check, corr_check) in enumerate(zip(branch["room_checks"], branch["corr_checks"])):
+                lit_seen_var = f"lit_seen_{branch_idx}_{room_idx}"
                 lit_case_lines.append(
                     f"""
             if ({active_room_var} == {room_idx} && sl_p1_alive && (({room_check}) || ({corr_check}))) {{
                 {lit_var} = 1;
+                if (!{lit_seen_var} && sl_p2_alive) {{
+                    {lit_seen_var} = 1;
+                    targets_lit_count++;
+                }}
             }}"""
                 )
             branch_light_lines.append(
@@ -582,6 +591,7 @@ ACTOR SLTurretGuard : DoomImp 16000 {{
             sl_rooms_seen = 0;
             sl_total_rooms = __ROOM_COUNT__;
             sl_team_hp = 200;
+            sl_targets_lit = 0;
 
             TakeInventory("Fist", 999);
             TakeInventory("Chainsaw", 999);
@@ -638,8 +648,10 @@ script 2 OPEN
     int enemies_left;
     int target_tid;
     int rooms_seen_count = 0;
+    int targets_lit_count = 0;
     int startup_ready_loops = 0;
 {"".join(room_seen_init_lines)}
+{"".join(target_lit_init_lines)}
 {"".join(enemy_state_init_lines)}
 
     sl_started = 0;
@@ -653,6 +665,7 @@ script 2 OPEN
     sl_enemies_dead = 0;
     sl_rooms_seen = 0;
     sl_team_hp = 200;
+    sl_targets_lit = 0;
 
     while (TRUE)
     {{
@@ -763,6 +776,7 @@ script 2 OPEN
         sl_target_lit = 0;
         {"".join(branch_light_lines)}
         sl_rooms_seen = rooms_seen_count;
+        sl_targets_lit = targets_lit_count;
 
         enemies_left = 0;
         {"".join(branch_logic_lines)}
