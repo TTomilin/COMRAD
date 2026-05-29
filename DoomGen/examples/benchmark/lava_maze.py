@@ -467,7 +467,7 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
         g_start_y = Random(0, MAP_WIDTH - 1);
 
         current_start_tag = get_tag(g_start_x, g_start_y);
-        lm_maze_size_global        = current_maze_size;
+        lm_maze_size_global        = MAP_WIDTH;
         lm_goal_grid_x_global      = -1;
         lm_goal_grid_y_global      = -1;
         lm_p1_grid_x_global        = -1;
@@ -559,7 +559,7 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
         }}
 
         current_end_tag = last_visited_tag;
-        lm_maze_size_global        = current_maze_size;
+        lm_maze_size_global        = MAP_WIDTH;
         lm_goal_grid_x_global      = last_x;
         lm_goal_grid_y_global      = last_y;
         lm_maze_bits_0_global      = maze_bits_chunk[0];
@@ -628,7 +628,7 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
                     current_maze_size += 2;
                     if (current_maze_size > MAX_TILES) current_maze_size = MAX_TILES;
                     if (current_maze_size < {INITIAL_MAZE_SIZE}) current_maze_size = {INITIAL_MAZE_SIZE};
-                    lm_maze_size_global = current_maze_size;
+                    lm_maze_size_global = MAP_WIDTH;
 
                     ACS_NamedExecute("GenerateMaze", 0, gx, gy, current_maze_size);
                 }}
@@ -653,6 +653,7 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
                     HudMessage(s:"A"; HUDMSG_PLAIN | HUDMSG_LAYER_UNDERHUD, 1, CR_UNTRANSLATED, 160.0, 100.0, 0.0);
                     g_flash_state = 0;
                     lm_flash_active_global = 0;
+                    lm_flash_signal_global = 0;
                 }}
             }}
 

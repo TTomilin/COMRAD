@@ -7,6 +7,7 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         env,
         room_discovery_reward=0.3,
         first_room_discovery_reward=0.8,
+        progress_milestone_reward=0.4,
         kill_reward=2.0,
         damage_taken_penalty_per_hp=-0.02,
         death_penalty=-1.0,
@@ -14,12 +15,14 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         super().__init__(env)
         self.room_discovery_reward = float(room_discovery_reward)
         self.first_room_discovery_reward = float(first_room_discovery_reward)
+        self.progress_milestone_reward = float(progress_milestone_reward)
         self.kill_reward = float(kill_reward)
         self.damage_taken_penalty_per_hp = float(damage_taken_penalty_per_hp)
         self.death_penalty = float(death_penalty)
 
         self.best_destroyed = None
         self.best_rooms_seen = None
+        self.best_progress_milestones = None
         self.prev_team_hp = None
         self.orig_env_reward = 0.0
 
@@ -54,16 +57,19 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         if info is None:
             self.best_destroyed = None
             self.best_rooms_seen = None
+            self.best_progress_milestones = None
             self.prev_team_hp = None
             return
         self.best_destroyed = max(0, self._int(info, "USER46"))
         self.best_rooms_seen = max(0, self._int(info, "USER48"))
+        self.best_progress_milestones = max(0, self._int(info, "USER51"))
         self.prev_team_hp = max(0.0, self._float(info, "USER50"))
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.best_destroyed = None
         self.best_rooms_seen = None
+        self.best_progress_milestones = None
         self.prev_team_hp = None
         self.orig_env_reward = 0.0
         self._sync(info)
@@ -82,13 +88,19 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
 
         destroyed = max(0, self._int(info, "USER46"))
         rooms_seen = max(0, self._int(info, "USER48"))
+        progress_milestones = max(0, self._int(info, "USER51"))
         remaining = max(0, self._int(info, "USER44"))
         total = max(0, self._int(info, "USER47"))
         team_hp = max(0.0, self._float(info, "USER50"))
         p1_alive = max(0, self._int(info, "USER41"))
         p2_alive = max(0, self._int(info, "USER42"))
 
-        if self.best_destroyed is None or self.best_rooms_seen is None or self.prev_team_hp is None:
+        if (
+            self.best_destroyed is None
+            or self.best_rooms_seen is None
+            or self.best_progress_milestones is None
+            or self.prev_team_hp is None
+        ):
             self._sync(info)
             info["true_objective"] = self._true_objective(info)
             info["success"] = False
@@ -98,6 +110,7 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
 
         delta_destroyed = max(0, destroyed - self.best_destroyed)
         delta_rooms_seen = max(0, rooms_seen - self.best_rooms_seen)
+        delta_progress_milestones = max(0, progress_milestones - self.best_progress_milestones)
         delta_team_damage = max(0.0, self.prev_team_hp - team_hp)
 
         success = bool(
@@ -110,6 +123,7 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         )
 
         shaped_team_reward = 0.0
+        shaped_team_reward += delta_progress_milestones * self.progress_milestone_reward
         if self.best_rooms_seen < 1 and rooms_seen >= 1:
             shaped_team_reward += self.first_room_discovery_reward
             delta_rooms_seen = max(0, delta_rooms_seen - 1)
@@ -122,11 +136,16 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
 
         total_reward = reward + shaped_team_reward * self._reward_share()
 
-        if destroyed < self.best_destroyed or rooms_seen < self.best_rooms_seen:
+        if (
+            destroyed < self.best_destroyed
+            or rooms_seen < self.best_rooms_seen
+            or progress_milestones < self.best_progress_milestones
+        ):
             info.setdefault("episode_extra_stats", {})["counter_regression"] = 1
 
         self.best_destroyed = max(self.best_destroyed, destroyed)
         self.best_rooms_seen = max(self.best_rooms_seen, rooms_seen)
+        self.best_progress_milestones = max(self.best_progress_milestones, progress_milestones)
         self.prev_team_hp = team_hp
 
         info["true_objective"] = self._true_objective(info)

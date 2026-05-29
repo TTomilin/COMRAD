@@ -39,28 +39,42 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         except (TypeError, ValueError, OverflowError):
             return default
 
+    def _grid_size_from(self, info):
+        return max(1, self._safe_int((info or {}).get("USER11", self.grid_size), self.grid_size))
+
     def sync_vars(self, info):
-        self.prev_vars = {k: v for k, v in info.items()}
+        info = info or {}
+        self.prev_vars = {
+            "USER11": self._safe_int(info.get("USER11", self.grid_size), self.grid_size),
+            "USER13": self._safe_int(info.get("USER13", -1), -1),
+            "USER14": self._safe_int(info.get("USER14", -1), -1),
+            "USER15": self._safe_int(info.get("USER15", -1), -1),
+            "USER16": self._safe_int(info.get("USER16", 0), 0),
+            "USER17": self._safe_int(info.get("USER17", 0), 0),
+            "USER18": self._safe_int(info.get("USER18", -1), -1),
+            "USER19": self._safe_int(info.get("USER19", 0), 0),
+            "USER20": self._safe_int(info.get("USER20", 0), 0),
+            "USER21": self._safe_int(info.get("USER21", 0), 0),
+            "USER22": self._safe_int(info.get("USER22", 0), 0),
+            "HEALTH": self._safe_int(info.get("HEALTH", 100), 100),
+        }
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
-        self.prev_vars = {}
         self.flash_timer = 0
         self.progress_occurred = False
         self.orig_env_reward = 0.0
-        
-        if info is not None:
-            self.sync_vars(info)
-            
+        self.sync_vars(info)
+
         return obs, info
 
-    def _decode_maze_grid(self, bits_0, bits_1, bits_2, active_y):
+    def _decode_maze_grid(self, bits_0, bits_1, bits_2, active_y, grid_size=None):
         """
         Reconstructs the grid from the 3 ACS integer chunks.
         Returns a 2D list where 1 is safe, 0 is lava.
         In this version, it's a 1D corridor at fixed Y.
         """
-        s = self.grid_size
+        s = grid_size or self.grid_size
         grid = [[0 for _ in range(s)] for _ in range(s)]
         chunks = [int(bits_0), int(bits_1), int(bits_2)]
 
@@ -69,13 +83,13 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
             chunk = bit_idx // 27
             shift = bit_idx % 27
 
-            is_safe = (chunks[chunk] & (1 << shift)) != 0
+            is_safe = chunk < len(chunks) and (chunks[chunk] & (1 << shift)) != 0
             if 0 <= active_y < s:
                 grid[active_y][x] = 1 if is_safe else 0
 
         return grid
 
-    def _get_bfs_distance(self, grid, start_x, start_y, goal_x, goal_y):
+    def _get_bfs_distance(self, grid, start_x, start_y, goal_x, goal_y, grid_size=None):
         """
         Calculates the shortest path distance using BFS.
         """
@@ -87,7 +101,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         if start_x == goal_x and start_y == goal_y:
             return 0
 
-        s = self.grid_size
+        s = grid_size or len(grid)
         if not (0 <= start_x < s and 0 <= start_y < s) or grid[start_y][start_x] == 0:
             return 999 # Standing in lava
 
@@ -110,7 +124,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
                     visited.add((nx, ny))
                     queue.append((nx, ny, dist + 1))
 
-        return 999 
+        return 999
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -138,19 +152,22 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         prev_levels = self._safe_int(self.prev_vars.get("USER22", 0), 0)
 
         current_signal = self._safe_int(info.get("USER16", 0), 0)
-        prev_signal = self._safe_int(self.prev_vars.get("USER16", 0), 0)
-        
+
         current_flash_active = self._safe_int(info.get("USER17", 0), 0)
         prev_flash_active = self._safe_int(self.prev_vars.get("USER17", 0), 0)
+        new_flash = current_flash_active == 1 and prev_flash_active == 0 and current_signal in (1, 2)
 
-        if current_signal != 0 and prev_signal == 0:
+        if new_flash:
             shaped_reward += self.signal_penalty
+
+        grid_size = self._grid_size_from(info)
 
         grid = self._decode_maze_grid(
             self._safe_int(info.get("USER19", 0), 0),
             self._safe_int(info.get("USER20", 0), 0),
             self._safe_int(info.get("USER21", 0), 0),
-            goal_y
+            goal_y,
+            grid_size,
         )
 
         current_hp = self._safe_int(info.get("HEALTH", 0), 0)
@@ -158,7 +175,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
 
         player_id = getattr(self.env.unwrapped, "player_id", -1)
         if player_id == 0:
-            if current_flash_active == 1 and prev_flash_active == 0:
+            if new_flash:
                 self.flash_timer = self.flash_window
                 self.progress_occurred = False
 
@@ -167,18 +184,18 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
                 if (p1_x != -1 and p1_y != -1 and goal_x != -1 and goal_y != -1 and
                     prev_p1_x != -1 and prev_p1_y != -1 and
                     goal_x == prev_goal_x and goal_y == prev_goal_y):
-                    
-                    dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
-                    prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y)
+
+                    dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y, grid_size)
+                    prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y, grid_size)
                     if dist < prev_dist:
                         self.progress_occurred = True
-                    
+
             if current_levels > prev_levels:
                 shaped_reward += self.goal_reward
-                
+
             if p1_x != -1 and goal_x != -1 and prev_p1_x != -1 and goal_x == prev_goal_x:
-                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
-                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y)
+                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y, grid_size)
+                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y, grid_size)
                 if dist < prev_dist:
                     shaped_reward += self.distance_reward_scale
                 elif dist > prev_dist:
@@ -186,25 +203,29 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
 
             if current_hp < prev_hp:
                 hp_loss = prev_hp - current_hp
-                if hp_loss > 20: 
+                if hp_loss > 20:
                     shaped_reward -= (hp_loss * self.lava_burn_penalty_scale)
-            
+
             if current_hp <= 0 and prev_hp > 0:
                 shaped_reward += self.death_penalty
-                
+
         elif player_id == 1:
             if current_levels > prev_levels:
                 shaped_reward += self.goal_reward
 
             if current_hp < prev_hp:
                 hp_loss = prev_hp - current_hp
-                if hp_loss > 20: 
+                if hp_loss > 20:
                     shaped_reward -= (hp_loss * self.lava_burn_penalty_scale)
 
+            if new_flash:
+                self.flash_timer = self.flash_window
+                self.progress_occurred = False
+
             if p1_x != -1 and goal_x != -1 and prev_p1_x != -1 and goal_x == prev_goal_x:
-                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
-                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y)
-                
+                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y, grid_size)
+                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y, grid_size)
+
                 if dist < prev_dist:
                     if self.flash_timer > 0:
                         shaped_reward += self.sender_bonus_scale
@@ -213,16 +234,13 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
                     shaped_reward -= self.distance_reward_scale
                     if self.flash_timer > 0:
                         shaped_reward += self.no_progress_penalty
-                        
-            if current_signal == 1 and prev_signal == 0:
-                self.flash_timer = self.flash_window
-            
+
             if self.flash_timer > 0:
                 self.flash_timer -= 1
-                
+
             if current_hp <= 0 and prev_hp > 0:
                 shaped_reward += self.death_penalty
-                
+
         else:
             if current_levels > prev_levels:
                 shaped_reward += self.goal_reward
@@ -233,18 +251,18 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
                     shaped_reward -= (hp_loss * self.lava_burn_penalty_scale)
 
             if p1_x != -1 and goal_x != -1 and prev_p1_x != -1 and goal_x == prev_goal_x:
-                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y)
-                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y)
+                dist = self._get_bfs_distance(grid, p1_x, p1_y, goal_x, goal_y, grid_size)
+                prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y, grid_size)
                 if dist < prev_dist:
                     shaped_reward += self.distance_reward_scale
                 elif dist > prev_dist:
                     shaped_reward -= self.distance_reward_scale
-                    
+
             if current_hp <= 0 and prev_hp > 0:
                 shaped_reward += self.death_penalty
 
         self.orig_env_reward += reward
-        
+
         if terminated or truncated:
             info["true_objective"] = current_levels
 
@@ -253,7 +271,7 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
 
 class LavaMazeSimpleAdditionalInput(gym.Wrapper):
     """
-    health, signal, weapons
+    health, green flash active, red flash active
     """
     def __init__(self, env):
         super().__init__(env)
@@ -263,11 +281,14 @@ class LavaMazeSimpleAdditionalInput(gym.Wrapper):
         })
 
     def _get_obs(self, obs, info):
-        hp = info.get("HEALTH", 100) / 100.0
-        signal = info.get("USER17", 0)
-        color = info.get("USER16", 0) # 0 for Green, 1 for Red
+        info = info or {}
+        hp = np.clip(float(info.get("HEALTH", 100)) / 100.0, 0.0, 1.0)
+        flash_active = bool(info.get("USER17", 0))
+        color = int(info.get("USER16", 0)) if flash_active else 0
+        green_active = float(color == 1)
+        red_active = float(color == 2)
 
-        measurements = np.array([hp, signal, color], dtype=np.float32)
+        measurements = np.array([hp, green_active, red_active], dtype=np.float32)
         return {"obs": obs, "measurements": measurements}
 
     def reset(self, **kwargs):
