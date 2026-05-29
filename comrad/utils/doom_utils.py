@@ -183,6 +183,7 @@ DOOM_ENVS = [
         nofreelook=0,
         additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
         extra_wrappers=[(LavaMazeRewardShaping, {})],
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(
@@ -216,7 +217,7 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
-        shared_reward_alpha=0.0,
+        shared_reward_alpha=1.0,
     ),
 
     DoomSpec(

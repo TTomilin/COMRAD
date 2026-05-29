@@ -204,7 +204,7 @@ python -m sample_factory.launcher.run --run=comrad.train_all --backend=processes
 | `platform_chain` | Yes | Progress is joint and tether-constrained by design. |
 | `rhythm_sync` | Yes | Success/failure is defined by synchronized team timing. |
 | `rhythm_sync_dense` | Yes | Dense shaping still targets the same joint synchronization objective. |
-| `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around one synchronized relay objective followed by extraction. |
+| `stealth_labyrinth` | Yes | Torch and Gunner are asymmetrically coupled around one synchronized relay objective. |
 | `foraging_commons` | No | Preserve the commons incentives; the benchmark is about balancing individual harvesting against shared resource collapse. |
 | `coop_health_gathering` | No | Scenario is about resource sharing, so no. |
 | `stag_hunt_arena` | No | Keep the rabbit option local so the stag-vs-rabbit coordination dilemma remains intact. |
