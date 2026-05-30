@@ -27,6 +27,9 @@ class LavaMazeSimpleScenario(Scenario):
             "max_maze_size": 14,
             "lava_damage": 35,
             "lava_depth": 64,
+            "step_tics": 12,
+            "step_cooldown_tics": 4,
+            "level_clear_grace_tics": 12,
             "seed": 42,
         }
 
@@ -38,6 +41,9 @@ class LavaMazeSimpleScenario(Scenario):
         MAX_MAZE_SIZE = int(cfg.get("max_maze_size", 14))
         LAVA_DAMAGE = int(cfg["lava_damage"])
         LAVA_DEPTH = int(cfg.get("lava_depth", 64))
+        STEP_TICS = int(cfg.get("step_tics", 12))
+        STEP_COOLDOWN_TICS = int(cfg.get("step_cooldown_tics", 4))
+        LEVEL_CLEAR_GRACE_TICS = int(cfg.get("level_clear_grace_tics", 12))
         seed = cfg["seed"] if cfg["seed"] is not None else random.randint(0, 999999)
 
         MAZE_WIDTH_UNITS = PHYSICAL_SIZE * CELL_SIZE
@@ -244,6 +250,7 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         acs.add_map_var("g_flash_timer", initial=0)
         acs.add_map_var("g_flash_state", initial=0)
         acs.add_map_var("g_flash_lump", var_type="str", initial='"S_BLACK"')
+        acs.add_map_var("level_clear_lock", initial=1)
         acs.add_global_var("lm_maze_size_global",        11, "int")
         acs.add_global_var("lm_goal_grid_x_global",      13, "int")
         acs.add_global_var("lm_p1_grid_x_global",        14, "int")
@@ -268,6 +275,9 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
     #define MAX_TILES {MAX_MAZE_SIZE}
     #define APROP_PainChance 21
     #define PLATFORM_RADIUS {STANDS_RADIUS_UNITS}
+    #define LM_STEP_TICS {STEP_TICS}
+    #define LM_STEP_COOLDOWN_TICS {STEP_COOLDOWN_TICS}
+    #define LEVEL_CLEAR_GRACE_TICS {LEVEL_CLEAR_GRACE_TICS}
 
     int max_unlocked_size = {INITIAL_MAZE_SIZE};
     int current_maze_size = {INITIAL_MAZE_SIZE};
@@ -289,6 +299,21 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
 
     function int get_world_y(int gy) {{
         return {OFFSET_Y} + (gy * {CELL_SIZE}) + ({CELL_SIZE} / 2);
+    }}
+
+    function int cell_is_safe(int x, int y) {{
+        if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_WIDTH) return FALSE;
+        if (y != lm_goal_grid_y_global) return FALSE;
+
+        int bit_idx = x;
+        int chunk = bit_idx / 27;
+        int shift = bit_idx % 27;
+        int mask = 1 << shift;
+
+        if (chunk == 0) return ((lm_maze_bits_0_global & mask) != 0);
+        if (chunk == 1) return ((lm_maze_bits_1_global & mask) != 0);
+        if (chunk == 2) return ((lm_maze_bits_2_global & mask) != 0);
+        return FALSE;
     }}
 
     function void reset_map(int keep_tag) {{
@@ -379,6 +404,7 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         lm_maze_bits_1_global      = 0;
         lm_maze_bits_2_global      = 0;
         lm_levels_completed_global = 0;
+        level_clear_lock           = 1;
 
         ACS_NamedExecute("GenerateMaze", 0, g_start_x, g_start_y, current_maze_size);
 
@@ -437,6 +463,8 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         Sector_SetColor(current_end_tag, 255, 255, 255);
         Light_ChangeToValue(current_end_tag, 255);
         Sector_SetFade(current_end_tag, 0, 0, 0);
+
+        level_clear_lock = 0;
     }}
 
     script "EndGame" (void) {{
@@ -465,6 +493,7 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
 
         Thing_ChangeTID(0, 1000);
         SetActorProperty(0, APROP_Health, 100);
+        SetPlayerProperty(0, 1, 0); // PROP_FROZEN
 
         int wx = get_world_x(g_start_x) << 16;
         int wy = get_world_y(g_start_y) << 16;
@@ -481,25 +510,71 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
         HudMessage(s:"A"; HUDMSG_PLAIN | HUDMSG_LAYER_UNDERHUD, 1, CR_UNTRANSLATED, 160.0, 100.0, 0.0);
         ClearInventory();
 
+        int p1_cell_x = g_start_x;
+        int p1_cell_y = g_start_y;
+        int step_active = 0;
+        int step_timer = 0;
+        int step_from_x = g_start_x;
+        int step_to_x = g_start_x;
+        int step_cooldown = 0;
+        int step_into_lava = 0;
+
         while (TRUE) {{
             if (GetActorProperty(0, APROP_HEALTH) <= 0) {{
                 ACS_NamedExecute("EndGame", 0);
                 terminate;
             }}
 
-            int x = GetActorX(0);
-            int y = GetActorY(0);
+            if (step_active) {{
+                step_timer++;
+                int from_world_x = get_world_x(step_from_x);
+                int to_world_x = get_world_x(step_to_x);
+                int interp_world_x = from_world_x + (((to_world_x - from_world_x) * step_timer) / LM_STEP_TICS);
+                SetActorPosition(0, interp_world_x << 16, get_world_y(p1_cell_y) << 16, 0, 0);
+                SetActorVelocity(0, 0, 0, 0, FALSE, FALSE);
 
-            int offset = (MAP_WIDTH * CELL_SIZE) / 2;
-            int gx = ((x >> 16) + offset) / CELL_SIZE;
-            int gy = ((y >> 16) + offset) / CELL_SIZE;
+                if (step_timer >= LM_STEP_TICS) {{
+                    p1_cell_x = step_to_x;
+                    SetActorPosition(0, get_world_x(p1_cell_x) << 16, get_world_y(p1_cell_y) << 16, 0, 0);
+                    SetActorVelocity(0, 0, 0, 0, FALSE, FALSE);
+                    step_active = 0;
+                    step_timer = 0;
+                    step_cooldown = LM_STEP_COOLDOWN_TICS;
+                    if (step_into_lava) {{
+                        SetActorProperty(0, APROP_Health, 0);
+                    }}
+                    step_into_lava = 0;
+                }}
+            }} else if (step_cooldown > 0) {{
+                step_cooldown--;
+            }} else if (level_clear_lock == 0) {{
+                int btns = GetPlayerInput(-1, INPUT_BUTTONS);
+                int desired_dir = 0;
+                if ((btns & BT_FORWARD) && !(btns & BT_BACK)) desired_dir = 1;
+                if ((btns & BT_BACK) && !(btns & BT_FORWARD)) desired_dir = -1;
 
-            if (gx >= 0 && gx < MAP_WIDTH && gy >= 0 && gy < MAP_WIDTH) {{
-                lm_p1_grid_x_global = gx;
-                lm_p1_grid_y_global = gy;
-                int my_tag = get_tag(gx, gy);
+                if (desired_dir != 0) {{
+                    int target_x = p1_cell_x + desired_dir;
+                    step_into_lava = !cell_is_safe(target_x, p1_cell_y);
+                    step_active = 1;
+                    step_timer = 0;
+                    step_from_x = p1_cell_x;
+                    step_to_x = target_x;
+                }}
+            }}
 
-                if (my_tag == current_end_tag) {{
+            if (!step_active) {{
+                SetActorPosition(0, get_world_x(p1_cell_x) << 16, get_world_y(p1_cell_y) << 16, 0, 0);
+                SetActorVelocity(0, 0, 0, 0, FALSE, FALSE);
+            }}
+
+            if (p1_cell_x >= 0 && p1_cell_x < MAP_WIDTH && p1_cell_y >= 0 && p1_cell_y < MAP_WIDTH) {{
+                lm_p1_grid_x_global = p1_cell_x;
+                lm_p1_grid_y_global = p1_cell_y;
+                int my_tag = get_tag(p1_cell_x, p1_cell_y);
+
+                if (my_tag == current_end_tag && level_clear_lock == 0) {{
+                    level_clear_lock = 1;
                     lm_levels_completed_global++;
                     max_unlocked_size += 2;
                     if (max_unlocked_size > MAX_TILES) max_unlocked_size = MAX_TILES;
@@ -508,7 +583,7 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
                     current_maze_size = next_size;
                     lm_maze_size_global = MAP_WIDTH;
 
-                    ACS_NamedExecute("GenerateMaze", 0, gx, gy, current_maze_size);
+                    ACS_NamedExecute("GenerateMaze", 0, p1_cell_x, p1_cell_y, current_maze_size);
                 }}
             }} else {{
                 lm_p1_grid_x_global = -1;
@@ -617,4 +692,4 @@ ACTOR LMShotgun : Shotgun replaces Shotgun
 
 
 if __name__ == "__main__":
-    LavaMazeSimpleScenario().generate("examples/benchmark/output/lava_maze_simple.wad")
+    LavaMazeSimpleScenario().generate("../comrad/scenarios/lava_maze_simple.wad")

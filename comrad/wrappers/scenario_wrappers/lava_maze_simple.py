@@ -8,12 +8,12 @@ class LavaMazeSimpleRewardShaping(gym.Wrapper):
         self,
         env,
         grid_size=18,
-        goal_reward=10.0,
+        goal_reward=2.0,
         death_penalty=-5.0,
         step_penalty=-0.005,
-        distance_reward_scale=0.5,
+        distance_reward_scale=0.1,
         lava_burn_penalty_scale=0.02,
-        signal_penalty=-0.025,
+        signal_penalty=-0.01,
     ):
         super().__init__(env)
         self.grid_size = grid_size
