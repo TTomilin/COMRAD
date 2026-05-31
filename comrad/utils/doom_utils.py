@@ -33,6 +33,7 @@ from comrad.envs.action_space import (
 )
 from comrad.envs.doom_gym import VizdoomEnv
 from comrad.wrappers.additional_input import DoomAdditionalInput
+from comrad.wrappers.action_mask import RoleActionMaskWrapper
 from comrad.wrappers.multiplayer_stats import MultiplayerStatsWrapper
 from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
@@ -94,6 +95,24 @@ ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vect
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
 LAVA_MAZE_ADDITIONAL_INPUT = (LavaMazeAdditionalInput, {})
 LAVA_MAZE_SIMPLE_ADDITIONAL_INPUT = (LavaMazeSimpleAdditionalInput, {})
+LAVA_MAZE_ACTION_MASK = (
+    RoleActionMaskWrapper,
+    {
+        "masks_by_player_id": {
+            0: [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+            1: [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
+        },
+    },
+)
+LAVA_MAZE_SIMPLE_ACTION_MASK = (
+    RoleActionMaskWrapper,
+    {
+        "masks_by_player_id": {
+            0: [1, 1, 1, 1, 0, 1, 0, 0],
+            1: [1, 0, 0, 1, 1, 1, 1, 1],
+        },
+    },
+)
 FORAGING_COMMONS_ADDITIONAL_INPUT = (ForagingCommonsAdditionalInput, {})
 AMMO_CARRIER_ADDITIONAL_INPUT = (AmmoCarrierAdditionalInput, {})
 LAVAPIT_ADDITIONAL_INPUT = (LavapitAdditionalInput, {})
@@ -168,7 +187,7 @@ DOOM_ENVS = [
         num_agents=2,
         forcerespawn=0,
         additional_input_wrapper=LAVA_MAZE_SIMPLE_ADDITIONAL_INPUT,
-        extra_wrappers=[(LavaMazeSimpleRewardShaping, {})],
+        extra_wrappers=[(LavaMazeSimpleRewardShaping, {}), LAVA_MAZE_SIMPLE_ACTION_MASK],
         shared_reward_alpha=1.0,
     ),
 
@@ -182,7 +201,7 @@ DOOM_ENVS = [
         forcerespawn=0,
         nofreelook=0,
         additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
-        extra_wrappers=[(LavaMazeRewardShaping, {})],
+        extra_wrappers=[(LavaMazeRewardShaping, {}), LAVA_MAZE_ACTION_MASK],
         shared_reward_alpha=1.0,
     ),
 

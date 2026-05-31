@@ -18,6 +18,7 @@ from sample_factory.model.encoder import make_img_encoder
 from sample_factory.model.core import ModelCoreRNN, ModelCoreIdentity
 from sample_factory.model.decoder import MlpDecoder
 from sample_factory.model.model_utils import nonlinearity
+from sample_factory.model.actor_critic import obs_space_without_action_mask
 from sample_factory.utils.typing import ActionSpace, Config, ObsSpace
 from sample_factory.utils.utils import log
 
@@ -320,7 +321,9 @@ class QMixActorCritic(nn.Module):
         self.encoders = []
 
         from sample_factory.utils.normalize import ObservationNormalizer
-        self.obs_normalizer = ObservationNormalizer(obs_space, cfg)
+        # Sample Factory inference pops action_mask before calling normalize_obs() and passes it separately
+        # so the normalizer shouldnt require the key (dont use `self.obs_normalizer = ObservationNormalizer(obs_space, cfg)`)
+        self.obs_normalizer = ObservationNormalizer(obs_space_without_action_mask(obs_space), cfg)
 
         # For compatibility, not used in Q learning
         from sample_factory.algo.utils.running_mean_std import RunningMeanStdInPlace

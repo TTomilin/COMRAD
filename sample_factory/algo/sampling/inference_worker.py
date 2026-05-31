@@ -15,6 +15,7 @@ from signal_slot.signal_slot import TightLoop, Timer, signal
 from sample_factory.algo.utils.context import SampleFactoryContext, set_global_context
 from sample_factory.algo.utils.env_info import EnvInfo
 from sample_factory.algo.utils.epsilon_schedule import EpsilonSchedule
+from sample_factory.algo.utils.action_distributions import split_tuple_action_mask
 from sample_factory.algo.utils.heartbeat import HeartbeatStoppableEventLoopObject
 from sample_factory.algo.utils.misc import (
     POLICY_ID_KEY,
@@ -259,6 +260,34 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
             if not policy_output.shape:
                 policy_output.unsqueeze_(-1)
 
+    @staticmethod
+    def _sample_masked_discrete(mask: Optional[torch.Tensor], n_actions: int, num_samples: int, device: torch.device):
+        if mask is None:
+            return torch.randint(0, n_actions, (num_samples,), device=device)
+
+        mask = mask.to(device=device, dtype=torch.float32)
+        if mask.dim() == 1:
+            mask = mask.unsqueeze(0).expand(num_samples, -1)
+
+        if mask.shape != (num_samples, n_actions):
+            raise ValueError(f"Invalid action mask shape {tuple(mask.shape)}, expected {(num_samples, n_actions)}")
+
+        empty_rows = mask.sum(dim=-1, keepdim=True) <= 0
+        if empty_rows.any():
+            mask = torch.where(empty_rows, torch.ones_like(mask), mask)
+
+        return torch.multinomial(mask, 1).squeeze(-1)
+
+    def _sample_random_actions(self, num_samples: int, device: torch.device, action_mask: Optional[torch.Tensor]):
+        if len(self.action_space_d) == 1:
+            return InferenceWorker._sample_masked_discrete(action_mask, self.action_space_d[0], num_samples, device)
+
+        split_masks = split_tuple_action_mask(action_mask, self.action_space_d, num_samples)
+        actions_lst = []
+        for n_actions, head_mask in zip(self.action_space_d, split_masks):
+            actions_lst.append(InferenceWorker._sample_masked_discrete(head_mask, n_actions, num_samples, device))
+        return torch.stack(actions_lst, dim=1)
+
     def _prepare_policy_outputs_batched(
         self, num_samples: int, policy_outputs: TensorDict, requests: List
     ) -> AdvanceRolloutSignals:
@@ -391,21 +420,11 @@ class InferenceWorker(HeartbeatStoppableEventLoopObject, Configurable):
                     device = actions.device
                     mask = torch.rand(num_samples, device=device) < epsilon
                     if mask.any():
-                        if len(self.action_space_d) == 1: # Single
-                            rand_actions = torch.randint(0, self.action_space_d[0], (num_samples,), device=device)
-                            if actions.dim() > 1:
-                                rand_actions = rand_actions.unsqueeze(-1)
-                                mask_expanded = mask.unsqueeze(-1)
-                            else:
-                                mask_expanded = mask
-                            policy_outputs["actions"] = torch.where(mask_expanded, rand_actions, actions)
-                        else: # Multi
-                            actions_lst = []
-                            for n_actions in self.action_space_d:
-                                actions_lst.append(torch.randint(0, n_actions, (num_samples,), device=device))
-                            rand_actions = torch.stack(actions_lst, dim=1)
-                            mask_expanded = mask.unsqueeze(-1)
-                            policy_outputs["actions"] = torch.where(mask_expanded, rand_actions, actions)
+                        rand_actions = self._sample_random_actions(num_samples, device, action_mask)
+                        if actions.dim() > 1 and rand_actions.dim() == 1:
+                            rand_actions = rand_actions.unsqueeze(-1)
+                        mask_expanded = mask.unsqueeze(-1) if actions.dim() > 1 else mask
+                        policy_outputs["actions"] = torch.where(mask_expanded, rand_actions, actions)
 
                     # Logging epsilon and action histograms
                     log_int = getattr(self.cfg, "epsilon_log_interval", 0)

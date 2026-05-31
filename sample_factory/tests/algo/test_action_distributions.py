@@ -117,6 +117,28 @@ class TestActionDistributions:
         entropy = action_distribution.entropy()
         assert list(entropy.shape) == [batch_size]
 
+    def test_tuple_distribution_accepts_flat_per_sample_mask(self):
+        action_space = gym.spaces.Tuple((
+            gym.spaces.Discrete(3),
+            gym.spaces.Discrete(2),
+            gym.spaces.Discrete(4),
+        ))
+        batch_size = 64
+        logits = torch.randn(batch_size, calc_num_action_parameters(action_space))
+
+        action_mask = torch.tensor(
+            [[1, 0, 0, 1, 1, 1, 0, 0, 0]] * batch_size,
+            dtype=torch.float32,
+        )
+        action_distribution = get_action_distribution(action_space, logits, action_mask)
+
+        actions = action_distribution.sample()
+
+        assert actions.shape == (batch_size, 3)
+        assert (actions[:, 0] == 0).all()
+        assert torch.isin(actions[:, 1], torch.tensor([0, 1])).all()
+        assert (actions[:, 2] == 0).all()
+
     @pytest.mark.parametrize("num_spaces", [3])
     @pytest.mark.parametrize("num_actions", [2])
     def test_tuple_sanity_check(self, num_spaces, num_actions):

@@ -95,6 +95,32 @@ def masked_log_softmax(logits, mask):
     return functional.log_softmax(logits, dim=-1)
 
 
+def split_tuple_action_mask(action_mask, logit_lengths, batch_size):
+    if action_mask is None:
+        return [None for _ in logit_lengths]
+
+    if isinstance(action_mask, (list, tuple)):
+        if len(action_mask) != len(logit_lengths):
+            raise ValueError(
+                f"Tuple action mask list has {len(action_mask)} heads, expected {len(logit_lengths)}"
+            )
+        return list(action_mask)
+
+    total_logits = sum(logit_lengths)
+    if action_mask.shape[-1] == total_logits:
+        return list(torch.split(action_mask, logit_lengths, dim=-1))
+
+    if len(set(logit_lengths)) == 1 and action_mask.shape[-1] == logit_lengths[0]:
+        if action_mask.shape[0] == len(logit_lengths):
+            return [action_mask[i] for i in range(len(logit_lengths))]
+        if action_mask.shape[0] == len(logit_lengths) * batch_size:
+            return list(torch.split(action_mask, batch_size, dim=0))
+
+    raise ValueError(
+        f"Unsupported tuple action mask shape {tuple(action_mask.shape)} for head sizes {logit_lengths}"
+    )
+
+
 # noinspection PyAbstractClass
 class CategoricalActionDistribution:
     def __init__(self, raw_logits, action_mask=None):
@@ -128,7 +154,7 @@ class CategoricalActionDistribution:
     def sample_gumbel(self):
         probs = self.raw_logits - torch.empty_like(self.raw_logits).exponential_().log_()
         if self.action_mask is not None:
-            probs = probs * self.action_mask
+            probs = probs + (self.action_mask == 0) * -1e9
         sample = torch.argmax(probs, -1)
         return sample
 
@@ -216,12 +242,13 @@ class TupleActionDistribution:
         self.split_logits = torch.split(logits_flat, self.logit_lengths, dim=1)
         self.action_lengths = [calc_num_actions(s) for s in action_space.spaces]
         self.action_mask = action_mask
+        self.split_action_masks = split_tuple_action_mask(action_mask, self.logit_lengths, logits_flat.shape[0])
 
         assert len(self.split_logits) == len(action_space.spaces)
 
         self.distributions = []
         for i, space in enumerate(action_space.spaces):
-            action_mask = self.action_mask[i] if self.action_mask is not None else None
+            action_mask = self.split_action_masks[i]
             self.distributions.append(get_action_distribution(space, self.split_logits[i], action_mask))
 
     @staticmethod

@@ -6,6 +6,7 @@ import gymnasium as gym
 from types import SimpleNamespace
 
 import sample_factory.algo.utils.shared_buffers as shared_buffers
+from sample_factory.algo.sampling.inference_worker import InferenceWorker
 from sample_factory.algo.learning.learner_qmix import QMixLearner
 from sample_factory.algo.utils.joint_replay_buffer import JointReplayBuffer
 from sample_factory.algo.utils.tensor_dict import TensorDict
@@ -60,6 +61,40 @@ def _make_actor_critic_multi_head():
         'qmix_hypernet_hidden': 64,
     })
     obs_space = gym.spaces.Dict({"obs": gym.spaces.Box(0, 1, shape=(3, 64, 64))})
+    action_space = gym.spaces.Tuple((
+        gym.spaces.Discrete(3),
+        gym.spaces.Discrete(2),
+        gym.spaces.Discrete(2),
+    ))
+    return QMixActorCritic(cfg, obs_space, action_space, num_agents=2)
+
+
+def _make_actor_critic_with_action_mask_and_input_norm():
+    cfg = AttrDict({
+        'encoder_conv_architecture': 'convnet_simple',
+        'encoder_conv_mlp_layers': [],
+        'encoder_extra_fc_layers': 0,
+        'hidden_size': 32,
+        'nonlinearity': 'relu',
+        'use_rnn': False,
+        'rnn_type': 'gru',
+        'rnn_num_layers': 1,
+        'decoder_mlp_layers': [],
+        'normalize_input': True,
+        'normalize_input_keys': None,
+        'normalize_returns': False,
+        'obs_subtract_mean': 0.0,
+        'obs_scale': 255.0,
+        'num_agents': 2,
+        'mixer': 'qmix',
+        'qmix_embed_dim': 32,
+        'qmix_hypernet_hidden': 64,
+    })
+
+    obs_space = gym.spaces.Dict({
+        'action_mask': gym.spaces.Box(0.0, 1.0, shape=(7,), dtype=float),
+        'obs': gym.spaces.Box(0, 255, shape=(3, 64, 64), dtype=int),
+    })
     action_space = gym.spaces.Tuple((
         gym.spaces.Discrete(3),
         gym.spaces.Discrete(2),
@@ -150,6 +185,25 @@ class TestActionMaskNowApplied:
         )
 
 
+class TestActionMaskNotRequiredForNormalization:
+
+    def test_normalize_obs_should_not_require_action_mask_key(self):
+        # InferenceWorker pops 'action_mask' before calling normalize_obs() and passes it separately.
+        # QMIX/QPLEX should not crash when 'action_mask' is absent from obs dict.
+        from sample_factory.algo.utils.rl_utils import prepare_and_normalize_obs
+
+        ac = _make_actor_critic_with_action_mask_and_input_norm()
+        ac.eval()
+
+        obs_without_mask = TensorDict({
+            'obs': torch.randint(0, 255, (4, 3, 64, 64), dtype=torch.uint8),
+        })
+
+        normalized = prepare_and_normalize_obs(ac, obs_without_mask)
+        assert 'obs' in normalized
+        assert 'action_mask' not in normalized
+
+
 class TestEpsilonFallbackRemoved:
 
     def test_fallback_code_raises_on_missing_global(self):
@@ -168,6 +222,26 @@ class TestEpsilonFallbackRemoved:
         assert 'global_env_steps_tensor is None' in src, (
             "Expected RuntimeError mentioning 'global_env_steps_tensor is None' in inference_worker"
         )
+
+    def test_epsilon_random_actions_respect_flat_tuple_mask(self):
+        worker = SimpleNamespace(action_space_d=[3, 2, 4])
+        mask = torch.tensor(
+            [
+                [1, 0, 0, 1, 1, 1, 0, 0, 0],
+                [0, 1, 0, 1, 0, 0, 0, 0, 1],
+            ],
+            dtype=torch.float32,
+        )
+
+        for _ in range(50):
+            actions = InferenceWorker._sample_random_actions(worker, 2, torch.device("cpu"), mask)
+
+            assert actions.shape == (2, 3)
+            assert actions[0, 0].item() == 0
+            assert actions[0, 2].item() == 0
+            assert actions[1, 0].item() == 1
+            assert actions[1, 1].item() == 0
+            assert actions[1, 2].item() == 3
 
 
 class TestSampleLock:
