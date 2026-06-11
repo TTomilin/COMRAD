@@ -42,5 +42,27 @@
       "core_health": 500,
       "enemy_difficulty": 1.25
     }
+  },
+  {
+    "filename": "armory_siege_variant_5.wad",
+    "config": {
+      "seed": 133,
+      "distance": 900,
+      "corridor_width": 5,
+      "door_timer": 120,
+      "core_health": 800,
+      "enemy_difficulty": 1.5
+    }
+  },
+  {
+    "filename": "armory_siege_variant_6.wad",
+    "config": {
+      "seed": 201,
+      "distance": 700,
+      "corridor_width": 1,
+      "door_timer": 450,
+      "core_health": 2000,
+      "enemy_difficulty": 0.3
+    }
   }
 ]
