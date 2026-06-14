@@ -135,3 +135,19 @@ See [`results/README.md`](results/README.md) for the structure of the committed 
 ## License and upstream assets
 
 The repository is released under the MIT license in [`LICENSE`](LICENSE). Upstream and third-party assets are documented in the repository itself, including the bundled `scripts/wad2image/` tool and the paper's citations to ViZDoom, Sample Factory, HARL, PyMARL, and QPLEX.
+
+## Acknowledgements
+
+We would like to thank Lou-corto Buring, Andrei Moise, and Yue Peng for your support and feedback; and the TU/e Supercomputing Center for providing the infrastructure to run the experiments. The environments are built on top of [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Our infrastructure is built on top of [Sample Factory](https://github.com/alex-petrenko/sample-factory). Our experiments were managed using [Weights & Biases](https://wandb.ai/). For on-policy actor-critic methods, we implement IPPO and MAPPO from the original implementation in [Sample Factory](https://github.com/alex-petrenko/sample-factory), and HAPPO following the [HARL codebase](https://github.com/PKU-MARL/HARL). For off-policy value decomposition methods, we implement IDQN, VDN, QMIX following the [PyMARL framework](https://github.com/oxwhirl/pymarl), and QPLEX following [official QPLEX reference implementation](https://github.com/wjh720/QPLEX).
+
+## Citation
+
+```
+@inproceedings{nguyen2026comrad,
+  title={{COMRAD}: A Benchmark for Embodied Cooperative Multi-Agent Reinforcement Learning},
+  author={Khoi H.B. Nguyen and Dimitar Zhivkov Zhekov and Tristan Tomilin},
+  booktitle={New Frontiers in Game-Theoretic Learning - NExT-Game},
+  year={2026},
+  url={https://openreview.net/forum?id=bXau6dlyV4}
+}
+```
