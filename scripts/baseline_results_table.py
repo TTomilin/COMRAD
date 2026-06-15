@@ -59,7 +59,7 @@ ALGORITHM_LABELS = {
 SCENARIO_CEILINGS = {
     "ammo_carrier": 8400.0,
     "armory_siege": 100.0,
-    "coop_health_gathering": 8400.0,
+    "coop_health_gathering": 2100.0,
     "coop_puzzle": 5.0,
     "dumb_enemies": 90.0,
     "foraging_commons": 21000.0,

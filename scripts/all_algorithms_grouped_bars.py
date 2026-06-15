@@ -46,7 +46,7 @@ OFF_POLICY = ["IDQN", "VDN", "QMIX", "QPLEX_dmaq", "QPLEX_dmaq_qatten"]
 
 CEILINGS = {
     "ammo_carrier": 8400.0, "armory_siege": 100.0,
-    "coop_health_gathering": 8400.0, "coop_puzzle": 5.0,
+    "coop_health_gathering": 2100.0, "coop_puzzle": 5.0,
     "dumb_enemies": 90.0, "foraging_commons": 21000.0,
     "lava_maze": 6.0, "lavapit": 11.0,
     "platform_chain": 47.0, "rhythm_sync_dense": 1.0,
