@@ -134,10 +134,10 @@ def plot_all_algorithms_grouped_bars(summary, output_pdf, output_png):
                             capsize=1.5, capthick=0.6, elinewidth=0.6, zorder=4)
 
         ax.set_ylim(0.0, 1.05)
-        ax.set_title(SCENARIO_LABELS[scenario], fontsize=8.5, fontweight="bold", pad=3)
+        ax.set_title(SCENARIO_LABELS[scenario], fontsize=12, fontweight="bold", pad=3)
 
         ax.set_xticks(positions)
-        ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=5.8)
+        ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=9)
         ax.set_axisbelow(True)
         ax.grid(axis="y", color="#d8d8d0", linewidth=0.6, alpha=0.85)
         ax.grid(axis="x", visible=False)
@@ -147,7 +147,7 @@ def plot_all_algorithms_grouped_bars(summary, output_pdf, output_png):
         ax.spines["bottom"].set_color("#444444")
 
         if idx % n_cols == 0:
-            ax.set_ylabel("Normalized score\n(fraction of ceiling)", fontsize=6.5)
+            ax.set_ylabel("Normalized score", fontsize=9)
 
     for idx in range(n_scenarios, len(axes_flat)):
         axes_flat[idx].set_visible(False)
