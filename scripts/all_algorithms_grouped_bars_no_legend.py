@@ -2,7 +2,6 @@ import argparse
 import json
 from pathlib import Path
 
-import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -40,7 +39,7 @@ ALGORITHMS = ["IPPO", "MAPPO", "HAPPO", "IDQN", "VDN", "QMIX", "QPLEX_dmaq", "QP
 ALGORITHM_LABELS = {
     "IPPO": "IPPO", "MAPPO": "MAPPO", "HAPPO": "HAPPO",
     "IDQN": "IDQN", "VDN": "VDN", "QMIX": "QMIX",
-    "QPLEX_dmaq": "QPLEX-DMAQ", "QPLEX_dmaq_qatten": "QPLEX-QATTEN",
+    "QPLEX_dmaq": "QPLEX-D", "QPLEX_dmaq_qatten": "QPLEX-Q",
 }
 ON_POLICY = ["IPPO", "MAPPO", "HAPPO"]
 OFF_POLICY = ["IDQN", "VDN", "QMIX", "QPLEX_dmaq", "QPLEX_dmaq_qatten"]
@@ -137,7 +136,8 @@ def plot_all_algorithms_grouped_bars(summary, output_pdf, output_png):
         ax.set_ylim(0.0, 1.05)
         ax.set_title(SCENARIO_LABELS[scenario], fontsize=12, fontweight="bold", pad=3)
 
-        ax.set_xticks([])
+        ax.set_xticks(positions)
+        ax.set_xticklabels(labels, rotation=35, ha="right", fontsize=9)
         ax.set_axisbelow(True)
         ax.grid(axis="y", color="#d8d8d0", linewidth=0.6, alpha=0.85)
         ax.grid(axis="x", visible=False)
@@ -151,24 +151,6 @@ def plot_all_algorithms_grouped_bars(summary, output_pdf, output_png):
 
     for idx in range(n_scenarios, len(axes_flat)):
         axes_flat[idx].set_visible(False)
-
-    gs = axes_flat[0].get_gridspec()
-    leg_ax = fig.add_subplot(gs[n_rows - 1, 3:5], facecolor="none")
-    leg_ax.set_xticks([])
-    leg_ax.set_yticks([])
-    for spine in leg_ax.spines.values():
-        spine.set_visible(False)
-    legend_patches = [
-        mpatches.Patch(facecolor=color_map[a], edgecolor=edge_map[a], linewidth=2.5,
-                       label=ALGORITHM_LABELS[a])
-        for a in ALGORITHMS
-    ]
-    leg_ax.legend(
-        handles=legend_patches, loc="center", ncol=2,
-        fontsize=15, frameon=True, facecolor="#fbfbf8", edgecolor="#cccccc",
-        columnspacing=2.0, handlelength=1.8, handleheight=1.8,
-        borderpad=1.0,
-    )
 
     fig.subplots_adjust(left=0.07, right=0.98, top=0.96, bottom=0.06)
     fig.savefig(output_pdf, bbox_inches="tight")
@@ -186,8 +168,8 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     summary = load_summary(summary_path)
-    output_pdf = output_dir / f"{args.output_name}.pdf"
-    output_png = output_dir / f"{args.output_name}.png"
+    output_pdf = output_dir / f"{args.output_name}_no_legend.pdf"
+    output_png = output_dir / f"{args.output_name}_no_legend.png"
     plot_all_algorithms_grouped_bars(summary, output_pdf, output_png)
 
 
