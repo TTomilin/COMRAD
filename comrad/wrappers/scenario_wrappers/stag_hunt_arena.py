@@ -11,6 +11,7 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         damage_taken_penalty_per_hp=-0.01,
         death_penalty=-2.0,
         timeout_survival_bonus=1.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.rabbit_reward = float(rabbit_reward)
@@ -22,10 +23,14 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
 
         self.best_stag_kills = None
         self.best_own_rabbit_kills = None
+        self.best_damagecount = None
         self.stag_alive = False
         self.lowest_stag_health = None
         self.orig_env_reward = 0.0
         self.prev_health = None
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _player_id(self) -> int:
         return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
@@ -41,6 +46,7 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         if info is None:
             self.best_stag_kills = None
             self.best_own_rabbit_kills = None
+            self.best_damagecount = None
             self.stag_alive = False
             self.lowest_stag_health = None
             self.prev_health = None
@@ -48,13 +54,28 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
 
         self.best_stag_kills = self._float(info, "USER54")
         self.best_own_rabbit_kills = self._float(info, self._own_rabbit_key())
+        self.best_damagecount = self._float(info, "DAMAGECOUNT")
         self.stag_alive = self._float(info, "USER55") > 0.0
         self.lowest_stag_health = self._float(info, "USER51") if self.stag_alive else None
         self.prev_health = self._float(info, "HEALTH")
 
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
+
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         self._sync(info)
         return obs, info
 
@@ -73,9 +94,10 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         curr_stag_kills = self._float(info, "USER54")
         curr_stag_alive = self._float(info, "USER55") > 0.0
         curr_own_rabbit_kills = self._float(info, self._own_rabbit_key())
+        curr_damagecount = self._float(info, "DAMAGECOUNT")
         curr_health = self._float(info, "HEALTH")
 
-        if self.best_stag_kills is None or self.best_own_rabbit_kills is None:
+        if self.best_stag_kills is None or self.best_own_rabbit_kills is None or self.best_damagecount is None:
             self._sync(info)
             info["true_objective"] = curr_stag_kills
             if terminated or truncated:
@@ -124,5 +146,24 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
         info["true_objective"] = self.best_stag_kills
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
+
+        if self.track_coop:
+            coop = 1.0 if curr_damagecount > self.best_damagecount else 0.0
+            defect = 1.0 if delta_own_rabbit_kills > 0.0 else 0.0
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
+        self.best_damagecount = max(self.best_damagecount, curr_damagecount)
 
         return obs, shaped_reward, terminated, truncated, info
