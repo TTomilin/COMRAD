@@ -358,10 +358,21 @@ ACTOR ChainNodeHot {
         acs.add_global_var("chg_chain_stretches_global", 3, "int")
         acs.add_global_var("chg_total_pickups_global", 4, "int")
         acs.add_global_var("chg_dragged_links_flash_global", 5, "int")
+        acs.add_global_var("chg_p0_pickups", 60, "int")
+        acs.add_global_var("chg_p1_pickups", 61, "int")
+        acs.add_global_var("chg_p2_pickups", 62, "int")
+        acs.add_global_var("chg_p3_pickups", 63, "int")
 
         acs.add_script(
             ScriptType.VOID,
-            "chg_total_pickups_global++;",
+            """
+            chg_total_pickups_global++;
+            int pn = PlayerNumber();
+            if (pn == 0) { chg_p0_pickups++; }
+            else if (pn == 1) { chg_p1_pickups++; }
+            else if (pn == 2) { chg_p2_pickups++; }
+            else if (pn == 3) { chg_p3_pickups++; }
+            """,
             number=10
         )
 
@@ -467,6 +478,10 @@ ACTOR ChainNodeHot {
         chg_chain_stretches_global = 0;
         chg_dragged_links_flash_global = 0;
         chg_total_pickups_global = 0;
+        chg_p0_pickups = 0;
+        chg_p1_pickups = 0;
+        chg_p2_pickups = 0;
+        chg_p3_pickups = 0;
 
         while (TRUE) {{
             {chain_block}

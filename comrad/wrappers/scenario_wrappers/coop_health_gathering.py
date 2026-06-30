@@ -16,6 +16,7 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         exploration_reward=0,
         exploration_distance=80.0,
         exploration_steps=200,
+        track_coop=True,
     ):
         super().__init__(env)
         self.health_reward = health_reward
@@ -32,6 +33,9 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.ticks = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _num_agents(self) -> int:
         return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -39,6 +43,12 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
     def _reward_share(self) -> float:
         """Team counters (USER3/USER4) are exposed to every player env, so divide."""
         return 1.0 / float(self._num_agents())
+
+    def _player_id(self) -> int:
+        return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
+
+    def _own_pickup_key(self) -> str:
+        return f"USER{60 + self._player_id()}"
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -103,8 +113,37 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         if terminated or truncated:
             info["true_objective"] = self.ticks
 
+        if self.track_coop:
+            own_key = self._own_pickup_key()
+            curr_own_pickups = info.get(own_key, 0)
+            prev_own_pickups = self.prev_vars.get(own_key, 0) if self.prev_vars else 0
+            delta_own_pickups = curr_own_pickups - prev_own_pickups
+            delta_stretches_now = curr_chain_stretches - prev_chain_stretches
+            coop = 1.0 if delta_own_pickups > 0 else 0.0
+            defect = 1.0 if delta_stretches_now > 0 else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
         self.sync_vars(info)
+
         return obs, individual_reward, terminated, truncated, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def reset(self, **kwargs):
         self.past_positions.clear()
@@ -114,6 +153,8 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
         self.sync_vars(info)
         self.orig_env_reward = 0.0
         self.ticks = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         return obs, info
 
     def sync_vars(self, info):
@@ -122,3 +163,5 @@ class CoopHealthGatheringRewardShaping(gym.Wrapper):
             "USER3": info.get("USER3", 0),
             "USER4": info.get("USER4", 0),
         }
+        own_key = self._own_pickup_key()
+        self.prev_vars[own_key] = info.get(own_key, 0)
