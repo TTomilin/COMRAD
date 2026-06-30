@@ -12,6 +12,7 @@ class DumbEnemiesRewardShaping(gym.Wrapper):
         continuous_slow_reward=0.05,
         ammo_use_penalty=-0.02,
         death_penalty=-10.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.kill_reward = kill_reward
@@ -27,6 +28,9 @@ class DumbEnemiesRewardShaping(gym.Wrapper):
         self.orig_env_reward = 0.0
         self.ticks = 0
         self.episode_start_kills = None
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _true_objective(self, info) -> float:
         curr_kills = info.get("KILLCOUNT", 0)
@@ -106,8 +110,39 @@ class DumbEnemiesRewardShaping(gym.Wrapper):
         if terminated or truncated:
             info["true_objective"] = self._true_objective(info)
 
+        curr_kills = info.get("KILLCOUNT", 0)
+        prev_kills_val = self.prev_vars.get("KILLCOUNT", 0) if self.prev_vars else 0
+        delta_kills_now = curr_kills - prev_kills_val
+        curr_slow = info.get("USER32", 0)
+        curr_alive = info.get("USER31", 0)
+        curr_fast = max(0, curr_alive - curr_slow)
+
+        if self.track_coop:
+            coop = 1.0 if delta_kills_now > 0 and curr_slow > 0 else 0.0
+            defect = 1.0 if curr_fast > 0 else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
         self.sync_vars(info)
+
         return obs, final_reward, terminated, truncated, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -115,6 +150,8 @@ class DumbEnemiesRewardShaping(gym.Wrapper):
         self.orig_env_reward = 0.0
         self.ticks = 0
         self.episode_start_kills = None
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
 
         if info is not None:
             self.episode_start_kills = info.get("KILLCOUNT", 0)

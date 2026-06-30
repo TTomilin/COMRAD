@@ -56,6 +56,7 @@ class LavapitRewardShaping(gym.Wrapper):
         frontier_stall_grace_steps: int = 16,
         frontier_stall_penalty: float = -0.02,
         timeout_penalty: float = -1.50,
+        track_coop=True,
     ):
         super().__init__(env)
         self.entry_support_reward = float(entry_support_reward)
@@ -75,6 +76,10 @@ class LavapitRewardShaping(gym.Wrapper):
         self.frontier_stage_claimed = 0
         self.frontier_stall_steps = 0
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
+        self._prev_platform_gap = 0
 
     def _num_agents(self) -> int:
         return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -155,9 +160,16 @@ class LavapitRewardShaping(gym.Wrapper):
         self.prev_joint_platform = 0
         self.frontier_stage_claimed = 0
         self.frontier_stall_steps = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self._prev_platform_gap = 0
+        self.prev_vars = {}
 
     def _sync(self, info) -> None:
         self.prev_joint_platform = self._joint_platform(info)
+        if info is not None:
+            own_key = f"USER{15 + self._player_id()}"
+            self.prev_vars[own_key] = self._int(info, own_key, 0)
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
@@ -165,6 +177,12 @@ class LavapitRewardShaping(gym.Wrapper):
         self._reset_episode_state()
         self._sync(info)
         return obs, info
+
+    def _player_id(self) -> int:
+        return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
+
+    def _own_platform(self, info) -> int:
+        return max(0, self._int(info, f"USER{15 + self._player_id()}", 0))
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -231,5 +249,37 @@ class LavapitRewardShaping(gym.Wrapper):
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
 
+        curr_own_platform = self._own_platform(info)
+        prev_own_platform = self._int(self.prev_vars, f"USER{15 + self._player_id()}", 0) if self.prev_vars else 0
+        platforms = self._player_best_platforms(info)
+        curr_gap = max(0, max(platforms) - min(platforms)) if platforms else 0
+        delta_own = curr_own_platform - prev_own_platform
+        delta_gap = curr_gap - self._prev_platform_gap
+
+        if self.track_coop:
+            coop = 1.0 if delta_own > 0 else 0.0
+            defect = 1.0 if delta_gap > 0 and delta_own <= 0 else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
         self._sync(info)
+
+        self._prev_platform_gap = curr_gap
         return obs, total_reward, terminated, truncated, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total

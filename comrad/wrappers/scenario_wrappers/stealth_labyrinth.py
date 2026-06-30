@@ -11,6 +11,7 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         kill_reward=2.0,
         damage_taken_penalty_per_hp=-0.02,
         death_penalty=-1.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.room_discovery_reward = float(room_discovery_reward)
@@ -25,6 +26,12 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         self.best_progress_milestones = None
         self.prev_team_hp = None
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
+
+        self._prev_destroyed = 0
+        self._prev_alive = True
 
     def _num_agents(self) -> int:
         return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -67,13 +74,30 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.best_destroyed = None
         self.best_rooms_seen = None
         self.best_progress_milestones = None
         self.prev_team_hp = None
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+
+        self._prev_destroyed = 0
+        self._prev_alive = True
         self._sync(info)
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -128,7 +152,6 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
             shaped_team_reward += self.first_room_discovery_reward
             delta_rooms_seen = max(0, delta_rooms_seen - 1)
         shaped_team_reward += delta_rooms_seen * self.room_discovery_reward
-        shaped_team_reward += delta_targets_lit * self.target_lit_reward
         shaped_team_reward += delta_destroyed * self.kill_reward
         shaped_team_reward += delta_team_damage * self.damage_taken_penalty_per_hp
 
@@ -153,5 +176,36 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
         info["success"] = success
         if terminated or truncated:
             info["orig_env_reward"] = self.orig_env_reward
+
+        player_id = getattr(self.env.unwrapped, "player_id", -1)
+        is_alive = (player_id == 0 and p1_alive > 0) or (player_id == 1 and p2_alive > 0)
+        both_alive = p1_alive > 0 and p2_alive > 0
+        delta_destroyed = max(0, destroyed - self._prev_destroyed)
+        delta_rooms_seen = max(0, rooms_seen - self.best_rooms_seen) if self.best_rooms_seen is not None else 0
+        delta_progress = max(0, progress_milestones - self.best_progress_milestones) if self.best_progress_milestones is not None else 0
+        delta_team_damage = max(0.0, self.prev_team_hp - team_hp) if self.prev_team_hp is not None else 0.0
+
+        if self.track_coop:
+            made_contribution = delta_destroyed > 0 or delta_rooms_seen > 0 or delta_progress > 0
+            took_damage_no_kill = delta_team_damage > 0 and delta_destroyed == 0
+
+            coop = 1.0 if made_contribution and both_alive else 0.0
+            defect = 1.0 if not is_alive or took_damage_no_kill else 0.0
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
+        self._prev_destroyed = destroyed
+        self._prev_alive = is_alive
 
         return obs, total_reward, terminated, truncated, info

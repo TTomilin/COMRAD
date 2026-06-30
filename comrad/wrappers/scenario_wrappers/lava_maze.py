@@ -14,6 +14,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         distance_reward_scale=0.5,
         lava_burn_penalty_scale=0.02,
         signal_penalty=-0.025,
+        track_coop=True,
     ):
         super().__init__(env)
         self.grid_size = grid_size
@@ -32,6 +33,11 @@ class LavaMazeRewardShaping(gym.Wrapper):
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
+        self._prev_levels = 0
+        self._prev_signal = 0
 
     def _decode_maze_grid(self, bits_0, bits_1, bits_2, grid_size=None):
         """
@@ -107,6 +113,8 @@ class LavaMazeRewardShaping(gym.Wrapper):
 
         if not self.prev_vars:
             self.sync_vars(info)
+            self._prev_levels = self._safe_int(info.get("USER22", 0), 0)
+            self._prev_signal = self._safe_int(info.get("USER16", 0), 0)
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = self.step_penalty
@@ -208,15 +216,85 @@ class LavaMazeRewardShaping(gym.Wrapper):
             info["true_objective"] = current_levels
 
         self.sync_vars(info)
+
+        curr_signal = self._safe_int(info.get("USER16", 0), 0)
+        signal_sent = curr_signal != 0
+
+        if self.track_coop:
+            player_id = getattr(self.env.unwrapped, "player_id", -1)
+            if player_id == 1:
+                coop = 1.0 if signal_sent else 0.0
+                defect = 1.0 if not signal_sent and self._prev_levels > 0 and current_levels == 0 else 0.0
+            else:
+                # Receiver cooperates by making directional progress toward goal
+                curr_p1_x = self._safe_int(info.get("USER14", -1), -1)
+                curr_p1_y = self._safe_int(info.get("USER15", -1), -1)
+                prev_p1_x = self._safe_int(self.prev_vars.get("USER14", -1), -1)
+                prev_p1_y = self._safe_int(self.prev_vars.get("USER15", -1), -1)
+                curr_goal_x = self._safe_int(info.get("USER13", -1), -1)
+                curr_goal_y = self._safe_int(info.get("USER18", -1), -1)
+                prev_goal_x = self._safe_int(self.prev_vars.get("USER13", -1), -1)
+                prev_goal_y = self._safe_int(self.prev_vars.get("USER18", -1), -1)
+
+                made_progress = False
+                if (curr_p1_x != -1 and curr_p1_y != -1 and curr_goal_x != -1 and curr_goal_y != -1 and
+                    prev_p1_x != -1 and prev_p1_y != -1 and
+                    curr_goal_x == prev_goal_x and curr_goal_y == prev_goal_y):
+                    grid = self._decode_maze_grid(
+                        self._safe_int(info.get("USER19", 0), 0),
+                        self._safe_int(info.get("USER20", 0), 0),
+                        self._safe_int(info.get("USER21", 0), 0),
+                        self._grid_size_from(info),
+                    )
+                    curr_dist = self._get_bfs_distance(grid, curr_p1_x, curr_p1_y, curr_goal_x, curr_goal_y)
+                    prev_dist = self._get_bfs_distance(grid, prev_p1_x, prev_p1_y, prev_goal_x, prev_goal_y)
+                    made_progress = curr_dist != 999 and prev_dist != 999 and curr_dist < prev_dist
+
+                coop = 1.0 if made_progress else 0.0
+                defect = 1.0 if not made_progress and signal_sent else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
+        self._prev_levels = current_levels
+        self._prev_signal = curr_signal
+
         return obs, individual_reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.sync_vars(info)
         self.flash_timer = 0
         self.progress_occurred = False
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self._prev_levels = 0
+        self._prev_signal = 0
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def sync_vars(self, info):
         info = info or {}

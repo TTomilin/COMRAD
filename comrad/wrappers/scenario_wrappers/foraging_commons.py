@@ -66,6 +66,7 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         # cleanup_reward=0.25,
         cleanup_reward=0.03,
         death_penalty=-1.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.harvest_reward = harvest_reward
@@ -73,7 +74,10 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         self.death_penalty = death_penalty
 
         self.prev_vars = {}
-        self.episode_steps = 0
+        self._step_count = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _player_index(self) -> int:
         return int(max(0, min(3, getattr(self.env.unwrapped, "player_id", 0))))
@@ -95,10 +99,24 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.prev_vars = {}
-        self.episode_steps = 0
+        self._step_count = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         self._sync(info)
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -106,7 +124,7 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
             reward = 0.0
         reward = float(reward)
 
-        self.episode_steps += 1
+        self._step_count += 1
 
         if info is None:
             return obs, reward, terminated, truncated, info
@@ -114,7 +132,7 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         if not self.prev_vars:
             self._sync(info)
             if terminated or truncated:
-                info["true_objective"] = float(self.episode_steps)
+                info["true_objective"] = float(self._step_count)
             return obs, reward, terminated, truncated, info
 
         shaped_reward = 0.0
@@ -140,8 +158,26 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
 
         reward += shaped_reward
 
+        if self.track_coop:
+            delta_harvests = curr_harvests - prev_harvests
+            delta_cleanups = curr_cleanups - prev_cleanups
+            coop = 1.0 if delta_cleanups > 0 else 0.0
+            defect = 1.0 if delta_harvests > 0 else 0.0
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
         if terminated or truncated:
-            info["true_objective"] = float(self.episode_steps)
+            info["true_objective"] = float(self._step_count)
+            if self.track_coop:
+                self._record_episode_stats(info)
 
         self._sync(info)
         return obs, reward, terminated, truncated, info
