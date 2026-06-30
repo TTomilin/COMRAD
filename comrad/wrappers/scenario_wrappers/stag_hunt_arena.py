@@ -148,8 +148,9 @@ class StagHuntArenaRewardShaping(gym.Wrapper):
             info["orig_env_reward"] = self.orig_env_reward
 
         if self.track_coop:
-            coop = 1.0 if curr_damagecount > self.best_damagecount else 0.0
-            defect = 1.0 if delta_own_rabbit_kills > 0.0 else 0.0
+            hurting_stag = curr_damagecount > self.best_damagecount
+            coop = 1.0 if hurting_stag and delta_own_rabbit_kills == 0.0 else 0.0
+            defect = 1.0 if delta_own_rabbit_kills > 0.0 and not hurting_stag else 0.0
             info["coop_step_signal"] = coop
             info["defect_step_signal"] = defect
 

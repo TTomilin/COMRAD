@@ -161,8 +161,8 @@ class ForagingCommonsRewardShaping(gym.Wrapper):
         if self.track_coop:
             delta_harvests = curr_harvests - prev_harvests
             delta_cleanups = curr_cleanups - prev_cleanups
-            coop = 1.0 if delta_cleanups > 0 else 0.0
-            defect = 1.0 if delta_harvests > 0 else 0.0
+            coop = 1.0 if delta_cleanups > 0 and delta_harvests == 0 else 0.0
+            defect = 1.0 if delta_harvests > 0 and delta_cleanups == 0 else 0.0
             info["coop_step_signal"] = coop
             info["defect_step_signal"] = defect
 

@@ -1,0 +1,4 @@
+proportion,C_payoff_mean,C_payoff_std,D_payoff_mean,D_payoff_std,avg_payoff
+0.0,20.0,0.0,-30.0,0.0,-30.0
+0.5,47.0,0.0,-12.5,0.0,17.25
+1.0,74.0,0.0,5.0,0.0,74.0

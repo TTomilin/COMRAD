@@ -19,9 +19,7 @@ class CooperationTracker:
             self.defect[i] += float(infos[i].get("defect_step_signal", 0.0))
 
     def on_episode_end(self, record):
-        if not any(self.coop) and not any(self.defect):
-            return
-
+        agent_idx = int(record.get("agent", 0))
         for i in range(self.num_agents):
             total = self.coop[i] + self.defect[i]
             record[f"agent{i}_coop_rate"] = self.coop[i] / max(total, 1.0)
@@ -29,8 +27,8 @@ class CooperationTracker:
             record[f"agent{i}_coop_steps"] = self.coop[i]
             record[f"agent{i}_defect_steps"] = self.defect[i]
         self.episodes.append(record)
-        self.coop = [0.0] * self.num_agents
-        self.defect = [0.0] * self.num_agents
+        self.coop[agent_idx] = 0.0
+        self.defect[agent_idx] = 0.0
 
 
 def main():
@@ -55,9 +53,10 @@ def main():
         return
 
     summary = {}
-    for col in ["cooperation_index", "defector_index",
+    for col in ["reward", "cooperation_index", "defector_index",
                  "agent0_coop_rate", "agent0_defect_rate",
-                 "agent1_coop_rate", "agent1_defect_rate"]:
+                 "agent1_coop_rate", "agent1_defect_rate",
+                 "true_objective"]:
         vals = [d[col] for d in tracker.episodes if col in d]
         if vals:
             summary[f"{col}_mean"] = float(np.mean(vals))
@@ -68,9 +67,12 @@ def main():
         if k.endswith("_mean"):
             print(f"  {k}: {v:.4f}")
 
+    all_keys = set()
+    for ep in tracker.episodes:
+        all_keys.update(ep.keys())
     csv_path = os.path.join(cfg.train_dir, cfg.experiment, "cooperation_results.csv")
     with open(csv_path, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=sorted(tracker.episodes[0].keys()))
+        writer = csv.DictWriter(f, fieldnames=sorted(all_keys))
         writer.writeheader()
         writer.writerows(tracker.episodes)
     print(f"\nPer-episode results saved to: {csv_path}")
