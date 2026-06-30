@@ -441,6 +441,8 @@ class PlatformChainScenario(Scenario):
         acs.add_global_var("pc_dragged_links_global", 53, "int")
         acs.add_global_var("pc_level_reached_global", 54, "int")
         acs.add_global_var("pc_route_progress_global", 55, "int")
+        acs.add_global_var("pc_p1_checkpoint_global", 60, "int")
+        acs.add_global_var("pc_p2_checkpoint_global", 61, "int")
         for player_idx in range(max_players):
             acs.add_map_var(f"pc_player_checkpoint_{player_idx}", "int", player_idx)
         for idx in range(level_count):
@@ -796,6 +798,8 @@ function int PcAdvanceCheckpoint(int current_idx, int safe_idx) {{
                 if (any_active) {{
                     pc_level_reached_global = min_lvl;
                     pc_route_progress_global = joint_progress_fixed;
+                    pc_p1_checkpoint_global = pc_player_checkpoint_0;
+                    pc_p2_checkpoint_global = pc_player_checkpoint_1;
                     if (min_lvl >= {route_last_idx}) {{
                         Delay(1);
                         Exit_Normal(0);
