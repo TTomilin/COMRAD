@@ -12,6 +12,7 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         timeout_penalty: float = -1.0,
         step_penalty: float = -0.002,
         last_zone: int | None = None,
+        track_coop=True,
     ):
         super().__init__(env)
         self.zone_advance_reward = float(zone_advance_reward)
@@ -24,6 +25,9 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         self.prev_team_max_zone = 0
         self.prev_completed_pairs = 0
         self.orig_env_reward = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _num_agents(self) -> int:
         return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -67,6 +71,8 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
 
     def _sync_progress(self, info) -> None:
         zone_a, zone_b = self._zones(info)
+        self._prev_zone_a = zone_a
+        self._prev_zone_b = zone_b
         self.prev_team_max_zone = self._team_max_zone(info, zone_a, zone_b)
         if self._has_per_player_progress(info):
             self.prev_completed_pairs = self._completed_pairs(zone_a, zone_b)
@@ -75,12 +81,28 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.orig_env_reward = 0.0
         self.prev_team_max_zone = 0
         self.prev_completed_pairs = 0
+        self._prev_zone_a = 0
+        self._prev_zone_b = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         if info is not None:
             self._sync_progress(info)
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -123,9 +145,30 @@ class CoopPuzzleRewardShaping(gym.Wrapper):
         info["true_objective"] = float(completed_pairs)
         info["success"] = success
 
-        self._sync_progress(info)
+        if self.track_coop:
+            delta_zone_a = zone_a - self._prev_zone_a
+            delta_zone_b = zone_b - self._prev_zone_b
+            player_id = int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
+            if player_id == 0:
+                my_progress = delta_zone_a > 0
+            else:
+                my_progress = delta_zone_b > 0
+            coop = 1.0 if my_progress else 0.0
+            defect = 1.0 if not my_progress and not success else 0.0
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
 
-        if terminated or truncated:
-            info["orig_env_reward"] = self.orig_env_reward
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
+        self._sync_progress(info)
 
         return obs, env_reward + shaped_reward, terminated, truncated, info
