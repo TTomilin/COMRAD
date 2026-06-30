@@ -50,8 +50,7 @@ def _print_eval_summaries(cfg, eval_stats):
 
             results[avg_tag] = float(stat_value)
 
-            # for key stats report min/max as well
-            if key in ("reward", "true_objective", "len"):
+            if key in ("reward", "true_objective", "len", "cooperation_index", "defector_index"):
                 results[min_tag] = float(min(stat[policy_id]))
                 results[max_tag] = float(max(stat[policy_id]))
 
