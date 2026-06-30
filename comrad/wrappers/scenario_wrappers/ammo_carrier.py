@@ -91,6 +91,7 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         pressure_bonus_per_enemy=0.02,
         contextual_pickup_reward=0.02,
         runner_damage_taken_penalty=-0.005,
+        track_coop=True,
     ):
         super().__init__(env)
         self.kill_reward = float(kill_reward)
@@ -106,7 +107,10 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.episode_steps = 0
+        self._step_count = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _player_id(self) -> int:
         return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
@@ -135,21 +139,37 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
             "HEALTH": self._float(info, "HEALTH"),
             "AMMO1": self._float(info, "AMMO1"),
             "KILLCOUNT": self._float(info, "KILLCOUNT"),
+            "HITCOUNT": self._float(info, "HITCOUNT"),
             "DAMAGECOUNT": self._float(info, "DAMAGECOUNT"),
             "USER41": self._float(info, "USER41"),
             "USER42": self._float(info, "USER42"),
             "USER43": self._float(info, "USER43"),
             "USER44": self._float(info, "USER44"),
             "USER45": self._float(info, "USER45"),
+            "USER46": self._float(info, "USER46"),
         }
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.prev_vars = {}
         self.orig_env_reward = 0.0
-        self.episode_steps = 0
+        self._step_count = 0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         self._sync(info)
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -158,7 +178,7 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
             reward = 0.0
         reward = float(reward)
         self.orig_env_reward += reward
-        self.episode_steps += 1
+        self._step_count += 1
 
         if info is None:
             return obs, reward, terminated, truncated, info
@@ -166,7 +186,7 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         if not self.prev_vars:
             self._sync(info)
             if terminated or truncated:
-                info["true_objective"] = float(self.episode_steps)
+                info["true_objective"] = float(self._step_count)
                 info["orig_env_reward"] = self.orig_env_reward
             return obs, reward, terminated, truncated, info
 
@@ -224,8 +244,47 @@ class AmmoCarrierRewardShaping(gym.Wrapper):
         total_reward = reward + shaped_reward
 
         if terminated or truncated:
-            info["true_objective"] = float(self.episode_steps)
+            info["true_objective"] = float(self._step_count)
             info["orig_env_reward"] = self.orig_env_reward
+
+        if self.track_coop:
+            coop = 0.0
+            defect = 0.0
+            if self._is_defender():
+                curr_kills = self._float(info, "KILLCOUNT")
+                prev_kills = self.prev_vars.get("KILLCOUNT", 0.0)
+                delta_kills = curr_kills - prev_kills
+                curr_hits = self._float(info, "HITCOUNT")
+                prev_hits = self.prev_vars.get("HITCOUNT", 0.0)
+                delta_hits = curr_hits - prev_hits
+                visible_enemies = self._float(info, "USER46")
+                shooter_ammo = self._float(info, "USER41")
+                has_ammo = shooter_ammo > 0.0
+                engaged = delta_kills > 0.0 or delta_hits > 0.0
+                coop = 1.0 if engaged else 0.0
+                defect = 1.0 if has_ammo and not engaged and visible_enemies > 0.0 else 0.0
+            else:
+                curr_deliveries = self._float(info, "USER42")
+                prev_deliveries = self.prev_vars.get("USER42", 0.0)
+                delta_deliveries = curr_deliveries - prev_deliveries
+                shooter_ammo = self._float(info, "USER41")
+                defender_low = shooter_ammo < self.reserve_target * 0.3
+                coop = 1.0 if delta_deliveries > 0.0 else 0.0
+                defect = 1.0 if defender_low and delta_deliveries == 0.0 else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
 
         self._sync(info)
         return obs, total_reward, terminated, truncated, info

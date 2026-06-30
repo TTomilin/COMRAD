@@ -121,6 +121,7 @@ class AmmoCarrierScenario(Scenario):
         acs.add_global_var("ac_world_ammo_packs_global", 43, "int")
         acs.add_global_var("ac_alive_enemies_global", 44, "int")
         acs.add_global_var("ac_low_ammo_alert_global", 45, "int")
+        acs.add_global_var("ac_visible_enemies_global", 46, "int")
 
         # Script 1: Player Setup & Role Assignment
         script_setup = """
@@ -356,6 +357,7 @@ class AmmoCarrierScenario(Scenario):
         ac_world_ammo_packs_global = 0;
         ac_alive_enemies_global = 0;
         ac_low_ammo_alert_global = 0;
+        ac_visible_enemies_global = 0;
 
         while (TRUE) {
             int shooter_ammo = 0;
@@ -369,6 +371,11 @@ class AmmoCarrierScenario(Scenario):
                 ac_low_ammo_alert_global = 0;
             }
             ac_alive_enemies_global = ThingCount(T_NONE, 700);
+            if (ThingCount(T_NONE, 100) > 0 && ThingCount(T_NONE, 700) > 0) {
+                ac_visible_enemies_global = CheckSight(100, 700, 0);
+            } else {
+                ac_visible_enemies_global = 0;
+            }
             Delay(4);
         }
         """, number=7)
