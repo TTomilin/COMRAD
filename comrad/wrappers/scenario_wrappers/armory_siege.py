@@ -116,6 +116,7 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         ammo_keys=["AMMO1", "AMMO2"],
         health_pickup_reward=0.01,
         survival_bonus=10.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.core_alive_reward = core_alive_reward
@@ -137,6 +138,9 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.max_core_hp = None
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _get_core_health(self, info):
         core_raw = info.get("USER1")
@@ -233,14 +237,54 @@ class ArmorySiegeRewardShaping(gym.Wrapper):
         if terminated or truncated:
             info["true_objective"] = self.orig_env_reward
 
+
+        if self.track_coop:
+            curr_kills = info.get("KILLCOUNT", 0)
+            prev_kills = self.prev_vars.get("KILLCOUNT", 0) if self.prev_vars else 0
+            delta_kills_now = curr_kills - prev_kills
+            curr_hits = info.get("HITCOUNT", 0)
+            prev_hits = self.prev_vars.get("HITCOUNT", 0) if self.prev_vars else 0
+            delta_hits_now = curr_hits - prev_hits
+
+            curr_core = self._get_core_health(info)
+            prev_core_val = self.prev_vars.get("USER1") if self.prev_vars else None
+            
+            engaged = delta_kills_now > 0 or delta_hits_now > 0
+            core_decreasing = (curr_core is not None and prev_core_val is not None and curr_core < prev_core_val)
+            enemies_present = core_decreasing
+            coop = 1.0 if engaged else 0.0
+            defect = 1.0 if not engaged and enemies_present else 0.0
+
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if terminated or truncated:
+                self._record_episode_stats(info)
+
         self.sync_vars(info)
+
         return obs, reward, terminated, truncated, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.max_core_hp = None
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
 
         if info is not None and "USER1" in info:
             self.sync_vars(info)
