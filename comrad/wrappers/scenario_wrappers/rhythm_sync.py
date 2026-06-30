@@ -8,6 +8,7 @@ class RhythmSyncRewardShaping(gym.Wrapper):
         stage_completion_reward=1.0,
         failure_penalty=-1.0,
         completion_bonus=0.0,
+        track_coop=True,
     ):
         super().__init__(env)
         self.stage_completion_reward = float(stage_completion_reward)
@@ -17,6 +18,9 @@ class RhythmSyncRewardShaping(gym.Wrapper):
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.episode_shaped_return = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
+        self.track_coop = track_coop
 
     def _num_agents(self) -> int:
         return int(max(1, getattr(self.env.unwrapped, "num_agents", 2)))
@@ -29,6 +33,9 @@ class RhythmSyncRewardShaping(gym.Wrapper):
     @staticmethod
     def _flag(info, key: str) -> float:
         return 1.0 if float(info.get(key, 0.0)) > 0.0 else 0.0
+
+    def _player_id(self) -> int:
+        return int(max(0, getattr(self.env.unwrapped, "player_id", 0)))
 
     def _completed_stages(self, info) -> float:
         if info is None:
@@ -54,11 +61,25 @@ class RhythmSyncRewardShaping(gym.Wrapper):
 
     def reset(self, **kwargs):
         obs, info = self.env.reset(**kwargs)
+        if info is not None and self.track_coop:
+            self._record_episode_stats(info)
         self.prev_vars = {}
         self.orig_env_reward = 0.0
         self.episode_shaped_return = 0.0
+        self.episode_coop_steps = 0
+        self.episode_defect_steps = 0
         self._sync(info)
         return obs, info
+
+    def _record_episode_stats(self, info):
+        extra = info.setdefault("episode_extra_stats", {})
+        total = self.episode_coop_steps + self.episode_defect_steps
+        extra["coop_steps"] = self.episode_coop_steps
+        extra["defect_steps"] = self.episode_defect_steps
+        extra["total_coop_defect_steps"] = total
+        if total > 0:
+            extra["cooperation_index"] = self.episode_coop_steps / total
+            extra["defector_index"] = self.episode_defect_steps / total
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -103,9 +124,41 @@ class RhythmSyncRewardShaping(gym.Wrapper):
         total_reward = reward + shaped_reward
         self.episode_shaped_return += total_reward
 
+        if self.track_coop:
+            delta_completed = curr_completed - prev_completed
+            delta_failed = curr_failed - prev_failed
+            player_id = self._player_id()
+            in_range = info.get(f"USER{60 + player_id}", 0) > 0
+
+            if delta_completed > 0.0:
+                coop = 1.0
+                defect = 0.0
+            elif delta_failed > 0.0:
+                if in_range:
+                    coop = 1.0
+                    defect = 0.0
+                else:
+                    coop = 0.0
+                    defect = 1.0
+            else:
+                coop = 0.0
+                defect = 0.0
+            info["coop_step_signal"] = coop
+            info["defect_step_signal"] = defect
+
+            self.episode_coop_steps += coop
+            self.episode_defect_steps += defect
+
+            if coop > 0.0 or defect > 0.0:
+                net_coop = coop - defect
+                info.setdefault("episode_extra_stats", {})["cooperation_index"] = max(0.0, net_coop)
+                info["episode_extra_stats"]["defector_index"] = max(0.0, -net_coop)
+
         if terminated or truncated:
             info["true_objective"] = curr_completed
             info["orig_env_reward"] = self.orig_env_reward
+            if self.track_coop:
+                self._record_episode_stats(info)
 
         self._sync(info)
         return obs, total_reward, terminated, truncated, info

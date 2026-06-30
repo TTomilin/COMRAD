@@ -390,6 +390,8 @@ class RhythmSyncScenario(Scenario):
         acs.add_global_var("switch_y_b", 36, "int")
         acs.add_global_var("cue_visible_a", 37, "int")
         acs.add_global_var("cue_visible_b", 38, "int")
+        acs.add_global_var("in_range_a", 60, "int")
+        acs.add_global_var("in_range_b", 61, "int")
 
         for idx in range(1, num_sections + 1):
             acs.add_map_var(f"stage_type_{idx}", "int", 0)
@@ -590,6 +592,8 @@ function void ResetPending(void) {
     pending_b = 0;
     press_tic_a = -999999;
     press_tic_b = -999999;
+    in_range_a = 0;
+    in_range_b = 0;
 }
 
 function void SyncPublicState(void) {
@@ -698,6 +702,8 @@ function void TryUseSwitchForPlayer(int player_num) {{
     int py = GetActorY(0) >> 16;
 
     if (AbsInt(px - sx) <= {switch_use_range} && AbsInt(py - sy) <= {switch_use_range}) {{
+        if (side == 0) {{ in_range_a = 1; }}
+        if (side == 1) {{ in_range_b = 1; }}
         HandleSwitchPress(current_stage, side);
     }}
 }}
