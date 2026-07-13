@@ -113,6 +113,20 @@ Generation workflows are in `DoomGen/`. The usual split is:
 
 If a scenario generator changes, rebuild the corresponding WAD in `DoomGen/` and copy the regenerated artifact back into `comrad/scenarios/` before training or evaluation.
 
+### Using DoomGen as a Python library
+
+DoomGen is declared as an optional dependency in the uv workspace. It is **not** installed by a plain `uv sync`:
+
+```bash
+uv sync --extra doomgen      # install doomgen + its deps
+# or
+uv run --extra doomgen python -m comrad.train ...   # one-off with doomgen available
+# or
+uv pip install -e DoomGen/   # editable install directly from local checkout
+```
+
+After any of these, `import doomgen` works from the root Python environment. Without `--extra doomgen`, the core COMRAD package remains self-contained and DoomGen is not pulled in.
+
 ## Tests
 
 Run COMRAD and Sample Factory tests with `uv`:
