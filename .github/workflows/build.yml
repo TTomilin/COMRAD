@@ -22,10 +22,13 @@ jobs:
         run: uv sync --frozen --all-extras
 
       - name: Verify doomgen import
-        run: uv run --extra doomgen python -c "import doomgen; print(doomgen.__version__)"
+        run: uv run python -c "import doomgen; print(doomgen.__version__)"
 
       - name: Run tests
         run: uv run pytest comrad/tests sample_factory/tests -v
+
+      - name: Run DoomGen tests
+        run: uv run pytest DoomGen/tests -v
 
       - name: Build package
         run: uv run python -m build
