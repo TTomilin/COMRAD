@@ -58,6 +58,7 @@ visual = [
     "pypng>=0.20220715.0",
     "shapely>=2.1.2",
 ]
+doomgen = ["doomgen"]
 
 [dependency-groups]
 dev = [
@@ -70,6 +71,12 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["comrad*", "sample_factory*"]
+
+[tool.uv.workspace]
+members = [".", "DoomGen"]
+
+[tool.uv.sources]
+doomgen = { workspace = true }
 
 [tool.ruff]
 line-length = 120

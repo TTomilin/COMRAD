@@ -67,16 +67,6 @@ warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
 
-[tool.uv.workspace]
-members = [
-    ".",
-    ".",
-    ".",
-]
-
-[tool.uv.sources]
-doomgen = { workspace = true, editable = true }
-
 [dependency-groups]
 dev = [
     "doomgen[dev]",
