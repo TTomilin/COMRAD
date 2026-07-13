@@ -4,10 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "COMRAD"
-version = "0.1.0"
-description = "comrad"
+version = "1.0.0"
+description = "MARL benchmark suite in ViZDoom"
 readme = "README.md"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Khoi H.B. Nguyen", email = "baokhoi136@gmail.com"},
+    {name = "Tristan Tomilin", email = "tristan.tomilin@hotmail.com"},
+    {name = "Dimitar Zhekov", email = "mitko.zh@gmail.com"},
+]
+keywords = ["marl", "vizdoom", "reinforcement-learning", "multi-agent", "benchmark"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Games/Entertainment :: First Person Shooters",
+]
 dependencies = [
     "numpy>=1.26.4,<2.0",
     "gymnasium[classic-control]>=0.27,<1.0",
@@ -38,6 +55,10 @@ dependencies = [
     "scipy>=1.17.0",
     "vizdoom>=1.3.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/TTomilin/COMRAD"
+Repository = "https://github.com/TTomilin/COMRAD"
 
 [project.optional-dependencies]
 sample-factory = [
