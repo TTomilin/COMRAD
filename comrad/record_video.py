@@ -42,6 +42,7 @@ def add_recording_args(parser):
     parser.add_argument("--output_dir", default=None, type=str, help="Output directory for videos (defaults to experiment directory)")
     parser.add_argument("--video_prefix", default="recording", type=str, help="Prefix for video filename")
     parser.add_argument("--overwrite_video", action="store_true", help="Overwrite existing video files")
+    parser.add_argument("--load_checkpoint_file", default=None, type=str, help="Load this exact checkpoint file")
     parser.set_defaults(max_num_episodes=1, max_num_frames=10000)
 
 
@@ -83,6 +84,17 @@ def make_env_for_recording(cfg: Config, resolution: str):
         env_config=AttrDict(worker_index=0, vector_index=0, env_id=1),
         render_mode="rgb_array"
     )
+
+
+def checkpoint_paths_for_recording(cfg: Config, policy_id: int):
+    if cfg.load_checkpoint_file:
+        checkpoint_file = os.path.abspath(cfg.load_checkpoint_file)
+        if not os.path.isfile(checkpoint_file):
+            raise FileNotFoundError(f"Checkpoint file not found: {checkpoint_file}")
+        return [checkpoint_file]
+
+    name_prefix = dict(latest="checkpoint", best="best")[cfg.load_checkpoint_kind]
+    return Learner.get_checkpoints(Learner.checkpoint_dir(cfg, policy_id), f"{name_prefix}_*")
 
 
 def record_video(cfg: Config) -> Tuple[StatusCode, float]:
@@ -130,8 +142,7 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
     actor_critic.model_to_device(device)
 
     policy_id = cfg.policy_index
-    name_prefix = dict(latest="checkpoint", best="best")[cfg.load_checkpoint_kind]
-    checkpoints = Learner.get_checkpoints(Learner.checkpoint_dir(cfg, policy_id), f"{name_prefix}_*")
+    checkpoints = checkpoint_paths_for_recording(cfg, policy_id)
     checkpoint_dict = Learner.load_checkpoint(checkpoints, device)
     if checkpoint_dict:
         actor_critic.load_state_dict(checkpoint_dict["model"])

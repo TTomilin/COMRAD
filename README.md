@@ -2,6 +2,10 @@
 
 COMRAD is a cooperative multi-agent reinforcement learning benchmark built on ViZDoom for first-person visual coordination. This repository contains the benchmark runtime assets, COMRAD-specific environment and model code, a modified Sample Factory training stack, paper artifacts, and the scripts used to produce figures, tables, and diagnostic media.
 
+<p align="center">
+  <img src="results/demo_all_checkpoints/comrad_vid_gif_540.gif" alt="COMRAD demo" style="width: 100%; max-width: 960px;">
+</p>
+
 ## Repository map
 
 | Path | Purpose |
