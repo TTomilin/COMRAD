@@ -36,7 +36,7 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "comrad",
+    "comrad-bench",
     "doomgen",
 ]
 
@@ -391,7 +391,7 @@ wheels = [
 ]
 
 [[package]]
-name = "comrad"
+name = "comrad-bench"
 version = "1.0.0"
 source = { editable = "." }
 dependencies = [
