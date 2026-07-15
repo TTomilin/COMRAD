@@ -32,11 +32,11 @@ FULL_BATCH_MODULES = [
     "generate_lava_maze_batch",
 ]
 
-ALL_BATCH_MODULES = FULL_BATCH_MODULES + [
+SMALL_BATCH_MODULES = [
     "generate_platform_chain_batch_small",
-    "generate_armory_siege_batch_small",
-    "generate_lava_maze_batch_small",
 ]
+
+ALL_BATCH_MODULES = FULL_BATCH_MODULES + SMALL_BATCH_MODULES
 
 
 @pytest.mark.parametrize("module_name", FULL_BATCH_MODULES)

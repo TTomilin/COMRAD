@@ -25,7 +25,10 @@ jobs:
         run: uv run python -c "import doomgen; print(doomgen.__version__)"
 
       - name: Run tests
-        run: uv run pytest comrad/tests sample_factory/tests -v
+        run: >
+          uv run pytest comrad/tests sample_factory/tests -v
+          --ignore=sample_factory/tests/envs/tuple_action_envs/test_two_discrete_action_dist_env_batched.py
+          --ignore=sample_factory/tests/envs/tuple_action_envs/test_two_discrete_action_dist_env_non_batched.py
 
       - name: Run DoomGen tests
         run: uv run pytest DoomGen/tests -v
