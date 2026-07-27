@@ -106,4 +106,7 @@ line-length = 120
 extend-exclude = ["vizdoom.pyi", "make_doomgen_variants.py"]
 
 [tool.ruff.lint]
-ignore = ["E701"]
+ignore = [
+        "E701",
+        "F706",
+    ]
