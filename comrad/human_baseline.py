@@ -8,19 +8,15 @@ from os.path import join
 from typing import Dict, List
 
 import numpy as np
-from pynput.keyboard import Key, Listener
 from sample_factory.algo.utils.spaces.discretized import Discretized
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.utils import log
 
 from comrad.utils.doom_utils import doom_env_by_name, make_doom_env_impl
 
-# WSL2: ViZDoom needs an X-server with OpenGL. WSLg's :0 doesn't support GLX and will segfault.
-# Install VcXsrv on Windows, then start it from Windows CMD:
-# "C:\Program Files\VcXsrv\vcxsrv.exe" :1 -ac -lesspointer -multiwindow -clipboard -wgl -dpi auto
-# The -wgl flag enables OpenGL support via WGL. Then set these env vars before running:
-# export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}'):1
-# export SDL_RENDER_DRIVER=software
+# WSL2: ViZDoom needs an X-server. WSLg works with SDL_SOFTWARE_DRIVER:
+#   export DISPLAY=:0
+#   export SDL_RENDER_DRIVER=software
 
 
 def parse_args():
@@ -158,36 +154,52 @@ class HumanBaselineRecorder:
 
 
 class HumanKeyboardHandler:
-    """Captures keyboard input and translates to ViZDoom actions."""
-
-    DEFAULT_BUTTON_KEYS = {
-        "MOVE_FORWARD": Key.up,
-        "MOVE_BACKWARD": Key.down,
-        "TURN_LEFT": Key.left,
-        "TURN_RIGHT": Key.right,
-        "MOVE_LEFT": "a",
-        "MOVE_RIGHT": "d",
-        "MOVE_UP": "w",
-        "MOVE_DOWN": "s",
-        "LOOK_UP": Key.page_up,
-        "LOOK_DOWN": Key.page_down,
-        "ATTACK": Key.space,
-        "JUMP": Key.ctrl_l,
-        "CROUCH": Key.ctrl_r,
-        "SPEED": Key.shift,
-        "USE": "e",
-        "SELECT_WEAPON1": "1",
-        "SELECT_WEAPON2": "2",
-        "SELECT_WEAPON3": "3",
-        "SELECT_WEAPON4": "4",
-        "SELECT_WEAPON5": "5",
-        "SELECT_WEAPON6": "6",
-        "SELECT_WEAPON7": "7",
-        "SELECT_NEXT_WEAPON": "q",
-        "SELECT_PREV_WEAPON": "r",
-    }
+    """
+    WASD: Move/Strafe
+    Arrow LR: Turn
+    Space: Jump
+    C: Attack (shoot)
+    E: Use
+    1-7: Select weapon
+    Q/R: Next/Prev weapon
+    Page Up/Down: Look up/down
+    Ctrl+R: Crouch
+    Shift: Speed
+    ESC: exit
+    """
 
     def __init__(self, doom_config_path: str, num_buttons: int):
+        try:
+            from pynput.keyboard import Key
+        except ImportError:
+            log.error("pynput requires an X display. Set DISPLAY to a running X server.")
+            raise
+
+        self._esc_key = Key.esc
+        self._button_keys = {
+            "MOVE_FORWARD": "w",
+            "MOVE_BACKWARD": "s",
+            "TURN_LEFT": Key.left,
+            "TURN_RIGHT": Key.right,
+            "MOVE_LEFT": "a",
+            "MOVE_RIGHT": "d",
+            "ATTACK": "c",
+            "USE": "e",
+            "JUMP": Key.space,
+            "SELECT_WEAPON1": "1",
+            "SELECT_WEAPON2": "2",
+            "SELECT_WEAPON3": "3",
+            "SELECT_WEAPON4": "4",
+            "SELECT_WEAPON5": "5",
+            "SELECT_WEAPON6": "6",
+            "SELECT_WEAPON7": "7",
+            "SELECT_NEXT_WEAPON": "q",
+            "SELECT_PREV_WEAPON": "r",
+            "LOOK_UP": Key.page_up,
+            "LOOK_DOWN": Key.page_down,
+            "CROUCH": Key.ctrl_r,
+            "SPEED": Key.shift,
+        }
         self._current_actions = []
         self._terminate = False
         self._listener = None
@@ -197,7 +209,7 @@ class HumanKeyboardHandler:
         self._button_index = {name: i for i, name in enumerate(button_names)}
 
         self._key_map = {}
-        for button_name, key in self.DEFAULT_BUTTON_KEYS.items():
+        for button_name, key in self._button_keys.items():
             if button_name in self._button_index:
                 self._key_map[key] = self._button_index[button_name]
 
@@ -209,6 +221,16 @@ class HumanKeyboardHandler:
             log.warning("Unmapped doom buttons (no keyboard binding): %s", unmapped)
 
     def start(self):
+        try:
+            from pynput.keyboard import Listener
+        except ImportError:
+            log.error(
+                "pynput requires an X display. Set DISPLAY to a running X server.\n"
+                "  WSLg:   export DISPLAY=:0\n"
+                "  VcXsrv: export DISPLAY=$(grep nameserver /etc/resolv.conf | awk '{print $2}'):0\n"
+                "  Also:   export SDL_RENDER_DRIVER=software"
+            )
+            raise
         self._listener = Listener(on_press=self._on_press, on_release=self._on_release)
         self._listener.start()
 
@@ -229,7 +251,7 @@ class HumanKeyboardHandler:
         return self._terminate
 
     def _on_press(self, key):
-        if key == Key.esc:
+        if key == self._esc_key:
             self._terminate = True
             return False
         action = self._resolve_key(key)
