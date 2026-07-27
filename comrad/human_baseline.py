@@ -15,8 +15,8 @@ from sample_factory.utils.utils import log
 from comrad.utils.doom_utils import doom_env_by_name, make_doom_env_impl
 
 # WSL2: ViZDoom needs an X-server. WSLg works with SDL_SOFTWARE_DRIVER:
-#   export DISPLAY=:0
-#   export SDL_RENDER_DRIVER=software
+# export DISPLAY=:0
+# export SDL_RENDER_DRIVER=software
 
 
 def parse_args():
@@ -31,9 +31,7 @@ def parse_args():
     )
     parser.add_argument("--host_ip", default="127.0.0.1", type=str, help="IP of the host machine")
     parser.add_argument("--participant_name", default="anonymous", type=str)
-    parser.add_argument("--participant_id", default=0, type=int)
     parser.add_argument("--num_humans", default=2, type=int, help="Total human players (including host)")
-    parser.add_argument("--num_agents", default=0, type=int, help="AI agent slots (0 for pure human)")
     parser.add_argument("--num_episodes", default=10, type=int, help="Recorded episodes per participant")
     parser.add_argument("--num_calibration_episodes", default=2, type=int, help="Practice episodes (not recorded)")
     parser.add_argument("--output_dir", default="results/human_baseline", type=str)
@@ -52,7 +50,6 @@ class HumanBaselineRecorder:
         self,
         scenario: str,
         participant_name: str,
-        participant_id: int,
         role: str,
         host_ip: str,
         num_calibration_episodes: int,
@@ -60,7 +57,6 @@ class HumanBaselineRecorder:
     ):
         self.scenario = scenario
         self.participant_name = participant_name
-        self.participant_id = participant_id
         self.role = role
         self.host_ip = host_ip
         self.num_calibration_episodes = num_calibration_episodes
@@ -91,11 +87,6 @@ class HumanBaselineRecorder:
 
     def end_episode(self, terminated: bool, truncated: bool, info: Dict):
         duration = time.time() - self._episode_start_time
-        if "true_objective" in info:
-            self.current_true_objective = info["true_objective"]
-        for key, val in info.items():
-            if isinstance(val, (int, float)):
-                self.current_game_variables[key] = float(val)
         episode_record = {
             "episode": self.current_episode_idx,
             "calibration": self.is_calibration,
@@ -109,7 +100,6 @@ class HumanBaselineRecorder:
         }
         if not self.is_calibration:
             self.episodes.append(episode_record)
-            self.save()
 
     def save(self):
         result = self._build_result()
@@ -136,7 +126,6 @@ class HumanBaselineRecorder:
         return {
             "scenario": self.scenario,
             "participant_name": self.participant_name,
-            "participant_id": self.participant_id,
             "role": self.role,
             "host_ip": self.host_ip,
             "num_calibration_episodes": self.num_calibration_episodes,
@@ -342,13 +331,13 @@ def _count_doom_buttons(doom_env) -> int:
     return 14
 
 
-def run_episode(env, keyboard_handler, recorder, episode_idx, skip_frames: int):
+def run_episode(env, keyboard_handler, recorder, episode_idx, skip_frames: int, fps: int):
     recorder.start_episode(episode_idx)
     doom = env.unwrapped
     doom.mode = "human"
-    obs, info = env.reset()
+    _, info = env.reset()
     last_render_time = time.time()
-    time_between_frames = 1.0 / 35.0
+    time_between_frames = 1.0 / fps
     num_actions = _count_doom_buttons(doom)
     terminated = truncated = False
     while not terminated and not truncated and not keyboard_handler.should_terminate:
@@ -385,26 +374,20 @@ def build_env_for_player(args, player_id: int, num_agents: int, max_num_players:
 
 def main():
     args = parse_args()
-    max_num_players = args.num_agents + args.num_humans
-    if args.role == "host":
-        player_id = 0
-    else:
-        player_id = args.participant_id
-        if player_id == 0:
-            log.warning("Client participant_id=0 conflicts with host. Using participant_id=1.")
-            player_id = 1
+    num_agents = 0
+    max_num_players = num_agents + args.num_humans
+    player_id = 0 if args.role == "host" else 1
     log.info("Human baseline: %s [%s] as %s", args.env, args.role, args.participant_name)
     os.environ["DOOM_DEFAULT_UDP_PORT"] = str(args.udp_port)
-    env = build_env_for_player(args, player_id, args.num_agents, max_num_players)
+    env = build_env_for_player(args, player_id, num_agents, max_num_players)
     doom = env.unwrapped
     num_buttons = _count_doom_buttons(doom)
     keyboard_handler = HumanKeyboardHandler(doom.config_path, num_buttons)
     recorder = HumanBaselineRecorder(
         scenario=args.env,
         participant_name=args.participant_name,
-        participant_id=player_id,
         role=args.role,
-        host_ip=args.host_ip if args.role == "client" else "0.0.0.0",
+        host_ip=args.host_ip,
         num_calibration_episodes=args.num_calibration_episodes,
         output_dir=args.output_dir,
     )
@@ -415,7 +398,7 @@ def main():
         for episode_idx in range(total_episodes):
             if keyboard_handler.should_terminate:
                 break
-            run_episode(env, keyboard_handler, recorder, episode_idx, skip_frames)
+            run_episode(env, keyboard_handler, recorder, episode_idx, skip_frames, args.fps)
     except KeyboardInterrupt:
         pass
     finally:
