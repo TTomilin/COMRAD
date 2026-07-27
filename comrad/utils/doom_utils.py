@@ -413,6 +413,7 @@ def make_doom_env_impl(
             respawn_delay=doom_spec.respawn_delay,
             timelimit=timelimit,
             render_mode=render_mode,
+            host_ip=getattr(cfg, "host_ip", "127.0.0.1"),
         )
 
     record_to = cfg.record_to if "record_to" in cfg else None

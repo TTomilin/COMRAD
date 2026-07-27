@@ -209,7 +209,7 @@ class VizdoomEnv(gym.Env):
         if mode == "algo":
             self.game.set_window_visible(False)
         elif mode == "human" or mode == "replay":
-            self.game.add_game_args("+freelook 1")
+            self.game.add_game_args("+freelook 1 +vid_fullscreen 1")
             self.game.set_window_visible(True)
         else:
             raise Exception("Unsupported mode")
