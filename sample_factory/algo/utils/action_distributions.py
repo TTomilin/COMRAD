@@ -336,6 +336,10 @@ class ContinuousActionDistribution(Independent):
         kl = torch.distributions.kl.kl_divergence(self, other)
         return kl
 
+    def symmetric_kl_with_uniform_prior(self):
+        kl = 0.5 * (self.means.pow(2) + (2 * self.log_std).exp() - 2 * self.log_std - 1)
+        return kl.sum(dim=-1)
+
     def summaries(self):
         return dict(
             action_mean=self.means.mean(),

@@ -429,27 +429,37 @@ class VizdoomEnv(gym.Env):
             actions = (actions,)
 
         actions_flattened = []
-        for i, action in enumerate(actions):
-            if isinstance(spaces[i], Discretized):
-                # discretized continuous action
-                # check discretized first because it's a subclass of gym.spaces.Discrete
-                # the order of if clauses here matters! DON'T CHANGE THE ORDER OF IFS!
+        try:
+            for i, action in enumerate(actions):
+                if isinstance(spaces[i], Discretized):
+                    # discretized continuous action
+                    # check discretized first because it's a subclass of gym.spaces.Discrete
+                    # the order of if clauses here matters! DON'T CHANGE THE ORDER OF IFS!
 
-                continuous_action = spaces[i].to_continuous(action)
-                actions_flattened.append(continuous_action)
-            elif isinstance(spaces[i], gym.spaces.Discrete):
-                # standard discrete action
-                num_non_idle_actions = spaces[i].n - 1
-                action_one_hot = np.zeros(num_non_idle_actions, dtype=np.uint8)
-                if action > 0:
-                    action_one_hot[action - 1] = 1  # 0th action in each subspace is a no-op
+                    continuous_action = spaces[i].to_continuous(action)
+                    actions_flattened.append(continuous_action)
+                elif isinstance(spaces[i], gym.spaces.Discrete):
+                    # standard discrete action
+                    num_non_idle_actions = spaces[i].n - 1
+                    action_one_hot = np.zeros(num_non_idle_actions, dtype=np.uint8)
+                    if action > 0:
+                        action_one_hot[action - 1] = 1  # 0th action in each subspace is a no-op
 
-                actions_flattened.extend(action_one_hot)
-            elif isinstance(spaces[i], gym.spaces.Box):
-                # continuous action
-                actions_flattened.extend(list(action * self.delta_actions_scaling_factor))
-            else:
-                raise NotImplementedError(f"Action subspace type {type(spaces[i])} is not supported!")
+                    actions_flattened.extend(action_one_hot)
+                elif isinstance(spaces[i], gym.spaces.Box):
+                    # continuous action
+                    val = action * self.delta_actions_scaling_factor
+                    if isinstance(val, (int, float, np.number)):
+                        actions_flattened.append(float(val))
+                    else:
+                        actions_flattened.extend(list(val))
+                else:
+                    raise NotImplementedError(f"Action subspace type {type(spaces[i])} is not supported!")
+        except IndexError as e:
+            log.error(f"IndexError in _convert_actions! len(spaces)={len(spaces)}, len(actions)={len(actions)}")
+            log.error(f"actions: {actions}")
+            log.error(f"spaces: {spaces}")
+            raise e
 
         return actions_flattened
 
