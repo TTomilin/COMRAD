@@ -74,11 +74,16 @@ class BatchedIdentityEnvMixedActions(gym.Env):
             infos.append(info)
         return obss, infos
 
-    def step(self, action: List[np.ndarray]):
+    def step(self, action):
         obss, rewards, terms, truncs, infos = [], [], [], [], []
 
+        subspace_major = len(action) > 0 and isinstance(action[0], np.ndarray)
         for i, env in enumerate(self.envs):
-            obs, reward, terminated, truncated, info = env.step([action[0][i], action[1][i]])
+            if subspace_major:
+                actions_i = [action[j][i] for j in range(len(action))]
+            else:
+                actions_i = list(action[i])
+            obs, reward, terminated, truncated, info = env.step(actions_i)
             obss.append(obs),
             rewards.append(reward)
             terms.append(terminated)
