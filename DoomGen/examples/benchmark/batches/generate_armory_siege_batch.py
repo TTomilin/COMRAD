@@ -8,7 +8,7 @@ OUTPUT_SUBDIR = "batch_armory_siege"
 EXPECTED_COUNT = 1215
 AXIS_OPTIONS = {
     "room_distance": [
-        {"_label": "close", "distance": 500},
+        {"_label": "close", "distance": 600},
         {"_label": "mid", "distance": 700},
         {"_label": "far", "distance": 900},
     ],
@@ -16,11 +16,6 @@ AXIS_OPTIONS = {
         {"_label": "tight", "corridor_width": 2},
         {"_label": "standard", "corridor_width": 3},
         {"_label": "wide", "corridor_width": 4},
-    ],
-    "door_timing": [
-        {"_label": "brief", "door_timer": 150},
-        {"_label": "standard", "door_timer": 300},
-        {"_label": "long", "door_timer": 450},
     ],
     "core_health_budget": [
         {"_label": "fragile", "core_health": 600},
@@ -31,13 +26,6 @@ AXIS_OPTIONS = {
         {"_label": "light", "enemy_difficulty": 0.5},
         {"_label": "standard", "enemy_difficulty": 1.0},
         {"_label": "heavy", "enemy_difficulty": 1.5},
-    ],
-    "team_size": [
-        {"_label": "2p", "max_players": 2},
-        {"_label": "3p", "max_players": 3},
-        {"_label": "4p", "max_players": 4},
-        {"_label": "6p", "max_players": 6},
-        {"_label": "8p", "max_players": 8},
     ],
 }
 

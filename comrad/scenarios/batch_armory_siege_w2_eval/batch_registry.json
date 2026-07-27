@@ -1,0 +1,173 @@
+[
+  {
+    "id": "armory_siege_w2_eval_01",
+    "filename": "armory_siege_w2_eval_01.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "easy",
+      "spatial_components": "close+wide",
+      "param_level": "easy",
+      "param_components": "durable+light"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_02",
+    "filename": "armory_siege_w2_eval_02.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "easy",
+      "spatial_components": "close+wide",
+      "param_level": "hard",
+      "param_components": "fragile+heavy"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_03",
+    "filename": "armory_siege_w2_eval_03.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "easy",
+      "spatial_components": "close+wide",
+      "param_level": "medium",
+      "param_components": "baseline+standard"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_04",
+    "filename": "armory_siege_w2_eval_04.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "hard",
+      "spatial_components": "far+tight",
+      "param_level": "easy",
+      "param_components": "durable+light"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_05",
+    "filename": "armory_siege_w2_eval_05.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "hard",
+      "spatial_components": "far+tight",
+      "param_level": "hard",
+      "param_components": "fragile+heavy"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_06",
+    "filename": "armory_siege_w2_eval_06.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "hard",
+      "spatial_components": "far+tight",
+      "param_level": "medium",
+      "param_components": "baseline+standard"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_07",
+    "filename": "armory_siege_w2_eval_07.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "medium",
+      "spatial_components": "mid+standard",
+      "param_level": "easy",
+      "param_components": "durable+light"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_08",
+    "filename": "armory_siege_w2_eval_08.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "medium",
+      "spatial_components": "mid+standard",
+      "param_level": "hard",
+      "param_components": "fragile+heavy"
+    }
+  },
+  {
+    "id": "armory_siege_w2_eval_09",
+    "filename": "armory_siege_w2_eval_09.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 999
+    },
+    "axes": {
+      "spatial_level": "medium",
+      "spatial_components": "mid+standard",
+      "param_level": "medium",
+      "param_components": "baseline+standard"
+    }
+  }
+]

@@ -1,0 +1,1541 @@
+[
+  {
+    "id": "armory_siege_0000",
+    "filename": "armory_siege_0000.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0001",
+    "filename": "armory_siege_0001.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0002",
+    "filename": "armory_siege_0002.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0003",
+    "filename": "armory_siege_0003.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0004",
+    "filename": "armory_siege_0004.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0005",
+    "filename": "armory_siege_0005.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0006",
+    "filename": "armory_siege_0006.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0007",
+    "filename": "armory_siege_0007.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0008",
+    "filename": "armory_siege_0008.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0009",
+    "filename": "armory_siege_0009.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0010",
+    "filename": "armory_siege_0010.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0011",
+    "filename": "armory_siege_0011.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0012",
+    "filename": "armory_siege_0012.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0013",
+    "filename": "armory_siege_0013.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0014",
+    "filename": "armory_siege_0014.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0015",
+    "filename": "armory_siege_0015.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0016",
+    "filename": "armory_siege_0016.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0017",
+    "filename": "armory_siege_0017.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0018",
+    "filename": "armory_siege_0018.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0019",
+    "filename": "armory_siege_0019.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0020",
+    "filename": "armory_siege_0020.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0021",
+    "filename": "armory_siege_0021.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0022",
+    "filename": "armory_siege_0022.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0023",
+    "filename": "armory_siege_0023.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0024",
+    "filename": "armory_siege_0024.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0025",
+    "filename": "armory_siege_0025.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0026",
+    "filename": "armory_siege_0026.wad",
+    "config": {
+      "distance": 600,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "close",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0027",
+    "filename": "armory_siege_0027.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0028",
+    "filename": "armory_siege_0028.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0029",
+    "filename": "armory_siege_0029.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0030",
+    "filename": "armory_siege_0030.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0031",
+    "filename": "armory_siege_0031.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0032",
+    "filename": "armory_siege_0032.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0033",
+    "filename": "armory_siege_0033.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0034",
+    "filename": "armory_siege_0034.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0035",
+    "filename": "armory_siege_0035.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0036",
+    "filename": "armory_siege_0036.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0037",
+    "filename": "armory_siege_0037.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0038",
+    "filename": "armory_siege_0038.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0039",
+    "filename": "armory_siege_0039.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0040",
+    "filename": "armory_siege_0040.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0041",
+    "filename": "armory_siege_0041.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0042",
+    "filename": "armory_siege_0042.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0043",
+    "filename": "armory_siege_0043.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0044",
+    "filename": "armory_siege_0044.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0045",
+    "filename": "armory_siege_0045.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0046",
+    "filename": "armory_siege_0046.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0047",
+    "filename": "armory_siege_0047.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0048",
+    "filename": "armory_siege_0048.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0049",
+    "filename": "armory_siege_0049.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0050",
+    "filename": "armory_siege_0050.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0051",
+    "filename": "armory_siege_0051.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0052",
+    "filename": "armory_siege_0052.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0053",
+    "filename": "armory_siege_0053.wad",
+    "config": {
+      "distance": 700,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "mid",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0054",
+    "filename": "armory_siege_0054.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0055",
+    "filename": "armory_siege_0055.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0056",
+    "filename": "armory_siege_0056.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0057",
+    "filename": "armory_siege_0057.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0058",
+    "filename": "armory_siege_0058.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0059",
+    "filename": "armory_siege_0059.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0060",
+    "filename": "armory_siege_0060.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0061",
+    "filename": "armory_siege_0061.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0062",
+    "filename": "armory_siege_0062.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 2,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "tight",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0063",
+    "filename": "armory_siege_0063.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0064",
+    "filename": "armory_siege_0064.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0065",
+    "filename": "armory_siege_0065.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0066",
+    "filename": "armory_siege_0066.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0067",
+    "filename": "armory_siege_0067.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0068",
+    "filename": "armory_siege_0068.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0069",
+    "filename": "armory_siege_0069.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0070",
+    "filename": "armory_siege_0070.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0071",
+    "filename": "armory_siege_0071.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 3,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "standard",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0072",
+    "filename": "armory_siege_0072.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0073",
+    "filename": "armory_siege_0073.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0074",
+    "filename": "armory_siege_0074.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 600,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "fragile",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0075",
+    "filename": "armory_siege_0075.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0076",
+    "filename": "armory_siege_0076.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0077",
+    "filename": "armory_siege_0077.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1000,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "baseline",
+      "enemy_pressure": "heavy"
+    }
+  },
+  {
+    "id": "armory_siege_0078",
+    "filename": "armory_siege_0078.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "light"
+    }
+  },
+  {
+    "id": "armory_siege_0079",
+    "filename": "armory_siege_0079.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.0,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "standard"
+    }
+  },
+  {
+    "id": "armory_siege_0080",
+    "filename": "armory_siege_0080.wad",
+    "config": {
+      "distance": 900,
+      "corridor_width": 4,
+      "door_timer": 300,
+      "core_health": 1400,
+      "enemy_difficulty": 1.5,
+      "max_players": 8,
+      "seed": 42
+    },
+    "axis_choices": {
+      "room_distance": "far",
+      "corridor_width": "wide",
+      "core_health_budget": "durable",
+      "enemy_pressure": "heavy"
+    }
+  }
+]
