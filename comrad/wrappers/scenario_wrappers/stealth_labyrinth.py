@@ -128,7 +128,6 @@ class StealthLabyrinthRewardShaping(gym.Wrapper):
             shaped_team_reward += self.first_room_discovery_reward
             delta_rooms_seen = max(0, delta_rooms_seen - 1)
         shaped_team_reward += delta_rooms_seen * self.room_discovery_reward
-        shaped_team_reward += delta_targets_lit * self.target_lit_reward
         shaped_team_reward += delta_destroyed * self.kill_reward
         shaped_team_reward += delta_team_damage * self.damage_taken_penalty_per_hp
 
