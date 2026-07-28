@@ -57,3 +57,4 @@ baseline_results.py
 
 results/demo
 results/qmix_lr_sensitivity/armory_siege_qmix_lr_sensitivity
+results/human_baseline/

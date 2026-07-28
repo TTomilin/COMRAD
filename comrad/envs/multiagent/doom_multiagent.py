@@ -81,6 +81,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         timelimit=0.0,
         record_to=None,
         render_mode: Optional[str] = None,
+        host_ip: str = "127.0.0.1",
     ):
         super().__init__(
             action_space,
@@ -107,6 +108,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
 
         self.respawn_delay = respawn_delay
         self.timelimit = timelimit
+        self.host_ip = host_ip
 
         self.is_multiplayer = True
         self.init_info = None
@@ -163,7 +165,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         else:
             # Join existing game.
             self.game.add_game_args(
-                f"-join 127.0.0.1:{port} "  # Connect to a host for a multiplayer game.
+                f"-join {self.host_ip}:{port} "  # Connect to a host for a multiplayer game.
                 f"+viz_connect_timeout {vizdoom_env_timeout} "
             )
 
@@ -192,9 +194,7 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         return obs, info
 
     def step(self, actions):
-        if self.skip_frames > 1 or self.num_agents == 1:
-            # not used in multi-agent mode due to VizDoom limitations
-            # this means that we have only one agent (+ maybe some bots, which is why we're in multiplayer mode)
+        if self._actions_flattened is not None or self.skip_frames > 1 or self.num_agents == 1:
             return super().step(actions)
 
         self._ensure_initialized()

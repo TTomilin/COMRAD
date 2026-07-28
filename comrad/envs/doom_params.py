@@ -22,6 +22,12 @@ def add_doom_env_args(parser):
     )
     p.add_argument("--num_humans", default=0, type=int, help="Meatbags want to play?")
     p.add_argument(
+        "--host_ip",
+        default="127.0.0.1",
+        type=str,
+        help="IP address of the game host for network multiplayer.",
+    )
+    p.add_argument(
         "--num_bots",
         default=-1,
         type=int,
