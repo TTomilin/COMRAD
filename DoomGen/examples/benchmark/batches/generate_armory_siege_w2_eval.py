@@ -69,6 +69,7 @@ def main() -> None:
     with open(registry_path, "w", encoding="utf-8") as f:
         json.dump(registry, f, indent=2)
 
+    sorted_keys = sorted(GRID.keys())
     print()
     print("3x3 Grid Summary")
     print("{:<22} {:<16} {:<16} {:<16}".format("Spatial \\ Param", "Easy", "Medium", "Hard"))
@@ -79,8 +80,7 @@ def main() -> None:
         row = [cell.ljust(21)]
         for p_level in ["easy", "medium", "hard"]:
             key = (s_level, p_level)
-            info = registry[list(GRID.keys()).index(key)]
-            row.append(info["id"].ljust(16))
+            info = registry[sorted_keys.index(key)]
         print(" | ".join(row))
     print(f"\nGenerated {len(registry)} WADs in {OUTPUT_DIR} with seed={HELD_OUT_SEED}")
     print(f"Registry saved to {registry_path}")
