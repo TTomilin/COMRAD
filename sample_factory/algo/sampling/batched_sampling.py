@@ -54,6 +54,10 @@ def preprocess_actions(
             )
         # this line can be used to transpose the actions, perhaps add as an option ?
         # out_actions = list(zip(*out_actions)) # transpose
+        # Yeah it can be used for cont. action vect
+        if len(out_actions) > 0 and isinstance(out_actions[0], (np.ndarray, Tensor)):
+            out_actions = list(zip(*out_actions))
+
         return out_actions
 
     raise NotImplementedError(f"Unknown action space type: {env_info.action_space}")
@@ -403,7 +407,7 @@ class BatchedVectorEnvRunner(VectorEnvRunner):
 
         self.env_step_ready = True
         return complete_rollouts, episodic_stats
-    
+
     def _get_task_idx_buffer(self, infos) -> torch.Tensor:
         """Extract task_idx from infos into a [num_agents] int32 tensor."""
         buf = torch.full(

@@ -328,6 +328,40 @@ def doom_action_space_stag_hunt():
         )
     )
 
+def doom_action_space_stag_hunt_continuous():
+    """
+    MOVE_FORWARD
+    MOVE_BACKWARD
+    MOVE_RIGHT
+    MOVE_LEFT
+    ATTACK
+    TURN_LEFT_RIGHT_DELTA
+    """
+    return gym.spaces.Tuple(
+        (
+            Discrete(3),  # noop, forward, backward
+            Discrete(3),  # noop, move right, move left
+            Discrete(2),  # noop, attack
+            Box(np.float32(-1.0), np.float32(1.0), (1,)), # continuous turning
+        )
+    )
+
+def doom_action_space_stag_hunt_continuous_full():
+    """
+    MOVE_FORWARD_BACKWARD_DELTA
+    MOVE_LEFT_RIGHT_DELTA
+    ATTACK
+    TURN_LEFT_RIGHT_DELTA
+    """
+    return gym.spaces.Tuple(
+        (
+            Box(np.float32(-1.0), np.float32(1.0), (1,)),  # continuous movement fb
+            Box(np.float32(-1.0), np.float32(1.0), (1,)),  # continuous movement lr
+            Discrete(2),  # noop, attack
+            Box(np.float32(-1.0), np.float32(1.0), (1,)),  # continuous turning
+        )
+    )
+
 def doom_action_space_lava_maze():
     """
     MOVE_FORWARD
