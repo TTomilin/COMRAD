@@ -10,9 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11,<3.13"
 license = {text = "MIT"}
 authors = [
-    {name = "Khoi H.B. Nguyen", email = "baokhoi136@gmail.com"},
-    {name = "Tristan Tomilin", email = "tristan.tomilin@hotmail.com"},
-    {name = "Dimitar Zhekov", email = "mitko.zh@gmail.com"},
+    {name = "Anonymized Authors"}
 ]
 keywords = ["marl", "vizdoom", "reinforcement-learning", "multi-agent", "benchmark"]
 classifiers = [
