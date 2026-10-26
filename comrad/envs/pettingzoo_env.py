@@ -70,10 +70,8 @@ class ComradParallelEnv(ParallelEnv):
         action_list = [
             actions.get(agent, self._noop) if agent in live else self._noop for agent in self.possible_agents
         ]
+        # A crash-recovery reset arrives as truncated=True from MultiAgentEnv(auto_reset=False).
         obs, rewards, terminated, truncated, infos = self.env.step(action_list)
-
-        # Crash recovery reset the game underneath us: the current episode is over for everyone.
-        hidden_reset = any(isinstance(info, dict) and info.get("_hidden_reset_count") for info in infos)
 
         out_obs, out_rew, out_term, out_trunc, out_info = {}, {}, {}, {}, {}
         for i, agent in enumerate(self.possible_agents):
@@ -82,7 +80,7 @@ class ComradParallelEnv(ParallelEnv):
             out_obs[agent] = obs[i]
             out_rew[agent] = float(rewards[i])
             out_term[agent] = bool(terminated[i])
-            out_trunc[agent] = bool(truncated[i]) or (hidden_reset and not out_term[agent])
+            out_trunc[agent] = bool(truncated[i])
             out_info[agent] = infos[i]
 
         self.agents = [agent for agent in self.agents if not (out_term[agent] or out_trunc[agent])]

@@ -45,6 +45,8 @@ class FakeListEnv(gym.Env):
             if done:
                 infos[i]["true_objective"] = 7
         if self.hidden_reset_at == self.t:
+            # MultiAgentEnv(auto_reset=False) reports a crash-recovery reset as truncation of live agents
+            truncated = [not term for term in terminated]
             for info in infos:
                 info["_hidden_reset_count"] = 1
         return self._obs(), rewards, terminated, truncated, infos

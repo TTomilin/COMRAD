@@ -8,6 +8,8 @@ from comrad.envs.multiagent import doom_multiagent_wrapper as wrapper_module
 from comrad.envs.multiagent.doom_multiagent_wrapper import MultiAgentEnv
 
 EPISODE_LEN = 3
+# {"step": k, "player": p} makes player p raise once on its k-th step of an episode
+CRASH_ONCE = {}
 
 
 class FakeAgentEnv(gym.Env):
@@ -33,6 +35,9 @@ class FakeAgentEnv(gym.Env):
         return self._obs(), {"player": self.player_id}
 
     def step(self, action):
+        if CRASH_ONCE.get("step") == self.t + 1 and CRASH_ONCE.get("player") == self.player_id:
+            CRASH_ONCE.clear()
+            raise RuntimeError("simulated ViZDoom segfault")
         self.t += 1
         return self._obs(), 1.0, self.t >= EPISODE_LEN, False, {"player": self.player_id}
 
@@ -45,6 +50,10 @@ def no_ports(monkeypatch, tmp_path):
 
     monkeypatch.setattr(wrapper_module, "reserve_available_port", fake_reserve)
     monkeypatch.setattr(wrapper_module, "doom_lock_file", lambda max_parallel: str(tmp_path / "doom.lock"))
+    monkeypatch.setattr(wrapper_module, "sleep", lambda seconds: None)
+    CRASH_ONCE.clear()
+    yield
+    CRASH_ONCE.clear()
 
 
 def _make(auto_reset=True, env_config=None, num_agents=2):
@@ -103,5 +112,44 @@ def test_explicit_reset_returns_terminal_obs_and_waits_for_reset():
         assert all(int(o[0, 0, 0]) == 0 for o in obs)
         obs, *_ = env.step([0, 0])
         assert all(int(o[0, 0, 0]) == 1 for o in obs)
+    finally:
+        env.close()
+
+
+def test_explicit_reset_truncates_episode_on_crash_recovery_reset():
+    # Regression: crash recovery resets the game and re-runs step() on a fresh episode. Without auto-reset the caller
+    # must see that boundary as a truncation, otherwise returns get stitched across two episodes.
+    env = _make(auto_reset=False)
+    try:
+        env.reset()
+        env.step([0, 0])
+        CRASH_ONCE.update(step=2, player=1)
+        obs, rewards, terminated, truncated, infos = env.step([0, 0])
+        assert not CRASH_ONCE, "the simulated crash must have fired"
+        assert all(int(o[0, 0, 0]) == 1 for o in obs), "step was re-run on the fresh episode"
+        assert truncated == [True, True]
+        assert terminated == [False, False]
+        assert all(info["_hidden_reset_count"] == 1 for info in infos)
+
+        obs, infos = env.reset()
+        _, _, terminated, truncated, infos = env.step([0, 0])
+        assert truncated == [False, False]
+        assert not any("_hidden_reset_count" in info for info in infos)
+    finally:
+        env.close()
+
+
+def test_auto_reset_crash_recovery_keeps_done_flags():
+    # Sample Factory path: the hidden reset is only surfaced via info, done flags stay untouched.
+    env = _make(auto_reset=True)
+    try:
+        env.reset()
+        env.step([0, 0])
+        CRASH_ONCE.update(step=2, player=0)
+        _, _, terminated, truncated, infos = env.step([0, 0])
+        assert not CRASH_ONCE
+        assert truncated == [False, False]
+        assert terminated == [False, False]
+        assert all(info["_hidden_reset_count"] == 1 for info in infos)
     finally:
         env.close()

@@ -514,6 +514,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         # Crash recovery can reset the game group underneath the outer wrappers.
         # Surface that reset boundary on the next successful step so wrappers such as VideoLoggerWrapper can advance their episode bookkeeping instead of silently stitching frames across the hidden reset.
+        # Without auto-reset the caller owns episode boundaries, so the episode that crashed is reported as truncated for every agent that has not terminated.
+        if not self.auto_reset and self._pending_reset_count > 0:
+            truncated = [bool(trunc) or not bool(term) for term, trunc in zip(terminated, truncated)]
         self._attach_pending_reset_infos(infos)
 
         if self.enable_rendering:
