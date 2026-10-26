@@ -341,6 +341,30 @@ DOOM_ENVS = [
 ]
 
 
+# One-line description and benchmark score (the episode `true_objective`) for every scenario in DOOM_ENVS.
+# Used by comrad.list_scenarios() and the docs.
+SCENARIO_METADATA = {
+    "stag_hunt_arena": ("Stag-hunt dilemma: safe solo rabbits vs. a larger stag that needs joint commitment.", "Stags killed"),
+    "stag_hunt_arena_continuous": ("Stag Hunt Arena with a continuous turning action.", "Stags killed"),
+    "stag_hunt_arena_continuous_full": ("Stag Hunt Arena with continuous turning and the full button set.", "Stags killed"),
+    "rhythm_sync": ("Separated agents must hit paired switches inside shared timing windows.", "Stages completed"),
+    "rhythm_sync_dense": ("Rhythm Sync with dense reward shaping.", "Stages completed"),
+    "foraging_commons": ("Harvesting depletes a shared resource; cleanup restores it at a personal cost.", "Survival time"),
+    "coop_puzzle": ("Paired lanes where players alternately unlock each other's path.", "Completed puzzle pairs"),
+    "platform_chain": ("Tethered players climb a long vertical route together.", "Joint checkpoint progress"),
+    "platform_chain_easy": ("Shorter, easier Platform Chain variant for debugging and warm-up.", "Joint checkpoint progress"),
+    "armory_siege": ("Defend a central core while rotating through gated supply rooms.", "Shaped episodic return"),
+    "coop_health_gathering": ("Tethered survival in a toxic maze with shared health kits.", "Survival time"),
+    "lavapit": ("Reciprocal bridge handoffs: one agent holds support while the other crosses.", "Joint bridges cleared"),
+    "smart_enemies": ("Fleeing enemies get harder to finish when agents crowd the same target.", "Enemies killed"),
+    "dumb_enemies": ("Same arena as Smart Enemies, but coordinated pressure makes enemies easier.", "Enemies killed"),
+    "ammo_carrier": ("Fixed roles: an immobile defender kept supplied with ammo by a runner.", "Survival time"),
+    "stealth_labyrinth": ("A non-attacking scout lights rooms for a gunner who depends on its vision.", "Enemies destroyed / total"),
+    "lava_maze": ("A navigator crosses lava guided by colour signals from an overhead observer.", "Maze levels cleared"),
+    "lava_maze_simple": ("Smaller, easier Lava Maze variant for debugging and warm-up.", "Maze levels cleared"),
+}
+
+
 def doom_env_by_name(name):
     for cfg in DOOM_ENVS:
         if cfg.name == name:
@@ -520,7 +544,9 @@ def make_doom_env_impl(
     return env
 
 
-def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode: Optional[str] = None, **kwargs):
+def make_doom_multiplayer_env(
+    doom_spec, cfg=None, env_config=None, render_mode: Optional[str] = None, auto_reset: bool = True, **kwargs
+):
     assert cfg is not None
 
     skip_frames = cfg.env_frameskip
@@ -560,6 +586,7 @@ def make_doom_multiplayer_env(doom_spec, cfg=None, env_config=None, render_mode:
             env_config=env_config,
             skip_frames=skip_frames,
             render_mode=render_mode,
+            auto_reset=auto_reset,
         )
 
         # For HAPPO, obs_space with temp env (player_id=-1) doesn't get AgentIDWrapper, so MultiAgentEnv.observation_space is missing 'agent_id'

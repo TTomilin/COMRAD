@@ -4,6 +4,28 @@ on:
       - 'v*'
 
 jobs:
+  doomgen-tests:
+    # DoomGen is a separate map-generation tool that lives in this repository but is not part of comrad-bench.
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: DoomGen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install DoomGen
+        run: uv sync --extra dev
+
+      - name: Run DoomGen tests
+        run: uv run pytest tests -v
+
   build-and-release:
     runs-on: ubuntu-latest
     permissions:
@@ -21,17 +43,11 @@ jobs:
       - name: Install dependencies
         run: uv sync --frozen --all-extras
 
-      - name: Verify doomgen import
-        run: uv run python -c "import doomgen; print(doomgen.__version__)"
-
       - name: Run tests
         run: >
           uv run pytest comrad/tests sample_factory/tests -v
           --ignore=sample_factory/tests/envs/tuple_action_envs/test_two_discrete_action_dist_env_batched.py
           --ignore=sample_factory/tests/envs/tuple_action_envs/test_two_discrete_action_dist_env_non_batched.py
-
-      - name: Run DoomGen tests
-        run: uv run pytest DoomGen/tests -v
 
       - name: Build package
         run: uv run python -m build

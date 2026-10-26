@@ -1,5 +1,5 @@
 include README.md
-recursive-include comrad/scenarios *.cfg *.wad
-recursive-include comrad/docs *.md
-recursive-include comrad/experiments *.md
-recursive-include comrad/templates *.sh
+include LICENSE
+recursive-include comrad/scenarios *.cfg *.wad *.json
+# local HPC job scripts (gitignored) must never ship in the package
+prune comrad/templates

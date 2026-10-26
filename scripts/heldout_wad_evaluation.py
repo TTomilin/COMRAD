@@ -427,7 +427,7 @@ if __name__ == "__main__":
     }
     if args.generate_only:
         print(json.dumps({"heldout_seeds": seeds, "batches": manifest_metadata}, indent=2))
-        return
+        raise SystemExit(0)
 
     archive_root = Path(args.archive_root)
     policies = discover_policy_specs(archive_root, scenarios, algorithms, int(args.target_steps))

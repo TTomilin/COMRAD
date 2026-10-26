@@ -58,6 +58,7 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/TTomilin/COMRAD"
 Repository = "https://github.com/TTomilin/COMRAD"
+Documentation = "https://ttomilin.github.io/COMRAD/"
 
 [project.optional-dependencies]
 sample-factory = [
@@ -78,7 +79,6 @@ visual = [
     "pypng>=0.20220715.0",
     "shapely>=2.1.2",
 ]
-doomgen = ["doomgen"]
 
 [dependency-groups]
 dev = [
@@ -86,18 +86,15 @@ dev = [
     "pytest>=9.0.2",
     "ruff>=0.14.13",
 ]
+docs = [
+    "mkdocs-material>=9.5",
+]
 
 [tool.setuptools]
 include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["comrad*", "sample_factory*"]
-
-[tool.uv.workspace]
-members = [".", "DoomGen"]
-
-[tool.uv.sources]
-doomgen = { workspace = true }
 
 [tool.ruff]
 line-length = 120

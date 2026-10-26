@@ -1,0 +1,76 @@
+site_name: COMRAD
+site_description: Cooperative multi-agent reinforcement learning benchmark in ViZDoom
+site_url: https://ttomilin.github.io/COMRAD/
+repo_url: https://github.com/TTomilin/COMRAD
+repo_name: TTomilin/COMRAD
+edit_uri: edit/main/docs/
+
+exclude_docs: |
+  superpowers/
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - content.code.copy
+    - search.suggest
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: amber
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+
+nav:
+  - Home: index.md
+  - Getting started:
+      - Installation: getting-started/installation.md
+      - Quickstart: getting-started/quickstart.md
+  - Scenarios:
+      - scenarios/index.md
+      - Stag Hunt Arena: scenarios/stag_hunt_arena.md
+      - Rhythm Sync: scenarios/rhythm_sync.md
+      - Foraging Commons: scenarios/foraging_commons.md
+      - Co-op Puzzle: scenarios/coop_puzzle.md
+      - Platform Chain: scenarios/platform_chain.md
+      - Armory Siege: scenarios/armory_siege.md
+      - Co-op Health Gathering: scenarios/coop_health_gathering.md
+      - Lava Pit: scenarios/lavapit.md
+      - Smart Enemies: scenarios/smart_enemies.md
+      - Dumb Enemies: scenarios/dumb_enemies.md
+      - Stealth Labyrinth: scenarios/stealth_labyrinth.md
+      - Ammo Carrier: scenarios/ammo_carrier.md
+      - Lava Maze: scenarios/lava_maze.md
+  - API:
+      - API reference: api.md
+      - Integrations: integrations.md
+  - Training:
+      - Sample Factory baselines: training/sample-factory.md
+      - Reproducing the paper: training/reproducing.md
+  - Baselines: baselines.md
+  - Contributing: contributing.md

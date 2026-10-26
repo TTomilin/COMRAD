@@ -1,29 +1,7 @@
 # `comrad/curriculum/`
 
-This directory implements curriculum strategies over fixed pools of pre-generated WAD tasks.
+Curricula over pools of pre-generated WADs, enabled with `--wad_batch=<dir> --curriculum=<strategy>` ([docs](https://ttomilin.github.io/COMRAD/training/reproducing/#wad-batches-and-curricula)).
 
-## Supported strategies
-
-- `uniform.py`
-- `sequential.py`
-- `learning_progress.py`
-- `omni.py`
-- `plr.py`
-
-`base.py` defines the common task-pool interface, and `observer.py` handles persistence and logging hooks.
-
-## How it is activated
-
-Curriculum is not enabled for ordinary single-WAD runs. It is activated through:
-
-- `--wad_batch=<path-to-batch-dir>`
-- `--curriculum=<strategy>`
-
-The batch directory must contain a `batch_registry.json` file readable through `comrad.envs.wad_catalog`.
-
-## Persistence
-
-- learner checkpoints store curriculum state when curriculum is active
-- `observer.py` also writes a `curriculum_state.json` file into the experiment directory
-
-For the task pools consumed by these strategies, see [`../scenarios/README.md`](../scenarios/README.md).
+- Strategies: `uniform.py`, `sequential.py`, `learning_progress.py`, `omni.py`, `plr.py`
+- `base.py`: shared task-pool interface
+- `observer.py`: logging and persistence. Curriculum state is saved in learner checkpoints and in `curriculum_state.json` in the experiment directory.

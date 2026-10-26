@@ -219,7 +219,7 @@ class MultiAgentEnvWorker:
 
 
 class MultiAgentEnv(gym.Env, RewardShapingInterface):
-    def __init__(self, num_agents, make_env_func, env_config, skip_frames, render_mode):
+    def __init__(self, num_agents, make_env_func, env_config, skip_frames, render_mode, auto_reset=True):
         gym.Env.__init__(self)
         RewardShapingInterface.__init__(self)
 
@@ -262,6 +262,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         self._pending_swap_config: Optional[str] = None
 
         self.render_mode = render_mode
+        # Sample Factory expects the env to reset itself when all agents are done.
+        # The public API (comrad.make / comrad.parallel_env) disables this so users call reset() explicitly and see the terminal observation.
+        self.auto_reset = auto_reset
         self._pending_reset_infos = None
         self._pending_reset_count = 0
 
@@ -453,7 +456,8 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
             else:
                 break
 
-        log.debug("%d agent workers initialized for env %d!", len(self.workers), self.env_config.worker_index)
+        worker_index = self.env_config.worker_index if self.env_config is not None else 0
+        log.debug("%d agent workers initialized for env %d!", len(self.workers), worker_index)
         self.initialized = True
         self._pending_swap_config = None
 
@@ -469,6 +473,8 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
     def reset(self, **kwargs):
         self._ensure_initialized()
         observation, info = self.await_tasks([kwargs] * self.num_agents, TaskType.RESET, timeout=2.0)
+        if self.enable_rendering:
+            self.last_obs = observation
         return observation, info
 
     def _attach_pending_reset_infos(self, infos):
@@ -501,7 +507,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         for info in infos:
             info["num_frames"] = self.skip_frames
 
-        if all(dones):
+        if self.auto_reset and all(dones):
             obs, reset_infos = self.await_tasks([{}] * self.num_agents, TaskType.RESET, timeout=2.0)
             for i, reset_info in enumerate(reset_infos):
                 infos[i]["reset_info"] = reset_info

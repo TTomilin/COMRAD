@@ -1,6 +1,6 @@
 # `scripts/`
 
-This directory contains the scripts used to turn benchmark outputs into paper artifacts or diagnostics.
+Scripts that turn benchmark outputs into paper figures, tables and diagnostics. See also [Reproducing the paper](https://ttomilin.github.io/COMRAD/training/reproducing/).
 
 ## Main groups
 
@@ -17,6 +17,8 @@ This directory contains the scripts used to turn benchmark outputs into paper ar
   - `make_doomgen_variants.py`
   - `render_doomgen_variant_images.py`
   - `wad2image/`
+- Documentation assets:
+  - `build_docs_assets.sh`: regenerates `docs/assets/` (thumbnails, figures, hero GIF)
 - Experiment helpers:
   - `download_baseline_results.sh`
   - `run_armory_siege.sh`
@@ -29,7 +31,5 @@ This directory contains the scripts used to turn benchmark outputs into paper ar
 ## Usage notes
 
 - Many scripts assume the repo root is the current working directory
-- Some scripts assume a co-located `DoomGen/` checkout and pre-existing result files under `results/` or `train_dir/`
-- Generated outputs are typically written back into `results/` or `paper/figure/`
-
-Treat this directory as the artifact-production layer above the benchmark runtime.
+- The DoomGen scripts need the separate `DoomGen/` environment, because `doomgen` is not a COMRAD dependency
+- Most scripts expect existing results under `results/` or `train_dir/`, and write into `results/` or `paper/figure/`

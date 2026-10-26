@@ -1,161 +1,116 @@
-# COMRAD
+<h1 align="center">COMRAD</h1>
 
-COMRAD is a cooperative multi-agent reinforcement learning benchmark built on ViZDoom for first-person visual coordination. This repository contains the benchmark runtime assets, COMRAD-specific environment and model code, a modified Sample Factory training stack, paper artifacts, and the scripts used to produce figures, tables, and diagnostic media.
+<p align="center"><b>Cooperative multi-agent reinforcement learning from pixels, in Doom.</b></p>
 
 <p align="center">
-  <img src="results/demo_all_checkpoints/comrad_vid_gif_540.gif" alt="COMRAD demo" style="width: 100%; max-width: 960px;">
+  <a href="https://pypi.org/project/comrad-bench/"><img src="https://img.shields.io/pypi/v/comrad-bench" alt="PyPI"></a>
+  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue" alt="Python 3.11 | 3.12">
+  <a href="https://github.com/TTomilin/COMRAD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
+  <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/docs-online-orange" alt="Docs"></a>
 </p>
 
-## Repository map
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/comrad_demo.gif" alt="COMRAD agents playing" width="720">
+</p>
 
-| Path | Purpose |
-| --- | --- |
-| `comrad/` | Benchmark package: training entrypoints, environment registration, wrappers, models, shipped scenario assets, launchers, tests. |
-| `sample_factory/` | Modified training engine used by COMRAD. |
-| `scripts/` | Figure-generation, result aggregation, WAD rendering, and experiment helper scripts. |
-| `results/` | Committed figures, tables, result summaries, and selected media artifacts. |
-| `DoomGen/` | Procedural generator used to build and vary scenario WADs. |
+COMRAD is a benchmark of **13 first-person cooperative scenarios** built on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Each one isolates a coordination skill: committing to a joint plan, synchronising in time, sharing a commons, swapping roles, or communicating without words. Agents see only their own 128×72 RGB view.
 
-Directory-level guides are provided in:
+## Scenarios
 
-- [`comrad/README.md`](comrad/README.md)
-- [`sample_factory/README.md`](sample_factory/README.md)
-- [`scripts/README.md`](scripts/README.md)
-- [`results/README.md`](results/README.md)
+> "Cooperation is the thorough conviction that nobody can get there unless everybody gets there." - Virginia Burden
 
-## Setup
+<table>
+  <tr>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/stag_hunt_arena/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/stag_hunt_arena.jpg" width="240"><br><b>Stag Hunt Arena</b></a><br>2–4 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/rhythm_sync/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/rhythm_sync.jpg" width="240"><br><b>Rhythm Sync</b></a><br>2 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/foraging_commons/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/foraging_commons.jpg" width="240"><br><b>Foraging Commons</b></a><br>2–4 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/coop_puzzle/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/coop_puzzle.jpg" width="240"><br><b>Co-op Puzzle</b></a><br>2 players</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/platform_chain/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/platform_chain.jpg" width="240"><br><b>Platform Chain</b></a><br>2 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/armory_siege/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/armory_siege.jpg" width="240"><br><b>Armory Siege</b></a><br>2–8 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/coop_health_gathering/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/coop_health_gathering.jpg" width="240"><br><b>Co-op Health Gathering</b></a><br>2–8 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/lavapit/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/lavapit.jpg" width="240"><br><b>Lava Pit</b></a><br>2 players</td>
+  </tr>
+  <tr>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/smart_enemies/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/smart_dumb_enemies.jpg" width="240"><br><b>Smart / Dumb Enemies</b></a><br>2–4 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/stealth_labyrinth/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/stealth_labyrinth.jpg" width="240"><br><b>Stealth Labyrinth</b></a><br>2 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/ammo_carrier/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/ammo_carrier.jpg" width="240"><br><b>Ammo Carrier</b></a><br>2 players</td>
+    <td align="center"><a href="https://ttomilin.github.io/COMRAD/scenarios/lava_maze/"><img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/scenarios/lava_maze.jpg" width="240"><br><b>Lava Maze</b></a><br>2 players</td>
+  </tr>
+</table>
 
-COMRAD is packaged through `pyproject.toml` and is intended to be run with `uv`.
-
-```bash
-uv sync --all-extras
-uv run pre-commit install
-```
-
-The project requires Python 3.10 or newer. The package metadata and CI workflow are the authoritative sources for dependency resolution.
-
-## Single-run training
-
-The main training entrypoint is `comrad.train`.
-
-```bash
-uv run python -m comrad.train \
-  --env=stag_hunt_arena \
-  --algo=IPPO \
-  --train_for_env_steps=10000 \
-  --num_workers=4 \
-  --num_envs_per_worker=4 \
-  --device=cpu
-```
-
-Training outputs are written under `train_dir/<experiment>/`. The main runtime log is:
+## Install
 
 ```bash
-tail -n 120 train_dir/<experiment>/sf_log.txt
+pip install comrad-bench
 ```
 
-For launcher-owned benchmark sweeps, use `comrad/train_all.py` instead of manually reproducing those long commands.
+Requires Python 3.11 or 3.12 on Linux or macOS. The ViZDoom engine comes with the `vizdoom` wheel.
 
-## Recording and evaluation
+## Quickstart
 
-High-resolution checkpoint recording:
+COMRAD scenarios are standard [PettingZoo](https://pettingzoo.farama.org/) and [Gymnasium](https://gymnasium.farama.org/) environments, so you can train them with any MARL library.
+
+```python
+import comrad
+
+env = comrad.parallel_env("stag_hunt_arena")
+observations, infos = env.reset(seed=42)
+
+while env.agents:
+    actions = {agent: env.action_space(agent).sample() for agent in env.agents}
+    observations, rewards, terminations, truncations, infos = env.step(actions)
+
+print("score:", {agent: info.get("true_objective") for agent, info in infos.items()})
+env.close()
+```
+
+Gymnasium, with per-agent lists:
+
+```python
+import gymnasium as gym
+import comrad  # registers comrad/<scenario>-v0
+
+env = gym.make("comrad/stag_hunt_arena-v0", num_agents=2)
+observations, infos = env.reset(seed=42)
+```
+
+See the [quickstart](https://ttomilin.github.io/COMRAD/getting-started/quickstart/) and [API reference](https://ttomilin.github.io/COMRAD/api/) for options such as `num_agents`, `shared_reward` and `render_mode`.
+
+## Baselines
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/figures/baseline_results_heatmap.png" alt="Baseline results" width="720">
+</p>
+
+The heatmap shows seven MARL algorithms on every scenario. [More results →](https://ttomilin.github.io/COMRAD/baselines/)
+
+## Train with the bundled algorithms
+
+The package includes a modified [Sample Factory](https://github.com/alex-petrenko/sample-factory) with **IPPO, MAPPO, HAPPO, IDQN, VDN, QMIX and QPLEX**:
 
 ```bash
-uv run python -m comrad.record_video \
-  --env=stag_hunt_arena \
-  --train_dir=train_dir \
-  --experiment=<experiment_name> \
-  --load_checkpoint_kind=best \
-  --resolution=1280x720
+python -m comrad.train --env=stag_hunt_arena --algo=MAPPO --train_for_env_steps=10000000
 ```
 
-Automap/top-down heatmap rendering:
+See the [per-algorithm commands](https://ttomilin.github.io/COMRAD/training/sample-factory/) and [how to reproduce the paper](https://ttomilin.github.io/COMRAD/training/reproducing/).
 
-```bash
-uv run python -m comrad.record_topdown_heatmap \
-  --env=ammo_carrier \
-  --train_dir=<train_root> \
-  --experiment=<experiment_name> \
-  --output_dir=results/videos/ammo_carrier_navigation_heatmap \
-  --device=cpu \
-  --overwrite
+## Documentation
+
+**https://ttomilin.github.io/COMRAD/**: scenarios, API, integrations, training and contributing.
+
+## Citation
+
+```bibtex
+@misc{comrad,
+  title  = {COMRAD: Cooperative Multi-Agent Reinforcement Learning Benchmark in ViZDoom},
+  author = {Anonymized Authors},
+  year   = {2026},
+  url    = {https://github.com/TTomilin/COMRAD}
+}
 ```
 
-Both commands expect a full experiment directory with at least `config.json` and the corresponding checkpoint directory.
+## License and acknowledgements
 
-## Benchmark launchers
-
-COMRAD ships several paper-facing launcher profiles through `comrad/train_all.py`.
-
-- `benchmark`: full benchmark suite
-- `agent_scaling`: Armory Siege agent-count sweep
-- `platform_chain_curriculum`: curriculum comparison on Platform Chain
-- `qmix_lr_sensitivity_pilot`: Short sensitivity study
-- `qmix_lr_sensitivity_full`: Full sensitivity study
-
-Run a launcher profile locally with:
-
-```bash
-COMRAD_TRAIN_ALL_PROFILE=benchmark \
-uv run python -m sample_factory.launcher.run \
-  --run=comrad.train_all \
-  --backend=processes \
-  --max_parallel=1 \
-  --pause_between=1
-```
-
-The exact benchmark definitions, algorithms, root directory names, and profile constants live at the top of [`comrad/train_all.py`](comrad/train_all.py).
-
-## Scenario assets and DoomGen
-
-Runtime scenario assets are stored in [`comrad/scenarios/`](comrad/scenarios/README.md) as `.cfg` and `.wad` pairs, plus pre-generated batch directories such as `batch_platform_chain_curriculum/`.
-
-Generation workflows are in `DoomGen/`. The usual split is:
-
-- `DoomGen/examples/benchmark`: procedural generators and geometry logic
-- `comrad/scenarios/`: runtime WADs and configs consumed by training and evaluation
-
-If a scenario generator changes, rebuild the corresponding WAD in `DoomGen/` and copy the regenerated artifact back into `comrad/scenarios/` before training or evaluation.
-
-### Using DoomGen as a Python library
-
-DoomGen is declared as an optional dependency in the uv workspace. It is **not** installed by a plain `uv sync`:
-
-```bash
-uv sync --extra doomgen      # install doomgen + its deps
-# or
-uv run --extra doomgen python -m comrad.train ...   # one-off with doomgen available
-# or
-uv pip install -e DoomGen/   # editable install directly from local checkout
-```
-
-After any of these, `import doomgen` works from the root Python environment. Without `--extra doomgen`, the core COMRAD package remains self-contained and DoomGen is not pulled in.
-
-## Tests
-
-Run COMRAD and Sample Factory tests with `uv`:
-
-```bash
-uv run pytest comrad/tests -v
-uv run pytest sample_factory/tests -v
-```
-
-Tests in `comrad/tests/` focus on benchmark logic, launchers, and recorder behavior. Tests in `sample_factory/tests/` cover the modified training stack.
-
-## Outputs and artifacts
-
-- `train_dir/`: experiment directories, configs, checkpoints, logs
-- `results/`: committed figures, tables, result summaries, selected media
-- `wandb/`: local W&B run state and uploads
-
-See [`results/README.md`](results/README.md) for the structure of the committed artifacts.
-
-## License and upstream assets
-
-The repository is released under the MIT license in [`LICENSE`](LICENSE). Upstream and third-party assets are documented in the repository itself, including the bundled `scripts/wad2image/` tool and the paper's citations to ViZDoom, Sample Factory, HARL, PyMARL, and QPLEX.
-
-## Acknowledgements
-
-We would like to thank all researchers, engineers, advisors involved in this work; and the TU/e Supercomputing Center for providing the infrastructure to run the experiments. The environments are built on top of [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Our infrastructure is built on top of [Sample Factory](https://github.com/alex-petrenko/sample-factory). Our experiments were managed using [Weights & Biases](https://wandb.ai/). For on-policy actor-critic methods, we implement IPPO and MAPPO from the original implementation in [Sample Factory](https://github.com/alex-petrenko/sample-factory), and HAPPO following the [HARL codebase](https://github.com/PKU-MARL/HARL). For off-policy value decomposition methods, we implement IDQN, VDN, QMIX following the [PyMARL framework](https://github.com/oxwhirl/pymarl), and QPLEX following [official QPLEX reference implementation](https://github.com/wjh720/QPLEX).
-
-<!-- ## Citation -->
+COMRAD is released under the [MIT license](https://github.com/TTomilin/COMRAD/blob/main/LICENSE). It builds on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom) and [Sample Factory](https://github.com/alex-petrenko/sample-factory). HAPPO follows [HARL](https://github.com/PKU-MARL/HARL), IDQN/VDN/QMIX follow [PyMARL](https://github.com/oxwhirl/pymarl), and QPLEX follows the [official implementation](https://github.com/wjh720/QPLEX). Experiments were tracked with [Weights & Biases](https://wandb.ai/) and run on the TU/e Supercomputing Center. We thank everyone who contributed to this work.

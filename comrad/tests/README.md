@@ -1,26 +1,10 @@
 # `comrad/tests/`
 
-This directory contains tests for COMRAD-specific behavior rather than generic Sample Factory logic.
-
-## Coverage areas
-
-- launcher profile construction in `train_all.py`
-- batch and scaling configuration regressions
-- recorder and top-down heatmap behavior
-- selected environment and wrapper invariants
-
-## Running tests
-
-Run the whole COMRAD test set:
+Tests for COMRAD-specific behaviour: public API and PettingZoo adapter, explicit reset, packaging, launcher profiles, recorders, and wrapper invariants.
 
 ```bash
 uv run pytest comrad/tests -v
+uv run pytest sample_factory/tests -v   # engine tests
 ```
 
-Run a focused file:
-
-```bash
-uv run pytest comrad/tests/test_train_all_scaling.py -v
-```
-
-If a change spans both benchmark code and the training engine, also run the relevant tests under `sample_factory/tests/`.
+Run DoomGen tests separately from `DoomGen/`, because running both suites from the repository root causes a `tests.*` import collision.
