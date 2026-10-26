@@ -1,0 +1,1298 @@
+[
+  {
+    "id": "ammo_carrier_0000",
+    "filename": "ammo_carrier_0000.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0001",
+    "filename": "ammo_carrier_0001.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0002",
+    "filename": "ammo_carrier_0002.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0003",
+    "filename": "ammo_carrier_0003.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0004",
+    "filename": "ammo_carrier_0004.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0005",
+    "filename": "ammo_carrier_0005.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0006",
+    "filename": "ammo_carrier_0006.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0007",
+    "filename": "ammo_carrier_0007.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0008",
+    "filename": "ammo_carrier_0008.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0009",
+    "filename": "ammo_carrier_0009.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0010",
+    "filename": "ammo_carrier_0010.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0011",
+    "filename": "ammo_carrier_0011.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0012",
+    "filename": "ammo_carrier_0012.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0013",
+    "filename": "ammo_carrier_0013.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0014",
+    "filename": "ammo_carrier_0014.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0015",
+    "filename": "ammo_carrier_0015.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0016",
+    "filename": "ammo_carrier_0016.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0017",
+    "filename": "ammo_carrier_0017.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0018",
+    "filename": "ammo_carrier_0018.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0019",
+    "filename": "ammo_carrier_0019.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0020",
+    "filename": "ammo_carrier_0020.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0021",
+    "filename": "ammo_carrier_0021.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0022",
+    "filename": "ammo_carrier_0022.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0023",
+    "filename": "ammo_carrier_0023.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0024",
+    "filename": "ammo_carrier_0024.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0025",
+    "filename": "ammo_carrier_0025.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0026",
+    "filename": "ammo_carrier_0026.wad",
+    "config": {
+      "map_radius": 1000,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "compact",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0027",
+    "filename": "ammo_carrier_0027.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0028",
+    "filename": "ammo_carrier_0028.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0029",
+    "filename": "ammo_carrier_0029.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0030",
+    "filename": "ammo_carrier_0030.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0031",
+    "filename": "ammo_carrier_0031.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0032",
+    "filename": "ammo_carrier_0032.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0033",
+    "filename": "ammo_carrier_0033.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0034",
+    "filename": "ammo_carrier_0034.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0035",
+    "filename": "ammo_carrier_0035.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0036",
+    "filename": "ammo_carrier_0036.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0037",
+    "filename": "ammo_carrier_0037.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0038",
+    "filename": "ammo_carrier_0038.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0039",
+    "filename": "ammo_carrier_0039.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0040",
+    "filename": "ammo_carrier_0040.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0041",
+    "filename": "ammo_carrier_0041.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0042",
+    "filename": "ammo_carrier_0042.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0043",
+    "filename": "ammo_carrier_0043.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0044",
+    "filename": "ammo_carrier_0044.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0045",
+    "filename": "ammo_carrier_0045.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0046",
+    "filename": "ammo_carrier_0046.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0047",
+    "filename": "ammo_carrier_0047.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0048",
+    "filename": "ammo_carrier_0048.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0049",
+    "filename": "ammo_carrier_0049.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0050",
+    "filename": "ammo_carrier_0050.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0051",
+    "filename": "ammo_carrier_0051.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0052",
+    "filename": "ammo_carrier_0052.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0053",
+    "filename": "ammo_carrier_0053.wad",
+    "config": {
+      "map_radius": 1200,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "standard",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0054",
+    "filename": "ammo_carrier_0054.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0055",
+    "filename": "ammo_carrier_0055.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0056",
+    "filename": "ammo_carrier_0056.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0057",
+    "filename": "ammo_carrier_0057.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0058",
+    "filename": "ammo_carrier_0058.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0059",
+    "filename": "ammo_carrier_0059.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0060",
+    "filename": "ammo_carrier_0060.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0061",
+    "filename": "ammo_carrier_0061.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0062",
+    "filename": "ammo_carrier_0062.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 1,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "single",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0063",
+    "filename": "ammo_carrier_0063.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0064",
+    "filename": "ammo_carrier_0064.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0065",
+    "filename": "ammo_carrier_0065.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0066",
+    "filename": "ammo_carrier_0066.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0067",
+    "filename": "ammo_carrier_0067.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0068",
+    "filename": "ammo_carrier_0068.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0069",
+    "filename": "ammo_carrier_0069.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0070",
+    "filename": "ammo_carrier_0070.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0071",
+    "filename": "ammo_carrier_0071.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 2,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "double",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0072",
+    "filename": "ammo_carrier_0072.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0073",
+    "filename": "ammo_carrier_0073.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0074",
+    "filename": "ammo_carrier_0074.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 0.75,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "light",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0075",
+    "filename": "ammo_carrier_0075.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0076",
+    "filename": "ammo_carrier_0076.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0077",
+    "filename": "ammo_carrier_0077.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.0,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "standard",
+      "layout_seed": "seed_43"
+    }
+  },
+  {
+    "id": "ammo_carrier_0078",
+    "filename": "ammo_carrier_0078.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 41
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_41"
+    }
+  },
+  {
+    "id": "ammo_carrier_0079",
+    "filename": "ammo_carrier_0079.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 42
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_42"
+    }
+  },
+  {
+    "id": "ammo_carrier_0080",
+    "filename": "ammo_carrier_0080.wad",
+    "config": {
+      "map_radius": 1400,
+      "num_depots": 3,
+      "enemy_density": 1.25,
+      "seed": 43
+    },
+    "axis_choices": {
+      "map_radius": "wide",
+      "depot_count": "triple",
+      "enemy_density": "heavy",
+      "layout_seed": "seed_43"
+    }
+  }
+]

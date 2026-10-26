@@ -1,0 +1,1541 @@
+[
+  {
+    "id": "lava_maze_0000",
+    "filename": "lava_maze_0000.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0001",
+    "filename": "lava_maze_0001.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0002",
+    "filename": "lava_maze_0002.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0003",
+    "filename": "lava_maze_0003.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0004",
+    "filename": "lava_maze_0004.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0005",
+    "filename": "lava_maze_0005.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0006",
+    "filename": "lava_maze_0006.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0007",
+    "filename": "lava_maze_0007.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0008",
+    "filename": "lava_maze_0008.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0009",
+    "filename": "lava_maze_0009.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0010",
+    "filename": "lava_maze_0010.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0011",
+    "filename": "lava_maze_0011.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0012",
+    "filename": "lava_maze_0012.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0013",
+    "filename": "lava_maze_0013.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0014",
+    "filename": "lava_maze_0014.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0015",
+    "filename": "lava_maze_0015.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0016",
+    "filename": "lava_maze_0016.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0017",
+    "filename": "lava_maze_0017.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0018",
+    "filename": "lava_maze_0018.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0019",
+    "filename": "lava_maze_0019.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0020",
+    "filename": "lava_maze_0020.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0021",
+    "filename": "lava_maze_0021.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0022",
+    "filename": "lava_maze_0022.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0023",
+    "filename": "lava_maze_0023.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0024",
+    "filename": "lava_maze_0024.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0025",
+    "filename": "lava_maze_0025.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0026",
+    "filename": "lava_maze_0026.wad",
+    "config": {
+      "physical_size": 4,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "small",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0027",
+    "filename": "lava_maze_0027.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0028",
+    "filename": "lava_maze_0028.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0029",
+    "filename": "lava_maze_0029.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0030",
+    "filename": "lava_maze_0030.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0031",
+    "filename": "lava_maze_0031.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0032",
+    "filename": "lava_maze_0032.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0033",
+    "filename": "lava_maze_0033.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0034",
+    "filename": "lava_maze_0034.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0035",
+    "filename": "lava_maze_0035.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0036",
+    "filename": "lava_maze_0036.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0037",
+    "filename": "lava_maze_0037.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0038",
+    "filename": "lava_maze_0038.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0039",
+    "filename": "lava_maze_0039.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0040",
+    "filename": "lava_maze_0040.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0041",
+    "filename": "lava_maze_0041.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0042",
+    "filename": "lava_maze_0042.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0043",
+    "filename": "lava_maze_0043.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0044",
+    "filename": "lava_maze_0044.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0045",
+    "filename": "lava_maze_0045.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0046",
+    "filename": "lava_maze_0046.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0047",
+    "filename": "lava_maze_0047.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0048",
+    "filename": "lava_maze_0048.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0049",
+    "filename": "lava_maze_0049.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0050",
+    "filename": "lava_maze_0050.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0051",
+    "filename": "lava_maze_0051.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0052",
+    "filename": "lava_maze_0052.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0053",
+    "filename": "lava_maze_0053.wad",
+    "config": {
+      "physical_size": 6,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "medium",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0054",
+    "filename": "lava_maze_0054.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0055",
+    "filename": "lava_maze_0055.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0056",
+    "filename": "lava_maze_0056.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0057",
+    "filename": "lava_maze_0057.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0058",
+    "filename": "lava_maze_0058.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0059",
+    "filename": "lava_maze_0059.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0060",
+    "filename": "lava_maze_0060.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0061",
+    "filename": "lava_maze_0061.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0062",
+    "filename": "lava_maze_0062.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 96,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "tight_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0063",
+    "filename": "lava_maze_0063.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0064",
+    "filename": "lava_maze_0064.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0065",
+    "filename": "lava_maze_0065.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0066",
+    "filename": "lava_maze_0066.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0067",
+    "filename": "lava_maze_0067.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0068",
+    "filename": "lava_maze_0068.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0069",
+    "filename": "lava_maze_0069.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0070",
+    "filename": "lava_maze_0070.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0071",
+    "filename": "lava_maze_0071.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "standard_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0072",
+    "filename": "lava_maze_0072.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0073",
+    "filename": "lava_maze_0073.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0074",
+    "filename": "lava_maze_0074.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 4,
+      "max_maze_size": 8,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "short_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0075",
+    "filename": "lava_maze_0075.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0076",
+    "filename": "lava_maze_0076.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0077",
+    "filename": "lava_maze_0077.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 6,
+      "max_maze_size": 14,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "medium_growth",
+      "lava_severity": "deep_harsh"
+    }
+  },
+  {
+    "id": "lava_maze_0078",
+    "filename": "lava_maze_0078.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 20,
+      "lava_depth": 24,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "shallow_mild"
+    }
+  },
+  {
+    "id": "lava_maze_0079",
+    "filename": "lava_maze_0079.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "baseline"
+    }
+  },
+  {
+    "id": "lava_maze_0080",
+    "filename": "lava_maze_0080.wad",
+    "config": {
+      "physical_size": 8,
+      "cell_size": 160,
+      "initial_maze_size": 8,
+      "max_maze_size": 20,
+      "lava_damage": 50,
+      "lava_depth": 96,
+      "seed": 42
+    },
+    "axis_choices": {
+      "physical_grid_size": "large",
+      "cell_size": "wide_cells",
+      "maze_growth_schedule": "long_growth",
+      "lava_severity": "deep_harsh"
+    }
+  }
+]

@@ -1,0 +1,2918 @@
+[
+  {
+    "id": "platform_chain_small_0000",
+    "filename": "platform_chain_small_0000.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0001",
+    "filename": "platform_chain_small_0001.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0002",
+    "filename": "platform_chain_small_0002.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0003",
+    "filename": "platform_chain_small_0003.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0004",
+    "filename": "platform_chain_small_0004.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0005",
+    "filename": "platform_chain_small_0005.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0006",
+    "filename": "platform_chain_small_0006.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0007",
+    "filename": "platform_chain_small_0007.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0008",
+    "filename": "platform_chain_small_0008.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0009",
+    "filename": "platform_chain_small_0009.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0010",
+    "filename": "platform_chain_small_0010.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0011",
+    "filename": "platform_chain_small_0011.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0012",
+    "filename": "platform_chain_small_0012.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0013",
+    "filename": "platform_chain_small_0013.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0014",
+    "filename": "platform_chain_small_0014.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0015",
+    "filename": "platform_chain_small_0015.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0016",
+    "filename": "platform_chain_small_0016.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0017",
+    "filename": "platform_chain_small_0017.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0018",
+    "filename": "platform_chain_small_0018.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0019",
+    "filename": "platform_chain_small_0019.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0020",
+    "filename": "platform_chain_small_0020.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0021",
+    "filename": "platform_chain_small_0021.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0022",
+    "filename": "platform_chain_small_0022.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0023",
+    "filename": "platform_chain_small_0023.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0024",
+    "filename": "platform_chain_small_0024.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0025",
+    "filename": "platform_chain_small_0025.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0026",
+    "filename": "platform_chain_small_0026.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0027",
+    "filename": "platform_chain_small_0027.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0028",
+    "filename": "platform_chain_small_0028.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0029",
+    "filename": "platform_chain_small_0029.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0030",
+    "filename": "platform_chain_small_0030.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0031",
+    "filename": "platform_chain_small_0031.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0032",
+    "filename": "platform_chain_small_0032.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0033",
+    "filename": "platform_chain_small_0033.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0034",
+    "filename": "platform_chain_small_0034.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0035",
+    "filename": "platform_chain_small_0035.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 36,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "short",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0036",
+    "filename": "platform_chain_small_0036.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0037",
+    "filename": "platform_chain_small_0037.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0038",
+    "filename": "platform_chain_small_0038.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0039",
+    "filename": "platform_chain_small_0039.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0040",
+    "filename": "platform_chain_small_0040.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0041",
+    "filename": "platform_chain_small_0041.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0042",
+    "filename": "platform_chain_small_0042.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0043",
+    "filename": "platform_chain_small_0043.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0044",
+    "filename": "platform_chain_small_0044.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0045",
+    "filename": "platform_chain_small_0045.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0046",
+    "filename": "platform_chain_small_0046.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0047",
+    "filename": "platform_chain_small_0047.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0048",
+    "filename": "platform_chain_small_0048.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0049",
+    "filename": "platform_chain_small_0049.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0050",
+    "filename": "platform_chain_small_0050.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0051",
+    "filename": "platform_chain_small_0051.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0052",
+    "filename": "platform_chain_small_0052.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0053",
+    "filename": "platform_chain_small_0053.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0054",
+    "filename": "platform_chain_small_0054.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0055",
+    "filename": "platform_chain_small_0055.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0056",
+    "filename": "platform_chain_small_0056.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0057",
+    "filename": "platform_chain_small_0057.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0058",
+    "filename": "platform_chain_small_0058.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0059",
+    "filename": "platform_chain_small_0059.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0060",
+    "filename": "platform_chain_small_0060.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0061",
+    "filename": "platform_chain_small_0061.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0062",
+    "filename": "platform_chain_small_0062.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0063",
+    "filename": "platform_chain_small_0063.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0064",
+    "filename": "platform_chain_small_0064.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0065",
+    "filename": "platform_chain_small_0065.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0066",
+    "filename": "platform_chain_small_0066.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0067",
+    "filename": "platform_chain_small_0067.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0068",
+    "filename": "platform_chain_small_0068.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0069",
+    "filename": "platform_chain_small_0069.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0070",
+    "filename": "platform_chain_small_0070.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0071",
+    "filename": "platform_chain_small_0071.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 48,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "standard",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0072",
+    "filename": "platform_chain_small_0072.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0073",
+    "filename": "platform_chain_small_0073.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0074",
+    "filename": "platform_chain_small_0074.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0075",
+    "filename": "platform_chain_small_0075.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0076",
+    "filename": "platform_chain_small_0076.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0077",
+    "filename": "platform_chain_small_0077.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0078",
+    "filename": "platform_chain_small_0078.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0079",
+    "filename": "platform_chain_small_0079.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0080",
+    "filename": "platform_chain_small_0080.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0081",
+    "filename": "platform_chain_small_0081.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0082",
+    "filename": "platform_chain_small_0082.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0083",
+    "filename": "platform_chain_small_0083.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0084",
+    "filename": "platform_chain_small_0084.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0085",
+    "filename": "platform_chain_small_0085.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0086",
+    "filename": "platform_chain_small_0086.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0087",
+    "filename": "platform_chain_small_0087.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0088",
+    "filename": "platform_chain_small_0088.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0089",
+    "filename": "platform_chain_small_0089.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 1,
+      "safe_start_levels_max": 1,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "minimal",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0090",
+    "filename": "platform_chain_small_0090.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0091",
+    "filename": "platform_chain_small_0091.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0092",
+    "filename": "platform_chain_small_0092.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0093",
+    "filename": "platform_chain_small_0093.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0094",
+    "filename": "platform_chain_small_0094.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0095",
+    "filename": "platform_chain_small_0095.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 220
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "tight",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0096",
+    "filename": "platform_chain_small_0096.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0097",
+    "filename": "platform_chain_small_0097.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0098",
+    "filename": "platform_chain_small_0098.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0099",
+    "filename": "platform_chain_small_0099.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0100",
+    "filename": "platform_chain_small_0100.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0101",
+    "filename": "platform_chain_small_0101.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 250
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "standard",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0102",
+    "filename": "platform_chain_small_0102.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0103",
+    "filename": "platform_chain_small_0103.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 35,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "mild",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0104",
+    "filename": "platform_chain_small_0104.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0105",
+    "filename": "platform_chain_small_0105.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 50,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "standard",
+      "mover_density": "dense"
+    }
+  },
+  {
+    "id": "platform_chain_small_0106",
+    "filename": "platform_chain_small_0106.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 4,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "light"
+    }
+  },
+  {
+    "id": "platform_chain_small_0107",
+    "filename": "platform_chain_small_0107.wad",
+    "config": {
+      "seed": 42,
+      "random_seed_on_generate": true,
+      "level_count": 60,
+      "base_height": 0,
+      "height_step": 12,
+      "safe_start_levels_min": 4,
+      "safe_start_levels_max": 4,
+      "max_players": 4,
+      "lava_height": -96,
+      "lava_damage": 70,
+      "polyobject_count": 12,
+      "map_radius": 1800,
+      "jump_gap": 68,
+      "chain_max_len": 280
+    },
+    "axis_choices": {
+      "route_length": "long",
+      "opening_safety_margin": "generous",
+      "tether_slack": "loose",
+      "lava_severity": "harsh",
+      "mover_density": "dense"
+    }
+  }
+]

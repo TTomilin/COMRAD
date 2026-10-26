@@ -1,0 +1,4862 @@
+[
+  {
+    "id": "coop_puzzle_0000",
+    "filename": "coop_puzzle_0000.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0001",
+    "filename": "coop_puzzle_0001.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0002",
+    "filename": "coop_puzzle_0002.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0003",
+    "filename": "coop_puzzle_0003.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0004",
+    "filename": "coop_puzzle_0004.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0005",
+    "filename": "coop_puzzle_0005.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0006",
+    "filename": "coop_puzzle_0006.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0007",
+    "filename": "coop_puzzle_0007.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0008",
+    "filename": "coop_puzzle_0008.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0009",
+    "filename": "coop_puzzle_0009.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0010",
+    "filename": "coop_puzzle_0010.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0011",
+    "filename": "coop_puzzle_0011.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0012",
+    "filename": "coop_puzzle_0012.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0013",
+    "filename": "coop_puzzle_0013.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0014",
+    "filename": "coop_puzzle_0014.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0015",
+    "filename": "coop_puzzle_0015.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0016",
+    "filename": "coop_puzzle_0016.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0017",
+    "filename": "coop_puzzle_0017.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0018",
+    "filename": "coop_puzzle_0018.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0019",
+    "filename": "coop_puzzle_0019.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0020",
+    "filename": "coop_puzzle_0020.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0021",
+    "filename": "coop_puzzle_0021.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0022",
+    "filename": "coop_puzzle_0022.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0023",
+    "filename": "coop_puzzle_0023.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0024",
+    "filename": "coop_puzzle_0024.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0025",
+    "filename": "coop_puzzle_0025.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0026",
+    "filename": "coop_puzzle_0026.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0027",
+    "filename": "coop_puzzle_0027.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0028",
+    "filename": "coop_puzzle_0028.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0029",
+    "filename": "coop_puzzle_0029.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0030",
+    "filename": "coop_puzzle_0030.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0031",
+    "filename": "coop_puzzle_0031.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0032",
+    "filename": "coop_puzzle_0032.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0033",
+    "filename": "coop_puzzle_0033.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0034",
+    "filename": "coop_puzzle_0034.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0035",
+    "filename": "coop_puzzle_0035.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0036",
+    "filename": "coop_puzzle_0036.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0037",
+    "filename": "coop_puzzle_0037.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0038",
+    "filename": "coop_puzzle_0038.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0039",
+    "filename": "coop_puzzle_0039.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0040",
+    "filename": "coop_puzzle_0040.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0041",
+    "filename": "coop_puzzle_0041.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0042",
+    "filename": "coop_puzzle_0042.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0043",
+    "filename": "coop_puzzle_0043.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0044",
+    "filename": "coop_puzzle_0044.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0045",
+    "filename": "coop_puzzle_0045.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0046",
+    "filename": "coop_puzzle_0046.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0047",
+    "filename": "coop_puzzle_0047.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0048",
+    "filename": "coop_puzzle_0048.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0049",
+    "filename": "coop_puzzle_0049.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0050",
+    "filename": "coop_puzzle_0050.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0051",
+    "filename": "coop_puzzle_0051.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0052",
+    "filename": "coop_puzzle_0052.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0053",
+    "filename": "coop_puzzle_0053.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 8,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "short",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0054",
+    "filename": "coop_puzzle_0054.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0055",
+    "filename": "coop_puzzle_0055.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0056",
+    "filename": "coop_puzzle_0056.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0057",
+    "filename": "coop_puzzle_0057.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0058",
+    "filename": "coop_puzzle_0058.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0059",
+    "filename": "coop_puzzle_0059.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0060",
+    "filename": "coop_puzzle_0060.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0061",
+    "filename": "coop_puzzle_0061.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0062",
+    "filename": "coop_puzzle_0062.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0063",
+    "filename": "coop_puzzle_0063.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0064",
+    "filename": "coop_puzzle_0064.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0065",
+    "filename": "coop_puzzle_0065.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0066",
+    "filename": "coop_puzzle_0066.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0067",
+    "filename": "coop_puzzle_0067.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0068",
+    "filename": "coop_puzzle_0068.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0069",
+    "filename": "coop_puzzle_0069.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0070",
+    "filename": "coop_puzzle_0070.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0071",
+    "filename": "coop_puzzle_0071.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0072",
+    "filename": "coop_puzzle_0072.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0073",
+    "filename": "coop_puzzle_0073.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0074",
+    "filename": "coop_puzzle_0074.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0075",
+    "filename": "coop_puzzle_0075.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0076",
+    "filename": "coop_puzzle_0076.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0077",
+    "filename": "coop_puzzle_0077.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0078",
+    "filename": "coop_puzzle_0078.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0079",
+    "filename": "coop_puzzle_0079.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0080",
+    "filename": "coop_puzzle_0080.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0081",
+    "filename": "coop_puzzle_0081.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0082",
+    "filename": "coop_puzzle_0082.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0083",
+    "filename": "coop_puzzle_0083.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0084",
+    "filename": "coop_puzzle_0084.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0085",
+    "filename": "coop_puzzle_0085.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0086",
+    "filename": "coop_puzzle_0086.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0087",
+    "filename": "coop_puzzle_0087.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0088",
+    "filename": "coop_puzzle_0088.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0089",
+    "filename": "coop_puzzle_0089.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0090",
+    "filename": "coop_puzzle_0090.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0091",
+    "filename": "coop_puzzle_0091.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0092",
+    "filename": "coop_puzzle_0092.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0093",
+    "filename": "coop_puzzle_0093.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0094",
+    "filename": "coop_puzzle_0094.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0095",
+    "filename": "coop_puzzle_0095.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0096",
+    "filename": "coop_puzzle_0096.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0097",
+    "filename": "coop_puzzle_0097.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0098",
+    "filename": "coop_puzzle_0098.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0099",
+    "filename": "coop_puzzle_0099.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0100",
+    "filename": "coop_puzzle_0100.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0101",
+    "filename": "coop_puzzle_0101.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0102",
+    "filename": "coop_puzzle_0102.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0103",
+    "filename": "coop_puzzle_0103.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0104",
+    "filename": "coop_puzzle_0104.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0105",
+    "filename": "coop_puzzle_0105.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0106",
+    "filename": "coop_puzzle_0106.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0107",
+    "filename": "coop_puzzle_0107.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 10,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "standard",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0108",
+    "filename": "coop_puzzle_0108.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0109",
+    "filename": "coop_puzzle_0109.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0110",
+    "filename": "coop_puzzle_0110.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0111",
+    "filename": "coop_puzzle_0111.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0112",
+    "filename": "coop_puzzle_0112.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0113",
+    "filename": "coop_puzzle_0113.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0114",
+    "filename": "coop_puzzle_0114.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0115",
+    "filename": "coop_puzzle_0115.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0116",
+    "filename": "coop_puzzle_0116.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0117",
+    "filename": "coop_puzzle_0117.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0118",
+    "filename": "coop_puzzle_0118.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0119",
+    "filename": "coop_puzzle_0119.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0120",
+    "filename": "coop_puzzle_0120.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0121",
+    "filename": "coop_puzzle_0121.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0122",
+    "filename": "coop_puzzle_0122.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0123",
+    "filename": "coop_puzzle_0123.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0124",
+    "filename": "coop_puzzle_0124.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0125",
+    "filename": "coop_puzzle_0125.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 320,
+      "lane_height": 220,
+      "lane_gap": 0,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "tight",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0126",
+    "filename": "coop_puzzle_0126.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0127",
+    "filename": "coop_puzzle_0127.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0128",
+    "filename": "coop_puzzle_0128.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0129",
+    "filename": "coop_puzzle_0129.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0130",
+    "filename": "coop_puzzle_0130.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0131",
+    "filename": "coop_puzzle_0131.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0132",
+    "filename": "coop_puzzle_0132.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0133",
+    "filename": "coop_puzzle_0133.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0134",
+    "filename": "coop_puzzle_0134.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0135",
+    "filename": "coop_puzzle_0135.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0136",
+    "filename": "coop_puzzle_0136.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0137",
+    "filename": "coop_puzzle_0137.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0138",
+    "filename": "coop_puzzle_0138.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0139",
+    "filename": "coop_puzzle_0139.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0140",
+    "filename": "coop_puzzle_0140.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0141",
+    "filename": "coop_puzzle_0141.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0142",
+    "filename": "coop_puzzle_0142.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0143",
+    "filename": "coop_puzzle_0143.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 384,
+      "lane_height": 240,
+      "lane_gap": 32,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "standard",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0144",
+    "filename": "coop_puzzle_0144.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0145",
+    "filename": "coop_puzzle_0145.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0146",
+    "filename": "coop_puzzle_0146.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0147",
+    "filename": "coop_puzzle_0147.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0148",
+    "filename": "coop_puzzle_0148.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0149",
+    "filename": "coop_puzzle_0149.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 96,
+      "plates_per_side": 1,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "few_large",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0150",
+    "filename": "coop_puzzle_0150.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0151",
+    "filename": "coop_puzzle_0151.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0152",
+    "filename": "coop_puzzle_0152.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0153",
+    "filename": "coop_puzzle_0153.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0154",
+    "filename": "coop_puzzle_0154.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0155",
+    "filename": "coop_puzzle_0155.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 72,
+      "plates_per_side": 2,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "balanced",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0156",
+    "filename": "coop_puzzle_0156.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0157",
+    "filename": "coop_puzzle_0157.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 2,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "frequent",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0158",
+    "filename": "coop_puzzle_0158.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0159",
+    "filename": "coop_puzzle_0159.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 3,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "standard",
+      "affordance_color_theme": "cyan_amber"
+    }
+  },
+  {
+    "id": "coop_puzzle_0160",
+    "filename": "coop_puzzle_0160.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_1",
+      "highlight_texture_a": "AQF044",
+      "highlight_texture_b": "AQF038",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "amber_cyan"
+    }
+  },
+  {
+    "id": "coop_puzzle_0161",
+    "filename": "coop_puzzle_0161.wad",
+    "config": {
+      "seed": 42,
+      "num_zones": 12,
+      "zone_length": 448,
+      "lane_height": 280,
+      "lane_gap": 64,
+      "plate_size": 56,
+      "plates_per_side": 3,
+      "and_frequency_pairs": 4,
+      "floor_texture": "FLOOR4_8",
+      "ceiling_texture": "CEIL3_5",
+      "wall_texture": "STONE2",
+      "door_texture": "BIGDOOR2",
+      "window_texture": "MIDGRATE",
+      "plate_texture": "CEIL5_2",
+      "highlight_texture_a": "AQF038",
+      "highlight_texture_b": "AQF044",
+      "light_level": 224
+    },
+    "axis_choices": {
+      "zone_count": "long",
+      "lane_geometry": "wide",
+      "plate_candidates": "many_small",
+      "sync_frequency": "rare",
+      "affordance_color_theme": "cyan_amber"
+    }
+  }
+]
