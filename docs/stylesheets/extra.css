@@ -1,0 +1,21 @@
+/* Left sidebar tweaks (desktop layout, where navigation.sections applies). */
+@media screen and (min-width: 76.25em) {
+  /* More space between top-level sidebar groups. */
+  .md-nav--primary > .md-nav__list > .md-nav__item {
+    margin-top: 0.6em;
+  }
+  .md-nav--primary > .md-nav__list > .md-nav__item--section {
+    margin: 1.8em 0;
+  }
+
+  /* Section headings with an index page (e.g. "Scenarios") render as links;
+     style them like the plain section headings so all groups look the same. */
+  .md-nav--primary .md-nav__item--section > .md-nav__container > a.md-nav__link,
+  .md-nav--primary .md-nav__item--section > .md-nav__container > a.md-nav__link--active {
+    color: var(--md-default-fg-color--light);
+    font-weight: 700;
+  }
+  .md-nav--primary .md-nav__item--section > .md-nav__container > a.md-nav__link:hover {
+    color: var(--md-accent-fg-color);
+  }
+}
