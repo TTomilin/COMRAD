@@ -13,7 +13,7 @@
   <img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/comrad_demo.gif" alt="COMRAD agents playing" width="720">
 </p>
 
-COMRAD is a benchmark of **13 first-person cooperative scenarios** built on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Each one isolates a coordination skill: committing to a joint plan, synchronising in time, sharing a commons, swapping roles, or communicating without words. Agents see only their own 128×72 RGB view.
+COMRAD is a benchmark of **13 first-person cooperative scenarios** built on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Each one isolates a coordination skill: committing to a joint plan, synchronising in time, sharing a commons, swapping roles, or communicating without words. Agents see only their own first-person view.
 
 ## Scenarios
 
@@ -98,7 +98,7 @@ See the [per-algorithm commands](https://ttomilin.github.io/COMRAD/training/samp
 
 ## Documentation
 
-**https://ttomilin.github.io/COMRAD/**: scenarios, API, integrations, training and contributing.
+**https://ttomilin.github.io/COMRAD/**: scenarios, API, integrations, training, and contributing.
 
 **https://lmbored.github.io/comrad_site/**: Project page. Visit for a playable demo, scoreboard, and paper overview.
 
