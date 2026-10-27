@@ -4,7 +4,7 @@
 pip install comrad-bench
 ```
 
-COMRAD needs **Python 3.11 or 3.12** on Linux or macOS. The ViZDoom engine comes with the `vizdoom` wheel, so nothing else has to be installed on common platforms. If `pip` has to build ViZDoom from source, follow the [ViZDoom build instructions](https://vizdoom.farama.org/introduction/building/) first.
+COMRAD needs **Python 3.11 or 3.12** on Linux or macOS. The ViZDoom engine comes with the `vizdoom` wheel, so nothing else has to be installed on common platforms. If `pip` has to build ViZDoom from source, follow the [ViZDoom build instructions](https://vizdoom.farama.org/dev/building_from_source/) first.
 
 Check the install:
 

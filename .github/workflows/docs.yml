@@ -9,6 +9,13 @@ on:
       - 'mkdocs.yml'
       - 'README.md'
       - '.github/workflows/docs.yml'
+  # While the repo's Pages source is "Deploy from a branch", GitHub's built-in Jekyll job
+  # ("pages build and deployment") runs on every push to main and overwrites this site.
+  # Re-deploy MkDocs right after it finishes so MkDocs is always the last deploy.
+  workflow_run:
+    workflows: ['pages-build-deployment']
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
