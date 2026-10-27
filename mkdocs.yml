@@ -11,10 +11,12 @@ exclude_docs: |
 theme:
   name: material
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.top
     - navigation.indexes
+    - navigation.path
+    - navigation.footer
+    - toc.follow
     - content.code.copy
     - search.suggest
   palette:

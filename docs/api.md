@@ -61,4 +61,4 @@ The defaults match the configuration used for the paper baselines.
 | `true_objective` | at episode end | The benchmark score for the scenario. Report this, not the shaped return. |
 | `episode_extra_stats` | at episode end | Extra scenario statistics, as a dict. |
 | `num_frames` | every step | Game tics simulated by the step (= `frameskip`). |
-| `_hidden_reset_count` | after a crash recovery | Number of transparent restarts since the previous step. |
+| `_hidden_reset_count` | after a crash recovery | Number of crash-recovery restarts since the previous step. The step's observation already belongs to the new episode, and every agent that is not terminated is marked `truncated`, so call `reset()` before continuing. |
