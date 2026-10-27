@@ -100,7 +100,7 @@ See the [per-algorithm commands](https://ttomilin.github.io/COMRAD/training/samp
 
 **https://ttomilin.github.io/COMRAD/**: scenarios, API, integrations, training and contributing.
 
-**Project page:** https://lmbored.github.io/comrad_site/ for a playable demo, scoreboard and paper overview.
+**https://lmbored.github.io/comrad_site/**: Project page. Visit for a playable demo, scoreboard, and paper overview.
 
 ## Citation
 
