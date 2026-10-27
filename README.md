@@ -4,9 +4,9 @@
 
 <p align="center">
   <a href="https://pypi.org/project/comrad-bench/"><img src="https://img.shields.io/pypi/v/comrad-bench" alt="PyPI"></a>
-  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue" alt="Python 3.11 | 3.12">
   <a href="https://github.com/TTomilin/COMRAD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
   <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/docs-online-orange" alt="Docs"></a>
+  <a href="https://lmbored.github.io/comrad_site/"><img src="https://img.shields.io/badge/project-page-blue" alt="Project page"></a>
 </p>
 
 <p align="center">
@@ -100,11 +100,13 @@ See the [per-algorithm commands](https://ttomilin.github.io/COMRAD/training/samp
 
 **https://ttomilin.github.io/COMRAD/**: scenarios, API, integrations, training and contributing.
 
+**Project page:** https://lmbored.github.io/comrad_site/ for a playable demo, scoreboard and paper overview.
+
 ## Citation
 
 ```bibtex
 @misc{comrad,
-  title  = {COMRAD: Cooperative Multi-Agent Reinforcement Learning Benchmark in ViZDoom},
+  title  = {COMRAD: A Benchmark for Embodied Multi-Agent Reinforcement Learning},
   author = {Anonymized Authors},
   year   = {2026},
   url    = {https://github.com/TTomilin/COMRAD}
