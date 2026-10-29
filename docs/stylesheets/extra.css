@@ -19,3 +19,12 @@
     color: var(--md-accent-fg-color);
   }
 }
+
+/* Home page: the logo is the page heading. */
+.md-typeset h1.comrad-logo {
+  margin-bottom: 0.6em;
+  text-align: center;
+}
+.md-typeset h1.comrad-logo .headerlink {
+  display: none;
+}

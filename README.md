@@ -1,12 +1,18 @@
-<h1 align="center">COMRAD</h1>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/comrad_logo.svg" alt="COMRAD" width="440">
+</p>
 
-<p align="center"><b>Cooperative multi-agent reinforcement learning from pixels, in Doom.</b></p>
+<h1 align="center"><b>COMRAD: Cooperative multi-agent reinforcement learning from pixels.</b></h1>
+
+<p align="center">
+  <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/%F0%9F%93%96%20Docs-f2801a?style=for-the-badge" alt="Docs" height="36"></a> &nbsp;
+  <a href="https://lmbored.github.io/comrad_site/"><img src="https://img.shields.io/badge/%F0%9F%8E%AE%20Project%20Page-6b74ff?style=for-the-badge" alt="Project page" height="36"></a>
+</p>
 
 <p align="center">
   <a href="https://pypi.org/project/comrad-bench/"><img src="https://img.shields.io/pypi/v/comrad-bench" alt="PyPI"></a>
+  <img src="https://img.shields.io/badge/python-3.11%20%7C%203.12-blue" alt="Python 3.11 | 3.12">
   <a href="https://github.com/TTomilin/COMRAD/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license"></a>
-  <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/docs-online-orange" alt="Docs"></a>
-  <a href="https://lmbored.github.io/comrad_site/"><img src="https://img.shields.io/badge/project-page-blue" alt="Project page"></a>
 </p>
 
 <p align="center">

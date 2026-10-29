@@ -1,6 +1,10 @@
-# COMRAD
+<h1 class="comrad-logo" markdown>![COMRAD](assets/comrad_logo.svg){ width="440" }</h1>
 
-**Cooperative multi-agent reinforcement learning from pixels, in Doom.**
+**Cooperative multi-agent reinforcement learning from pixels.**
+
+[🎮 Project Page](https://lmbored.github.io/comrad_site/){ .md-button .md-button--primary }
+[GitHub](https://github.com/TTomilin/COMRAD){ .md-button }
+[PyPI](https://pypi.org/project/comrad-bench/){ .md-button }
 
 COMRAD is a benchmark of 13 first-person cooperative scenarios built on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Each scenario isolates one coordination skill: committing to a joint plan, synchronising in time, sharing a commons, swapping roles, or communicating without words.
 
@@ -38,3 +42,4 @@ Works with any MARL library that speaks PettingZoo or Gymnasium. No Sample Facto
 - [API reference](api.md): options, spaces, info keys and episode semantics.
 - [Sample Factory baselines](training/sample-factory.md): train IPPO, MAPPO, HAPPO, IDQN, VDN, QMIX or QPLEX with the bundled trainer.
 - [Baselines](baselines.md): results of the seven reference algorithms.
+- [Project page](https://lmbored.github.io/comrad_site/): playable demo, scoreboard and paper overview.
