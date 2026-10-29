@@ -1,6 +1,6 @@
 <h1 align="center"><b>COMRAD: Cooperative multi-agent reinforcement learning from pixels.</b></h1>
 
-<p align="center">
+<p align="center" markdown>
 [🎮 Project Page](https://lmbored.github.io/comrad_site/){ .md-button .md-button--primary .md-button--sm }
 [GitHub](https://github.com/TTomilin/COMRAD){ .md-button .md-button--sm }
 [PyPI](https://pypi.org/project/comrad-bench/){ .md-button .md-button--sm }

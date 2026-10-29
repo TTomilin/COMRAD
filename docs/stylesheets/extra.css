@@ -28,3 +28,9 @@
 .md-typeset h1.comrad-logo .headerlink {
   display: none;
 }
+
+/* Smaller variant of Material's .md-button (not built into the theme). */
+.md-typeset .md-button--sm {
+  padding: 0.35em 1em;
+  font-size: 0.75rem;
+}
