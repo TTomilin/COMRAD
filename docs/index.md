@@ -1,9 +1,9 @@
 <h1 align="center"><b>COMRAD: Cooperative multi-agent reinforcement learning from pixels.</b></h1>
 
 <p align="center" markdown>
-[🎮 Project Page](https://lmbored.github.io/comrad_site/){ .md-button .md-button--primary .md-button--sm }
-[GitHub](https://github.com/TTomilin/COMRAD){ .md-button .md-button--sm }
-[PyPI](https://pypi.org/project/comrad-bench/){ .md-button .md-button--sm }
+[🎮 Project Page](https://lmbored.github.io/comrad_site/){ .md-button .md-button--sm }
+[:fontawesome-brands-github: GitHub](https://github.com/TTomilin/COMRAD){ .md-button .md-button--sm }
+[:simple-pypi: PyPI](https://pypi.org/project/comrad-bench/){ .md-button .md-button--sm }
 </p>
 
 COMRAD is a benchmark of 13 first-person cooperative scenarios built on [ViZDoom](https://github.com/Farama-Foundation/ViZDoom). Each scenario isolates one coordination skill: committing to a joint plan, synchronising in time, sharing a commons, swapping roles, or communicating without words.
