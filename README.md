@@ -1,6 +1,6 @@
-<p align="center">
+<!-- <p align="center">
   <img src="https://raw.githubusercontent.com/TTomilin/COMRAD/main/docs/assets/comrad_logo.svg" alt="COMRAD" width="440">
-</p>
+</p> -->
 
 <h1 align="center"><b>COMRAD: Cooperative multi-agent reinforcement learning from pixels.</b></h1>
 
