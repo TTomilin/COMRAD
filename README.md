@@ -5,8 +5,8 @@
 <h1 align="center"><b>COMRAD: Cooperative multi-agent reinforcement learning from pixels.</b></h1>
 
 <p align="center">
-  <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/%F0%9F%93%96%20Docs-f2801a?style=for-the-badge" alt="Docs" height="36"></a> &nbsp;
-  <a href="https://lmbored.github.io/comrad_site/"><img src="https://img.shields.io/badge/%F0%9F%8E%AE%20Project%20Page-6b74ff?style=for-the-badge" alt="Project page" height="36"></a>
+  <a href="https://ttomilin.github.io/COMRAD/"><img src="https://img.shields.io/badge/%F0%9F%93%96%20Docs-f2801a?style=for-the-badge" alt="Docs" height="39"></a> &nbsp;
+  <a href="https://lmbored.github.io/comrad_site/"><img src="https://img.shields.io/badge/%F0%9F%8E%AE%20Project%20Page-6b74ff?style=for-the-badge" alt="Project page" height="39"></a>
 </p>
 
 <p align="center">
