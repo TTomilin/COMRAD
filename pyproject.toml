@@ -95,6 +95,12 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["comrad*", "sample_factory*"]
+exclude = [
+    "comrad.tests*",
+    "comrad.examples*",
+    "comrad.templates*",
+    "sample_factory.tests*",
+]
 
 [tool.ruff]
 line-length = 120

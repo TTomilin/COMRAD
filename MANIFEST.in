@@ -3,3 +3,7 @@ include LICENSE
 recursive-include comrad/scenarios *.cfg *.wad *.json
 # local HPC job scripts (gitignored) must never ship in the package
 prune comrad/templates
+# dev-only code: tests and examples are not part of the package
+prune comrad/tests
+prune comrad/examples
+prune sample_factory/tests
