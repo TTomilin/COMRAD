@@ -65,7 +65,7 @@ for index in "${!checkpoints[@]}"; do
   video_prefix="demo_${checkpoint_name}"
 
   cmd=(
-    uv run python -m comrad.record_video
+    uv run python -m comrad.utils.record_video
     "--env=${scenario}"
     "--algo=${algo}"
     "--train_dir=${train_dir}"

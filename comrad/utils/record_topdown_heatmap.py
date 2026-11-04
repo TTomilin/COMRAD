@@ -77,7 +77,7 @@ class AutomapCalibration:
 
 def add_topdown_args(parser) -> None:
     """
-    Example: uv run python -m comrad.record_topdown_heatmap --env=ammo_carrier --train_dir=train_dir/.../ammo_carrier --experiment=IPPO_env_ammo_carrier --output_dir=results/videos/test --device=cpu --overwrite
+    Example: uv run python -m comrad.utils.record_topdown_heatmap --env=ammo_carrier --train_dir=train_dir/.../ammo_carrier --experiment=IPPO_env_ammo_carrier --output_dir=results/videos/test --device=cpu --overwrite
     """
     parser.add_argument(
         "--resolution",
@@ -199,7 +199,7 @@ def load_policy(cfg: Config, env, device: torch.device):
 def scenario_cfg_path(env_name: str) -> str:
     for spec in DOOM_ENVS:
         if spec.name == env_name:
-            return os.path.abspath(join(os.path.dirname(__file__), "scenarios", spec.env_spec_file))
+            return os.path.abspath(join(os.path.dirname(os.path.dirname(__file__)), "scenarios", spec.env_spec_file))
     raise KeyError(f"Unknown Doom env {env_name!r}")
 
 

@@ -56,7 +56,7 @@ for experiment_dir in "${EXPERIMENT_DIRS[@]}"; do
     mkdir -p "${experiment_output_dir}"
 
     cmd=(
-        python -m comrad.record_topdown_heatmap
+        python -m comrad.utils.record_topdown_heatmap
         "--env=${ENV_NAME}"
         "--train_dir=${TRAIN_DIR}"
         "--experiment=${experiment_name}"

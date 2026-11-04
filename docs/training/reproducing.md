@@ -25,11 +25,11 @@ The launcher adds `--experiment` and `--train_dir` itself, so don't put them in 
 
 ```bash
 # High-resolution video from a checkpoint
-uv run python -m comrad.record_video --env=stag_hunt_arena --train_dir=train_dir \
+uv run python -m comrad.utils.record_video --env=stag_hunt_arena --train_dir=train_dir \
     --experiment=<experiment> --load_checkpoint_kind=best --resolution=1280x720
 
 # Top-down trajectory heatmap on the automap
-uv run python -m comrad.record_topdown_heatmap --env=ammo_carrier --train_dir=<train_root> \
+uv run python -m comrad.utils.record_topdown_heatmap --env=ammo_carrier --train_dir=<train_root> \
     --experiment=<experiment> --output_dir=results/videos/ammo_carrier_navigation_heatmap --device=cpu
 ```
 

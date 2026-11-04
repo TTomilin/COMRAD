@@ -36,7 +36,7 @@ mkdir -p "$output_dir"
 
 cd "$repo_root"
 
-UV_CACHE_DIR=/tmp/uv-cache uv run python -m comrad.record_video \
+UV_CACHE_DIR=/tmp/uv-cache uv run python -m comrad.utils.record_video \
   --env="$scenario" \
   --algo=IPPO \
   --train_dir="$train_dir" \

@@ -94,7 +94,7 @@ Logs, configs and checkpoints are written to `train_dir/<experiment>/`. The main
 ## Recording a trained policy
 
 ```bash
-python -m comrad.record_video --env=stag_hunt_arena --experiment=<experiment> \
+python -m comrad.utils.record_video --env=stag_hunt_arena --experiment=<experiment> \
     --load_checkpoint_kind=best --resolution=1920x1080 --max_num_episodes=5
 ```
 
