@@ -1,13 +1,13 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <3.13"
 resolution-markers = [
     "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and sys_platform == 'darwin'",
     "python_full_version >= '3.12' and sys_platform != 'darwin' and sys_platform != 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'darwin'",
     "python_full_version < '3.12' and sys_platform != 'darwin' and sys_platform != 'linux'",
 ]
@@ -308,6 +308,10 @@ dev = [
 docs = [
     { name = "mkdocs-material" },
 ]
+generation = [
+    { name = "doomgen" },
+    { name = "pillow" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -364,6 +368,10 @@ dev = [
     { name = "ruff", specifier = ">=0.14.13" },
 ]
 docs = [{ name = "mkdocs-material", specifier = ">=9.5" }]
+generation = [
+    { name = "doomgen", editable = "../DoomGen" },
+    { name = "pillow", specifier = ">=11.3.0" },
+]
 
 [[package]]
 name = "contourpy"
@@ -448,6 +456,48 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c9/02/bd72be9134d25ed783ecbbc38a539ffaefbf90c78418c7fb7229600dbac7/distlib-0.4.3.tar.gz", hash = "sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed", size = 615141, upload-time = "2026-06-12T08:04:52.847Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/02/08/9c41fb51ab5b43eb21674aff13df270e8ba6c4b29c8624e328dc7a9482af/distlib-0.4.3-py2.py3-none-any.whl", hash = "sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b", size = 470628, upload-time = "2026-06-12T08:04:50.506Z" },
+]
+
+[[package]]
+name = "doomgen"
+version = "0.1.0"
+source = { editable = "../DoomGen" }
+dependencies = [
+    { name = "numpy" },
+    { name = "omgifol" },
+    { name = "scipy" },
+    { name = "shapely" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "matplotlib", marker = "extra == 'dev'", specifier = ">=3.0.0" },
+    { name = "matplotlib", marker = "extra == 'viz'", specifier = ">=3.0.0" },
+    { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "numpy", specifier = ">=1.24.0" },
+    { name = "omgifol", specifier = ">=0.5.0" },
+    { name = "pillow", marker = "extra == 'dev'", specifier = ">=12.2.0" },
+    { name = "pillow", marker = "extra == 'viz'", specifier = ">=12.2.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
+    { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=4.0.0" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
+    { name = "scipy", specifier = ">=1.10.0" },
+    { name = "shapely", specifier = ">=2.0.0" },
+    { name = "tomli", marker = "python_full_version < '3.11' and extra == 'dev'", specifier = ">=2.0.0" },
+    { name = "twine", marker = "extra == 'dev'", specifier = ">=5.0.0" },
+]
+provides-extras = ["viz", "dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "build", specifier = ">=1.0.0" },
+    { name = "mypy", specifier = ">=1.0.0" },
+    { name = "pytest", specifier = ">=7.0.0" },
+    { name = "pytest-cov", specifier = ">=4.0.0" },
+    { name = "ruff", specifier = ">=0.1.0" },
+    { name = "tomli", marker = "python_full_version < '3.11'", specifier = ">=2.0.0" },
+    { name = "twine", specifier = ">=5.0.0" },
 ]
 
 [[package]]
