@@ -130,7 +130,133 @@ class CoopPuzzleScenario(Scenario):
         lines.append("}")
         return "\n".join(lines)
 
-    def _make_acs(self, num_zones: int) -> ACSBuilder:
+    @staticmethod
+    def _area_center(builder: ProceduralMapBuilder, area_name: str) -> tuple[int, int]:
+        """Bounding-box centre of the Voronoi cells that form an area (read-only, consumes no RNG)."""
+        area_id = builder.name_to_id[area_name]
+        vor = builder.mesh.vor
+        xs, ys = [], []
+        for idx, s in enumerate(builder.seeds):
+            if s.area_id != area_id:
+                continue
+            for v in vor.regions[vor.point_region[idx]]:
+                if v >= 0:
+                    xs.append(float(vor.vertices[v][0]))
+                    ys.append(float(vor.vertices[v][1]))
+        if not xs:
+            return 0, 0
+        return int(round((min(xs) + max(xs)) / 2)), int(round((min(ys) + max(ys)) / 2))
+
+    def _plate_centers(self, builder: ProceduralMapBuilder, metadata: Dict[str, Any]) -> list[tuple[int, int, int, int]]:
+        """(tag, lane, x, y) for every candidate plate; lane 0 = A, 1 = B. Stores the centre in metadata too."""
+        plates = []
+        for zone_idx in sorted(metadata["zones"]):
+            for lane_idx, lane in enumerate(("A", "B")):
+                for plate in metadata["zones"][zone_idx]["type1"][lane]:
+                    plate["center"] = self._area_center(builder, plate["name"])
+                    plates.append((plate["tag"], lane_idx, *plate["center"]))
+        for zone_idx in sorted(metadata["sync_zones"]):
+            for lane_idx, lane in enumerate(("A", "B")):
+                plate = metadata["sync_zones"][zone_idx]["plates"][lane]
+                plate["center"] = self._area_center(builder, plate["name"])
+                plates.append((plate["tag"], lane_idx, *plate["center"]))
+        return plates
+
+    @staticmethod
+    def _make_plate_coord_function(name: str, plates: list[tuple[int, int, int, int]], coord: int) -> str:
+        """ACS if-chain mapping (plate tag, lane) to a plate centre coordinate; lane only matters for sync plates."""
+        lines = [f"function int {name}(int tag, int lane) {{"]
+        lane_count: Dict[int, int] = {}
+        for tag, _, _, _ in plates:
+            lane_count[tag] = lane_count.get(tag, 0) + 1
+        for i, plate in enumerate(plates):
+            tag, lane = plate[0], plate[1]
+            prefix = "    if" if i == 0 else "    else if"
+            cond = f"tag == {tag}" if lane_count[tag] == 1 else f"tag == {tag} && lane == {lane}"
+            lines.append(f"{prefix} ({cond}) return {plate[coord]};")
+        lines.append("    return 0;")
+        lines.append("}")
+        return "\n".join(lines)
+
+    def _make_state_export_function(self, num_zones: int, plates: list[tuple[int, int, int, int]]) -> str:
+        """Read-only telemetry of the frontier door pair; touches no gameplay state, RNG or timing."""
+        num_pairs = num_zones // 2
+        return f"""
+{self._make_plate_coord_function("PlateX", plates, 2)}
+
+{self._make_plate_coord_function("PlateY", plates, 3)}
+
+function int GateOpen(int door_tag)
+{{
+    return GetSectorCeilingZ(door_tag, 0, 0) - GetSectorFloorZ(door_tag, 0, 0) >= 56.0;
+}}
+
+function void UpdateStateExport(void)
+{{
+    int lo = zone_p1;
+    int f;
+    int tag;
+    int pair;
+    int mask = 0;
+
+    if (zone_p2 < lo) lo = zone_p2;
+    if (lo < 1) lo = 1;
+    f = lo;
+    if (f % 2 == 0) f++;
+    if (f > {num_zones - 1}) f = {num_zones - 1};
+    frontier = f;
+
+    if (IsSyncZone(f))
+    {{
+        plate1_x = PlateX(100 + f, 0);
+        plate1_y = PlateY(100 + f, 0);
+        plate2_x = PlateX(100 + f, 1);
+        plate2_y = PlateY(100 + f, 1);
+        plate1_lane = 2;
+        sync_time = sync_timer[f];
+    }}
+    else
+    {{
+        tag = active_plate[f];
+        if (tag != 0)
+        {{
+            plate1_x = PlateX(tag, plate_in_b_zone[f]);
+            plate1_y = PlateY(tag, plate_in_b_zone[f]);
+            plate1_lane = plate_in_b_zone[f];
+        }}
+        else
+        {{
+            plate1_x = 0;
+            plate1_y = 0;
+            plate1_lane = -1;
+        }}
+        tag = active_plate[f + 1];
+        if (tag != 0)
+        {{
+            plate2_x = PlateX(tag, plate_in_b_zone[f + 1]);
+            plate2_y = PlateY(tag, plate_in_b_zone[f + 1]);
+        }}
+        else
+        {{
+            plate2_x = 0;
+            plate2_y = 0;
+        }}
+        sync_time = 0;
+    }}
+
+    pair = (f + 1) / 2;
+    if (GateOpen(pair)) mask |= 1;
+    if (GateOpen(pair + 50)) mask |= 2;
+    if (pair < {num_pairs})
+    {{
+        if (GateOpen(pair + 1)) mask |= 4;
+        if (GateOpen(pair + 51)) mask |= 8;
+    }}
+    gate_mask = mask;
+}}
+""".strip()
+
+    def _make_acs(self, num_zones: int, plates: list[tuple[int, int, int, int]]) -> ACSBuilder:
         acs = ACSBuilder()
         acs.add_include("zcommon.acs")
         acs.add_global_var("zone", 1, "int")
@@ -139,6 +265,15 @@ class CoopPuzzleScenario(Scenario):
         acs.add_global_var("zone_p1", 4, "int")
         acs.add_global_var("zone_p2", 5, "int")
         acs.add_global_var("zone_limit", 6, "int")
+        # USER7-USER14: read-only frontier telemetry for the global-state observation.
+        acs.add_global_var("frontier", 7, "int")
+        acs.add_global_var("plate1_x", 8, "int")
+        acs.add_global_var("plate1_y", 9, "int")
+        acs.add_global_var("plate2_x", 10, "int")
+        acs.add_global_var("plate2_y", 11, "int")
+        acs.add_global_var("plate1_lane", 12, "int")
+        acs.add_global_var("sync_time", 13, "int")
+        acs.add_global_var("gate_mask", 14, "int")
         acs.add_global_code(
             f"""
 int active_plate[{num_zones + 1}];
@@ -172,6 +307,8 @@ function int get_sector_tag(int min_tag, int max_tag, int n)
 }}
 
 {self._make_sync_zone_function(num_zones)}
+
+{self._make_state_export_function(num_zones, plates)}
 """.strip()
         )
         acs.add_script(
@@ -408,6 +545,7 @@ while (true)
         room_type = IsSyncZone(new_zone);
     }}
     plate_state = plate;
+    UpdateStateExport();
 
     if (
         ThingCountSector(T_NONE, 1, {200 + num_zones}) > 0
@@ -441,7 +579,6 @@ while (true)
         light_level = int(cfg["light_level"])
 
         builder = self._make_builder(seed)
-        acs = self._make_acs(num_zones)
         metadata: Dict[str, Any] = {"zones": {}, "relay_doors": {}, "sync_zones": {}}
 
         for zone_idx in range(1, num_zones + 1):
@@ -562,6 +699,7 @@ while (true)
             builder.connect_adjacent(self._zone_name(zone_idx, "A"), self._zone_name(zone_idx + 1, "A"), ConnectionType.OPEN)
             builder.connect_adjacent(self._zone_name(zone_idx, "B"), self._zone_name(zone_idx + 1, "B"), ConnectionType.OPEN)
 
+        acs = self._make_acs(num_zones, self._plate_centers(builder, metadata))
         return builder, acs, metadata
 
     def generate(self, output_path: str) -> None:
