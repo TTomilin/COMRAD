@@ -266,7 +266,9 @@ class Learner(Configurable):
 
     @staticmethod
     def get_checkpoints(checkpoints_dir, pattern="checkpoint_*"):
-        checkpoints = glob.glob(join(checkpoints_dir, pattern))
+        # only finished .pth files: a save interrupted mid-write (e.g. disk quota) leaves "checkpoint_temp", which matches
+        # "checkpoint_*" and sorts after every numbered checkpoint, so resuming would load the corrupted temp file
+        checkpoints = [c for c in glob.glob(join(checkpoints_dir, pattern)) if c.endswith(".pth")]
         return sorted(checkpoints)
 
     @staticmethod
