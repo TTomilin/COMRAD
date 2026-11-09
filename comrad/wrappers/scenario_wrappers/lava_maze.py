@@ -1,6 +1,12 @@
 import gymnasium as gym
-from collections import deque
 import numpy as np
+
+from comrad.wrappers.scenario_wrappers.lava_maze_grid import (
+    bfs_distance,
+    decode_maze_grid,
+    next_step_from_info,
+    safe_int,
+)
 
 
 class LavaMazeRewardShaping(gym.Wrapper):
@@ -32,72 +38,40 @@ class LavaMazeRewardShaping(gym.Wrapper):
 
         self.prev_vars = {}
         self.orig_env_reward = 0.0
+        # Benchmark score J = mazes completed. Counted as goal relocations rather than read from the ACS level counter
+        # (USER22), which the released WAD advances twice per completion (the goal moves one tic after the check).
+        self.goals_reached = 0
+        self._last_goal = None
+
+    def _track_goal(self, info):
+        goal = (
+            self._safe_int((info or {}).get("USER13", -1), -1),
+            self._safe_int((info or {}).get("USER18", -1), -1),
+        )
+        if goal[0] < 0 or goal[1] < 0:
+            return
+        if self._last_goal is not None and goal != self._last_goal:
+            self.goals_reached += 1
+        self._last_goal = goal
 
     def _decode_maze_grid(self, bits_0, bits_1, bits_2, grid_size=None):
         """
         Reconstructs the grid from the 3 ACS integer chunks.
         Returns a 2D list where 1 is safe, 0 is lava.
         """
-        s = grid_size or self.grid_size
-        grid = [[0 for _ in range(s)] for _ in range(s)]
-        chunks = [int(bits_0), int(bits_1), int(bits_2)]
-
-        for y in range(s):
-            for x in range(s):
-                bit_idx = y * s + x
-                chunk = bit_idx // 27
-                shift = bit_idx % 27
-
-                is_safe = chunk < len(chunks) and (chunks[chunk] & (1 << shift)) != 0
-                grid[y][x] = 1 if is_safe else 0
-
-        return grid
+        return decode_maze_grid(bits_0, bits_1, bits_2, grid_size or self.grid_size)
 
     def _safe_int(self, value, default):
-        try:
-            return int(value)
-        except (TypeError, ValueError, OverflowError):
-            return default
+        return safe_int(value, default)
 
     def _grid_size_from(self, info):
         return max(1, self._safe_int((info or {}).get("USER11", self.grid_size), self.grid_size))
 
     def _get_bfs_distance(self, grid, start_x, start_y, goal_x, goal_y, grid_size=None):
         """
-        Calculates the shortest path distance using BFS.
+        Calculates the shortest path distance using BFS (999 when in lava or unreachable).
         """
-        start_x = self._safe_int(start_x, -1)
-        start_y = self._safe_int(start_y, -1)
-        goal_x = self._safe_int(goal_x, -1)
-        goal_y = self._safe_int(goal_y, -1)
-
-        if start_x == goal_x and start_y == goal_y:
-            return 0
-
-        s = grid_size or len(grid)
-        if not (0 <= start_x < s and 0 <= start_y < s) or grid[start_y][start_x] == 0:
-            return 999 # Standing in lava
-
-        queue = deque([(start_x, start_y, 0)])
-        visited = set([(start_x, start_y)])
-
-        while queue:
-            cx, cy, dist = queue.popleft()
-
-            if cx == goal_x and cy == goal_y:
-                return dist
-
-            for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
-                nx, ny = cx + dx, cy + dy
-
-                if (0 <= nx < s and 0 <= ny < s and
-                    (nx, ny) not in visited and
-                    grid[ny][nx] == 1): # safe floor
-
-                    visited.add((nx, ny))
-                    queue.append((nx, ny, dist + 1))
-
-        return 999 # Fallback if path doesn't exist
+        return bfs_distance(grid, start_x, start_y, goal_x, goal_y, grid_size)
 
     def step(self, action):
         obs, reward, terminated, truncated, info = self.env.step(action)
@@ -105,8 +79,12 @@ class LavaMazeRewardShaping(gym.Wrapper):
         if reward is None or info is None:
             return obs, reward, terminated, truncated, info
 
+        self._track_goal(info)
+
         if not self.prev_vars:
             self.sync_vars(info)
+            if terminated or truncated:
+                info["true_objective"] = self.goals_reached
             return obs, 0.0, terminated, truncated, info
 
         shaped_reward = self.step_penalty
@@ -205,7 +183,7 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.orig_env_reward += reward
 
         if terminated or truncated:
-            info["true_objective"] = current_levels
+            info["true_objective"] = self.goals_reached
 
         self.sync_vars(info)
         return obs, individual_reward, terminated, truncated, info
@@ -216,6 +194,9 @@ class LavaMazeRewardShaping(gym.Wrapper):
         self.flash_timer = 0
         self.progress_occurred = False
         self.orig_env_reward = 0.0
+        # tracking starts at the first step: reset info can still carry the previous episode's goal
+        self.goals_reached = 0
+        self._last_goal = None
         return obs, info
 
     def sync_vars(self, info):
@@ -301,3 +282,80 @@ class LavaMazeAdditionalInput(gym.Wrapper):
 
         obs_dict = self._parse_info(obs, info)
         return obs_dict, rew, terminated, truncated, info
+
+
+def _set_direction_one_hot(measurements, direction):
+    """measurements[1:6] = one-hot over (none, +x/green, -x/red, +y/yellow, -y/blue), measurements[6] = active flag."""
+    direction = max(0, min(4, int(direction)))
+    measurements[1:6] = 0.0
+    measurements[1 + direction] = 1.0
+    measurements[6] = float(direction > 0)
+    return measurements
+
+
+class LavaMazeOracleHintInput(LavaMazeAdditionalInput):
+    """
+    Oracle variant (communication removed): the navigator's measurement vector carries the BFS next-step direction
+    toward the goal, computed from the same telemetry as LavaMazeRewardShaping. The observer gets health only.
+    Same 7-dim layout as LavaMazeAdditionalInput: [HEALTH, none, +x, -x, +y, -y, hint_active].
+    """
+
+    def _parse_info(self, obs, info):
+        obs_dict = {"obs": obs, "measurements": self.measurements_vec}
+        if info is None:
+            return obs_dict
+
+        measurements = obs_dict["measurements"]
+        measurements[0] = max(0.0, info.get("HEALTH", 0.0))
+        if getattr(self.env.unwrapped, "player_id", -1) == 0:
+            _set_direction_one_hot(measurements, next_step_from_info(info))
+        else:
+            measurements[1:7] = 0.0
+        return obs_dict
+
+
+class LavaMazeOracleMessageWrapper(gym.Wrapper):
+    """
+    Oracle variant (lossless channel), applied around MultiAgentEnv. The observer's weapon-select head
+    (action head `message_head`, values 0..4) is a discrete message; its value at step t is written one-hot into the
+    navigator's measurements[1:6] at step t+1 (no weapon-fire latency, flash timer or signal penalty).
+    Requires LavaMazeAdditionalInput on the per-player stack; the observer's ATTACK should be masked so the ACS
+    flash never fires (LAVA_MAZE_ORACLE_MSG_ACTION_MASK).
+    """
+
+    def __init__(self, env, navigator_index=0, observer_index=1, message_head=3):
+        super().__init__(env)
+        self.num_agents = getattr(env, "num_agents", 2)
+        self.is_multiagent = True
+        self.navigator_index = navigator_index
+        self.observer_index = observer_index
+        self.message_head = message_head
+
+    def _write_message(self, obs, message):
+        nav_obs = obs[self.navigator_index] if obs is not None else None
+        if not isinstance(nav_obs, dict) or "measurements" not in nav_obs:
+            return obs
+        nav_obs = dict(nav_obs)
+        nav_obs["measurements"] = _set_direction_one_hot(np.array(nav_obs["measurements"], dtype=np.float32, copy=True), message)
+        obs = list(obs)
+        obs[self.navigator_index] = nav_obs
+        return obs
+
+    def _message_from(self, actions):
+        try:
+            return int(np.asarray(actions[self.observer_index]).reshape(-1)[self.message_head])
+        except (IndexError, TypeError, ValueError):
+            return 0
+
+    def reset(self, **kwargs):
+        obs, infos = self.env.reset(**kwargs)
+        return self._write_message(obs, 0), infos
+
+    def step(self, actions):
+        message = self._message_from(actions)
+        obs, rewards, terminated, truncated, infos = self.env.step(actions)
+        dones = [bool(t or tr) for t, tr in zip(terminated, truncated)]
+        if dones and all(dones):
+            # MultiAgentEnv already auto-reset: the returned obs start a new episode with an empty channel
+            message = 0
+        return self._write_message(obs, message), rewards, terminated, truncated, infos
