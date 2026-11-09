@@ -15,7 +15,7 @@
       "lava_damage": 20,
       "polyobject_count": 2,
       "map_radius": 1800,
-      "cell_spacing": 168,
+      "jump_gap": 24,
       "chain_max_len": 300
     },
     "curriculum_stage": "easy_intro",
@@ -37,7 +37,7 @@
       "lava_damage": 30,
       "polyobject_count": 4,
       "map_radius": 1800,
-      "cell_spacing": 176,
+      "jump_gap": 32,
       "chain_max_len": 285
     },
     "curriculum_stage": "easy_movers",
@@ -59,7 +59,7 @@
       "lava_damage": 40,
       "polyobject_count": 6,
       "map_radius": 1800,
-      "cell_spacing": 180,
+      "jump_gap": 36,
       "chain_max_len": 270
     },
     "curriculum_stage": "easy_spacing",
@@ -81,7 +81,7 @@
       "lava_damage": 50,
       "polyobject_count": 8,
       "map_radius": 1800,
-      "cell_spacing": 184,
+      "jump_gap": 40,
       "chain_max_len": 250
     },
     "curriculum_stage": "easy_mastery",
@@ -103,7 +103,7 @@
       "lava_damage": 25,
       "polyobject_count": 4,
       "map_radius": 1800,
-      "cell_spacing": 172,
+      "jump_gap": 60,
       "chain_max_len": 290
     },
     "curriculum_stage": "bridge_intro",
@@ -125,7 +125,7 @@
       "lava_damage": 35,
       "polyobject_count": 6,
       "map_radius": 1800,
-      "cell_spacing": 176,
+      "jump_gap": 64,
       "chain_max_len": 275
     },
     "curriculum_stage": "bridge_progress",
@@ -147,7 +147,7 @@
       "lava_damage": 45,
       "polyobject_count": 6,
       "map_radius": 1800,
-      "cell_spacing": 180,
+      "jump_gap": 68,
       "chain_max_len": 260
     },
     "curriculum_stage": "bridge_mastery",
@@ -169,7 +169,7 @@
       "lava_damage": 35,
       "polyobject_count": 6,
       "map_radius": 1800,
-      "cell_spacing": 176,
+      "jump_gap": 64,
       "chain_max_len": 265
     },
     "curriculum_stage": "hard_intro",
@@ -191,7 +191,7 @@
       "lava_damage": 50,
       "polyobject_count": 8,
       "map_radius": 1800,
-      "cell_spacing": 180,
+      "jump_gap": 68,
       "chain_max_len": 250
     },
     "curriculum_stage": "hard_default",
@@ -213,7 +213,7 @@
       "lava_damage": 50,
       "polyobject_count": 8,
       "map_radius": 1800,
-      "cell_spacing": 182,
+      "jump_gap": 70,
       "chain_max_len": 240
     },
     "curriculum_stage": "hard_tighter",
@@ -235,7 +235,7 @@
       "lava_damage": 60,
       "polyobject_count": 10,
       "map_radius": 1800,
-      "cell_spacing": 184,
+      "jump_gap": 72,
       "chain_max_len": 230
     },
     "curriculum_stage": "hard_extended",
@@ -257,7 +257,7 @@
       "lava_damage": 70,
       "polyobject_count": 12,
       "map_radius": 1800,
-      "cell_spacing": 188,
+      "jump_gap": 76,
       "chain_max_len": 220
     },
     "curriculum_stage": "hard_endgame",
