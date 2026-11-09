@@ -25,6 +25,10 @@ class LavaMazeScenario(Scenario):
             "cell_size": 128,
             "initial_maze_size": 8,
             "max_maze_size": 20,
+            # Released benchmark WADs double-triggered the goal check (once per tic until GenerateMaze moved the goal),
+            # so the maze grew by 4 per completion and the next maze was generated at +2 (8, 10, 14, 18, 20, ...).
+            # The goal is now counted once; True keeps that published size progression, False grows by 2.
+            "legacy_maze_growth": True,
             "lava_damage": 35,
             "lava_depth": 64,
             "seed": 42,
@@ -36,6 +40,7 @@ class LavaMazeScenario(Scenario):
         CELL_SIZE = int(cfg["cell_size"])
         INITIAL_MAZE_SIZE = int(cfg["initial_maze_size"])
         MAX_MAZE_SIZE = int(cfg.get("max_maze_size", 20))
+        LEGACY_GROWTH = 2 if bool(cfg.get("legacy_maze_growth", True)) else 0
         LAVA_DAMAGE = int(cfg["lava_damage"])
         LAVA_DEPTH = int(cfg.get("lava_depth", 64))
         seed = cfg["seed"] if cfg["seed"] is not None else random.randint(0, 999999)
@@ -640,6 +645,9 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
                 int my_tag = get_tag(gx, gy);
 
                 if (my_tag == current_end_tag) {{
+                    // invalidate the goal until GenerateMaze sets the next one (it relocates the goal after a
+                    // Delay), otherwise the next tic counts the same completion again
+                    current_end_tag = -1;
                     lm_levels_completed_global++;
                     current_maze_size += 2;
                     if (current_maze_size > MAX_TILES) current_maze_size = MAX_TILES;
@@ -647,6 +655,8 @@ ACTOR LMPlasmaRifle : PlasmaRifle replaces PlasmaRifle
                     lm_maze_size_global = MAP_WIDTH;
 
                     ACS_NamedExecute("GenerateMaze", 0, gx, gy, current_maze_size);
+                    current_maze_size += {LEGACY_GROWTH};
+                    if (current_maze_size > MAX_TILES) current_maze_size = MAX_TILES;
                 }}
             }} else {{
                 lm_p1_grid_x_global = -1;
