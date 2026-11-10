@@ -53,9 +53,10 @@ def _tile_ahwc(frames: Sequence[np.ndarray]) -> np.ndarray:
 
 def _select_image(obs) -> np.ndarray | None:
     if obs is None: return None
-    if isinstance(obs, np.ndarray): return obs
+    # Only 2D/3D arrays are frames; 1D vectors (state obs, measurements) cannot be rendered.
+    if isinstance(obs, np.ndarray): return obs if obs.ndim >= 2 else None
     if isinstance(obs, dict): # Check additional_input.py
-        if "obs" in obs and isinstance(obs["obs"], np.ndarray):
+        if "obs" in obs and isinstance(obs["obs"], np.ndarray) and obs["obs"].ndim >= 2:
             return obs["obs"]
         for i in obs.values():
             o = _select_image(i)

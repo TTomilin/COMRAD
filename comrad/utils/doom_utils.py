@@ -41,7 +41,16 @@ from comrad.wrappers.observation_space import SetResolutionWrapper, resolutions
 from comrad.wrappers.scenario_wrappers import (
     CoopPuzzleRewardShaping, ArmorySiegeRewardShaping, ArmorySiegeAdditionalInput, AmmoCarrierAdditionalInput, AmmoCarrierRewardShaping, LavapitAdditionalInput, LavapitRewardShaping, LavaMazeRewardShaping, LavaMazeAdditionalInput, LavaMazeSimpleRewardShaping, LavaMazeSimpleAdditionalInput, CoopHealthGatheringRewardShaping, ForagingCommonsAdditionalInput, ForagingCommonsRewardShaping, PlatformChainRewardShaping, RhythmSyncAdditionalInput, RhythmSyncRewardShaping, RhythmSyncRewardShapingDense, SmartEnemiesRewardShaping, DumbEnemiesRewardShaping, StagHuntArenaRewardShaping, StealthLabyrinthRewardShaping
 )
+from comrad.wrappers.scenario_wrappers.lava_maze import LavaMazeOracleHintInput, LavaMazeOracleMessageWrapper
+from comrad.wrappers.scripted_partner import NoopPartnerPolicy, ScriptedPartnerWrapper
 from comrad.wrappers.shared_reward import SharedRewardWrapper
+from comrad.wrappers.entity_state import EntityStateWrapper
+from comrad.wrappers.global_state import GlobalStateWrapper
+from comrad.wrappers.shared_vision import SharedVisionWrapper
+from comrad.wrappers.state_observation import BlindObservationWrapper, StateObservationWrapper
+from comrad.wrappers.visibility_diagnostics import VisibilityDiagnosticsWrapper
+from comrad.scripted.lava_maze_navigator import LavaMazeNavigatorPolicy
+from comrad.scripted.lava_maze_observer import LavaMazeObserverPolicy
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
 
 OFF_POLICY = {"IDQN", "VDN", "QMIX", "QPLEX"}
@@ -67,6 +76,7 @@ class DoomSpec:
         extra_wrappers=None,
         shared_reward_alpha=0.0,
         shared_reward_scalarisation="sum",
+        joint_wrappers=None,
     ):
         self.name = name
         self.env_spec_file = env_spec_file
@@ -92,6 +102,8 @@ class DoomSpec:
         # unused for off-policy variants
         self.shared_reward_alpha = shared_reward_alpha
         self.shared_reward_scalarisation = shared_reward_scalarisation
+        # list of tuples (wrapper_cls, wrapper_kwargs) applied around MultiAgentEnv (cross-agent logic)
+        self.joint_wrappers = joint_wrappers
 
 ADDITIONAL_INPUT = (DoomAdditionalInput, {})  # health, ammo, etc. as input vector
 ARMORY_SIEGE_ADDITIONAL_INPUT = (ArmorySiegeAdditionalInput, {})  # health, ammo, weapons, core_hp
@@ -105,6 +117,26 @@ LAVA_MAZE_ACTION_MASK = (
             1: [1, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1],
         },
     },
+)
+# Oracle-message variant: the observer's ATTACK is masked so the ACS flash never fires; head 3 is the message
+LAVA_MAZE_ORACLE_MSG_ACTION_MASK = (
+    RoleActionMaskWrapper,
+    {
+        "masks_by_player_id": {
+            0: [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0],
+            1: [1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1],
+        },
+    },
+)
+LAVA_MAZE_ORACLE_HINT_INPUT = (LavaMazeOracleHintInput, {})
+LAVA_MAZE_SCRIPTED_OBSERVER = (
+    ScriptedPartnerWrapper,
+    {"learner_index": 0, "partner_policy": LavaMazeObserverPolicy},
+)
+# converse reference: scripted navigator (fixed colour -> direction convention), learned observer
+LAVA_MAZE_SCRIPTED_NAVIGATOR = (
+    ScriptedPartnerWrapper,
+    {"learner_index": 1, "partner_policy": LavaMazeNavigatorPolicy},
 )
 LAVA_MAZE_SIMPLE_ACTION_MASK = (
     RoleActionMaskWrapper,
@@ -207,6 +239,74 @@ DOOM_ENVS = [
         shared_reward_alpha=1.0,
     ),
 
+    # Learnability references on the original Lava Maze (paper App. very_difficult)
+    DoomSpec(
+        # scripted BFS observer (hidden from SF), learned navigator
+        "lava_maze_scripted_observer",
+        "lava_maze_scripted_observer.cfg",
+        doom_action_space_lava_maze(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        nofreelook=0,
+        additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
+        use_additional_input=True,
+        extra_wrappers=[(LavaMazeRewardShaping, {}), LAVA_MAZE_ACTION_MASK],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[LAVA_MAZE_SCRIPTED_OBSERVER],
+    ),
+
+    DoomSpec(
+        # converse: scripted navigator (hidden from SF) obeys the fixed colour convention, learned observer
+        "lava_maze_scripted_navigator",
+        "lava_maze.cfg",
+        doom_action_space_lava_maze(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        nofreelook=0,
+        additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
+        use_additional_input=True,
+        extra_wrappers=[(LavaMazeRewardShaping, {}), LAVA_MAZE_ACTION_MASK],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[LAVA_MAZE_SCRIPTED_NAVIGATOR],
+    ),
+
+    DoomSpec(
+        # lossless discrete message head: observer head 3 -> navigator measurements next step
+        "lava_maze_oracle_msg",
+        "lava_maze.cfg",
+        doom_action_space_lava_maze(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        nofreelook=0,
+        additional_input_wrapper=LAVA_MAZE_ADDITIONAL_INPUT,
+        use_additional_input=True,
+        extra_wrappers=[(LavaMazeRewardShaping, {}), LAVA_MAZE_ORACLE_MSG_ACTION_MASK],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[(LavaMazeOracleMessageWrapper, {})],
+    ),
+
+    DoomSpec(
+        # communication removed: navigator measurements carry the BFS next-step direction
+        "lava_maze_oracle_hint",
+        "lava_maze.cfg",
+        doom_action_space_lava_maze(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        nofreelook=0,
+        additional_input_wrapper=LAVA_MAZE_ORACLE_HINT_INPUT,
+        use_additional_input=True,
+        extra_wrappers=[(LavaMazeRewardShaping, {}), LAVA_MAZE_ACTION_MASK],
+        shared_reward_alpha=1.0,
+    ),
+
     DoomSpec(
         "smart_enemies",
         "smart_enemies.cfg",
@@ -239,6 +339,62 @@ DOOM_ENVS = [
         forcerespawn=0,
         extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
         shared_reward_alpha=1.0,
+    ),
+
+    # Learnability references on the original Stealth Labyrinth (paper App. very_difficult)
+    DoomSpec(
+        # ACS-driven scout (player 0, hidden from SF), learned gunner (player 1)
+        "stealth_labyrinth_scripted_scout",
+        "stealth_labyrinth_scripted_scout.cfg",
+        doom_action_space_stealth_labyrinth(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[(ScriptedPartnerWrapper, {"learner_index": 1, "partner_policy": NoopPartnerPolicy})],
+    ),
+
+    DoomSpec(
+        # converse: ACS-driven gunner (player 1, hidden from SF) trails the scout and shoots lit turrets; learned scout
+        "stealth_labyrinth_scripted_gunner",
+        "stealth_labyrinth_scripted_gunner.cfg",
+        doom_action_space_stealth_labyrinth(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[(ScriptedPartnerWrapper, {"learner_index": 0, "partner_policy": NoopPartnerPolicy})],
+    ),
+
+    DoomSpec(
+        # rooms/corridors permanently lit; turrets still invulnerable until the scout lights the active room
+        "stealth_labyrinth_lit",
+        "stealth_labyrinth_lit.cfg",
+        doom_action_space_stealth_labyrinth(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
+        shared_reward_alpha=1.0,
+    ),
+
+    DoomSpec(
+        # each agent observes [own frame, partner frame] stacked along channels
+        "stealth_labyrinth_shared_vision",
+        "stealth_labyrinth.cfg",
+        doom_action_space_stealth_labyrinth(),
+        1.0,
+        5250,
+        num_agents=2,
+        forcerespawn=0,
+        extra_wrappers=[(StealthLabyrinthRewardShaping, {})],
+        shared_reward_alpha=1.0,
+        joint_wrappers=[(SharedVisionWrapper, {})],
     ),
 
     DoomSpec(
@@ -362,6 +518,15 @@ SCENARIO_METADATA = {
     "stealth_labyrinth": ("A non-attacking scout lights rooms for a gunner who depends on its vision.", "Enemies destroyed / total"),
     "lava_maze": ("A navigator crosses lava guided by colour signals from an overhead observer.", "Maze levels cleared"),
     "lava_maze_simple": ("Smaller, easier Lava Maze variant for debugging and warm-up.", "Maze levels cleared"),
+    # learnability references (paper App. very_difficult): one role scripted and hidden, or coordination removed
+    "lava_maze_scripted_observer": ("Lava Maze with a scripted BFS observer; only the navigator learns.", "Maze levels cleared"),
+    "lava_maze_scripted_navigator": ("Lava Maze with a scripted navigator obeying a fixed colour convention; only the observer learns.", "Maze levels cleared"),
+    "lava_maze_oracle_msg": ("Lava Maze with a lossless discrete message channel from observer to navigator.", "Maze levels cleared"),
+    "lava_maze_oracle_hint": ("Lava Maze where the navigator receives the next safe direction directly.", "Maze levels cleared"),
+    "stealth_labyrinth_scripted_scout": ("Stealth Labyrinth with a scripted scout; only the gunner learns.", "Enemies destroyed / total"),
+    "stealth_labyrinth_scripted_gunner": ("Stealth Labyrinth with a scripted gunner that trails the scout; only the scout learns.", "Enemies destroyed / total"),
+    "stealth_labyrinth_lit": ("Stealth Labyrinth with permanently lit rooms; turrets stay scout-gated.", "Enemies destroyed / total"),
+    "stealth_labyrinth_shared_vision": ("Stealth Labyrinth where each agent also sees its partner's frame.", "Enemies destroyed / total"),
 }
 
 
@@ -390,9 +555,96 @@ def get_scalarisation(cfg, doom_spec) -> str:
 
 def get_use_additional_input(cfg, doom_spec) -> bool:
     override = getattr(cfg, "use_additional_input", None)
-    if override is None:
-        return doom_spec.use_additional_input
-    return override
+    if override is not None:
+        return override
+    # Only the 1D state modality pulls in the scenario's task scalars by default. Full observability must NOT
+    # enable them implicitly, otherwise Pixel/Full gets hand-crafted features that Pixel/Partial lacks
+    # (pass --use_additional_input=True explicitly to reproduce that variant).
+    if doom_spec.additional_input_wrapper is not None and str(getattr(cfg, "obs_modality", "pixel")).lower() == "state":
+        return True
+    return doom_spec.use_additional_input
+
+
+FULL_OBS_SHARED_VISION = "shared_vision"
+FULL_OBS_GLOBAL_STATE = "global_state"
+
+
+def get_full_obs_mode(cfg) -> Optional[str]:
+    """None when full observability is off, else the mode (archived configs without the key are shared vision)."""
+    if not bool(getattr(cfg, "full_observability", False)):
+        return None
+    return str(getattr(cfg, "full_obs_mode", None) or FULL_OBS_SHARED_VISION).lower()
+
+
+def get_global_state_version(cfg) -> int:
+    """Encoding version of --full_obs_mode=global_state (see doom_params; archived runs are resolved by the evaluator)."""
+    return int(getattr(cfg, "global_state_version", None) or 2)
+
+
+def restrict_global_state_input_normalization(cfg) -> None:
+    """Global-state v2 training normalizes only the image: the state vector is already scaled, and running statistics
+    of inputs that are constant on the training layouts (empty object slots, static walls) turn any held-out change
+    into a saturated input. An explicit --normalize_input_keys is kept."""
+    if get_full_obs_mode(cfg) != FULL_OBS_GLOBAL_STATE or get_global_state_version(cfg) < 2:
+        return
+    if getattr(cfg, "normalize_input", False) and getattr(cfg, "normalize_input_keys", None) is None:
+        log.info("global_state v2: normalizing only the 'obs' image, not the global state in 'measurements'")
+        cfg.normalize_input_keys = ["obs"]
+
+
+STATE_ENCODING_EGO = "ego"
+STATE_ENCODING_ENTITY = "entity"
+
+
+def get_state_encoding(cfg) -> str:
+    """State-vector encoding for --obs_modality=state (archived configs without the key are 'ego')."""
+    return str(getattr(cfg, "state_encoding", None) or STATE_ENCODING_EGO).lower()
+
+
+def uses_entity_state_encoding(cfg) -> bool:
+    obs_modality = str(getattr(cfg, "obs_modality", "pixel") or "pixel").lower()
+    return obs_modality == "state" and get_state_encoding(cfg) == STATE_ENCODING_ENTITY
+
+
+def global_state_horizon_steps(doom_spec, cfg) -> int:
+    """Episode length in joint env steps: the engine timeout (cfg episode_timeout, capped by timelimit) / frameskip."""
+    tics = []
+    try:
+        with open(doom_spec_config_path(doom_spec), "r") as f:
+            for raw in f:
+                line = raw.split("#", 1)[0].strip()
+                if "=" in line and line.split("=", 1)[0].strip().lower().replace("_", "") == "episodetimeout":
+                    tics.append(int(float(line.split("=", 1)[1].strip())))
+    except (OSError, ValueError):
+        pass
+    timelimit = cfg.timelimit if getattr(cfg, "timelimit", None) is not None else doom_spec.timelimit
+    if timelimit and timelimit > 0:
+        tics.append(int(timelimit * 60 * 35))
+    tics = [t for t in tics if t > 0]
+    frameskip = max(1, int(getattr(cfg, "env_frameskip", 1) or 1))
+    return max(1, -(-min(tics) // frameskip)) if tics else 4500
+
+
+def doom_spec_config_path(doom_spec) -> str:
+    if os.path.isabs(doom_spec.env_spec_file):
+        return doom_spec.env_spec_file
+    return join(os.path.dirname(__file__), os.pardir, "scenarios", doom_spec.env_spec_file)
+
+
+def resolve_archived_use_additional_input(archived_cfg: dict):
+    """Value of --use_additional_input that reproduces an archived run's observation space.
+
+    Runs trained before full observability stopped implicitly enabling the scenario's task scalars stored
+    ``use_additional_input=None`` together with ``full_observability=True``; their checkpoints expect the wider
+    measurement vector, so ``None`` must be resolved to ``True`` when evaluating them. The clean runs pass the flag
+    explicitly, so an explicit value is always returned unchanged.
+    """
+    value = archived_cfg.get("use_additional_input")
+    if value is not None:
+        return bool(value)
+    if bool(archived_cfg.get("full_observability", False)):
+        return True
+    return None
 
 
 def get_extra_wrappers(cfg, doom_spec):
@@ -400,9 +652,13 @@ def get_extra_wrappers(cfg, doom_spec):
     use_additional_input = get_use_additional_input(cfg, doom_spec)
 
     if doom_spec.additional_input_wrapper is not None and use_additional_input:
-        wrappers.append(doom_spec.additional_input_wrapper)
+        w_cls, w_kwargs = doom_spec.additional_input_wrapper
+        if w_cls is RhythmSyncAdditionalInput and get_full_obs_mode(cfg) == FULL_OBS_SHARED_VISION:
+            w_kwargs = dict(w_kwargs)
+            w_kwargs["feature_set"] = "full"
+        wrappers.append((w_cls, w_kwargs))
     elif use_additional_input and doom_spec.additional_input_wrapper is None:
-        if doom_spec.name not in _WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS:
+        if doom_spec.name not in _WARNED_UNSUPPORTED_ADDITIONAL_INPUT_ENVS and getattr(cfg, "use_additional_input", None) is True:
             log.warning(
                 "Scenario %s does not define an additional input wrapper, ignoring --use_additional_input=True",
                 doom_spec.name,
@@ -436,6 +692,18 @@ def make_doom_env_impl(
     fps = cfg.fps if "fps" in cfg else None
     async_mode = fps == 0
 
+    enable_labels_buffer = bool(
+        getattr(cfg, "enable_labels_buffer", False)
+        or str(getattr(cfg, "partner_occlusion_mode", "none")).lower() in ("sprite", "both")
+    )
+    # objects and layout are read from a single (synchronized) game instance: the host
+    global_state_mode = get_full_obs_mode(cfg) == FULL_OBS_GLOBAL_STATE
+    entity_state = uses_entity_state_encoding(cfg)
+    enable_global_state_info = (global_state_mode or entity_state) and player_id in (None, 0)
+    # the entity encoding only needs objects; wall lines and sector heights stay with the global-state mode
+    global_state_geometry = global_state_mode
+    enable_depth_row = entity_state
+
     if player_id is None:
         env = VizdoomEnv(
             doom_spec.action_space,
@@ -443,6 +711,10 @@ def make_doom_env_impl(
             skip_frames=skip_frames,
             async_mode=async_mode,
             render_mode=render_mode,
+            enable_labels_buffer=enable_labels_buffer,
+            enable_global_state_info=enable_global_state_info,
+            global_state_geometry=global_state_geometry,
+            enable_depth_row=enable_depth_row,
         )
     else:
         timelimit = cfg.timelimit if cfg.timelimit is not None else doom_spec.timelimit
@@ -462,8 +734,14 @@ def make_doom_env_impl(
             nofreelook=doom_spec.nofreelook,
             respawn_delay=doom_spec.respawn_delay,
             timelimit=timelimit,
+            # set by comrad.utils.record_demo_video: host writes a native ViZDoom .lmp demo for high-res replay
+            record_to=cfg.get("demo_record_to") if hasattr(cfg, "get") else getattr(cfg, "demo_record_to", None),
             render_mode=render_mode,
             host_ip=getattr(cfg, "host_ip", "127.0.0.1"),
+            enable_labels_buffer=enable_labels_buffer,
+            enable_global_state_info=enable_global_state_info,
+            global_state_geometry=global_state_geometry,
+            enable_depth_row=enable_depth_row,
         )
 
     record_to = cfg.record_to if "record_to" in cfg else None
@@ -479,6 +757,9 @@ def make_doom_env_impl(
     env = MultiplayerStatsWrapper(env)
 
     resolution = custom_resolution
+    if resolution is None:
+        # set by comrad.record_video so the render env draws natively at the video resolution instead of upscaling
+        resolution = cfg.get("native_render_resolution") if hasattr(cfg, "get") else getattr(cfg, "native_render_resolution", None)
     if resolution is None:
         resolution = "256x144" if cfg.wide_aspect_ratio else "160x120"
         # resolution = "640x480" # Custom resolution
@@ -507,6 +788,19 @@ def make_doom_env_impl(
 
     for wrapper_cls, wrapper_kwargs in get_extra_wrappers(cfg, doom_spec):
         env = wrapper_cls(env, **wrapper_kwargs)
+
+    obs_modality = str(getattr(cfg, "obs_modality", "pixel") or "pixel").lower()
+    horizon_steps = timeout if timeout and timeout > 0 else 4500
+    if obs_modality == "state":
+        env = StateObservationWrapper(
+            env,
+            scenario_name=doom_spec.name,
+            include_global_state=bool(getattr(cfg, "full_observability", False)),
+            horizon=horizon_steps,
+            state_encoding=get_state_encoding(cfg),
+        )
+    elif obs_modality == "blind":
+        env = BlindObservationWrapper(env, horizon=horizon_steps)
 
     if doom_spec.reward_scaling != 1.0:
         env = RewardScalingWrapper(env, doom_spec.reward_scaling)
@@ -589,6 +883,55 @@ def make_doom_multiplayer_env(
             auto_reset=auto_reset,
         )
 
+        shared_reward_alpha = get_alpha(cfg, doom_spec)
+        shared_reward_scalarisation = get_scalarisation(cfg, doom_spec)
+        use_shared_reward = shared_reward_alpha > 0 and str(getattr(cfg, "algo", "MAPPO")).upper() not in OFF_POLICY
+        shared_reward_applied = False
+
+        for wrapper_cls, wrapper_kwargs in (doom_spec.joint_wrappers or []):
+            if getattr(wrapper_cls, "hides_agents", False) and use_shared_reward and not shared_reward_applied:
+                # blend rewards while every player is still visible, so a single learner behind a scripted partner
+                # receives exactly the benchmark reward (team reward for on-policy algos)
+                env = SharedRewardWrapper(env, alpha=shared_reward_alpha, scalarisation=shared_reward_scalarisation)
+                shared_reward_applied = True
+            env = wrapper_cls(env, **wrapper_kwargs)
+        wrapped_num_agents = getattr(env, "num_agents", num_agents)
+
+        has_spec_shared_vision = any(
+            issubclass(w_cls, SharedVisionWrapper) for w_cls, _ in (doom_spec.joint_wrappers or [])
+        )
+        full_obs_mode = get_full_obs_mode(cfg)
+        if uses_entity_state_encoding(cfg):
+            if full_obs_mode is not None:
+                raise ValueError("--state_encoding=entity cannot be combined with --full_observability=True")
+            env = EntityStateWrapper(
+                env,
+                scenario_name=doom_spec.name,
+                horizon=global_state_horizon_steps(doom_spec, cfg),
+                sight_range=float(getattr(cfg, "state_sight_range", 512.0) or 512.0),
+            )
+        if full_obs_mode == FULL_OBS_GLOBAL_STATE:
+            env = GlobalStateWrapper(
+                env,
+                horizon=global_state_horizon_steps(doom_spec, cfg),
+                game_variables=VizdoomEnv._parse_variable_indices(doom_spec_config_path(doom_spec)).keys(),
+                version=get_global_state_version(cfg),
+            )
+        elif full_obs_mode == FULL_OBS_SHARED_VISION and not has_spec_shared_vision and wrapped_num_agents == 2:
+            env = SharedVisionWrapper(
+                env,
+                stack_measurements=True,
+                include_relative_pose=True,
+            )
+
+        partner_occlusion_mode = str(getattr(cfg, "partner_occlusion_mode", "none") or "none").lower()
+        if (bool(getattr(cfg, "enable_labels_buffer", False)) or partner_occlusion_mode != "none") and wrapped_num_agents == 2:
+            env = VisibilityDiagnosticsWrapper(
+                env,
+                scenario_name=doom_spec.name,
+                partner_occlusion_mode=partner_occlusion_mode,
+            )
+
         # For HAPPO, obs_space with temp env (player_id=-1) doesn't get AgentIDWrapper, so MultiAgentEnv.observation_space is missing 'agent_id'
         # SF uses this obs_space to create the model, so we augment it manually here
         # But that setting is only for player testing so shouldn't matter much
@@ -599,15 +942,15 @@ def make_doom_multiplayer_env(
             spaces['agent_id'] = gym.spaces.Box(low=0.0, high=1.0, shape=(num_agents,), dtype=np.float32)
             env.observation_space = gym.spaces.Dict(spaces)
 
-        shared_reward_alpha = get_alpha(cfg, doom_spec)
-        shared_reward_scalarisation = get_scalarisation(cfg, doom_spec)
-        if shared_reward_alpha > 0 and str(getattr(cfg, "algo", "MAPPO")).upper() not in OFF_POLICY:
+        if use_shared_reward and not shared_reward_applied and wrapped_num_agents > 1:
             env = SharedRewardWrapper(
                 env,
                 alpha=shared_reward_alpha,
                 scalarisation=shared_reward_scalarisation,
             )
     else:
+        if uses_entity_state_encoding(cfg):
+            raise ValueError("--state_encoding=entity needs a multi-agent env (partner and host object info)")
         # if we have only one agent, there's no need for multi-agent wrapper
         from comrad.envs.multiagent.doom_multiagent_wrapper import init_multiplayer_env
 
@@ -633,7 +976,7 @@ def make_doom_multiplayer_env(
                 record_every=getattr(cfg, "wandb_record_every", 0),
                 fps=getattr(cfg, "wandb_video_fps", 35) // getattr(cfg, "env_frameskip", 1),
                 is_multi=is_multiagent,
-                done_mode="any" if is_multiagent and algo_name in ON_POLICY else "all",
+                done_mode="any" if is_multiagent and (algo_name in ON_POLICY or getattr(env, "num_agents", 1) == 1) else "all",
                 output_dir=dirr,
             )
 

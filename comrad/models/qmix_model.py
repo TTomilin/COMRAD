@@ -41,11 +41,16 @@ class QMixAgentNet(nn.Module):
 
         # Encoder
         if "obs" in obs_space.spaces:
-            self.encoder = make_img_encoder(cfg, obs_space["obs"])
+            if len(obs_space["obs"].shape) == 1:
+                from sample_factory.model.encoder import MlpEncoder
+
+                self.encoder = MlpEncoder(cfg, obs_space["obs"])
+            else:
+                self.encoder = make_img_encoder(cfg, obs_space["obs"])
         else:
             from sample_factory.model.encoder import MlpEncoder
-            obs_shape = obs_space.shape if hasattr(obs_space, 'shape') else obs_space["obs"].shape
-            self.encoder = MlpEncoder(cfg, obs_shape)
+
+            self.encoder = MlpEncoder(cfg, obs_space)
 
         encoder_out = self.encoder.get_out_size()
 
@@ -113,9 +118,12 @@ class QMixAgentNet(nn.Module):
         :returns: [batch, encoder_out_size]
         """
         if isinstance(obs, dict) and "obs" in obs:
-            x = self.encoder(obs["obs"])
+            obs_tensor = obs["obs"]
+            if obs_tensor.dim() == 2 and obs_tensor.dtype != torch.float32:
+                obs_tensor = obs_tensor.float()
+            x = self.encoder(obs_tensor)
         else:
-            x = self.encoder(obs)
+            x = self.encoder(obs.float() if hasattr(obs, "dim") and obs.dim() == 2 else obs)
 
         if self.measurements_head is not None and "measurements" in obs:
             meas = self.measurements_head(obs["measurements"].float())
@@ -127,6 +135,9 @@ class QMixAgentNet(nn.Module):
         """Modularize this to use in learner_qmix"""
         x = self.encode(obs)
         encoder_out = x
+
+        if self.use_rnn and rnn_states is None:
+            rnn_states = x.new_zeros((x.shape[0], self.get_rnn_size()))
 
         x, new_rnn = self.core(x, rnn_states)
 

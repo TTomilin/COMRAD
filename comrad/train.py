@@ -21,6 +21,7 @@ from comrad.utils.doom_utils import (
     make_doom_env_from_batch,
     doom_env_by_name,
     get_num_agents,
+    restrict_global_state_input_normalization,
 )
 from comrad.utils.video_uploader import upload_video
 from comrad.models.mappo_model import make_mappo_actor_critic
@@ -131,6 +132,7 @@ def prepare_cfg_for_training(cfg):
         cfg = maybe_load_from_checkpoint(cfg)
 
     configure_batch_env_and_agents(cfg)
+    restrict_global_state_input_normalization(cfg)
     restore_curriculum_state(cfg, getattr(cfg, "_curriculum", None))
     return cfg
 
