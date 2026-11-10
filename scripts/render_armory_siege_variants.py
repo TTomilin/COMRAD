@@ -8,21 +8,23 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
+import vizdoom
 from PIL import Image, ImageDraw, ImageFont
 from omg import MapEditor, WAD
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 WAD2IMAGE_SCRIPT = REPO_ROOT / "scripts" / "wad2image" / "bin" / "wad2image.py"
-DEFAULT_IWAD = REPO_ROOT / "DoomGen" / "examples" / "play" / "freedoom2.wad"
+DEFAULT_IWAD = Path(vizdoom.root_path) / "freedoom2.wad"
 DEFAULT_VARIANTS_DIR = REPO_ROOT / "results" / "variants"
 DEFAULT_OUTPUT_DIR = DEFAULT_VARIANTS_DIR / "images"
 DEFAULT_REGISTRY_PATH = DEFAULT_VARIANTS_DIR / "variants_registry.json"
-DEFAULT_MONTAGE_PATH = REPO_ROOT / "results" / "armory_seige_variants.png"
+DEFAULT_MONTAGE_PATH = REPO_ROOT / "results" / "armory_siege_variants.png"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Render DoomGen variant WADs into readable top-down images using wad2image plus preview overlays."
+        description="Render Armory Siege variants into readable top-down images using wad2image plus preview overlays."
     )
     parser.add_argument(
         "--variants-dir",
@@ -52,7 +54,13 @@ def parse_args() -> argparse.Namespace:
         "--montage-path",
         type=Path,
         default=DEFAULT_MONTAGE_PATH,
-        help="Path for the final 2x2 montage PNG.",
+        help="Path for the final montage PNG.",
+    )
+    parser.add_argument(
+        "--cols",
+        type=int,
+        default=2,
+        help="Number of columns in the final montage.",
     )
     parser.add_argument("--width", type=int, default=1800, help="Image width in pixels.")
     parser.add_argument("--thickness", type=int, default=3, help="Line thickness.")
@@ -355,9 +363,11 @@ def variant_label_from_path(path: Path) -> str:
     return f"Variant {suffix}"
 
 
-def build_montage(image_paths: list[Path], output_path: Path) -> None:
-    if len(image_paths) != 4:
-        raise ValueError(f"Expected exactly 4 images for montage, found {len(image_paths)}")
+def build_montage(image_paths: list[Path], output_path: Path, cols: int) -> None:
+    if not image_paths:
+        raise ValueError("No images to render in montage")
+    if cols < 1:
+        raise ValueError("cols must be at least 1")
 
     images = [Image.open(path).convert("RGBA") for path in image_paths]
     labels = [variant_label_from_path(path) for path in image_paths]
@@ -373,14 +383,15 @@ def build_montage(image_paths: list[Path], output_path: Path) -> None:
     panel_width = max(image.width for image in images) + panel_padding * 2
     panel_height = max(image.height for image in images) + panel_padding * 2 + label_height
 
-    canvas_width = outer_padding * 2 + panel_width * 2 + gap
-    canvas_height = outer_padding * 2 + panel_height * 2 + gap
+    rows = (len(images) + cols - 1) // cols
+    canvas_width = outer_padding * 2 + panel_width * cols + gap * (cols - 1)
+    canvas_height = outer_padding * 2 + panel_height * rows + gap * (rows - 1)
     canvas = Image.new("RGBA", (canvas_width, canvas_height), bg)
     draw = ImageDraw.Draw(canvas)
 
     for index, (image, label) in enumerate(zip(images, labels)):
-        row = index // 2
-        col = index % 2
+        row = index // cols
+        col = index % cols
         origin_x = outer_padding + col * (panel_width + gap)
         origin_y = outer_padding + row * (panel_height + gap)
 
@@ -463,7 +474,7 @@ def main() -> None:
             )
         rendered_images.append(output_path)
 
-    build_montage(rendered_images, montage_path)
+    build_montage(rendered_images, montage_path, args.cols)
     print(f"Wrote {len(wad_paths)} images to {output_dir}")
     print(f"Wrote montage to {montage_path}")
 

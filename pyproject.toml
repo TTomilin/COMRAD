@@ -112,7 +112,7 @@ exclude = [
 
 [tool.ruff]
 line-length = 120
-extend-exclude = ["vizdoom.pyi", "make_doomgen_variants.py"]
+extend-exclude = ["vizdoom.pyi"]
 
 [tool.ruff.lint]
 ignore = [
