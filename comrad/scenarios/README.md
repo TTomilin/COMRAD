@@ -8,4 +8,4 @@ Runtime assets for every scenario: one `.cfg` plus `.wad` pair per scenario, and
 
 Pools are consumed with `--wad_batch=<dir>` (see [Reproducing](https://ttomilin.github.io/COMRAD/training/reproducing/#wad-batches-and-curricula)).
 
-The maps are produced by the separate generators in `DoomGen/`, which are not part of this package. After regenerating a map there, copy the new `.wad` here and keep the `.cfg` and `batch_registry.json` in sync. Training always reads from this directory.
+The maps are produced by the separate generators in `scenario_generation/`, which are not part of this package. After regenerating a map there, copy the new `.wad` here and keep the `.cfg` and `batch_registry.json` in sync. Training always reads from this directory.

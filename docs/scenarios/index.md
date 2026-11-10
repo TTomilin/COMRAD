@@ -29,4 +29,4 @@ Every scenario is a first-person, partially observed, multi-agent task. Each age
 
 ## Map generation
 
-The maps were generated procedurally. The generators live in the separate `DoomGen/` folder of the repository and are not part of the `comrad-bench` package. The package ships ready-made `.wad` and `.cfg` files under `comrad/scenarios/`.
+The maps were generated procedurally. The generators live in the separate `scenario_generation/` folder of the repository and are not part of the `comrad-bench` package. The package ships ready-made `.wad` and `.cfg` files under `comrad/scenarios/`.

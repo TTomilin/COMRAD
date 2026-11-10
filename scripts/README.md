@@ -29,7 +29,7 @@ Scripts that turn benchmark outputs into paper figures, tables and diagnostics. 
   - `categories_with_difficulty.py`
   - `acs_random_distribution.py`: runtime check of ACS `Random()` distribution
 - Held-out WAD evaluation:
-  - `scenario_generation.heldout`: generate held-out WAD batches
+  - `scenario_generation.evaluation.heldout`: generate held-out WAD batches
   - `heldout_wad_evaluation.py`: evaluate checkpoints on those batches
 
 ## Usage notes

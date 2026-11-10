@@ -18,7 +18,17 @@ uv run pytest comrad/tests sample_factory/tests
 | `scripts/` | Figure, table and analysis scripts |
 | `results/` | Committed figures, tables and result summaries |
 | `docs/`, `mkdocs.yml` | This website |
-| `DoomGen/`, `DoomGen2/` | Separate map-generation tools. They are **not** part of the COMRAD package and have their own environment and tests. |
+| `scenario_generation/` | Generators for the COMRAD scenario WADs. Not installed with `comrad-bench`. |
+| `DoomGen/`, `DoomGen2/` | Separate map-generation tools. |
+
+## Scenario generation
+
+```bash
+uv sync --group generation
+uv run --group generation python -m scenario_generation.batches.generate_armory_siege_batch
+```
+
+Generated WADs are written directly to `comrad/scenarios/`.
 
 ## Adding a scenario
 
