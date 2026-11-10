@@ -10,6 +10,7 @@ from sample_factory.algo.sampling.sampling_utils import VectorEnvRunner, record_
 from sample_factory.algo.utils.agent_policy_mapping import AgentPolicyMapping
 from sample_factory.algo.utils.env_info import EnvInfo, check_env_info
 from sample_factory.algo.utils.make_env import make_env_func_non_batched
+from sample_factory.algo.utils.masked_sampling import sample_masked_action
 from sample_factory.algo.utils.misc import EPISODIC, POLICY_ID_KEY
 from sample_factory.algo.utils.shared_buffers import BufferMgr
 from sample_factory.algo.utils.tensor_dict import TensorDict, to_numpy
@@ -441,7 +442,10 @@ class NonBatchedVectorEnvRunner(VectorEnvRunner):
 
                 log.info("Decorrelating experience for %d frames...", decorrelate_steps)
                 for decorrelate_step in range(decorrelate_steps):
-                    actions = [e.action_space.sample(obs.get("action_mask")) for obs in observations]
+                    actions = [
+                        sample_masked_action(e.action_space, obs.get("action_mask") if isinstance(obs, dict) else None)
+                        for obs in observations
+                    ]
                     observations, rew, terminated, truncated, info = e.step(actions)
 
             for agent_i, obs in enumerate(observations):

@@ -1,5 +1,6 @@
 import time
 
+from sample_factory.algo.utils.masked_sampling import sample_masked_action
 from sample_factory.envs.env_utils import num_env_steps
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.timing import Timing
@@ -37,10 +38,10 @@ def eval_env_performance(make_env, env_type, verbose=False, eval_frames=10_000):
 
                 if is_multiagent:
                     action_mask = [o.get("action_mask") if isinstance(o, dict) else None for o in obs]
-                    action = [env.action_space.sample(m) for m in action_mask]
+                    action = [sample_masked_action(env.action_space, m) for m in action_mask]
                 else:
                     action_mask = obs.get("action_mask") if isinstance(obs, dict) else None
-                    action = env.action_space.sample(action_mask)
+                    action = sample_masked_action(env.action_space, action_mask)
 
                 obs, rew, terminated, truncated, info = env.step(action)
 
