@@ -10,6 +10,8 @@ from comrad.envs.multiagent.doom_multiagent_wrapper import MultiAgentEnv
 EPISODE_LEN = 3
 # {"step": k, "player": p} makes player p raise once on its k-th step of an episode
 CRASH_ONCE = {}
+# every FakeAgentEnv ever created (crash recovery respawns them)
+CREATED = []
 
 
 class FakeAgentEnv(gym.Env):
@@ -23,9 +25,14 @@ class FakeAgentEnv(gym.Env):
         self.worker_index = 0
         self.vector_index = 0
         self.t = 0
+        self.scenario = "base.cfg"
+        CREATED.append(self)
 
     def seed(self, seed=None):
         pass
+
+    def swap_scenario(self, config_path):
+        self.scenario = config_path
 
     def _obs(self):
         return np.full((4, 4, 3), self.t, dtype=np.uint8)
@@ -52,8 +59,10 @@ def no_ports(monkeypatch, tmp_path):
     monkeypatch.setattr(wrapper_module, "doom_lock_file", lambda max_parallel: str(tmp_path / "doom.lock"))
     monkeypatch.setattr(wrapper_module, "sleep", lambda seconds: None)
     CRASH_ONCE.clear()
+    CREATED.clear()
     yield
     CRASH_ONCE.clear()
+    CREATED.clear()
 
 
 def _make(auto_reset=True, env_config=None, num_agents=2):
@@ -135,6 +144,32 @@ def test_explicit_reset_truncates_episode_on_crash_recovery_reset():
         _, _, terminated, truncated, infos = env.step([0, 0])
         assert truncated == [False, False]
         assert not any("_hidden_reset_count" in info for info in infos)
+    finally:
+        env.close()
+
+
+def test_crash_recovery_respawns_on_the_swapped_scenario():
+    # Regression: respawned workers used to start from make_env_func's base scenario because the swap requested
+    # before initialisation was forgotten, so held-out evaluation silently continued on the training WAD.
+    env = _make(auto_reset=False)
+    try:
+        del CREATED[:]  # ignore the probe env built in __init__ to read the spaces
+        env.swap_scenario("heldout.cfg")
+        env.reset()
+        assert [e.scenario for e in CREATED] == ["heldout.cfg", "heldout.cfg"]
+        env.step([0, 0])
+        CRASH_ONCE.update(step=2, player=1)
+        env.step([0, 0])
+        assert not CRASH_ONCE
+        assert len(CREATED) == 4
+        assert [e.scenario for e in CREATED[2:]] == ["heldout.cfg", "heldout.cfg"]
+        env.swap_scenario("next.cfg")  # a later swap is what the next respawn must use
+        env.reset()
+        env.step([0, 0])
+        CRASH_ONCE.update(step=2, player=0)
+        env.step([0, 0])
+        assert not CRASH_ONCE
+        assert [e.scenario for e in CREATED[4:]] == ["next.cfg", "next.cfg"]
     finally:
         env.close()
 

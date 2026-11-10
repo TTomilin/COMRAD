@@ -260,6 +260,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         # Holds a config_path when swap_scenario() is called before the env
         # is initialised (workers not yet created).
         self._pending_swap_config: Optional[str] = None
+        # Last scenario config requested via swap_scenario(). Crash recovery respawns workers from make_env_func
+        # (the base scenario), so this is re-applied on every re-initialisation to stay on the swapped WAD.
+        self._active_swap_config: Optional[str] = None
 
         self.render_mode = render_mode
         # Sample Factory expects the env to reset itself when all agents are done.
@@ -415,8 +418,9 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
                         log.debug("Using reserved port %d", port)
                         init_info = dict(port=port)
 
-                        if self._pending_swap_config is not None:
-                            init_info["swap_scenario"] = self._pending_swap_config
+                        swap_config = self._pending_swap_config or self._active_swap_config
+                        if swap_config is not None:
+                            init_info["swap_scenario"] = swap_config
 
                         for i, worker in enumerate(self.workers):
                             worker.task_queue.put((init_info, TaskType.INIT))
@@ -583,6 +587,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
         method is safe to call between episodes. It blocks until all workers
         have acknowledged the request.
         """
+        self._active_swap_config = config_path
         if self.workers is None:
             # Not yet initialised, store centrally so _ensure_initialized
             # can propagate after workers are created.

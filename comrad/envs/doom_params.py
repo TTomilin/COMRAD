@@ -8,10 +8,72 @@ def add_doom_env_args(parser):
 
     p.add_argument(
         "--use_additional_input",
-        default=False,
+        default=None,
         type=str2bool,
         help="Override whether Doom scenarios use their optional additional measurement vector. "
         "If unset, each scenario keeps its default behavior.",
+    )
+    p.add_argument(
+        "--full_observability",
+        default=False,
+        type=str2bool,
+        help="If True, wrap MultiAgentEnv with SharedVisionWrapper stacking [own, partner] observations "
+        "and concatenating [own, partner, relative_pose] measurements.",
+    )
+    p.add_argument(
+        "--full_obs_mode",
+        default="shared_vision",
+        choices=["shared_vision", "global_state"],
+        type=str,
+        help="What --full_observability=True adds. shared_vision: partner frame and relative pose (2 agents). "
+        "global_state: own frame plus the global environment state (all agents, task variables, every object, "
+        "layout grid, time) in measurements, for any number of agents.",
+    )
+    p.add_argument(
+        "--global_state_version",
+        default=2,
+        type=int,
+        choices=[1, 2],
+        help="Encoding of --full_obs_mode=global_state. 1: original encoding (task variables clipped at symlog 5, "
+        "ammo read from AMMO1 first). 2: wider task clip and the held weapon's ammo. Archived configs without the "
+        "key were trained with version 1.",
+    )
+    p.add_argument(
+        "--obs_modality",
+        default="pixel",
+        type=str,
+        choices=["pixel", "state", "blind"],
+        help="Observation modality: 'pixel' (3D egocentric RGB), 'state' (compact 1D state vector + MLP encoder), "
+        "or 'blind' (zeroed RGB with normalized step counter t/H).",
+    )
+    p.add_argument(
+        "--state_encoding",
+        default="ego",
+        type=str,
+        choices=["ego", "entity"],
+        help="State vector for --obs_modality=state. 'ego': own absolute pose, vitals and task variables. "
+        "'entity': heading-relative partner and nearest objects within --state_sight_range, 16 depth rays "
+        "and radius-gated task variables (multi-agent envs only).",
+    )
+    p.add_argument(
+        "--state_sight_range",
+        default=512.0,
+        type=float,
+        help="Sight radius in map units for --state_encoding=entity; entities beyond it are zeroed.",
+    )
+    p.add_argument(
+        "--enable_labels_buffer",
+        default=False,
+        type=str2bool,
+        help="If True, enable ViZDoom labels_buffer and depth_buffer for visibility/occlusion diagnostics.",
+    )
+    p.add_argument(
+        "--partner_occlusion_mode",
+        default="none",
+        type=str,
+        choices=["none", "sprite", "cues", "both"],
+        help="Evaluation intervention masking partner visual information: 'none', 'sprite' (mask DoomPlayer in labels_buffer), "
+        "'cues' (mask partner-transmitted cues), or 'both'.",
     )
 
     p.add_argument(

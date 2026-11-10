@@ -3,6 +3,7 @@ import os
 import random
 import re
 import time
+import zlib
 from os.path import join
 from threading import Thread
 from typing import Dict, Optional, Tuple
@@ -12,10 +13,21 @@ import gymnasium as gym
 import numpy as np
 from filelock import FileLock, Timeout
 from gymnasium.utils import seeding
-from vizdoom.vizdoom import AutomapMode, DoomGame, Mode, ScreenResolution
+from vizdoom.vizdoom import AutomapMode, DoomGame, GameVariable, Mode, ScreenResolution
 
 from sample_factory.algo.utils.spaces.discretized import Discretized
 from sample_factory.utils.utils import log, project_tmp_dir
+from comrad.envs.wad_geometry import load_wad_geometry, scenario_wad_and_map
+
+# global-state extraction (used by --full_obs_mode=global_state)
+GLOBAL_STATE_INFO_KEYS = ("_gs_objects", "_gs_lines", "_gs_layout_id")
+DEPTH_ROW_INFO_KEY = "_depth_row"
+PLAYER_ACTOR_NAMES = frozenset({"DoomPlayer"})
+
+
+def actor_name_hash(name: str) -> int:
+    """Stable 16-bit hash of an actor class name (exact in float32)."""
+    return zlib.crc32(str(name).encode("utf-8")) & 0xFFFF
 
 
 def doom_lock_file(max_parallel):
@@ -90,8 +102,20 @@ class VizdoomEnv(gym.Env):
         async_mode=False,
         record_to=None,
         render_mode: Optional[str] = None,
+        enable_labels_buffer: bool = False,
+        enable_global_state_info: bool = False,
+        global_state_geometry: bool = True,
+        enable_depth_row: bool = False,
     ):
         self.initialized = False
+        self.enable_labels_buffer = bool(enable_labels_buffer)
+        self.enable_global_state_info = bool(enable_global_state_info)
+        self.global_state_geometry = bool(global_state_geometry)
+        self.enable_depth_row = bool(enable_depth_row)
+        self._gs_geometry = None
+        self._gs_live_sectors = False
+        self._gs_closed_signature = None
+        self._gs_layout_id = 0
 
         # pending WAD hot-swap (set via swap_scenario(), consumed in reset())
         self._pending_config: Optional[str] = None
@@ -205,6 +229,18 @@ class VizdoomEnv(gym.Env):
         self.game.load_config(self.config_path)
         self.game.set_screen_resolution(self.screen_resolution)
         self.game.set_seed(self.curr_seed)
+        if self.enable_labels_buffer:
+            try:
+                self.game.set_labels_buffer_enabled(True)
+                self.game.set_depth_buffer_enabled(True)
+            except Exception as exc:
+                log.debug("Could not enable labels/depth buffer on DoomGame: %r", exc)
+        if self.enable_depth_row:
+            self.game.set_depth_buffer_enabled(True)
+        if self.enable_global_state_info:
+            self.game.set_objects_info_enabled(True)
+            if self.global_state_geometry:
+                self._setup_global_state_geometry()
 
         if mode == "algo":
             self.game.set_window_visible(False)
@@ -345,11 +381,115 @@ class VizdoomEnv(gym.Env):
         return self.black_screen
 
     def _game_variables_dict(self, state):
-        game_variables = state.game_variables
+        game_variables = state.game_variables if state is not None and state.game_variables is not None else ()
         variables = {}
         for variable, idx in self.variable_indices.items():
-            variables[variable] = game_variables[idx]
+            if idx < len(game_variables):
+                variables[variable] = game_variables[idx]
+        if self.game is not None:
+            for var_name, gv in (
+                ("POSITION_X", GameVariable.POSITION_X),
+                ("POSITION_Y", GameVariable.POSITION_Y),
+                ("POSITION_Z", GameVariable.POSITION_Z),
+                ("ANGLE", GameVariable.ANGLE),
+                ("PITCH", GameVariable.PITCH),
+                ("HEALTH", GameVariable.HEALTH),
+            ):
+                if var_name not in variables:
+                    try:
+                        variables[var_name] = float(self.game.get_game_variable(gv))
+                    except Exception:
+                        pass
         return variables
+
+    def _attach_labels_info(self, state, info: Dict) -> None:
+        if not self.enable_labels_buffer or state is None:
+            return
+        labels_raw = getattr(state, "labels", None)
+        labels_list = []
+        if labels_raw is not None:
+            for lb in labels_raw:
+                labels_list.append(
+                    {
+                        "value": int(getattr(lb, "value", 0)),
+                        "object_id": int(getattr(lb, "object_id", 0)),
+                        "object_name": str(getattr(lb, "object_name", "")),
+                        "x": int(getattr(lb, "x", 0)),
+                        "y": int(getattr(lb, "y", 0)),
+                        "width": int(getattr(lb, "width", 0)),
+                        "height": int(getattr(lb, "height", 0)),
+                        "object_position_x": float(getattr(lb, "object_position_x", np.nan)),
+                        "object_position_y": float(getattr(lb, "object_position_y", np.nan)),
+                        "object_position_z": float(getattr(lb, "object_position_z", np.nan)),
+                    }
+                )
+        info["_labels"] = labels_list
+        labels_buf = getattr(state, "labels_buffer", None)
+        if labels_buf is not None:
+            info["_labels_buffer"] = labels_buf
+
+    def _attach_depth_row(self, state, info: Dict) -> None:
+        """`_depth_row` (W,) uint8: the centre row of the depth buffer, for the entity state encoding."""
+        if not self.enable_depth_row or state is None:
+            return
+        depth = getattr(state, "depth_buffer", None)
+        if depth is None:
+            return
+        depth = np.asarray(depth)
+        info["_depth_row"] = np.array(depth[depth.shape[0] // 2], dtype=np.uint8)
+
+    def _setup_global_state_geometry(self) -> None:
+        """Load the level layout from the WAD; enable live sector heights only where ViZDoom can export them safely."""
+        self._gs_geometry, self._gs_live_sectors, self._gs_closed_signature = None, False, None
+        try:
+            wad_path, map_name = scenario_wad_and_map(self.config_path)
+            self._gs_geometry = load_wad_geometry(wad_path, map_name)
+        except Exception as exc:
+            log.warning("Global state: could not read level geometry for %s: %r", self.config_path, exc)
+            return
+        self._gs_live_sectors = self._gs_geometry.supports_live_sectors
+        if self._gs_live_sectors:
+            self.game.set_sectors_info_enabled(True)
+        else:
+            log.info(
+                "Global state: %s (%d lines, max %d per sector) uses the static WAD layout without live doors",
+                os.path.basename(wad_path),
+                self._gs_geometry.segments.shape[0],
+                self._gs_geometry.max_lines_per_sector,
+            )
+
+    def _attach_global_state_info(self, state, info: Dict, force_layout: bool = False) -> None:
+        """Ground-truth objects and level layout for the global-state observation mode.
+
+        `_gs_objects` (M, 6): x, y, z, vx, vy, 16-bit hash of the actor name; players are excluded.
+        `_gs_layout_id`: incremented whenever the set of closed sectors changes.
+        `_gs_lines` (L, 5): x1, y1, x2, y2, blocked; only sent at reset and when `_gs_layout_id` changes.
+        """
+        if not self.enable_global_state_info or state is None:
+            return
+        objects = [
+            (o.position_x, o.position_y, o.position_z, o.velocity_x, o.velocity_y, actor_name_hash(o.name))
+            for o in (state.objects or ())
+            if o.name not in PLAYER_ACTOR_NAMES
+        ]
+        info["_gs_objects"] = np.asarray(objects, dtype=np.float32).reshape(-1, 6)
+
+        geometry = self._gs_geometry
+        if geometry is None:
+            return
+        sectors = state.sectors if self._gs_live_sectors else None
+        if sectors and len(sectors) == geometry.num_sectors:
+            closed = geometry.closed_sectors(
+                [s.floor_height for s in sectors], [s.ceiling_height for s in sectors]
+            )
+        else:
+            closed = geometry.closed_sectors()
+        signature = closed.tobytes()
+        if force_layout or signature != self._gs_closed_signature:
+            self._gs_closed_signature = signature
+            self._gs_layout_id += 1
+            info["_gs_lines"] = geometry.lines_array(closed)
+        info["_gs_layout_id"] = self._gs_layout_id
 
     @staticmethod
     def demo_path(episode_idx, record_to):
@@ -415,7 +555,24 @@ class VizdoomEnv(gym.Env):
 
         self._num_episodes += 1
 
-        return np.transpose(img, (1, 2, 0)), {}  # since Gym 0.26.0, we return dict as second return value
+        reset_info = {}
+        if self.state is not None:
+            try:
+                game_variables = self._game_variables_dict(self.state)
+                reset_info.update(self.get_info(game_variables))
+                self._attach_labels_info(self.state, reset_info)
+            except Exception:
+                pass
+            try:
+                self._attach_global_state_info(self.state, reset_info, force_layout=True)
+            except Exception as exc:
+                log.warning("Could not extract global state at reset: %r", exc)
+            try:
+                self._attach_depth_row(self.state, reset_info)
+            except Exception as exc:
+                log.warning("Could not extract depth row at reset: %r", exc)
+
+        return np.transpose(img, (1, 2, 0)), reset_info  # since Gym 0.26.0, we return dict as second return value
 
     def _convert_actions(self, actions):
         """Convert actions from gym action space to the action space expected by Doom game."""
@@ -501,8 +658,16 @@ class VizdoomEnv(gym.Env):
             observation = np.transpose(state.screen_buffer, (1, 2, 0))
             game_variables = self._game_variables_dict(state)
             info.update(self.get_info(game_variables))
+            self._attach_labels_info(state, info)
+            self._attach_global_state_info(state, info)
+            self._attach_depth_row(state, info)
             self._update_histogram(info)
             self._prev_info = copy.copy(info)
+            self._prev_info.pop("_labels_buffer", None)
+            self._prev_info.pop("_labels", None)
+            for key in GLOBAL_STATE_INFO_KEYS:
+                self._prev_info.pop(key, None)
+            self._prev_info.pop(DEPTH_ROW_INFO_KEY, None)
         else:
             observation = self._black_screen()
 
@@ -621,7 +786,12 @@ class VizdoomEnv(gym.Env):
             y = variables["POSITION_Y"]
             a = variables["ANGLE"]
 
-        return {"agent_x": x, "agent_y": y, "agent_a": a}
+        pos = {"agent_x": x, "agent_y": y, "agent_a": a}
+        if "POSITION_Z" in variables:
+            pos["agent_z"] = variables["POSITION_Z"]
+        if "PITCH" in variables:
+            pos["agent_pitch"] = variables["PITCH"]
+        return pos
 
     def get_automap_buffer(self):
         if self.game.is_episode_finished():

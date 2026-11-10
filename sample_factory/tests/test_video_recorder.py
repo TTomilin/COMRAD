@@ -358,6 +358,7 @@ def test_make_doom_multiplayer_env_uses_any_done_mode_for_on_policy_only(monkeyp
         def __init__(self, *args, **kwargs):
             self.args = args
             self.kwargs = kwargs
+            self.num_agents = kwargs["num_agents"]
 
     class _CapturingVideoLoggerWrapper:
         def __init__(self, env, **kwargs):
@@ -373,6 +374,7 @@ def test_make_doom_multiplayer_env_uses_any_done_mode_for_on_policy_only(monkeyp
         num_bots=0,
         shared_reward_alpha=0.0,
         shared_reward_scalarisation="sum",
+        joint_wrappers=None,
     )
     cfg_base = {
         "env_frameskip": 4,

@@ -1,3 +1,4 @@
+import json
 import os
 from contextlib import contextmanager
 from os.path import join
@@ -28,7 +29,10 @@ def find_available_port(start_port, increment=1000):
 
 
 def udp_port_reservation_file(port: int) -> str:
-    return join(project_tmp_dir(), f"doom_udp_port_{port}.lockfile")
+    # DOOM_PORT_LOCK_DIR lets colocated SLURM jobs share reservations when each job gets a private /tmp (Snellius).
+    lock_dir = os.environ.get("DOOM_PORT_LOCK_DIR") or project_tmp_dir()
+    os.makedirs(lock_dir, exist_ok=True)
+    return join(lock_dir, f"doom_udp_port_{port}.lockfile")
 
 
 @contextmanager
@@ -82,6 +86,10 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
         record_to=None,
         render_mode: Optional[str] = None,
         host_ip: str = "127.0.0.1",
+        enable_labels_buffer: bool = False,
+        enable_global_state_info: bool = False,
+        global_state_geometry: bool = True,
+        enable_depth_row: bool = False,
     ):
         super().__init__(
             action_space,
@@ -90,6 +98,10 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
             async_mode=async_mode,
             record_to=record_to,
             render_mode=render_mode,
+            enable_labels_buffer=enable_labels_buffer,
+            enable_global_state_info=enable_global_state_info,
+            global_state_geometry=global_state_geometry,
+            enable_depth_row=enable_depth_row,
         )
 
         self.worker_index = 0
@@ -161,7 +173,12 @@ class VizdoomEnvMultiplayer(VizdoomEnv):
                 # reportedly this does not work with bots
                 demo_path = self.demo_path(self._num_episodes, self.record_to)
                 log.debug("Recording multiplayer demo to %s", demo_path)
+                os.makedirs(self.record_to, exist_ok=True)
                 self.game.add_game_args(f"-record {demo_path}")
+                # replay needs the exact cfg/WAD (it can change via swap_scenario) and the game args used for hosting
+                with open(f"{demo_path}.json", "w") as f:
+                    json.dump({"config_path": self.config_path, "seed": int(self.curr_seed),
+                               "game_args": " ".join(game_args_list), "max_num_players": self.max_num_players}, f)
         else:
             # Join existing game.
             self.game.add_game_args(

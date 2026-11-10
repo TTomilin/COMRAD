@@ -2,7 +2,7 @@ import torch
 from torch import nn
 
 from sample_factory.algo.utils.torch_utils import calc_num_elements
-from sample_factory.model.encoder import Encoder, make_img_encoder
+from sample_factory.model.encoder import Encoder, MlpEncoder, make_img_encoder
 from sample_factory.model.model_utils import nonlinearity
 from sample_factory.utils.typing import Config, ObsSpace
 from sample_factory.utils.utils import log
@@ -12,8 +12,11 @@ class VizdoomEncoder(Encoder):
     def __init__(self, cfg: Config, obs_space: ObsSpace):
         super().__init__(cfg)
 
-        # reuse the default image encoder
-        self.basic_encoder = make_img_encoder(cfg, obs_space["obs"])
+        if len(obs_space["obs"].shape) == 1:
+            self.basic_encoder = MlpEncoder(cfg, obs_space["obs"])
+        else:
+            # reuse the default image encoder
+            self.basic_encoder = make_img_encoder(cfg, obs_space["obs"])
         self.encoder_out_size = self.basic_encoder.get_out_size()
 
         self.measurements_head = None
@@ -30,7 +33,10 @@ class VizdoomEncoder(Encoder):
         log.debug("Policy head output size: %r", self.get_out_size())
 
     def forward(self, obs_dict):
-        x = self.basic_encoder(obs_dict["obs"])
+        obs_tensor = obs_dict["obs"]
+        if obs_tensor.dim() == 2 and obs_tensor.dtype != torch.float32:
+            obs_tensor = obs_tensor.float()
+        x = self.basic_encoder(obs_tensor)
 
         if self.measurements_head is not None:
             measurements = self.measurements_head(obs_dict["measurements"].float())
