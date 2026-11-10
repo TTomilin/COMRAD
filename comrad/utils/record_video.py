@@ -5,6 +5,7 @@ import time
 from collections import deque
 from typing import Tuple
 
+import cv2
 import imageio
 import numpy as np
 import torch
@@ -22,7 +23,7 @@ from sample_factory.model.actor_critic import create_actor_critic
 from sample_factory.model.model_utils import get_rnn_size
 from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.typing import Config, StatusCode
-from sample_factory.utils.utils import experiment_dir, log
+from sample_factory.utils.utils import experiment_dir, log, str2bool
 
 from comrad.train import register_vizdoom_components, register_model_factory
 from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, doom_override_defaults, add_wandb_args
@@ -43,6 +44,9 @@ def add_recording_args(parser):
     parser.add_argument("--video_prefix", default="recording", type=str, help="Prefix for video filename")
     parser.add_argument("--overwrite_video", action="store_true", help="Overwrite existing video files")
     parser.add_argument("--load_checkpoint_file", default=None, type=str, help="Load this exact checkpoint file")
+    parser.add_argument("--video_quality", default=8, type=int, help="imageio/ffmpeg quality 0-10 (10 = highest bitrate)")
+    parser.add_argument("--replay_only_success", default=False, type=str2bool,
+                        help="record_demo_video: only replay/encode episodes whose info['success'] is True")
     parser.set_defaults(max_num_episodes=1, max_num_frames=10000)
 
 
@@ -57,10 +61,10 @@ def parse_recording_args(argv=None):
     return cfg
 
 
-def save_video(frames, file_path, fps=35):
+def save_video(frames, file_path, fps=35, quality=8):
     # IMAGEIO FFMPEG_WRITER WARNING occurs when resolution like 640x360 has height 360, which isn't divisible by 16 (the macro block size for H.264)
     # Thus here must set macro_block_size here
-    writer = imageio.get_writer(file_path, fps=fps, quality=8, macro_block_size=1)
+    writer = imageio.get_writer(file_path, fps=fps, quality=quality, macro_block_size=1)
     for frame in frames:
         writer.append_data(frame)
     writer.close()
@@ -75,6 +79,8 @@ def make_env_for_recording(cfg: Config, resolution: str):
     render_cfg.res_w = width
     render_cfg.res_h = height
     render_cfg.wide_aspect_ratio = width / height > 1.5
+    # render natively at the video resolution; otherwise the 256x144 game screen is just upscaled
+    render_cfg.native_render_resolution = resolution
 
     render_cfg.wandb_record_every = 0
     render_cfg.with_wandb = False
@@ -84,6 +90,41 @@ def make_env_for_recording(cfg: Config, resolution: str):
         env_config=AttrDict(worker_index=0, vector_index=0, env_id=1),
         render_mode="rgb_array"
     )
+
+
+def downscale_frame(frame: np.ndarray, native_res: Tuple[int, int], policy_res: Tuple[int, int]) -> np.ndarray:
+    """HWC uint8 high-res frame -> what training saw: native Doom render (point-sampled, so approximated by
+    nearest-neighbour downsampling), then the training ResizeWrapper's nearest-neighbour resize to the policy resolution."""
+    frame = cv2.resize(frame, native_res, interpolation=cv2.INTER_NEAREST)
+    return cv2.resize(frame, policy_res, interpolation=cv2.INTER_NEAREST)
+
+
+def make_policy_obs_downscaler(policy_obs_space, native_res: Tuple[int, int]):
+    """Returns fn mapping the high-res env's obs dict to the policy's observation shape (image keys only)."""
+    spaces_by_key = getattr(policy_obs_space, "spaces", {"obs": policy_obs_space})
+
+    def convert(obs):
+        for key, space in spaces_by_key.items():
+            if key not in obs or len(space.shape) != 3:
+                continue
+            value = obs[key]
+            is_tensor = torch.is_tensor(value)
+            array = value.cpu().numpy() if is_tensor else np.asarray(value)
+            if array.shape[1:] == tuple(space.shape):
+                continue
+            chw = space.shape[0] in (1, 3) and space.shape[-1] not in (1, 3)
+            h, w = (space.shape[1], space.shape[2]) if chw else (space.shape[0], space.shape[1])
+            frames = []
+            for agent_frame in array:
+                hwc = agent_frame.transpose(1, 2, 0) if chw else agent_frame
+                small = downscale_frame(np.ascontiguousarray(hwc), native_res, (w, h))
+                small = small.reshape(h, w, -1)
+                frames.append(small.transpose(2, 0, 1) if chw else small)
+            result = np.stack(frames).astype(array.dtype)
+            obs[key] = torch.from_numpy(result).to(value.device) if is_tensor else result
+        return obs
+
+    return convert
 
 
 def checkpoint_paths_for_recording(cfg: Config, policy_id: int):
@@ -123,19 +164,26 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
 
     cfg.num_envs = 1
 
-    env = make_env_func_batched(
+    # The policy env is only used for the spaces the model was trained with. Driving a second high-res env with the
+    # same actions diverges (independent RNG / scripted partners), so a single high-res env is both rendered and fed
+    # to the policy after downscaling its observations the way training did.
+    policy_env = make_env_func_batched(
         cfg, env_config=AttrDict(worker_index=0, vector_index=0, env_id=0), render_mode=None
     )
-    env_render = make_env_for_recording(cfg, cfg.resolution)
-    env_info = extract_env_info(env, cfg)
+    env_info = extract_env_info(policy_env, cfg)
+    policy_obs_space, policy_action_space = policy_env.observation_space, policy_env.action_space
+    num_agents = policy_env.num_agents
+    policy_env.close()
 
+    env = make_env_for_recording(cfg, cfg.resolution)
     # reset call ruins the demo recording for VizDoom
     if hasattr(env.unwrapped, "reset_on_init"):
         env.unwrapped.reset_on_init = False
-    if hasattr(env_render.unwrapped, "reset_on_init"):
-        env_render.unwrapped.reset_on_init = False
 
-    actor_critic = create_actor_critic(cfg, env.observation_space, env.action_space)
+    native_res = tuple(map(int, ("256x144" if cfg.wide_aspect_ratio else "160x120").split("x")))
+    to_policy_obs = make_policy_obs_downscaler(policy_obs_space, native_res)
+
+    actor_critic = create_actor_critic(cfg, policy_obs_space, policy_action_space)
     actor_critic.eval()
 
     device = torch.device("cpu" if cfg.device == "cpu" else "cuda")
@@ -149,23 +197,25 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
     else:
         raise RuntimeError("Could not load checkpoint")
 
-    episode_rewards = [deque([], maxlen=100) for _ in range(env.num_agents)]
+    episode_rewards = [deque([], maxlen=100) for _ in range(num_agents)]
     num_frames = 0
-    video_frames = []
+    # stream frames straight to disk: buffering e.g. 3840x1080 side-by-side frames in RAM needs ~12MB per frame
+    writer = imageio.get_writer(video_file_path, fps=cfg.video_fps, quality=cfg.video_quality, macro_block_size=1)
+    num_video_frames = 0
     num_episodes = 0
 
     def max_frames_reached(frames):
         return cfg.max_num_frames is not None and frames > cfg.max_num_frames
 
     obs, infos = env.reset()
-    _, _ = env_render.reset()
+    obs = to_policy_obs(obs)
 
     action_mask = obs.pop("action_mask").to(device) if "action_mask" in obs else None
-    rnn_states = torch.zeros([env.num_agents, get_rnn_size(cfg)], dtype=torch.float32, device=device)
+    rnn_states = torch.zeros([num_agents, get_rnn_size(cfg)], dtype=torch.float32, device=device)
     episode_reward = None
-    finished_episode = [False for _ in range(env.num_agents)]
+    finished_episode = [False for _ in range(num_agents)]
 
-    log.info(f"Recording at {cfg.resolution}, up to {cfg.max_num_episodes} episodes, {env.num_agents} agents")
+    log.info(f"Recording at {cfg.resolution}, up to {cfg.max_num_episodes} episodes, {num_agents} agents")
 
     with torch.no_grad():
         while not max_frames_reached(num_frames):
@@ -184,12 +234,13 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
             rnn_states = policy_outputs["new_rnn_states"]
 
             for _ in range(render_action_repeat):
-                frame = env_render.render()
+                frame = env.render()
                 if frame is not None:
-                    video_frames.append(frame.copy())
+                    writer.append_data(frame)
+                    num_video_frames += 1
 
                 obs, rew, terminated, truncated, infos = env.step(actions)
-                _, _, _, _, _ = env_render.step(actions)
+                obs = to_policy_obs(obs)
 
                 action_mask = obs.pop("action_mask").to(device) if "action_mask" in obs else None
                 dones = make_dones(terminated, truncated)
@@ -202,7 +253,7 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
 
                 num_frames += 1
                 if num_frames % 500 == 0:
-                    log.debug(f"Recorded {num_frames} frames, {len(video_frames)} video frames...")
+                    log.debug(f"Recorded {num_frames} frames, {num_video_frames} video frames...")
 
                 dones = dones.cpu().numpy()
                 for agent_i, done_flag in enumerate(dones):
@@ -212,33 +263,35 @@ def record_video(cfg: Config) -> Tuple[StatusCode, float]:
 
                         if verbose:
                             log.info(
-                                "Episode finished for agent %d at %d frames. Reward: %.3f",
+                                "Episode finished for agent %d at %d frames. Reward: %.3f, true_objective: %s",
                                 agent_i, num_frames, episode_reward[agent_i],
+                                infos[agent_i].get("true_objective") if agent_i < len(infos) else None,
                             )
                         rnn_states[agent_i] = torch.zeros([get_rnn_size(cfg)], dtype=torch.float32, device=device)
                         episode_reward[agent_i] = 0
 
                 if all(dones):
-                    frame = env_render.render()
+                    frame = env.render()
                     if frame is not None:
-                        video_frames.append(frame.copy())
+                        writer.append_data(frame)
+                        num_video_frames += 1
                     time.sleep(0.05)
 
                 if all(finished_episode):
-                    finished_episode = [False] * env.num_agents
+                    finished_episode = [False] * num_agents
                     num_episodes += 1
 
-                    avg_rewards = [np.mean(episode_rewards[i]) for i in range(env.num_agents)]
+                    avg_rewards = [np.mean(episode_rewards[i]) for i in range(num_agents)]
                     log.info(f"Completed episode {num_episodes}. Avg rewards: {avg_rewards}")
 
             if num_episodes >= cfg.max_num_episodes:
                 break
 
     env.close()
-    env_render.close()
 
-    if video_frames:
-        save_video(video_frames, video_file_path, fps=cfg.video_fps)
+    writer.close()
+    if num_video_frames:
+        log.info(f"Video saved to {video_file_path} ({num_video_frames} frames at {cfg.video_fps} fps)")
     else:
         log.warning("No frames captured!")
 
