@@ -9,8 +9,6 @@ import csv
 import hashlib
 import json
 import re
-import shutil
-import sys
 import tempfile
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -20,11 +18,9 @@ from typing import Any, Iterable
 import numpy as np
 import torch
 
+from scenario_generation.manifest import WadManifestEntry, load_manifest, sha256_file
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DOOMGEN_ROOT = REPO_ROOT / "DoomGen"
-for _path in (DOOMGEN_ROOT, DOOMGEN_ROOT / "src", DOOMGEN_ROOT / "examples" / "benchmark"):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
 
 from comrad.train import (  # noqa: E402
     configure_batch_env_and_agents,
@@ -45,7 +41,6 @@ from sample_factory.model.actor_critic import create_actor_critic  # noqa: E402
 from sample_factory.model.model_utils import get_rnn_size  # noqa: E402
 
 
-HELDOUT_SEEDS = (1009, 2027, 3037, 4051, 5099)
 DEFAULT_ARCHIVE_ROOT = "/home/knguyen2/ViZDoom/train_dir/mode3_comrad_benchmark_20260503_134649"
 DEFAULT_SCENARIOS = ("ammo_carrier", "armory_siege", "coop_puzzle")
 DEFAULT_ALGORITHMS = ("IPPO", "MAPPO", "HAPPO", "QMIX", "QPLEX-D")
@@ -57,11 +52,6 @@ POLICY_DIRECTORY_TOKENS = {
     "HAPPO": "_HAPPO_",
     "QMIX": "_QMIX_",
     "QPLEX-D": "_QPLEX_dmaq_",
-}
-SCENARIO_CLASSES = {
-    "ammo_carrier": ("examples.benchmark.ammo_carrier", "AmmoCarrierScenario"),
-    "armory_siege": ("examples.benchmark.armory_siege", "ArmorySiegeScenario"),
-    "coop_puzzle": ("examples.benchmark.coop_puzzle", "CoopPuzzleScenario"),
 }
 CHECKPOINT_RE = re.compile(r"^(?:best|checkpoint)_\d+_(?P<steps>\d+)(?:_|\.)")
 
@@ -75,24 +65,6 @@ class PolicySpec:
     checkpoint_steps: int
     config_sha256: str
     checkpoint_sha256: str
-
-
-@dataclass(frozen=True)
-class WadManifestEntry:
-    scenario: str
-    wad_id: str
-    seed: int
-    filename: str
-    sha256: str
-    config: dict[str, Any]
-
-
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
 
 
 def canonical_json_sha256(payload: Any) -> str:
@@ -167,51 +139,6 @@ def discover_policy_specs(
                 )
             )
     return policies
-
-
-def generate_heldout_batch(scenario: str, output_dir: Path, seeds: Iterable[int]) -> list[WadManifestEntry]:
-    """Generate only layout changes: each WAD uses the scenario's default config plus a new seed."""
-    if scenario not in SCENARIO_CLASSES:
-        raise ValueError(f"Unsupported scenario {scenario!r}; choices: {sorted(SCENARIO_CLASSES)}")
-    module_name, class_name = SCENARIO_CLASSES[scenario]
-    module = __import__(module_name, fromlist=[class_name])
-    scenario_cls = getattr(module, class_name)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    entries: list[WadManifestEntry] = []
-    for index, seed in enumerate(seeds):
-        wad_id = f"{scenario}_heldout_seed_{seed}"
-        filename = f"{wad_id}.wad"
-        wad_path = output_dir / filename
-        generated = scenario_cls({"seed": int(seed)}, name=wad_id)
-        generated.generate(str(wad_path))
-        entries.append(
-            WadManifestEntry(
-                scenario=scenario,
-                wad_id=wad_id,
-                seed=int(seed),
-                filename=filename,
-                sha256=sha256_file(wad_path),
-                config=dict(generated.config),
-            )
-        )
-
-    manifest_path = output_dir / "batch_registry.json"
-    manifest_payload = [asdict(entry) for entry in entries]
-    manifest_path.write_text(json.dumps(manifest_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return entries
-
-
-def load_manifest(batch_dir: Path) -> list[WadManifestEntry]:
-    manifest_path = batch_dir / "batch_registry.json"
-    payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    entries = [WadManifestEntry(**item) for item in payload]
-    for entry in entries:
-        wad_path = batch_dir / entry.filename
-        actual_sha = sha256_file(wad_path)
-        if actual_sha != entry.sha256:
-            raise RuntimeError(f"WAD hash mismatch for {wad_path}: {actual_sha} != {entry.sha256}")
-    return entries
 
 
 def singleton_batch_dir(batch_dir: Path, entry: WadManifestEntry) -> tempfile.TemporaryDirectory[str]:
@@ -382,13 +309,10 @@ def parse_cli() -> argparse.Namespace:
     parser.add_argument("--output-dir", default="results/heldout_wad_evaluation")
     parser.add_argument("--scenarios", default=",".join(DEFAULT_SCENARIOS))
     parser.add_argument("--algorithms", default=",".join(DEFAULT_ALGORITHMS))
-    parser.add_argument("--seeds", default=",".join(map(str, HELDOUT_SEEDS)))
     parser.add_argument("--episodes-per-wad", type=int, default=20)
     parser.add_argument("--target-steps", type=int, default=DEFAULT_TARGET_STEPS)
     parser.add_argument("--device", default="gpu")
     parser.add_argument("--deterministic", action="store_true")
-    parser.add_argument("--generate-only", action="store_true")
-    parser.add_argument("--overwrite-batches", action="store_true")
     return parser.parse_args()
 
 
@@ -396,9 +320,6 @@ if __name__ == "__main__":
     args = parse_cli()
     scenarios = parse_csv_argument(args.scenarios)
     algorithms = parse_csv_argument(args.algorithms)
-    seeds = tuple(int(value) for value in parse_csv_argument(args.seeds))
-    if len(seeds) != 5 or len(set(seeds)) != 5:
-        raise ValueError("Held-out protocol requires exactly five distinct layout seeds")
     if int(args.episodes_per_wad) <= 0:
         raise ValueError("--episodes-per-wad must be positive")
 
@@ -407,15 +328,20 @@ if __name__ == "__main__":
     manifests: dict[str, list[WadManifestEntry]] = {}
     for scenario in scenarios:
         batch_dir = batch_root / scenario
-        if args.overwrite_batches and batch_dir.exists():
-            shutil.rmtree(batch_dir)
-        if not (batch_dir / "batch_registry.json").is_file():
-            manifests[scenario] = generate_heldout_batch(scenario, batch_dir, seeds)
-        else:
-            manifests[scenario] = load_manifest(batch_dir)
-        actual_seeds = tuple(entry.seed for entry in manifests[scenario])
-        if actual_seeds != seeds:
-            raise RuntimeError(f"Batch {batch_dir} has seeds {actual_seeds}; expected {seeds}")
+        manifest_path = batch_dir / "batch_registry.json"
+        if not manifest_path.is_file():
+            raise FileNotFoundError(
+                f"Missing {manifest_path}; generate it with "
+                "`python -m scenario_generation.evaluation.heldout` first"
+            )
+        manifests[scenario] = load_manifest(batch_dir)
+
+    seed_sets = {tuple(entry.seed for entry in entries) for entries in manifests.values()}
+    if len(seed_sets) != 1:
+        raise RuntimeError(f"Held-out batches use different seeds: {sorted(seed_sets)}")
+    seeds = seed_sets.pop()
+    if len(seeds) != 5 or len(set(seeds)) != 5:
+        raise ValueError("Held-out protocol requires exactly five distinct layout seeds")
 
     manifest_metadata = {
         scenario: {
@@ -425,9 +351,6 @@ if __name__ == "__main__":
         }
         for scenario, entries in manifests.items()
     }
-    if args.generate_only:
-        print(json.dumps({"heldout_seeds": seeds, "batches": manifest_metadata}, indent=2))
-        raise SystemExit(0)
 
     archive_root = Path(args.archive_root)
     policies = discover_policy_specs(archive_root, scenarios, algorithms, int(args.target_steps))
