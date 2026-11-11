@@ -202,7 +202,7 @@ def build_figure(
         fontsize=8.5,
         va="top",
     )
-    ax.set_xlabel("Environment Steps (Millions)")
+    ax.set_xlabel("Frames (Millions)")
     ax.set_ylabel("Average shaped episodic return")
     ax.set_xlim(0, max_step / 1_000_000.0 + 1.0)
     ax.grid(axis="y", color="#d8d8d8", linewidth=0.7, alpha=0.7)

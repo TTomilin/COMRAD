@@ -118,7 +118,7 @@ def build_learning_figure(data: dict[int, dict[str, np.ndarray | float]], output
         fontsize=8.5,
         va="top",
     )
-    ax_left.set_xlabel("Environment Steps (Millions)")
+    ax_left.set_xlabel("Frames (Millions)")
     ax_left.set_ylabel("Average shaped episodic return")
     ax_left.set_xlim(0, PLOT_MAX_STEPS / 1_000_000.0 + 1.0)
     ax_left.grid(axis="y", color="#d8d8d8", linewidth=0.7, alpha=0.7)
