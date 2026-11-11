@@ -94,10 +94,6 @@ generation = [
     "pillow>=11.3.0",
 ]
 
-[tool.uv.sources]
-# Temporary local source until doomgen==0.1.0 is published.
-doomgen = { path = "../DoomGen", editable = true }
-
 [tool.setuptools]
 include-package-data = true
 
