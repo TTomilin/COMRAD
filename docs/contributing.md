@@ -19,7 +19,7 @@ uv run pytest comrad/tests sample_factory/tests
 | `results/` | Committed figures, tables and result summaries |
 | `docs/`, `mkdocs.yml` | This website |
 | `scenario_generation/` | Generators for the COMRAD scenario WADs. Not installed with `comrad-bench`. |
-| `DoomGen/`, `DoomGen2/` | Separate map-generation tools. |
+| `DoomGen2/` | Separate map-generation tool. |
 
 ## Scenario generation
 
