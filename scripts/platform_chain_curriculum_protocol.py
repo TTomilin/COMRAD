@@ -499,7 +499,7 @@ def plot_summary(summary: dict[str, Any], output_dir: Path, figure_name: str, pa
     retained_name = f"{figure_name}_retained"
 
     fig_best, ax_best = plt.subplots(figsize=(4.8, 4.1), dpi=300)
-    ax_best.set_xlabel("Step of best retained checkpoint (millions)")
+    ax_best.set_xlabel("Frames at best retained checkpoint (millions)")
     ax_best.set_ylabel("Common-target progress (checkpoints)")
     ax_best.set_xlim(0.0, 130.0)
     ax_best.set_ylim(y_min, y_max)
