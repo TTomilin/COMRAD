@@ -1,13 +1,13 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.11, <3.13"
 resolution-markers = [
     "python_full_version >= '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
-    "python_full_version < '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
     "python_full_version >= '3.12' and sys_platform == 'darwin'",
     "python_full_version >= '3.12' and sys_platform != 'darwin' and sys_platform != 'linux'",
+    "python_full_version < '3.12' and platform_machine == 'aarch64' and sys_platform == 'linux'",
+    "python_full_version < '3.12' and platform_machine != 'aarch64' and sys_platform == 'linux'",
     "python_full_version < '3.12' and sys_platform == 'darwin'",
     "python_full_version < '3.12' and sys_platform != 'darwin' and sys_platform != 'linux'",
 ]
@@ -308,6 +308,10 @@ dev = [
 docs = [
     { name = "mkdocs-material" },
 ]
+generation = [
+    { name = "doomgen" },
+    { name = "pillow" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -364,6 +368,10 @@ dev = [
     { name = "ruff", specifier = ">=0.14.13" },
 ]
 docs = [{ name = "mkdocs-material", specifier = ">=9.5" }]
+generation = [
+    { name = "doomgen", specifier = "==0.1.0" },
+    { name = "pillow", specifier = ">=11.3.0" },
+]
 
 [[package]]
 name = "contourpy"
@@ -448,6 +456,26 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/c9/02/bd72be9134d25ed783ecbbc38a539ffaefbf90c78418c7fb7229600dbac7/distlib-0.4.3.tar.gz", hash = "sha256:f152097224a0ae24be5a0f6bae1b9359af82133bce63f98a95f86cae1aede9ed", size = 615141, upload-time = "2026-06-12T08:04:52.847Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/02/08/9c41fb51ab5b43eb21674aff13df270e8ba6c4b29c8624e328dc7a9482af/distlib-0.4.3-py2.py3-none-any.whl", hash = "sha256:4b0ce306c966eb73bc3a7b6abad017c556dadd92c44701562cd528ac7fde4d5b", size = 470628, upload-time = "2026-06-12T08:04:50.506Z" },
+]
+
+[[package]]
+name = "doomgen"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "omgifol" },
+    { name = "scipy" },
+    { name = "shapely" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/45/5e/2bc3b2fef1a3a24b15281fc3313a47792e6f280d7338528b9a12efcf883e/doomgen-0.1.0.tar.gz", hash = "sha256:7f4b4c0a47a1c5a5e8af0bd02e5a6c49a10f9de84b446737843cd8b2d54e871b", size = 1239873, upload-time = "2026-11-11T02:33:03.898Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a4/a0/636cdd976069be1d60d3e4551db1f899945647206d42dd85248eb1cc8801/doomgen-0.1.0-py3-none-macosx_11_0_universal2.whl", hash = "sha256:0bf8db8bb56442e061d3e70e3b3e27240a7d70ce72dfc53a458bbb1f8e671413", size = 403525, upload-time = "2026-11-11T02:32:53.97Z" },
+    { url = "https://files.pythonhosted.org/packages/e2/57/671903fa4f04526cb751f55b3ca6e3bd8b970fd4dfa6998df0fbf4fa7e30/doomgen-0.1.0-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:cb5369b79a97f8bf964566834a3b22787b50212126ca0370d784b90042ed0ecc", size = 474140, upload-time = "2026-11-11T02:32:55.836Z" },
+    { url = "https://files.pythonhosted.org/packages/22/7f/62e0eacbd15f6f2ef1f1d2ad256e59f5a9f2902fe59531ab314cbe5a91c1/doomgen-0.1.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:21e5b680b5ba966687b302e32b98144b81113100401d377cfe022d171fe5653d", size = 798916, upload-time = "2026-11-11T02:32:57.216Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/a5/162cc4aa964d509a5b5ab4e98574d201d1ad382a5acb54586a2d90828919/doomgen-0.1.0-py3-none-win32.whl", hash = "sha256:2ec1375e09b6d2747ed5e3e4f9d0ca3f3721a77390897d022770fa1d5dee61ed", size = 417532, upload-time = "2026-11-11T02:32:58.85Z" },
+    { url = "https://files.pythonhosted.org/packages/b0/67/961dd963adb6248af643206b5ca79e0b3497ad6e82a8be061213cfe91388/doomgen-0.1.0-py3-none-win_amd64.whl", hash = "sha256:8355bd3356202220332e2c0dfe1382c52a3fe276c4541f49b259a0e3ee98f29a", size = 417534, upload-time = "2026-11-11T02:33:00.604Z" },
+    { url = "https://files.pythonhosted.org/packages/9d/38/1b82d188e0f1ad4944f9b15c6fb90c64a19bbd096bfd8f4c5491190ab7ff/doomgen-0.1.0-py3-none-win_arm64.whl", hash = "sha256:4545569d6f07f1f040ed75984100467a802057b4a20d344fc8e0dc0ec1eb1a33", size = 417532, upload-time = "2026-11-11T02:33:02.374Z" },
 ]
 
 [[package]]

@@ -23,9 +23,6 @@ wheelhouse
 **/freedm.wad
 **_vizdoom.ini
 
-# DoomGen
-DoomGen/**/*.wad
-
 
 # MacOS
 .DS_Store
