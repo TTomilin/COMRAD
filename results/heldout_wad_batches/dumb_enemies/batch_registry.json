@@ -1,0 +1,82 @@
+[
+  {
+    "config": {
+      "arena_radius": 1000,
+      "num_enemies": 10,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 1009,
+      "spawn_interval": 3
+    },
+    "filename": "dumb_enemies_heldout_seed_1009.wad",
+    "scenario": "dumb_enemies",
+    "seed": 1009,
+    "sha256": "4e587c2d48d3abbdd703472c724286b0d4ec34622018ad88f4ef13797d69115f",
+    "wad_id": "dumb_enemies_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "arena_radius": 1000,
+      "num_enemies": 10,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 2027,
+      "spawn_interval": 3
+    },
+    "filename": "dumb_enemies_heldout_seed_2027.wad",
+    "scenario": "dumb_enemies",
+    "seed": 2027,
+    "sha256": "ef19ea4445fcd2b09b6ef0c331791eaa4f3f3da6261c4810a4d9e6b355322df4",
+    "wad_id": "dumb_enemies_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "arena_radius": 1000,
+      "num_enemies": 10,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 3037,
+      "spawn_interval": 3
+    },
+    "filename": "dumb_enemies_heldout_seed_3037.wad",
+    "scenario": "dumb_enemies",
+    "seed": 3037,
+    "sha256": "7b5c5032c26ebd367fc4f0ee436bca5154558b69f0a8a9132001232c998a2e32",
+    "wad_id": "dumb_enemies_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "arena_radius": 1000,
+      "num_enemies": 10,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 4051,
+      "spawn_interval": 3
+    },
+    "filename": "dumb_enemies_heldout_seed_4051.wad",
+    "scenario": "dumb_enemies",
+    "seed": 4051,
+    "sha256": "7ca86c6e7cbb4df05f60e902b8059a7e62c4a548844ad515c0038b1ca7741657",
+    "wad_id": "dumb_enemies_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "arena_radius": 1000,
+      "num_enemies": 10,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 5099,
+      "spawn_interval": 3
+    },
+    "filename": "dumb_enemies_heldout_seed_5099.wad",
+    "scenario": "dumb_enemies",
+    "seed": 5099,
+    "sha256": "e382959d07a7e8465249aa2950df818efb3ac86503e84e0ea17881abf11d56cb",
+    "wad_id": "dumb_enemies_heldout_seed_5099"
+  }
+]

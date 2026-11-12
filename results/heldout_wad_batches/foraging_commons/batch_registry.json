@@ -1,0 +1,112 @@
+[
+  {
+    "config": {
+      "cleanup_boost": 15,
+      "cleanup_distance": 1200,
+      "cleanup_size": 384,
+      "cleanup_time": 72,
+      "corridor_width": 3,
+      "field_size": 1600,
+      "harvest_degrade": 2,
+      "hp_drain": 2,
+      "initial_spawn_rate": 80,
+      "natural_decay_rate": 1,
+      "num_agents": 2,
+      "seed": 1009,
+      "spots_per_room": 16
+    },
+    "filename": "foraging_commons_heldout_seed_1009.wad",
+    "scenario": "foraging_commons",
+    "seed": 1009,
+    "sha256": "79085e8cfbdf9a8e12367042ca9a1151ef14a88d9f1121d87ff9ab70f431fcda",
+    "wad_id": "foraging_commons_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "cleanup_boost": 15,
+      "cleanup_distance": 1200,
+      "cleanup_size": 384,
+      "cleanup_time": 72,
+      "corridor_width": 3,
+      "field_size": 1600,
+      "harvest_degrade": 2,
+      "hp_drain": 2,
+      "initial_spawn_rate": 80,
+      "natural_decay_rate": 1,
+      "num_agents": 2,
+      "seed": 2027,
+      "spots_per_room": 16
+    },
+    "filename": "foraging_commons_heldout_seed_2027.wad",
+    "scenario": "foraging_commons",
+    "seed": 2027,
+    "sha256": "2de9083860d94cec0e99479e94c7a4e80eb63d88449775aef55d65f032466b4c",
+    "wad_id": "foraging_commons_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "cleanup_boost": 15,
+      "cleanup_distance": 1200,
+      "cleanup_size": 384,
+      "cleanup_time": 72,
+      "corridor_width": 3,
+      "field_size": 1600,
+      "harvest_degrade": 2,
+      "hp_drain": 2,
+      "initial_spawn_rate": 80,
+      "natural_decay_rate": 1,
+      "num_agents": 2,
+      "seed": 3037,
+      "spots_per_room": 16
+    },
+    "filename": "foraging_commons_heldout_seed_3037.wad",
+    "scenario": "foraging_commons",
+    "seed": 3037,
+    "sha256": "638f142ed17c6c46f46427d3c385d795a66372ef920eb89debecd85fffef73b7",
+    "wad_id": "foraging_commons_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "cleanup_boost": 15,
+      "cleanup_distance": 1200,
+      "cleanup_size": 384,
+      "cleanup_time": 72,
+      "corridor_width": 3,
+      "field_size": 1600,
+      "harvest_degrade": 2,
+      "hp_drain": 2,
+      "initial_spawn_rate": 80,
+      "natural_decay_rate": 1,
+      "num_agents": 2,
+      "seed": 4051,
+      "spots_per_room": 16
+    },
+    "filename": "foraging_commons_heldout_seed_4051.wad",
+    "scenario": "foraging_commons",
+    "seed": 4051,
+    "sha256": "6c0a1327ba5011c52071be5e8a319485151acc1930979596dba28314bfe9f4e7",
+    "wad_id": "foraging_commons_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "cleanup_boost": 15,
+      "cleanup_distance": 1200,
+      "cleanup_size": 384,
+      "cleanup_time": 72,
+      "corridor_width": 3,
+      "field_size": 1600,
+      "harvest_degrade": 2,
+      "hp_drain": 2,
+      "initial_spawn_rate": 80,
+      "natural_decay_rate": 1,
+      "num_agents": 2,
+      "seed": 5099,
+      "spots_per_room": 16
+    },
+    "filename": "foraging_commons_heldout_seed_5099.wad",
+    "scenario": "foraging_commons",
+    "seed": 5099,
+    "sha256": "2e78c7f1e09f8cd7451e97ace21d46622177a4e74e1ca500f0c01ca9d8a343b3",
+    "wad_id": "foraging_commons_heldout_seed_5099"
+  }
+]

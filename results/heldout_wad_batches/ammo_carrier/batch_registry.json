@@ -1,0 +1,67 @@
+[
+  {
+    "config": {
+      "enemy_density": 1.0,
+      "map_radius": 1200,
+      "num_depots": 1,
+      "seed": 1009
+    },
+    "filename": "ammo_carrier_heldout_seed_1009.wad",
+    "scenario": "ammo_carrier",
+    "seed": 1009,
+    "sha256": "f4282626e720d2b593b9201b11d89331197f9b8a287a842e6ce542e45e662cee",
+    "wad_id": "ammo_carrier_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "enemy_density": 1.0,
+      "map_radius": 1200,
+      "num_depots": 1,
+      "seed": 2027
+    },
+    "filename": "ammo_carrier_heldout_seed_2027.wad",
+    "scenario": "ammo_carrier",
+    "seed": 2027,
+    "sha256": "1815080ce426ae26053ead24bd76f88bbb19b6f011fb0507e73bbe1b15fcbe9c",
+    "wad_id": "ammo_carrier_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "enemy_density": 1.0,
+      "map_radius": 1200,
+      "num_depots": 1,
+      "seed": 3037
+    },
+    "filename": "ammo_carrier_heldout_seed_3037.wad",
+    "scenario": "ammo_carrier",
+    "seed": 3037,
+    "sha256": "9f194756cc5f12dfc91dfcb23b02342e7bd8ed010f20fcf0c24f4bc41e019774",
+    "wad_id": "ammo_carrier_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "enemy_density": 1.0,
+      "map_radius": 1200,
+      "num_depots": 1,
+      "seed": 4051
+    },
+    "filename": "ammo_carrier_heldout_seed_4051.wad",
+    "scenario": "ammo_carrier",
+    "seed": 4051,
+    "sha256": "8d320130dcac9d79b82c4773506ccf59c248f2340e4fa01e196b2b786cf94a78",
+    "wad_id": "ammo_carrier_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "enemy_density": 1.0,
+      "map_radius": 1200,
+      "num_depots": 1,
+      "seed": 5099
+    },
+    "filename": "ammo_carrier_heldout_seed_5099.wad",
+    "scenario": "ammo_carrier",
+    "seed": 5099,
+    "sha256": "d9f1e32910cc458232d98dccaff9b0cf69752dd4597700fd38df8d1e46a97f17",
+    "wad_id": "ammo_carrier_heldout_seed_5099"
+  }
+]

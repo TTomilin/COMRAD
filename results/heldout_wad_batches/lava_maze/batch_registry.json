@@ -1,0 +1,87 @@
+[
+  {
+    "config": {
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "legacy_maze_growth": true,
+      "max_maze_size": 20,
+      "physical_size": 8,
+      "seed": 1009
+    },
+    "filename": "lava_maze_heldout_seed_1009.wad",
+    "scenario": "lava_maze",
+    "seed": 1009,
+    "sha256": "028de39d803a1891503d7fbdbc60b1ceeaba0c713b99e4c72b3a4e7f929cabe3",
+    "wad_id": "lava_maze_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "legacy_maze_growth": true,
+      "max_maze_size": 20,
+      "physical_size": 8,
+      "seed": 2027
+    },
+    "filename": "lava_maze_heldout_seed_2027.wad",
+    "scenario": "lava_maze",
+    "seed": 2027,
+    "sha256": "6a1e012070f1ff555091f86ae8d1eaf91dfc661f93442544ab89796d31310d50",
+    "wad_id": "lava_maze_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "legacy_maze_growth": true,
+      "max_maze_size": 20,
+      "physical_size": 8,
+      "seed": 3037
+    },
+    "filename": "lava_maze_heldout_seed_3037.wad",
+    "scenario": "lava_maze",
+    "seed": 3037,
+    "sha256": "b913c78d7bcef2b6f7a0c85b566d3744c74f461d6005c839cf127ae23bb19843",
+    "wad_id": "lava_maze_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "legacy_maze_growth": true,
+      "max_maze_size": 20,
+      "physical_size": 8,
+      "seed": 4051
+    },
+    "filename": "lava_maze_heldout_seed_4051.wad",
+    "scenario": "lava_maze",
+    "seed": 4051,
+    "sha256": "b07d6355427efccae34130bfc2d612dd8d2f761c2c2142ed4914357f1eb2f5fa",
+    "wad_id": "lava_maze_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "cell_size": 128,
+      "initial_maze_size": 8,
+      "lava_damage": 35,
+      "lava_depth": 64,
+      "legacy_maze_growth": true,
+      "max_maze_size": 20,
+      "physical_size": 8,
+      "seed": 5099
+    },
+    "filename": "lava_maze_heldout_seed_5099.wad",
+    "scenario": "lava_maze",
+    "seed": 5099,
+    "sha256": "4f5dc7014fc53afcb6179fba55cef6508cfc3f83b20fed9dcbdc8ed943c6a2e2",
+    "wad_id": "lava_maze_heldout_seed_5099"
+  }
+]
