@@ -1,0 +1,12 @@
+{
+  "config_path": "comrad/envs/../scenarios/lava_maze_scripted_observer.cfg",
+  "seed": 1582102974,
+  "game_args": "-host 2 -port 41300 +timelimit 10.0 +sv_noautoaim 1 +sv_nocrouch 1 +sv_nofreelook 0 +sv_forcerespawn 0 +viz_respawn_delay 0 +viz_connect_timeout 60",
+  "max_num_players": 2,
+  "rewards": [
+    42.025089263916016
+  ],
+  "true_objective": [
+    1
+  ]
+}

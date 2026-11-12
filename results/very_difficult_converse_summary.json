@@ -1,0 +1,323 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IDQN/seed_154/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IDQN/seed_42/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IDQN/seed_68/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IDQN/seed_81/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IDQN/seed_97/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IPPO/seed_154/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IPPO/seed_42/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IPPO/seed_68/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IPPO/seed_81/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_navigator/IPPO/seed_97/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_154/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_42/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_68/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_81/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_97/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_154/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_42/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_68/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_81/summary.json",
+    "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_97/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IDQN/seed_154/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IDQN/seed_42/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IDQN/seed_68/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IDQN/seed_81/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IDQN/seed_97/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IPPO/seed_154/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IPPO/seed_42/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IPPO/seed_68/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IPPO/seed_81/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_gunner/IPPO/seed_97/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_154/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_42/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_68/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_81/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_97/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_154/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_42/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_68/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_81/summary.json",
+    "results/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_97/summary.json"
+  ],
+  "ci": "Student-t 95% CI half-width over training seeds",
+  "rows": [
+    {
+      "label": "Scripted scout $\\rightarrow$ learned gunner",
+      "env": "stealth_labyrinth_scripted_scout",
+      "algorithm": "IPPO",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.2,
+        0.17,
+        0.105,
+        0.16,
+        0.18
+      ],
+      "mean": 0.16299999999999998,
+      "ci95_half_width": 0.04424925361215612,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted scout $\\rightarrow$ learned gunner",
+      "env": "stealth_labyrinth_scripted_scout",
+      "algorithm": "IDQN",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.265,
+        0.29,
+        0.27,
+        0.245,
+        0.31
+      ],
+      "mean": 0.27599999999999997,
+      "ci95_half_width": 0.03085478822871478,
+      "checkpoint_steps": [
+        50001920,
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted gunner $\\rightarrow$ learned scout",
+      "env": "stealth_labyrinth_scripted_gunner",
+      "algorithm": "IPPO",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.415,
+        0.03,
+        0.385
+      ],
+      "mean": 0.16599999999999998,
+      "ci95_half_width": 0.2659959029091424,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted gunner $\\rightarrow$ learned scout",
+      "env": "stealth_labyrinth_scripted_gunner",
+      "algorithm": "IDQN",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.06,
+        0.0,
+        0.0,
+        0.005
+      ],
+      "mean": 0.013000000000000001,
+      "ci95_half_width": 0.03273380502909152,
+      "checkpoint_steps": [
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted observer $\\rightarrow$ learned navigator",
+      "env": "lava_maze_scripted_observer",
+      "algorithm": "IPPO",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.87,
+        0.87,
+        0.99,
+        1.0,
+        1.1
+      ],
+      "mean": 0.966,
+      "ci95_half_width": 0.12121337379459832,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        1.74,
+        1.73,
+        1.98,
+        2.0,
+        2.2
+      ],
+      "raw_counter_mean": 1.9299999999999997,
+      "raw_counter_ci95_half_width": 0.24552316151724413
+    },
+    {
+      "label": "Scripted observer $\\rightarrow$ learned navigator",
+      "env": "lava_maze_scripted_observer",
+      "algorithm": "IDQN",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.08,
+        0.04,
+        0.08,
+        0.12,
+        0.0
+      ],
+      "mean": 0.064,
+      "ci95_half_width": 0.05662859107929098,
+      "checkpoint_steps": [
+        50001920,
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.16,
+        0.08,
+        0.16,
+        0.24,
+        0.0
+      ],
+      "raw_counter_mean": 0.128,
+      "raw_counter_ci95_half_width": 0.11325718215858196
+    },
+    {
+      "label": "Scripted navigator $\\rightarrow$ learned observer",
+      "env": "lava_maze_scripted_navigator",
+      "algorithm": "IPPO",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean": 0.0,
+      "ci95_half_width": 0.0,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "raw_counter_mean": 0.0,
+      "raw_counter_ci95_half_width": 0.0
+    },
+    {
+      "label": "Scripted navigator $\\rightarrow$ learned observer",
+      "env": "lava_maze_scripted_navigator",
+      "algorithm": "IDQN",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.05,
+        0.03,
+        0.02,
+        0.05,
+        0.01
+      ],
+      "mean": 0.03200000000000001,
+      "ci95_half_width": 0.022211560841582392,
+      "checkpoint_steps": [
+        50001920,
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.05,
+        0.03,
+        0.02,
+        0.05,
+        0.01
+      ],
+      "raw_counter_mean": 0.03200000000000001,
+      "raw_counter_ci95_half_width": 0.022211560841582392
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+[
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth.wad"
+    },
+    "filename": "stealth_labyrinth.wad",
+    "scenario": "stealth_labyrinth_shared_vision",
+    "seed": 1009,
+    "sha256": "4fb77d6f2b87384f383f1d20a9ba7c2993028f86e7145bc42b33491c5e11d17c",
+    "wad_id": "stealth_labyrinth_shared_vision_trainwad_rep_1009"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth.wad"
+    },
+    "filename": "stealth_labyrinth.wad",
+    "scenario": "stealth_labyrinth_shared_vision",
+    "seed": 2027,
+    "sha256": "4fb77d6f2b87384f383f1d20a9ba7c2993028f86e7145bc42b33491c5e11d17c",
+    "wad_id": "stealth_labyrinth_shared_vision_trainwad_rep_2027"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth.wad"
+    },
+    "filename": "stealth_labyrinth.wad",
+    "scenario": "stealth_labyrinth_shared_vision",
+    "seed": 3037,
+    "sha256": "4fb77d6f2b87384f383f1d20a9ba7c2993028f86e7145bc42b33491c5e11d17c",
+    "wad_id": "stealth_labyrinth_shared_vision_trainwad_rep_3037"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth.wad"
+    },
+    "filename": "stealth_labyrinth.wad",
+    "scenario": "stealth_labyrinth_shared_vision",
+    "seed": 4051,
+    "sha256": "4fb77d6f2b87384f383f1d20a9ba7c2993028f86e7145bc42b33491c5e11d17c",
+    "wad_id": "stealth_labyrinth_shared_vision_trainwad_rep_4051"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth.wad"
+    },
+    "filename": "stealth_labyrinth.wad",
+    "scenario": "stealth_labyrinth_shared_vision",
+    "seed": 5099,
+    "sha256": "4fb77d6f2b87384f383f1d20a9ba7c2993028f86e7145bc42b33491c5e11d17c",
+    "wad_id": "stealth_labyrinth_shared_vision_trainwad_rep_5099"
+  }
+]

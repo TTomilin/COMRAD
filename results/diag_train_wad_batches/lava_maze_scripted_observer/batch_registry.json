@@ -1,0 +1,57 @@
+[
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "lava_maze.wad"
+    },
+    "filename": "lava_maze.wad",
+    "scenario": "lava_maze_scripted_observer",
+    "seed": 1009,
+    "sha256": "9f82048f671c3786a72b730b2d80d335d8b7be2c33d545cf9aea7cd6892cd01c",
+    "wad_id": "lava_maze_scripted_observer_trainwad_rep_1009"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "lava_maze.wad"
+    },
+    "filename": "lava_maze.wad",
+    "scenario": "lava_maze_scripted_observer",
+    "seed": 2027,
+    "sha256": "9f82048f671c3786a72b730b2d80d335d8b7be2c33d545cf9aea7cd6892cd01c",
+    "wad_id": "lava_maze_scripted_observer_trainwad_rep_2027"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "lava_maze.wad"
+    },
+    "filename": "lava_maze.wad",
+    "scenario": "lava_maze_scripted_observer",
+    "seed": 3037,
+    "sha256": "9f82048f671c3786a72b730b2d80d335d8b7be2c33d545cf9aea7cd6892cd01c",
+    "wad_id": "lava_maze_scripted_observer_trainwad_rep_3037"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "lava_maze.wad"
+    },
+    "filename": "lava_maze.wad",
+    "scenario": "lava_maze_scripted_observer",
+    "seed": 4051,
+    "sha256": "9f82048f671c3786a72b730b2d80d335d8b7be2c33d545cf9aea7cd6892cd01c",
+    "wad_id": "lava_maze_scripted_observer_trainwad_rep_4051"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "lava_maze.wad"
+    },
+    "filename": "lava_maze.wad",
+    "scenario": "lava_maze_scripted_observer",
+    "seed": 5099,
+    "sha256": "9f82048f671c3786a72b730b2d80d335d8b7be2c33d545cf9aea7cd6892cd01c",
+    "wad_id": "lava_maze_scripted_observer_trainwad_rep_5099"
+  }
+]
