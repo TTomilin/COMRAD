@@ -68,7 +68,7 @@ Logs, configs and checkpoints are written to `train_dir/<experiment>/`. The main
 | `--num_agents=N` | Team size, defaults to the scenario's value. |
 | `--device=cpu` | Train without CUDA. |
 | `--num_workers`, `--num_envs_per_worker` | Rollout parallelism. `4` and `4` with `--policy_workers_per_policy=2` is a good starting point on 16 CPUs. |
-| `--shared_reward_alpha=α` | Override the scenario's shared-reward blend (actor-critic only). |
+| `--shared_reward_alpha=α` | Override the scenario's shared-reward blend (IPPO, MAPPO and HAPPO only). |
 | `--use_additional_input=True` | Feed the measurement vector to the policy. |
 | `--with_wandb=True`, `--wandb_record_every=N` | Log to Weights & Biases and record a video every N episodes. |
 | DQN: `--learning_starts`, `--replay_buffer_size`, `--epsilon_decay_steps`, `--target_update_interval` | Replay and exploration schedule. Use `--learning_starts=0` for quick local tests. |
@@ -83,13 +83,15 @@ Logs, configs and checkpoints are written to `train_dir/<experiment>/`. The main
 
 `shared_reward_alpha` only affects actor-critic algorithms. Value-decomposition learners already sum per-agent rewards.
 
-| Scenario | Use `α = 1.0` for MAPPO/HAPPO? | Why |
-|---|:---:|---|
-| `ammo_carrier`, `armory_siege` | yes | One shared defence objective; local shaping is role-specific. |
-| `lava_maze`, `lavapit`, `platform_chain`, `coop_puzzle` | yes | Fully joint traversal or puzzle progress. |
-| `rhythm_sync`, `stealth_labyrinth` | yes | Success is defined by the pair. |
-| `stag_hunt_arena`, `foraging_commons` | no | Local incentives are the point of the dilemma. |
-| `coop_health_gathering`, `smart_enemies`, `dumb_enemies` | no | Keep the scenario default. |
+The scenario default applies when `--shared_reward_alpha` is not passed. `python -m comrad.train_all` overrides it with the value in the benchmark column.
+
+| Scenario | Scenario default | Benchmark (`train_all.py`) | Reward structure |
+|---|:---:|:---:|---|
+| `stealth_labyrinth`, `lava_maze` | 1.0 | 1.0 | The scout and the observer cannot reach the objective alone. |
+| `coop_puzzle`, `platform_chain`, `lavapit`, `rhythm_sync`, `rhythm_sync_dense` | 1.0 | 0.0 | The scenario already splits joint-progress rewards equally between the agents. |
+| `coop_health_gathering` | 0.0 | 0.0 | The scenario already splits joint-progress rewards equally between the agents. |
+| `stag_hunt_arena`, `foraging_commons` | 0.0 | 0.0 | Local incentives are the point of the dilemma. |
+| `ammo_carrier`, `armory_siege`, `smart_enemies`, `dumb_enemies` | 0.0 | 0.0 | Each agent is also rewarded for its own kills, hits or deliveries. |
 
 ## Recording a trained policy
 
