@@ -1,0 +1,1090 @@
+[
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100000
+    },
+    "filename": "armory_siege_train_seed_100000.wad",
+    "id": "armory_siege_train_seed_100000",
+    "scenario": "armory_siege",
+    "seed": 100000,
+    "sha256": "6290c55d442b5cdfe289bea9f24c3d733ebef45792ab10e768b95bbe1b74484b",
+    "wad_id": "armory_siege_train_seed_100000"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100001
+    },
+    "filename": "armory_siege_train_seed_100001.wad",
+    "id": "armory_siege_train_seed_100001",
+    "scenario": "armory_siege",
+    "seed": 100001,
+    "sha256": "e2ba5032bec4100b732074179a5ca0675e6b31d334d34e4f00b86e35c597297b",
+    "wad_id": "armory_siege_train_seed_100001"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100002
+    },
+    "filename": "armory_siege_train_seed_100002.wad",
+    "id": "armory_siege_train_seed_100002",
+    "scenario": "armory_siege",
+    "seed": 100002,
+    "sha256": "496c54fc68471dae1f355da9d0adec4f66b9f03f34b1e2e5c861affe71ef551c",
+    "wad_id": "armory_siege_train_seed_100002"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100003
+    },
+    "filename": "armory_siege_train_seed_100003.wad",
+    "id": "armory_siege_train_seed_100003",
+    "scenario": "armory_siege",
+    "seed": 100003,
+    "sha256": "9b30cec62f5c1623f3f0d57e8dc7a8d45f9f407b6005edd7eb7cd88efddf5827",
+    "wad_id": "armory_siege_train_seed_100003"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100004
+    },
+    "filename": "armory_siege_train_seed_100004.wad",
+    "id": "armory_siege_train_seed_100004",
+    "scenario": "armory_siege",
+    "seed": 100004,
+    "sha256": "21efcd722fcffcce7ecd119dad4cc98fadacb3a7b92e26afdde3bc68c9308f74",
+    "wad_id": "armory_siege_train_seed_100004"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100005
+    },
+    "filename": "armory_siege_train_seed_100005.wad",
+    "id": "armory_siege_train_seed_100005",
+    "scenario": "armory_siege",
+    "seed": 100005,
+    "sha256": "652a6d245c00b45451250c38122da9940f510f272a13cb91b7af8e3050388589",
+    "wad_id": "armory_siege_train_seed_100005"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100006
+    },
+    "filename": "armory_siege_train_seed_100006.wad",
+    "id": "armory_siege_train_seed_100006",
+    "scenario": "armory_siege",
+    "seed": 100006,
+    "sha256": "660b8e408acb6913fb6b9f9f38398dd71d39a6729d3aae10f84c242caa4bcdbe",
+    "wad_id": "armory_siege_train_seed_100006"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100007
+    },
+    "filename": "armory_siege_train_seed_100007.wad",
+    "id": "armory_siege_train_seed_100007",
+    "scenario": "armory_siege",
+    "seed": 100007,
+    "sha256": "a582ffbdb1569778964559d271a067ba31da9ea4a1a8ef286570241888964631",
+    "wad_id": "armory_siege_train_seed_100007"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100008
+    },
+    "filename": "armory_siege_train_seed_100008.wad",
+    "id": "armory_siege_train_seed_100008",
+    "scenario": "armory_siege",
+    "seed": 100008,
+    "sha256": "f5058bce362b282c637cdf163598f2d6181c08e6ab330d0c367465ee468ca283",
+    "wad_id": "armory_siege_train_seed_100008"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100009
+    },
+    "filename": "armory_siege_train_seed_100009.wad",
+    "id": "armory_siege_train_seed_100009",
+    "scenario": "armory_siege",
+    "seed": 100009,
+    "sha256": "1b6251c5f820d13f51bd0edcfeba2077659c06ae91df0840edbccdaba7861da6",
+    "wad_id": "armory_siege_train_seed_100009"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100010
+    },
+    "filename": "armory_siege_train_seed_100010.wad",
+    "id": "armory_siege_train_seed_100010",
+    "scenario": "armory_siege",
+    "seed": 100010,
+    "sha256": "855b10c47c2b399ba64a2080f58c271219746cbfab06f9c88fa244d9a273599e",
+    "wad_id": "armory_siege_train_seed_100010"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100011
+    },
+    "filename": "armory_siege_train_seed_100011.wad",
+    "id": "armory_siege_train_seed_100011",
+    "scenario": "armory_siege",
+    "seed": 100011,
+    "sha256": "483327affdec5ba23f4188d81c5db5baef5681c07d9cd4d4f234626be1e92fb2",
+    "wad_id": "armory_siege_train_seed_100011"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100012
+    },
+    "filename": "armory_siege_train_seed_100012.wad",
+    "id": "armory_siege_train_seed_100012",
+    "scenario": "armory_siege",
+    "seed": 100012,
+    "sha256": "b5cf2606c73a776797f8b0cf21835d62bb4e058b666c151badc9e42c11faba90",
+    "wad_id": "armory_siege_train_seed_100012"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100013
+    },
+    "filename": "armory_siege_train_seed_100013.wad",
+    "id": "armory_siege_train_seed_100013",
+    "scenario": "armory_siege",
+    "seed": 100013,
+    "sha256": "72bb27659a95ef9ccfb9161b4edce7e97b2fa3c30cc497d3acb9b5361ac637d1",
+    "wad_id": "armory_siege_train_seed_100013"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100014
+    },
+    "filename": "armory_siege_train_seed_100014.wad",
+    "id": "armory_siege_train_seed_100014",
+    "scenario": "armory_siege",
+    "seed": 100014,
+    "sha256": "598a72c5ce0e40ce8bcff6cc5552cdbec95e9e9ecee3b21e7604a42feec8edd1",
+    "wad_id": "armory_siege_train_seed_100014"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100015
+    },
+    "filename": "armory_siege_train_seed_100015.wad",
+    "id": "armory_siege_train_seed_100015",
+    "scenario": "armory_siege",
+    "seed": 100015,
+    "sha256": "0ceeaf511812a59e012cd56bc64c616ca0d3dba8eb1fa39562f515249c9c0207",
+    "wad_id": "armory_siege_train_seed_100015"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100016
+    },
+    "filename": "armory_siege_train_seed_100016.wad",
+    "id": "armory_siege_train_seed_100016",
+    "scenario": "armory_siege",
+    "seed": 100016,
+    "sha256": "89d84ee3f597e3063a43e1f5988458968b582779690336243e230179ef25191d",
+    "wad_id": "armory_siege_train_seed_100016"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100017
+    },
+    "filename": "armory_siege_train_seed_100017.wad",
+    "id": "armory_siege_train_seed_100017",
+    "scenario": "armory_siege",
+    "seed": 100017,
+    "sha256": "6f5a2701f7ced54e0fef44d814f94f198e510141c39b7da55d9faf675b095a2d",
+    "wad_id": "armory_siege_train_seed_100017"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100018
+    },
+    "filename": "armory_siege_train_seed_100018.wad",
+    "id": "armory_siege_train_seed_100018",
+    "scenario": "armory_siege",
+    "seed": 100018,
+    "sha256": "07c540a7901afeac90944b525ba543faf89216c84f660b742e30fa074ed94641",
+    "wad_id": "armory_siege_train_seed_100018"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100019
+    },
+    "filename": "armory_siege_train_seed_100019.wad",
+    "id": "armory_siege_train_seed_100019",
+    "scenario": "armory_siege",
+    "seed": 100019,
+    "sha256": "f7fd038df302242647f0531980a84e804cfc6dd55e088a539b3e8ee9c306e134",
+    "wad_id": "armory_siege_train_seed_100019"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100020
+    },
+    "filename": "armory_siege_train_seed_100020.wad",
+    "id": "armory_siege_train_seed_100020",
+    "scenario": "armory_siege",
+    "seed": 100020,
+    "sha256": "474e96f34072d59df78adc728e933713560a67a353a6aa2e142cfb578786d63d",
+    "wad_id": "armory_siege_train_seed_100020"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100021
+    },
+    "filename": "armory_siege_train_seed_100021.wad",
+    "id": "armory_siege_train_seed_100021",
+    "scenario": "armory_siege",
+    "seed": 100021,
+    "sha256": "c9694e1ef3310abcaccb26520f8421d004c052ff78c702e6be9fbb89d612f08a",
+    "wad_id": "armory_siege_train_seed_100021"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100022
+    },
+    "filename": "armory_siege_train_seed_100022.wad",
+    "id": "armory_siege_train_seed_100022",
+    "scenario": "armory_siege",
+    "seed": 100022,
+    "sha256": "1b8fe8ac8f1c84377f30cab9b56723ceb8a50cd2cd182dbfd7a07922278b2d38",
+    "wad_id": "armory_siege_train_seed_100022"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100023
+    },
+    "filename": "armory_siege_train_seed_100023.wad",
+    "id": "armory_siege_train_seed_100023",
+    "scenario": "armory_siege",
+    "seed": 100023,
+    "sha256": "6569e225da1e076d79b3372bd2b88bbf2dafd2b89c729d89792612f1aa78f2d5",
+    "wad_id": "armory_siege_train_seed_100023"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100024
+    },
+    "filename": "armory_siege_train_seed_100024.wad",
+    "id": "armory_siege_train_seed_100024",
+    "scenario": "armory_siege",
+    "seed": 100024,
+    "sha256": "58a7063b96d5288a59e61ad46527f5d1146bc14a8a91f72bb82d113b9a55cdc9",
+    "wad_id": "armory_siege_train_seed_100024"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100025
+    },
+    "filename": "armory_siege_train_seed_100025.wad",
+    "id": "armory_siege_train_seed_100025",
+    "scenario": "armory_siege",
+    "seed": 100025,
+    "sha256": "78d6b74a734af3b69b563639181efd156ed47a1722fcee5834d90ee2d7ffd6cf",
+    "wad_id": "armory_siege_train_seed_100025"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100026
+    },
+    "filename": "armory_siege_train_seed_100026.wad",
+    "id": "armory_siege_train_seed_100026",
+    "scenario": "armory_siege",
+    "seed": 100026,
+    "sha256": "0431f82cc9abb0bf6a54493bcd16e08c9a9a25c05d10ce332f493da2a30b3d86",
+    "wad_id": "armory_siege_train_seed_100026"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100027
+    },
+    "filename": "armory_siege_train_seed_100027.wad",
+    "id": "armory_siege_train_seed_100027",
+    "scenario": "armory_siege",
+    "seed": 100027,
+    "sha256": "dd88a1abc4be1948b10dbae9d0243206f43dc6302490e7bcdb917d0c1823b887",
+    "wad_id": "armory_siege_train_seed_100027"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100028
+    },
+    "filename": "armory_siege_train_seed_100028.wad",
+    "id": "armory_siege_train_seed_100028",
+    "scenario": "armory_siege",
+    "seed": 100028,
+    "sha256": "9bb8bf52bccee2ae99573b99add43ca388602f4f9cce29713a8e69735d309ca5",
+    "wad_id": "armory_siege_train_seed_100028"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100029
+    },
+    "filename": "armory_siege_train_seed_100029.wad",
+    "id": "armory_siege_train_seed_100029",
+    "scenario": "armory_siege",
+    "seed": 100029,
+    "sha256": "18944d867b6b567205328ca4019e0a2f1162e770fd71152530bdacadbdc14c2a",
+    "wad_id": "armory_siege_train_seed_100029"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100030
+    },
+    "filename": "armory_siege_train_seed_100030.wad",
+    "id": "armory_siege_train_seed_100030",
+    "scenario": "armory_siege",
+    "seed": 100030,
+    "sha256": "7b04960bd43586fde4e0d25c12b9843c3cb2cf67a06839b087ffc35d0346ba40",
+    "wad_id": "armory_siege_train_seed_100030"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100031
+    },
+    "filename": "armory_siege_train_seed_100031.wad",
+    "id": "armory_siege_train_seed_100031",
+    "scenario": "armory_siege",
+    "seed": 100031,
+    "sha256": "e0572f48bd58681304aa4f8bde6d487959485e59bc645dfa21cc927386a4f0eb",
+    "wad_id": "armory_siege_train_seed_100031"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100032
+    },
+    "filename": "armory_siege_train_seed_100032.wad",
+    "id": "armory_siege_train_seed_100032",
+    "scenario": "armory_siege",
+    "seed": 100032,
+    "sha256": "be8d423b2d914e1975a21be9847aded2de7d0900052125cf2dd09c5addc5cda7",
+    "wad_id": "armory_siege_train_seed_100032"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100033
+    },
+    "filename": "armory_siege_train_seed_100033.wad",
+    "id": "armory_siege_train_seed_100033",
+    "scenario": "armory_siege",
+    "seed": 100033,
+    "sha256": "fab856a60fb7a43793862b3d445fa0ea764142cf14005fd95d78a6e98805d369",
+    "wad_id": "armory_siege_train_seed_100033"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100034
+    },
+    "filename": "armory_siege_train_seed_100034.wad",
+    "id": "armory_siege_train_seed_100034",
+    "scenario": "armory_siege",
+    "seed": 100034,
+    "sha256": "1065916e10e572736a333e012eaf68a9bdb6a792c01e25f3cb69fb5aa167f399",
+    "wad_id": "armory_siege_train_seed_100034"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100035
+    },
+    "filename": "armory_siege_train_seed_100035.wad",
+    "id": "armory_siege_train_seed_100035",
+    "scenario": "armory_siege",
+    "seed": 100035,
+    "sha256": "7d903554e4076f1f8fad708ee55d1f00cb59df729d684eef40d1f1b3a6440432",
+    "wad_id": "armory_siege_train_seed_100035"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100036
+    },
+    "filename": "armory_siege_train_seed_100036.wad",
+    "id": "armory_siege_train_seed_100036",
+    "scenario": "armory_siege",
+    "seed": 100036,
+    "sha256": "b25744629df05d1f8448f77210ff0db1daf7cd36c59371685927e01b94e479cc",
+    "wad_id": "armory_siege_train_seed_100036"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100037
+    },
+    "filename": "armory_siege_train_seed_100037.wad",
+    "id": "armory_siege_train_seed_100037",
+    "scenario": "armory_siege",
+    "seed": 100037,
+    "sha256": "08694dd98c210cd1ed88442df8be551878854a01a5ee0b5a02f05f3c1200c982",
+    "wad_id": "armory_siege_train_seed_100037"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100038
+    },
+    "filename": "armory_siege_train_seed_100038.wad",
+    "id": "armory_siege_train_seed_100038",
+    "scenario": "armory_siege",
+    "seed": 100038,
+    "sha256": "a05a1f97ca917bb9502e4d6cac54a59c40047bd36bc1f2943942b68d1452f67e",
+    "wad_id": "armory_siege_train_seed_100038"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100039
+    },
+    "filename": "armory_siege_train_seed_100039.wad",
+    "id": "armory_siege_train_seed_100039",
+    "scenario": "armory_siege",
+    "seed": 100039,
+    "sha256": "3ec56fab24c9bbde1c1aee64d8f4a2389b9a1bd776f815601bc7ad2d20e9a4d4",
+    "wad_id": "armory_siege_train_seed_100039"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100040
+    },
+    "filename": "armory_siege_train_seed_100040.wad",
+    "id": "armory_siege_train_seed_100040",
+    "scenario": "armory_siege",
+    "seed": 100040,
+    "sha256": "534899db748e72d2e9eb8cdc09dbaf160298d49f9d4ee60870d5a4aaf575ac08",
+    "wad_id": "armory_siege_train_seed_100040"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100041
+    },
+    "filename": "armory_siege_train_seed_100041.wad",
+    "id": "armory_siege_train_seed_100041",
+    "scenario": "armory_siege",
+    "seed": 100041,
+    "sha256": "a512da0e95403c252c79f33faa4b44cff214b679ff2e9ece6538e9b0455fdf52",
+    "wad_id": "armory_siege_train_seed_100041"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100042
+    },
+    "filename": "armory_siege_train_seed_100042.wad",
+    "id": "armory_siege_train_seed_100042",
+    "scenario": "armory_siege",
+    "seed": 100042,
+    "sha256": "d27fc859fa3690f15b1f0db5d7d187f1f4c11a838bbc550c37e0ec7a181ca103",
+    "wad_id": "armory_siege_train_seed_100042"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100043
+    },
+    "filename": "armory_siege_train_seed_100043.wad",
+    "id": "armory_siege_train_seed_100043",
+    "scenario": "armory_siege",
+    "seed": 100043,
+    "sha256": "71253759af2c244dea53a8db04df61ed6d34e0b7befd30a789d0e5ca1bd0c193",
+    "wad_id": "armory_siege_train_seed_100043"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100044
+    },
+    "filename": "armory_siege_train_seed_100044.wad",
+    "id": "armory_siege_train_seed_100044",
+    "scenario": "armory_siege",
+    "seed": 100044,
+    "sha256": "08727db06262cec54a7abdbee2eac5af72976335dc48e085036233efcf2c4d3c",
+    "wad_id": "armory_siege_train_seed_100044"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100045
+    },
+    "filename": "armory_siege_train_seed_100045.wad",
+    "id": "armory_siege_train_seed_100045",
+    "scenario": "armory_siege",
+    "seed": 100045,
+    "sha256": "f0f8e1ce05e2f6f329806675c68aa76cab0db1ee5b8fc2db6f416b1eaf6f6fdd",
+    "wad_id": "armory_siege_train_seed_100045"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100046
+    },
+    "filename": "armory_siege_train_seed_100046.wad",
+    "id": "armory_siege_train_seed_100046",
+    "scenario": "armory_siege",
+    "seed": 100046,
+    "sha256": "2fd7a0edcc780f4b058258130e70441a78f539dcb05ee4f999203962ad4a9f01",
+    "wad_id": "armory_siege_train_seed_100046"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100047
+    },
+    "filename": "armory_siege_train_seed_100047.wad",
+    "id": "armory_siege_train_seed_100047",
+    "scenario": "armory_siege",
+    "seed": 100047,
+    "sha256": "4e4dc9ac3d28a06462cd70a664e369143bc50af195dee1dc27f2224b4c3d4e3f",
+    "wad_id": "armory_siege_train_seed_100047"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100048
+    },
+    "filename": "armory_siege_train_seed_100048.wad",
+    "id": "armory_siege_train_seed_100048",
+    "scenario": "armory_siege",
+    "seed": 100048,
+    "sha256": "818ff931276a301894a67b9853bc526159cf5dbbdfa230c668307b47a3c3c6b8",
+    "wad_id": "armory_siege_train_seed_100048"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100049
+    },
+    "filename": "armory_siege_train_seed_100049.wad",
+    "id": "armory_siege_train_seed_100049",
+    "scenario": "armory_siege",
+    "seed": 100049,
+    "sha256": "b9e581acc61e1c51d8705fda4af82b4c28a528e0a912b1ce8c498714abc79779",
+    "wad_id": "armory_siege_train_seed_100049"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100050
+    },
+    "filename": "armory_siege_train_seed_100050.wad",
+    "id": "armory_siege_train_seed_100050",
+    "scenario": "armory_siege",
+    "seed": 100050,
+    "sha256": "886bc54afc41df28354f3f9ebf4470cb8fc09e781a56abfd9607ebf95e44f350",
+    "wad_id": "armory_siege_train_seed_100050"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100051
+    },
+    "filename": "armory_siege_train_seed_100051.wad",
+    "id": "armory_siege_train_seed_100051",
+    "scenario": "armory_siege",
+    "seed": 100051,
+    "sha256": "3bee269373c3ed8547ff8544f4294152f6bea808a96cd3c8d4dd01c66c651e29",
+    "wad_id": "armory_siege_train_seed_100051"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100052
+    },
+    "filename": "armory_siege_train_seed_100052.wad",
+    "id": "armory_siege_train_seed_100052",
+    "scenario": "armory_siege",
+    "seed": 100052,
+    "sha256": "4dff2ff78a0ca329dabcb582041edeb5e8ce900302cc68ea3d7358454ab16410",
+    "wad_id": "armory_siege_train_seed_100052"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100053
+    },
+    "filename": "armory_siege_train_seed_100053.wad",
+    "id": "armory_siege_train_seed_100053",
+    "scenario": "armory_siege",
+    "seed": 100053,
+    "sha256": "ce776094a10903c76e2cddf6136c7b4290f742700edcfa803760b1605a042b96",
+    "wad_id": "armory_siege_train_seed_100053"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100054
+    },
+    "filename": "armory_siege_train_seed_100054.wad",
+    "id": "armory_siege_train_seed_100054",
+    "scenario": "armory_siege",
+    "seed": 100054,
+    "sha256": "64f45347aa5349d9796a499432b29ef3bdbbb4574b371e0e49d0359b1070b1b4",
+    "wad_id": "armory_siege_train_seed_100054"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100055
+    },
+    "filename": "armory_siege_train_seed_100055.wad",
+    "id": "armory_siege_train_seed_100055",
+    "scenario": "armory_siege",
+    "seed": 100055,
+    "sha256": "43fffc20b601d97b56b1cdd629a7f4db724fa7af1cfe21a07c60f1b784c2b8a9",
+    "wad_id": "armory_siege_train_seed_100055"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100056
+    },
+    "filename": "armory_siege_train_seed_100056.wad",
+    "id": "armory_siege_train_seed_100056",
+    "scenario": "armory_siege",
+    "seed": 100056,
+    "sha256": "83c5fe0109c69e0bd068c2736d9ec7d9f2493ffbd80ee437e44103a9652f9251",
+    "wad_id": "armory_siege_train_seed_100056"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100057
+    },
+    "filename": "armory_siege_train_seed_100057.wad",
+    "id": "armory_siege_train_seed_100057",
+    "scenario": "armory_siege",
+    "seed": 100057,
+    "sha256": "2c73419d17dfbeacdf4fb2a145ad59621c5294faa0e8f0f900db47da03a4c66e",
+    "wad_id": "armory_siege_train_seed_100057"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100058
+    },
+    "filename": "armory_siege_train_seed_100058.wad",
+    "id": "armory_siege_train_seed_100058",
+    "scenario": "armory_siege",
+    "seed": 100058,
+    "sha256": "da06c0e9afe97fa45e1d77b7be1efc7d3c8259957e8ab94ce3ac984e88f5ec49",
+    "wad_id": "armory_siege_train_seed_100058"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100059
+    },
+    "filename": "armory_siege_train_seed_100059.wad",
+    "id": "armory_siege_train_seed_100059",
+    "scenario": "armory_siege",
+    "seed": 100059,
+    "sha256": "44d4a9642dc8d51358fca00f7660767fbd671f08741ca21a0cd3c297e2b0dad2",
+    "wad_id": "armory_siege_train_seed_100059"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100060
+    },
+    "filename": "armory_siege_train_seed_100060.wad",
+    "id": "armory_siege_train_seed_100060",
+    "scenario": "armory_siege",
+    "seed": 100060,
+    "sha256": "368be0b3cc3c98ba732b87a3b04d5a0fa8d898368992334316f275434b568fe8",
+    "wad_id": "armory_siege_train_seed_100060"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100061
+    },
+    "filename": "armory_siege_train_seed_100061.wad",
+    "id": "armory_siege_train_seed_100061",
+    "scenario": "armory_siege",
+    "seed": 100061,
+    "sha256": "acf365cf281ff3e65f35211a91b46632bb7f6aad592f92a7cac8ed7c8d02dc01",
+    "wad_id": "armory_siege_train_seed_100061"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100062
+    },
+    "filename": "armory_siege_train_seed_100062.wad",
+    "id": "armory_siege_train_seed_100062",
+    "scenario": "armory_siege",
+    "seed": 100062,
+    "sha256": "d4ff30f7400d6ee1114e2c2e11dc1c465f50f758664da0816ff268df4cca6bd2",
+    "wad_id": "armory_siege_train_seed_100062"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 100063
+    },
+    "filename": "armory_siege_train_seed_100063.wad",
+    "id": "armory_siege_train_seed_100063",
+    "scenario": "armory_siege",
+    "seed": 100063,
+    "sha256": "51a35dc4cb4dd49a5bde9d0f2c9209efd827778afdd282c39528192b5cd86fa9",
+    "wad_id": "armory_siege_train_seed_100063"
+  }
+]
