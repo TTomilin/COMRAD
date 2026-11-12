@@ -1,0 +1,82 @@
+[
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 1009
+    },
+    "filename": "armory_siege_heldout_seed_1009.wad",
+    "scenario": "armory_siege",
+    "seed": 1009,
+    "sha256": "68726071b41e0f76b76efdbd4eb4dff64d5636722c8d17175f570d4fe00d96c9",
+    "wad_id": "armory_siege_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 2027
+    },
+    "filename": "armory_siege_heldout_seed_2027.wad",
+    "scenario": "armory_siege",
+    "seed": 2027,
+    "sha256": "09e73220ddfc0d9e75d3057f48b5b6a8b12edcbd354cac0f75d7f7c9f32f8c0a",
+    "wad_id": "armory_siege_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 3037
+    },
+    "filename": "armory_siege_heldout_seed_3037.wad",
+    "scenario": "armory_siege",
+    "seed": 3037,
+    "sha256": "1801fafebbbb0a7b35733c8d3fafa2f20249f6c383120cc29c415d2878916ba4",
+    "wad_id": "armory_siege_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 4051
+    },
+    "filename": "armory_siege_heldout_seed_4051.wad",
+    "scenario": "armory_siege",
+    "seed": 4051,
+    "sha256": "d8a1af15b2dd7939604ef540aa6ea86f57ff3b79540e774eaabb677b231a39fc",
+    "wad_id": "armory_siege_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "core_health": 1000,
+      "corridor_width": 3,
+      "distance": 600,
+      "door_timer": 300,
+      "enemy_difficulty": 0.5,
+      "max_players": 8,
+      "seed": 5099
+    },
+    "filename": "armory_siege_heldout_seed_5099.wad",
+    "scenario": "armory_siege",
+    "seed": 5099,
+    "sha256": "e6362fcd4175aed5040ec2b445d7ccf7c8583029d9c1f03d47a1f0776a6ba9d5",
+    "wad_id": "armory_siege_heldout_seed_5099"
+  }
+]

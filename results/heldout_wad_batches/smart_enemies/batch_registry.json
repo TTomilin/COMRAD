@@ -1,0 +1,82 @@
+[
+  {
+    "config": {
+      "arena_radius": 800,
+      "num_enemies": 4,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 1009,
+      "spawn_interval": 3
+    },
+    "filename": "smart_enemies_heldout_seed_1009.wad",
+    "scenario": "smart_enemies",
+    "seed": 1009,
+    "sha256": "adae52be50622a9796f7c2e821c4d39df28c41fc9c6c91e5441cecf96e76cfc2",
+    "wad_id": "smart_enemies_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "arena_radius": 800,
+      "num_enemies": 4,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 2027,
+      "spawn_interval": 3
+    },
+    "filename": "smart_enemies_heldout_seed_2027.wad",
+    "scenario": "smart_enemies",
+    "seed": 2027,
+    "sha256": "cc3476ef5a11f30ee19cc9dd0d0ea221067a0ef943f3e7b07985dcf2e37a22ee",
+    "wad_id": "smart_enemies_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "arena_radius": 800,
+      "num_enemies": 4,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 3037,
+      "spawn_interval": 3
+    },
+    "filename": "smart_enemies_heldout_seed_3037.wad",
+    "scenario": "smart_enemies",
+    "seed": 3037,
+    "sha256": "654f755efcdbf8caaae9d975b8a48dcd906ed7848f79c5efa0f91b8360e1980e",
+    "wad_id": "smart_enemies_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "arena_radius": 800,
+      "num_enemies": 4,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 4051,
+      "spawn_interval": 3
+    },
+    "filename": "smart_enemies_heldout_seed_4051.wad",
+    "scenario": "smart_enemies",
+    "seed": 4051,
+    "sha256": "543afb4fde8e56453db8b1f6b6bc553c5c1c27b01ad33af763b7764ce5ff9bf3",
+    "wad_id": "smart_enemies_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "arena_radius": 800,
+      "num_enemies": 4,
+      "num_obstacles": 30,
+      "player_count": 2,
+      "proximity_radius": 512,
+      "seed": 5099,
+      "spawn_interval": 3
+    },
+    "filename": "smart_enemies_heldout_seed_5099.wad",
+    "scenario": "smart_enemies",
+    "seed": 5099,
+    "sha256": "8e4ee23a02128046926c06dbf47119fe794ec8af6f6e82ba828d3614b9de8660",
+    "wad_id": "smart_enemies_heldout_seed_5099"
+  }
+]

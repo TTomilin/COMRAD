@@ -1,0 +1,82 @@
+[
+  {
+    "config": {
+      "chain_max_len": 400,
+      "map_radius": 2000,
+      "max_health_kits": 80,
+      "max_players": 4,
+      "maze_density": 0.6,
+      "seed": 1009,
+      "toxic_damage": 5
+    },
+    "filename": "coop_health_gathering_heldout_seed_1009.wad",
+    "scenario": "coop_health_gathering",
+    "seed": 1009,
+    "sha256": "4c59358792f37e3102141693e8768d3dfe3ddf5ea66d776ec8847a251c4bc196",
+    "wad_id": "coop_health_gathering_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "chain_max_len": 400,
+      "map_radius": 2000,
+      "max_health_kits": 80,
+      "max_players": 4,
+      "maze_density": 0.6,
+      "seed": 2027,
+      "toxic_damage": 5
+    },
+    "filename": "coop_health_gathering_heldout_seed_2027.wad",
+    "scenario": "coop_health_gathering",
+    "seed": 2027,
+    "sha256": "53e14c1650ff1c35e546729d30e2b765b6b90f7a9c76d423ddbe6b43e90c5ea0",
+    "wad_id": "coop_health_gathering_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "chain_max_len": 400,
+      "map_radius": 2000,
+      "max_health_kits": 80,
+      "max_players": 4,
+      "maze_density": 0.6,
+      "seed": 3037,
+      "toxic_damage": 5
+    },
+    "filename": "coop_health_gathering_heldout_seed_3037.wad",
+    "scenario": "coop_health_gathering",
+    "seed": 3037,
+    "sha256": "893fba39f4d1c212dd310ce12dd5208ee51eac6d437d07ba36be994a132296f1",
+    "wad_id": "coop_health_gathering_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "chain_max_len": 400,
+      "map_radius": 2000,
+      "max_health_kits": 80,
+      "max_players": 4,
+      "maze_density": 0.6,
+      "seed": 4051,
+      "toxic_damage": 5
+    },
+    "filename": "coop_health_gathering_heldout_seed_4051.wad",
+    "scenario": "coop_health_gathering",
+    "seed": 4051,
+    "sha256": "f48286deda4c9150ad1f68b95e92fddd9e7070b65c086a57e17aa47cd161056c",
+    "wad_id": "coop_health_gathering_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "chain_max_len": 400,
+      "map_radius": 2000,
+      "max_health_kits": 80,
+      "max_players": 4,
+      "maze_density": 0.6,
+      "seed": 5099,
+      "toxic_damage": 5
+    },
+    "filename": "coop_health_gathering_heldout_seed_5099.wad",
+    "scenario": "coop_health_gathering",
+    "seed": 5099,
+    "sha256": "b010d9a285e6023b321b91e582278259284665dacf9001cef455150d8ee76659",
+    "wad_id": "coop_health_gathering_heldout_seed_5099"
+  }
+]

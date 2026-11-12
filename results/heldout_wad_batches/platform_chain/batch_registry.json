@@ -1,0 +1,117 @@
+[
+  {
+    "config": {
+      "base_height": 0,
+      "cell_spacing": 180,
+      "chain_max_len": 250,
+      "height_step": 12,
+      "lava_damage": 50,
+      "lava_height": -96,
+      "level_count": 48,
+      "map_radius": 1800,
+      "max_players": 4,
+      "polyobject_count": 8,
+      "random_seed_on_generate": true,
+      "safe_start_levels_max": 3,
+      "safe_start_levels_min": 1,
+      "seed": 1009
+    },
+    "filename": "platform_chain_heldout_seed_1009.wad",
+    "scenario": "platform_chain",
+    "seed": 1009,
+    "sha256": "f78d03748977acc73f3408c2b425eed5644fb1d24e21498485c9d915eb746f5f",
+    "wad_id": "platform_chain_heldout_seed_1009"
+  },
+  {
+    "config": {
+      "base_height": 0,
+      "cell_spacing": 180,
+      "chain_max_len": 250,
+      "height_step": 12,
+      "lava_damage": 50,
+      "lava_height": -96,
+      "level_count": 48,
+      "map_radius": 1800,
+      "max_players": 4,
+      "polyobject_count": 8,
+      "random_seed_on_generate": true,
+      "safe_start_levels_max": 3,
+      "safe_start_levels_min": 1,
+      "seed": 2027
+    },
+    "filename": "platform_chain_heldout_seed_2027.wad",
+    "scenario": "platform_chain",
+    "seed": 2027,
+    "sha256": "1092b08d7188fa3679c6aac508fe5bce8b83035e2916695f22088970ddef96c9",
+    "wad_id": "platform_chain_heldout_seed_2027"
+  },
+  {
+    "config": {
+      "base_height": 0,
+      "cell_spacing": 180,
+      "chain_max_len": 250,
+      "height_step": 12,
+      "lava_damage": 50,
+      "lava_height": -96,
+      "level_count": 48,
+      "map_radius": 1800,
+      "max_players": 4,
+      "polyobject_count": 8,
+      "random_seed_on_generate": true,
+      "safe_start_levels_max": 3,
+      "safe_start_levels_min": 1,
+      "seed": 3037
+    },
+    "filename": "platform_chain_heldout_seed_3037.wad",
+    "scenario": "platform_chain",
+    "seed": 3037,
+    "sha256": "9e942c07dd550632c8438c152eead3fdf258144a227129d83cc7625ec00f0851",
+    "wad_id": "platform_chain_heldout_seed_3037"
+  },
+  {
+    "config": {
+      "base_height": 0,
+      "cell_spacing": 180,
+      "chain_max_len": 250,
+      "height_step": 12,
+      "lava_damage": 50,
+      "lava_height": -96,
+      "level_count": 48,
+      "map_radius": 1800,
+      "max_players": 4,
+      "polyobject_count": 8,
+      "random_seed_on_generate": true,
+      "safe_start_levels_max": 3,
+      "safe_start_levels_min": 1,
+      "seed": 4051
+    },
+    "filename": "platform_chain_heldout_seed_4051.wad",
+    "scenario": "platform_chain",
+    "seed": 4051,
+    "sha256": "e1e3d779597d5abcf73e521f65eab5c406af74a48494a41b01fcc1e2dca7ef45",
+    "wad_id": "platform_chain_heldout_seed_4051"
+  },
+  {
+    "config": {
+      "base_height": 0,
+      "cell_spacing": 180,
+      "chain_max_len": 250,
+      "height_step": 12,
+      "lava_damage": 50,
+      "lava_height": -96,
+      "level_count": 48,
+      "map_radius": 1800,
+      "max_players": 4,
+      "polyobject_count": 8,
+      "random_seed_on_generate": true,
+      "safe_start_levels_max": 3,
+      "safe_start_levels_min": 1,
+      "seed": 5099
+    },
+    "filename": "platform_chain_heldout_seed_5099.wad",
+    "scenario": "platform_chain",
+    "seed": 5099,
+    "sha256": "8df70db693aa66f24aca4bd2c4084b913c72acc06f0b373d6ff09ad109dce2e5",
+    "wad_id": "platform_chain_heldout_seed_5099"
+  }
+]
