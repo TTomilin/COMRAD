@@ -1,0 +1,137 @@
+{
+  "archive_root": "train_dir/mode3_comrad_very_difficult_scripted_20260926_005603",
+  "archive_root_path": "train_dir/mode3_comrad_very_difficult_scripted_20260926_005603",
+  "batch_manifests": {
+    "lava_maze_scripted_observer": {
+      "entries": [
+        {
+          "config": {
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "max_maze_size": 20,
+            "physical_size": 8,
+            "seed": 1009
+          },
+          "filename": "lava_maze_scripted_observer_heldout_seed_1009.wad",
+          "scenario": "lava_maze_scripted_observer",
+          "seed": 1009,
+          "sha256": "48f15c3a78fbd193fb0c337b286a092a7a41c625fa8fc760f9f604dd501bacc1",
+          "wad_id": "lava_maze_scripted_observer_heldout_seed_1009"
+        },
+        {
+          "config": {
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "max_maze_size": 20,
+            "physical_size": 8,
+            "seed": 2027
+          },
+          "filename": "lava_maze_scripted_observer_heldout_seed_2027.wad",
+          "scenario": "lava_maze_scripted_observer",
+          "seed": 2027,
+          "sha256": "119839017faa357c7a84323bc99b111b869616466340ba6341b6775d9c001a31",
+          "wad_id": "lava_maze_scripted_observer_heldout_seed_2027"
+        },
+        {
+          "config": {
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "max_maze_size": 20,
+            "physical_size": 8,
+            "seed": 3037
+          },
+          "filename": "lava_maze_scripted_observer_heldout_seed_3037.wad",
+          "scenario": "lava_maze_scripted_observer",
+          "seed": 3037,
+          "sha256": "32a172a82c53b720de15d0c5c90304df0021bc7b1280c087f6958ff110251f85",
+          "wad_id": "lava_maze_scripted_observer_heldout_seed_3037"
+        },
+        {
+          "config": {
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "max_maze_size": 20,
+            "physical_size": 8,
+            "seed": 4051
+          },
+          "filename": "lava_maze_scripted_observer_heldout_seed_4051.wad",
+          "scenario": "lava_maze_scripted_observer",
+          "seed": 4051,
+          "sha256": "31715bfdfed384f1af55def47bf85bf3537e69184b4a1bfb17f2814f2100ee88",
+          "wad_id": "lava_maze_scripted_observer_heldout_seed_4051"
+        },
+        {
+          "config": {
+            "cell_size": 128,
+            "initial_maze_size": 8,
+            "lava_damage": 35,
+            "lava_depth": 64,
+            "max_maze_size": 20,
+            "physical_size": 8,
+            "seed": 5099
+          },
+          "filename": "lava_maze_scripted_observer_heldout_seed_5099.wad",
+          "scenario": "lava_maze_scripted_observer",
+          "seed": 5099,
+          "sha256": "124a56e100cb76e7d0dc8194a1c8431ae801aa84cd1a9576eace9214bf83bb73",
+          "wad_id": "lava_maze_scripted_observer_heldout_seed_5099"
+        }
+      ],
+      "path": "results/heldout_wad_batches/lava_maze_scripted_observer/batch_registry.json",
+      "sha256": "ada8cc40146c5a9b04590b714e26c4bba2446249212324cd1440e80af89659ee"
+    }
+  },
+  "created_at_utc": "2026-09-26T05:54:01.533287+00:00",
+  "device": "gpu",
+  "episodes_per_policy": 100,
+  "episodes_per_wad": 20,
+  "eval_deterministic": false,
+  "heldout_layout_seeds": [
+    1009,
+    2027,
+    3037,
+    4051,
+    5099
+  ],
+  "policy_summaries": [
+    {
+      "algorithm": "IPPO",
+      "checkpoint": "train_dir/mode3_comrad_very_difficult_scripted_20260926_005603/very_difficult_scripted/01_IPPO_env_lava_maze_scripted_observer_s.r.alp_1.0_see_68/checkpoint_p0/checkpoint_000012199_50020352.pth",
+      "checkpoint_sha256": "4d00f9827c88e6f0df3b76d9b965b319bb229b6fc4d1b932e60e99a84351f7d8",
+      "checkpoint_steps": 50020352,
+      "config_sha256": "b5c72f231c3fe84464df069b3b45ca4be8483255ae3294fde479fddb0e0c74e6",
+      "episodes": 100,
+      "layout_mean_ci95": 0.25479999999999997,
+      "layout_means": {
+        "lava_maze_scripted_observer_heldout_seed_1009": 1.4,
+        "lava_maze_scripted_observer_heldout_seed_2027": 2.05,
+        "lava_maze_scripted_observer_heldout_seed_3037": 2.0,
+        "lava_maze_scripted_observer_heldout_seed_4051": 1.7,
+        "lava_maze_scripted_observer_heldout_seed_5099": 1.5
+      },
+      "mean_goals_reached": 0.87,
+      "mean_true_objective": 1.73,
+      "run_dir": "train_dir/mode3_comrad_very_difficult_scripted_20260926_005603/very_difficult_scripted/01_IPPO_env_lava_maze_scripted_observer_s.r.alp_1.0_see_68",
+      "scenario": "lava_maze_scripted_observer",
+      "std_goals_reached": 0.7869516689688949,
+      "std_true_objective": 1.5754108010037229,
+      "train_seed": 68
+    }
+  ],
+  "protocol_sha256": "9d340584758cd4c0a63f698fc499451829adb7d15cb474f04507850ae67b02e0",
+  "raw_episode_scores_csv": "results/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_68/raw_episode_scores.csv",
+  "raw_episode_scores_sha256": "a98ec0298e57b2663ce6e78eb2351f0837e165b576263e197516c14bf9b22a16",
+  "schema_version": 1,
+  "target_checkpoint_steps": 50000000,
+  "train_seeds": [
+    68
+  ]
+}

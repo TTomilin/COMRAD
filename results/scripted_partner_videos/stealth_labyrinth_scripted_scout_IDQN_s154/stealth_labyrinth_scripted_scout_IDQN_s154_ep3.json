@@ -1,0 +1,12 @@
+{
+  "config_path": "comrad/envs/../scenarios/stealth_labyrinth_scripted_scout.cfg",
+  "seed": 691628257,
+  "game_args": "-host 2 -port 41300 +timelimit 10.0 +sv_noautoaim 1 +sv_nocrouch 1 +sv_nofreelook 1 +sv_forcerespawn 0 +viz_respawn_delay 0 +viz_connect_timeout 60",
+  "max_num_players": 2,
+  "rewards": [
+    0.3500000238418579
+  ],
+  "true_objective": [
+    0.5
+  ]
+}

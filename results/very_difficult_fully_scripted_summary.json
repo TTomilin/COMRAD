@@ -1,0 +1,32 @@
+{
+  "stealth_labyrinth": {
+    "metric": "true_objective",
+    "episodes": 100,
+    "layouts": 5,
+    "mean": 0.6,
+    "layout_mean_ci95": 0.02683840531775316,
+    "layout_means": {
+      "stealth_labyrinth_scripted_both_heldout_seed_1009": 0.6,
+      "stealth_labyrinth_scripted_both_heldout_seed_2027": 0.6,
+      "stealth_labyrinth_scripted_both_heldout_seed_3037": 0.575,
+      "stealth_labyrinth_scripted_both_heldout_seed_4051": 0.65,
+      "stealth_labyrinth_scripted_both_heldout_seed_5099": 0.575
+    },
+    "mean_true_objective": 0.6
+  },
+  "lava_maze": {
+    "metric": "goals_reached",
+    "episodes": 100,
+    "layouts": 5,
+    "mean": 28.97,
+    "layout_mean_ci95": 0.0908814612558579,
+    "layout_means": {
+      "lava_maze_scripted_navigator_heldout_seed_1009": 28.8,
+      "lava_maze_scripted_navigator_heldout_seed_2027": 29.05,
+      "lava_maze_scripted_navigator_heldout_seed_3037": 28.95,
+      "lava_maze_scripted_navigator_heldout_seed_4051": 29.05,
+      "lava_maze_scripted_navigator_heldout_seed_5099": 29.0
+    },
+    "mean_true_objective": 28.97
+  }
+}

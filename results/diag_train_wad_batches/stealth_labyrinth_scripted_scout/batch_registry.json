@@ -1,0 +1,57 @@
+[
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth_scripted_scout.wad"
+    },
+    "filename": "stealth_labyrinth_scripted_scout.wad",
+    "scenario": "stealth_labyrinth_scripted_scout",
+    "seed": 1009,
+    "sha256": "d959eb08f983ad8ba60d9a912fc7cf65020f9a6887eaa50c367c7bec55955c2d",
+    "wad_id": "stealth_labyrinth_scripted_scout_trainwad_rep_1009"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth_scripted_scout.wad"
+    },
+    "filename": "stealth_labyrinth_scripted_scout.wad",
+    "scenario": "stealth_labyrinth_scripted_scout",
+    "seed": 2027,
+    "sha256": "d959eb08f983ad8ba60d9a912fc7cf65020f9a6887eaa50c367c7bec55955c2d",
+    "wad_id": "stealth_labyrinth_scripted_scout_trainwad_rep_2027"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth_scripted_scout.wad"
+    },
+    "filename": "stealth_labyrinth_scripted_scout.wad",
+    "scenario": "stealth_labyrinth_scripted_scout",
+    "seed": 3037,
+    "sha256": "d959eb08f983ad8ba60d9a912fc7cf65020f9a6887eaa50c367c7bec55955c2d",
+    "wad_id": "stealth_labyrinth_scripted_scout_trainwad_rep_3037"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth_scripted_scout.wad"
+    },
+    "filename": "stealth_labyrinth_scripted_scout.wad",
+    "scenario": "stealth_labyrinth_scripted_scout",
+    "seed": 4051,
+    "sha256": "d959eb08f983ad8ba60d9a912fc7cf65020f9a6887eaa50c367c7bec55955c2d",
+    "wad_id": "stealth_labyrinth_scripted_scout_trainwad_rep_4051"
+  },
+  {
+    "config": {
+      "diagnostic": "train_wad_replay",
+      "training_wad": "stealth_labyrinth_scripted_scout.wad"
+    },
+    "filename": "stealth_labyrinth_scripted_scout.wad",
+    "scenario": "stealth_labyrinth_scripted_scout",
+    "seed": 5099,
+    "sha256": "d959eb08f983ad8ba60d9a912fc7cf65020f9a6887eaa50c367c7bec55955c2d",
+    "wad_id": "stealth_labyrinth_scripted_scout_trainwad_rep_5099"
+  }
+]

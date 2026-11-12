@@ -1,0 +1,480 @@
+{
+  "schema_version": 1,
+  "inputs": [
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/MAPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/MAPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/MAPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/MAPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/MAPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/QMIX/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/QMIX/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/QMIX/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/QMIX/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_hint/QMIX/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/MAPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/MAPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/MAPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/MAPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/MAPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/QMIX/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/QMIX/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/QMIX/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/QMIX/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_oracle_msg/QMIX/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IDQN/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/lava_maze_scripted_observer/IPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/MAPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/MAPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/MAPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/MAPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult_rerun/stealth_labyrinth_lit/MAPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/QMIX/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/QMIX/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/QMIX/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/QMIX/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_lit/QMIX/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IDQN/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_scripted_scout/IPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult_rerun/stealth_labyrinth_shared_vision/MAPPO/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/MAPPO/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult_rerun/stealth_labyrinth_shared_vision/MAPPO/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult_rerun/stealth_labyrinth_shared_vision/MAPPO/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/MAPPO/seed_97/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/QMIX/seed_154/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/QMIX/seed_42/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/QMIX/seed_68/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult_rerun/stealth_labyrinth_shared_vision/QMIX/seed_81/summary.json",
+    "results/very_difficult_eval/heldout_very_difficult/stealth_labyrinth_shared_vision/QMIX/seed_97/summary.json"
+  ],
+  "ci": "Student-t 95% CI half-width over training seeds",
+  "rows": [
+    {
+      "label": "Scripted scout $\\rightarrow$ learned gunner",
+      "env": "stealth_labyrinth_scripted_scout",
+      "algorithm": "IPPO",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.2,
+        0.17,
+        0.105,
+        0.16,
+        0.18
+      ],
+      "mean": 0.16299999999999998,
+      "ci95_half_width": 0.04424925361215612,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted scout $\\rightarrow$ learned gunner",
+      "env": "stealth_labyrinth_scripted_scout",
+      "algorithm": "IDQN",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.265,
+        0.29,
+        0.27,
+        0.245,
+        0.31
+      ],
+      "mean": 0.27599999999999997,
+      "ci95_half_width": 0.03085478822871478,
+      "checkpoint_steps": [
+        50001920,
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Always-lit rooms",
+      "env": "stealth_labyrinth_lit",
+      "algorithm": "MAPPO",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.005
+      ],
+      "mean": 0.001,
+      "ci95_half_width": 0.002776445105197798,
+      "checkpoint_steps": [
+        100024320
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Always-lit rooms",
+      "env": "stealth_labyrinth_lit",
+      "algorithm": "QMIX",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.05
+      ],
+      "mean": 0.01,
+      "ci95_half_width": 0.027764451051977987,
+      "checkpoint_steps": [
+        100040704
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Shared vision",
+      "env": "stealth_labyrinth_shared_vision",
+      "algorithm": "MAPPO",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean": 0.0,
+      "ci95_half_width": 0.0,
+      "checkpoint_steps": [
+        100024320
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Shared vision",
+      "env": "stealth_labyrinth_shared_vision",
+      "algorithm": "QMIX",
+      "task": "Stealth Labyrinth",
+      "ceiling": 1.0,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.005,
+        0.0
+      ],
+      "mean": 0.001,
+      "ci95_half_width": 0.002776445105197799,
+      "checkpoint_steps": [
+        100040704
+      ],
+      "episodes_per_seed": [
+        100
+      ]
+    },
+    {
+      "label": "Scripted observer $\\rightarrow$ learned navigator",
+      "env": "lava_maze_scripted_observer",
+      "algorithm": "IPPO",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.87,
+        0.87,
+        0.99,
+        1.0,
+        1.1
+      ],
+      "mean": 0.966,
+      "ci95_half_width": 0.12121337379459832,
+      "checkpoint_steps": [
+        50020352
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        1.74,
+        1.73,
+        1.98,
+        2.0,
+        2.2
+      ],
+      "raw_counter_mean": 1.9299999999999997,
+      "raw_counter_ci95_half_width": 0.24552316151724413
+    },
+    {
+      "label": "Scripted observer $\\rightarrow$ learned navigator",
+      "env": "lava_maze_scripted_observer",
+      "algorithm": "IDQN",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.08,
+        0.04,
+        0.08,
+        0.12,
+        0.0
+      ],
+      "mean": 0.064,
+      "ci95_half_width": 0.05662859107929098,
+      "checkpoint_steps": [
+        50001920,
+        50002944
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.16,
+        0.08,
+        0.16,
+        0.24,
+        0.0
+      ],
+      "raw_counter_mean": 0.128,
+      "raw_counter_ci95_half_width": 0.11325718215858196
+    },
+    {
+      "label": "Oracle message head",
+      "env": "lava_maze_oracle_msg",
+      "algorithm": "MAPPO",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.01,
+        0.06,
+        0.0,
+        0.01,
+        0.02
+      ],
+      "mean": 0.019999999999999997,
+      "ci95_half_width": 0.02911960192790158,
+      "checkpoint_steps": [
+        100007936,
+        100024320
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.02,
+        0.11,
+        0.0,
+        0.02,
+        0.04
+      ],
+      "raw_counter_mean": 0.038,
+      "raw_counter_ci95_half_width": 0.05297119652860751
+    },
+    {
+      "label": "Oracle message head",
+      "env": "lava_maze_oracle_msg",
+      "algorithm": "QMIX",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        0.02,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "mean": 0.004,
+      "ci95_half_width": 0.011105780420791196,
+      "checkpoint_steps": [
+        100024320
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        0.04,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "raw_counter_mean": 0.008,
+      "raw_counter_ci95_half_width": 0.022211560841582392
+    },
+    {
+      "label": "Oracle direction hint",
+      "env": "lava_maze_oracle_hint",
+      "algorithm": "MAPPO",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        31.22,
+        49.44,
+        43.58,
+        15.61,
+        39.29
+      ],
+      "mean": 35.827999999999996,
+      "ci95_half_width": 16.27677392156111,
+      "checkpoint_steps": [
+        100024320
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        62.44,
+        98.88,
+        87.16,
+        31.19,
+        78.57
+      ],
+      "raw_counter_mean": 71.648,
+      "raw_counter_ci95_half_width": 32.56709205924283
+    },
+    {
+      "label": "Oracle direction hint",
+      "env": "lava_maze_oracle_hint",
+      "algorithm": "QMIX",
+      "task": "Lava Maze",
+      "ceiling": null,
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "seed_means": [
+        2.2,
+        0.51,
+        2.76,
+        0.01,
+        2.15
+      ],
+      "mean": 1.5259999999999998,
+      "ci95_half_width": 1.4818155700414872,
+      "checkpoint_steps": [
+        100024320,
+        100040704
+      ],
+      "episodes_per_seed": [
+        100
+      ],
+      "metric": "mazes completed per episode (goal relocations)",
+      "seed_raw_counter_means": [
+        4.4,
+        1.02,
+        5.51,
+        0.02,
+        4.29
+      ],
+      "raw_counter_mean": 3.0479999999999996,
+      "raw_counter_ci95_half_width": 2.958802198953697
+    }
+  ]
+}
