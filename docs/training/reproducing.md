@@ -21,6 +21,8 @@ COMRAD_TRAIN_ALL_PROFILE=benchmark uv run python -m sample_factory.launcher.run 
 
 The launcher adds `--experiment` and `--train_dir` itself, so don't put them in the profile commands. Algorithm hyperparameters, step budgets and experiment names live at the top of `comrad/train_all.py`.
 
+Follow-up studies (Very Difficult learnability references, rebuttal ablations) live outside the package in `experiments/`; see `experiments/README.md` in the repository.
+
 ## Recording and heatmaps
 
 ```bash
