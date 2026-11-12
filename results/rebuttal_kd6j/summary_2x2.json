@@ -1,0 +1,3662 @@
+{
+  "ammo_carrier": {
+    "MAPPO": {
+      "blind": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1228.7600000000002,
+          "ci95": 230.23272,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1210.64,
+            1246.88
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.25092476968907745,
+          "ci95": 0.03236068825290433,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.24837788725141774,
+            0.25347165212673717
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.13971596847700987,
+          "ci95": 0.005368290401505786,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.14013846890212445,
+            0.1392934680518953
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.44342569983336955,
+          "ci95": 0.12158424083375813,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4338566583699855,
+            0.45299474129675366
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8602840315229902,
+          "ci95": 0.005368290401506138,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8598615310978756,
+            0.8607065319481048
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.024457166744788945,
+          "ci95": 0.04295619631454057,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.02783794718824405,
+            0.02107638630133384
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.42269342897651724,
+          "ci95": 0.17472746289260227,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4364450001155541,
+            0.4089418578374804
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.5755673367186764,
+          "ci95": 0.17575310640523367,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5617350443839343,
+            0.5893996290534186
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0008859806128048513,
+          "ci95": 0.0039037187818355165,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0011932148943911505,
+            0.0005787463312185523
+          ]
+        }
+      },
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1591.82,
+          "ci95": 956.2535599999998,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1667.08,
+            1516.56
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3921257501106921,
+          "ci95": 0.337411798861966,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.36557043774944814,
+            0.4186810624719361
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.24050956934999662,
+          "ci95": 0.598354223953019,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.19341731183756006,
+            0.2876018268624332
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.37308911832074804,
+          "ci95": 0.7200096935401166,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4297560232113601,
+            0.316422213430136
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7594904306500034,
+          "ci95": 0.5983542239530175,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8065826881624399,
+            0.712398173137567
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.09646417064602975,
+          "ci95": 0.4905146013618731,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.05785921225142301,
+            0.13506912904063648
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.5153221048314556,
+          "ci95": 0.5689965106593919,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.47054038669361586,
+            0.5601038229692954
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.4828823441705443,
+          "ci95": 0.5712291334093492,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5278397763607969,
+            0.43792491198029176
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0020301665540644197,
+          "ci95": 0.012400308138642787,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0010542254129780992,
+            0.0030061076951507404
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1306.0,
+          "ci95": 426.4133599999993,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1339.56,
+            1272.44
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3395545696652089,
+          "ci95": 0.7310858347514312,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3970931998203664,
+            0.2820159395100514
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.17492136089927018,
+          "ci95": 0.45796160680608744,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2109643017780745,
+            0.13887842002046588
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.49191288752570717,
+          "ci95": 0.34439832646699,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.46480771465722065,
+            0.5190180603941937
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8250786391007296,
+          "ci95": 0.4579616068060877,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7890356982219253,
+            0.861121579979534
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.04479426824747076,
+          "ci95": 0.24635315618047685,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.06418299453272787,
+            0.025405541962213642
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.4760860820088614,
+          "ci95": 0.2312505026679603,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4942861845327053,
+            0.4578859794850175
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.522162195814805,
+          "ci95": 0.23173017921143,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5039243413199657,
+            0.5404000503096446
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0008001663422028988,
+          "ci95": 0.0032281735340291672,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0010542332030583346,
+            0.000546099481347463
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1133.4,
+          "ci95": 398.9683999999997,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1164.8,
+            1102.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2516373620857559,
+          "ci95": 0.1690117418088553,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2383356352001227,
+            0.26493908897138907
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.10844734551661903,
+          "ci95": 0.2894295192271494,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.13122630972464275,
+            0.0856683813085953
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5374900021534066,
+          "ci95": 0.9794796395819104,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4604020405933632,
+            0.6145779637134499
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8915526544833808,
+          "ci95": 0.289429519227148,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8687736902753572,
+            0.9143316186914044
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.020170668844053902,
+          "ci95": 0.04701028564760214,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.023870518178825045,
+            0.01647081950928276
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.31707957170071827,
+          "ci95": 0.04883750177797558,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.32092322838086745,
+            0.3132359150205691
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.6815921063078769,
+          "ci95": 0.04796056018829779,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6778174675397124,
+            0.6853667450760413
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0007278259373133793,
+          "ci95": 0.0006781078412167986,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0006744568328574688,
+            0.0007811950417692898
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1157.3400000000001,
+          "ci95": 1948.3380400000003,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1310.68,
+            1004.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.42019329532291616,
+          "ci95": 0.37588985205810876,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3906096457039874,
+            0.4497769449418449
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.2045395554434311,
+          "ci95": 0.7379509075071392,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.14646062363899706,
+            0.2626184872478652
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5081184915845647,
+          "ci95": 1.0955087620007444,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5943382902624132,
+            0.421898692906716
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7954604445565687,
+          "ci95": 0.7379509075071392,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8535393763610029,
+            0.7373815127521347
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.022201274088788622,
+          "ci95": 0.2820893885721482,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.044402548177577245,
+            0.0
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.39611224440090886,
+          "ci95": 0.1900015524496268,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3811585569737385,
+            0.41106593182807927
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.6022137444951997,
+          "ci95": 0.19212576139447823,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.617334613485793,
+            0.5870928755046064
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0008321956302767923,
+          "ci95": 0.009085041092418606,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0015472153919971299,
+            0.00011717586855645491
+          ]
+        }
+      }
+    },
+    "QMIX": {
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1333.98,
+          "ci95": 2429.1330800000005,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1142.8,
+            1525.16
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3828515407967053,
+          "ci95": 0.3455633568117121,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.35565467657415595,
+            0.41004840501925466
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.16248384296863783,
+          "ci95": 0.7968931030211903,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09976598502583992,
+            0.22520170091143574
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5066390219416506,
+          "ci95": 1.2435427276635593,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6045095341141328,
+            0.4087685097691683
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8375161570313623,
+          "ci95": 0.7968931030211904,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9002340149741602,
+            0.7747982990885643
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.038128617775308744,
+          "ci95": 0.25534362389528803,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.01803231493450219,
+            0.0582249206161153
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.517455444395907,
+          "ci95": 0.6168708343739604,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5660050142348776,
+            0.4689058745569364
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.48069229846790534,
+          "ci95": 0.6217709512535113,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.43175707485280135,
+            0.5296275220830093
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0010015063762257726,
+          "ci95": 0.01224146496676462,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            3.8066665320324866e-05,
+            0.0019649460871312206
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1533.02,
+          "ci95": 669.6062000000006,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1480.32,
+            1585.72
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2406314819240702,
+          "ci95": 0.11392014559876236,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2316656275561525,
+            0.2495973362919879
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.13453940379348334,
+          "ci95": 0.15136768072054052,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.12262631700609625,
+            0.14645249058087045
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.3848259265634155,
+          "ci95": 0.13075908474577552,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.39511705553758325,
+            0.37453479758924774
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8654605962065167,
+          "ci95": 0.15136768072054138,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8773736829939038,
+            0.8535475094191295
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.044114257903720214,
+          "ci95": 0.06270957428476598,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.03917882784825304,
+            0.0490496879591874
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.42970609504478996,
+          "ci95": 0.3081602518251946,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4054529664578866,
+            0.4539592236316934
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.5688974468772126,
+          "ci95": 0.3079640668994146,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5931351351268123,
+            0.5446597586276127
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0007648998671296954,
+          "ci95": 0.0004774072946972738,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.000727326492763469,
+            0.000802473241495922
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1231.6799999999998,
+          "ci95": 1780.3647199999998,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1371.8,
+            1091.56
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.20576742164753697,
+          "ci95": 1.0514598346864457,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.28852043870140487,
+            0.12301440459366905
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.10879210594489166,
+          "ci95": 0.554092249088349,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.15240081435732272,
+            0.0651833975324606
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.4969832596386099,
+          "ci95": 0.14276174362708416,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4857474857029036,
+            0.5082190335743162
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8912078940551083,
+          "ci95": 0.5540922490883486,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8475991856426772,
+            0.9348166024675393
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.017969934254725786,
+          "ci95": 0.223638032335659,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.03557091271652801,
+            0.0003689557929235632
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.35748390048918655,
+          "ci95": 1.4453164970661592,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4712346085850593,
+            0.24373319239331376
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.641145265373346,
+          "ci95": 1.4494235610805222,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5270713191211406,
+            0.7552192116255515
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0006677904643099368,
+          "ci95": 0.008074705125702832,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0013032937797280725,
+            3.2287148891800925e-05
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 1384.22,
+          "ci95": 343.3161199999997,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1411.24,
+            1357.2
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.20242373795229032,
+          "ci95": 0.5889118462049981,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1560746236594367,
+            0.24877285224514395
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.08254120749028715,
+          "ci95": 0.4089519969613638,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.050355468708501855,
+            0.11472694627207243
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.4502673907615178,
+          "ci95": 0.4094232496500402,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4824902185318657,
+            0.41804456299116993
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.9174587925097129,
+          "ci95": 0.40895199696136286,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9496445312914981,
+            0.8852730537279276
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.009479488690494368,
+          "ci95": 0.10031205463887376,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0015846315648156523,
+            0.017374345816173083
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.3028015918486453,
+          "ci95": 0.8662478959385664,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.23462530537465143,
+            0.37097787832263923
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.6961319022340471,
+          "ci95": 0.8687355555018109,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.764503974916387,
+            0.6277598295517072
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0011964855947918934,
+          "ci95": 0.010392145580642715,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0003785928212484718,
+            0.002014378368335315
+          ]
+        }
+      }
+    }
+  },
+  "armory_siege": {
+    "MAPPO": {
+      "blind": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -7.511629999999963,
+          "ci95": 5.017980580000022,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            -7.906559999999964,
+            -7.116699999999961
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3584640042875543,
+          "ci95": 0.039983268563568784,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3616108064726298,
+            0.35531720210247886
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.20510490185100172,
+          "ci95": 0.07298475978737753,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1993607841280852,
+            0.21084901957391827
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.447893968538945,
+          "ci95": 0.2577802806892818,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4681820435184257,
+            0.42760589355946427
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7948950981489983,
+          "ci95": 0.07298475978737701,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8006392158719148,
+            0.7891509804260818
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.07025248565346534,
+          "ci95": 0.00012283224947094072,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.07024281839000941,
+            0.07026215291692126
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.676655945750108,
+          "ci95": 0.04864676755065786,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6728273004210777,
+            0.6804845910791382
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.3221031672836464,
+          "ci95": 0.04840138191608952,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3259125000332206,
+            0.31829383453407223
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0030096927070293196,
+          "ci95": 0.0034720511276906873,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.002736431954023599,
+            0.0032829534600350404
+          ]
+        }
+      },
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 13.59383999999999,
+          "ci95": 33.463411019999384,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            10.960170000000039,
+            16.227509999999942
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.5196669415478463,
+          "ci95": 0.5190541083804406,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5605180440490616,
+            0.4788158390466311
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.325487416423775,
+          "ci95": 0.5200448410928258,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2845583403106925,
+            0.36641649253685743
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.3635007081515267,
+          "ci95": 1.6368091982180215,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.49232246151356207,
+            0.23467895478949127
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.674512583576225,
+          "ci95": 0.5200448410928248,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7154416596893074,
+            0.6335835074631426
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.15884439891511024,
+          "ci95": 0.20560646814597375,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.142662558198443,
+            0.17502623963177746
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.7824754476276132,
+          "ci95": 0.012229147764512002,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7815129773171684,
+            0.7834379179380581
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.21650420843789597,
+          "ci95": 0.01187152037501292,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.21743853240885558,
+            0.21556988446693634
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.002564738062366448,
+          "ci95": 0.012105510823764785,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0016119983469749172,
+            0.0035174777777579784
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 5.427440000000098,
+          "ci95": 3.0317786600000103,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            5.666050000000099,
+            5.188830000000097
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.38242642736697946,
+          "ci95": 0.5716189130082394,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.33743831836271065,
+            0.42741453637124827
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.27457279249208144,
+          "ci95": 0.3905940135716124,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2438318816175645,
+            0.3053137033665984
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.28562829595569994,
+          "ci95": 0.04753171223396334,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.28188740879735247,
+            0.28936918311404747
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7254272075079187,
+          "ci95": 0.39059401357161266,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7561681183824356,
+            0.6946862966334016
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0908835368054706,
+          "ci95": 0.2660881257271462,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.06994160970589983,
+            0.11182546390504138
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.6664064601850015,
+          "ci95": 0.8022554847766755,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6032665668451088,
+            0.729546353524894
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.33270498850120633,
+          "ci95": 0.8032564515797611,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.39592366090635045,
+            0.2694863160960622
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0038857314373921424,
+          "ci95": 0.00024291062142691694,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0039048492259508485,
+            0.0038666136488334367
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -8.203439999999967,
+          "ci95": 0.7093759799999806,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            -8.259269999999965,
+            -8.147609999999968
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3802357280679818,
+          "ci95": 0.713759047514762,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3240607676150649,
+            0.4364106885208987
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1853054925440465,
+          "ci95": 0.20650029426324695,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2015576800352512,
+            0.1690533050528418
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.4769806049449504,
+          "ci95": 1.538688454932604,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3558812459859858,
+            0.598079963903915
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8146945074559535,
+          "ci95": 0.20650029426324784,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7984423199647488,
+            0.8309466949471583
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.04131898104849206,
+          "ci95": 0.3600751759142163,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.06965796860667059,
+            0.01297999349031354
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.5946533114026764,
+          "ci95": 0.10737495808932872,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6031040400418491,
+            0.5862025827635037
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.4042458182407773,
+          "ci95": 0.10732380248308654,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.39579911570000237,
+            0.4126925207815523
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.001568510647908409,
+          "ci95": 0.008182444742274699,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.002212493391673142,
+            0.0009245279041436759
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -9.173759999999959,
+          "ci95": 19.692775280000056,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            -7.6238799999999545,
+            -10.723639999999964
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.41819205847967766,
+          "ci95": 0.03619199894771696,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.41534364049229244,
+            0.42104047646706294
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1843111874105241,
+          "ci95": 0.11905447719172385,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.19368112894930295,
+            0.17494124587174528
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5360986190230458,
+          "ci95": 0.45413682629000235,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.500356699749474,
+            0.5718405382966175
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8156888125894759,
+          "ci95": 0.11905447719172402,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8063188710506971,
+            0.8250587541282548
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.029883234948101786,
+          "ci95": 0.19230990323106598,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.014747873447152157,
+            0.045018596449051415
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.6163422406303458,
+          "ci95": 0.528266731372346,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.6579184039683236,
+            0.574766077292368
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.38249324436487325,
+          "ci95": 0.5286544004921906,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3408865703138587,
+            0.4240999184158878
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0023810532733870918,
+          "ci95": 0.014041672633054062,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0034861746831977374,
+            0.0012759318635764461
+          ]
+        }
+      }
+    },
+    "QMIX": {
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -2.435244999999968,
+          "ci95": 54.695708789999976,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1.8694700000000308,
+            -6.739959999999967
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3687349099176471,
+          "ci95": 0.1512780597677682,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.38064094326943115,
+            0.35682887656586304
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.18835629188827446,
+          "ci95": 0.05062902535447917,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.18437163697292117,
+            0.1923409468036278
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.49779546902894684,
+          "ci95": 0.34238330183873494,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5247420534645469,
+            0.47084888459334673
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8116437081117257,
+          "ci95": 0.050629025354478635,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.815628363027079,
+            0.8076590531963724
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.06897769863738079,
+          "ci95": 0.10228904701995747,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.07702815094494868,
+            0.06092724632981292
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.6743369403056767,
+          "ci95": 0.5189839832383942,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7151825237495926,
+            0.633491356861761
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.3245269900260172,
+          "ci95": 0.5187971986535345,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.28369610708460885,
+            0.36535787296742556
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.002347965606250834,
+          "ci95": 0.0016493358192993337,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0022181579705433468,
+            0.0024777732419583214
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 14.266929999999991,
+          "ci95": 21.656233460000205,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            12.562519999999976,
+            15.971340000000009
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.37852543274329786,
+          "ci95": 0.007711983195185205,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3779184767228992,
+            0.3791323887636965
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.2482985206568003,
+          "ci95": 0.3861975865043154,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.21790362167172903,
+            0.27869341964187155
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.3477751306946615,
+          "ci95": 0.9556752552095387,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.4229896163872114,
+            0.27256064500211163
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7517014793431998,
+          "ci95": 0.38619758650431524,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.782096378328271,
+            0.7213065803581284
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.08707414071897819,
+          "ci95": 0.16952960093053163,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.07373165677985245,
+            0.10041662465810393
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.7225595949093617,
+          "ci95": 0.10397883622947529,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7307430386547951,
+            0.7143761511639285
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.27655439294522693,
+          "ci95": 0.10441245158785728,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.26833682238109524,
+            0.2847719635093586
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.003273761095074665,
+          "ci95": 0.009344061258893439,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0025383556756748984,
+            0.0040091665144744324
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -8.796844999999976,
+          "ci95": 7.269420250000019,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            -9.368969999999978,
+            -8.224719999999975
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2875890885473922,
+          "ci95": 0.11468685079365183,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2966152848950745,
+            0.2785628921997098
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.13906307600753237,
+          "ci95": 0.10767212567875295,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.14753719262005818,
+            0.13058895939500656
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.49254780877716975,
+          "ci95": 0.2517814587309623,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.47273185893213887,
+            0.5123637586222006
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8609369239924676,
+          "ci95": 0.10767212567875402,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8524628073799417,
+            0.8694110406049935
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.019832070134148498,
+          "ci95": 0.11756517852713867,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.029084799437401977,
+            0.01057934083089502
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.5086995545757371,
+          "ci95": 0.06610325827442332,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5034970314941675,
+            0.5139020776573067
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.4903338896557836,
+          "ci95": 0.06617941915751098,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.49554240682542877,
+            0.4851253724861385
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.00441988842528404,
+          "ci95": 0.014950065162127749,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.003243273820992544,
+            0.0055965030295755365
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": -9.88716499999998,
+          "ci95": 1.2547810300000075,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            -9.78840999999998,
+            -9.98591999999998
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2757790870244776,
+          "ci95": 0.10218119781967609,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.26773712276982026,
+            0.28382105127913493
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1832907044690154,
+          "ci95": 0.0541674279400391,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1790275667435283,
+            0.1875538421945025
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.35798830159135275,
+          "ci95": 0.07204598887274527,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3636585352504701,
+            0.35231806793223536
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8167092955309845,
+          "ci95": 0.05416742794004104,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8209724332564717,
+            0.8124461578054972
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.032483232786123466,
+          "ci95": 0.2387934902821205,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.013689474696864806,
+            0.05127699087538212
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.6124716329473237,
+          "ci95": 0.24153443625684384,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5934621542556155,
+            0.6314811116390319
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.3863378176378388,
+          "ci95": 0.24140951737927574,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.40533746484225214,
+            0.3673381704334255
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.004498525402867613,
+          "ci95": 0.026544081066611113,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.002409427255015329,
+            0.006587623550719897
+          ]
+        }
+      }
+    }
+  },
+  "rhythm_sync_dense": {
+    "MAPPO": {
+      "blind": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.017,
+          "ci95": 0.019058999999999993,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.018500000000000003,
+            0.015500000000000003
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.0615697537361881,
+          "ci95": 0.0789091453922112,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.05535936924128717,
+            0.06778013823108903
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.05104159256083894,
+          "ci95": 0.08320662441692227,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.04449298368181153,
+            0.05759020143986635
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.08997821540310394,
+          "ci95": 0.05869771124806272,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09459789990240054,
+            0.08535853090380732
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.948958407439161,
+          "ci95": 0.08320662441692307,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9555070163181886,
+            0.9424097985601336
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0009842805425432036,
+          "ci95": 0.004120452504843774,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0013085724129071085,
+            0.0006599886721792989
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.08529682536156352,
+          "ci95": 0.005759910608763395,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.08484350326107845,
+            0.0857501474620486
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9147031746384365,
+          "ci95": 0.00575991060876225,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9151564967389215,
+            0.9142498525379515
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0004588709955384459,
+          "ci95": 0.002508710804946575,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00026142799184361077,
+            0.000656313999233281
+          ]
+        }
+      },
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.933,
+          "ci95": 0.26682600000000023,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.912,
+            0.9540000000000001
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.22191387860740405,
+          "ci95": 0.7805688977168506,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.28334697302868933,
+            0.16048078418611877
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.20690628612922585,
+          "ci95": 0.7080625168474065,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.26263291267160005,
+            0.15117965958685164
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.06497305221977166,
+          "ci95": 0.09536103501190167,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.07247824937166067,
+            0.05746785506788266
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.793093713870774,
+          "ci95": 0.7080625168474072,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7373670873283997,
+            0.8488203404131482
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0017102411110853028,
+          "ci95": 0.021730323557449856,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0034204822221706056,
+            0.0
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.09108438445122366,
+          "ci95": 0.005558905292985954,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09064688206707555,
+            0.09152188683537178
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9089156155487762,
+          "ci95": 0.005558905292986924,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9093531179329244,
+            0.908478113164628
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0010005202265588626,
+          "ci95": 0.0028962382522892027,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0012284627932430436,
+            0.0007725776598746817
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.76225,
+          "ci95": 0.09847150000000184,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7544999999999998,
+            0.7700000000000001
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.1982704847449141,
+          "ci95": 0.1580989951011168,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1858276234903008,
+            0.21071334599952743
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1884054787494549,
+          "ci95": 0.14367446055766853,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1770978712760039,
+            0.19971308622290593
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.05153668586076285,
+          "ci95": 0.05215246307656365,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.04743213186449623,
+            0.05564123985702946
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8115945212505449,
+          "ci95": 0.14367446055766836,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8229021287239959,
+            0.8002869137770939
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0007780719629661864,
+          "ci95": 0.009886182361448363,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0015561439259323727
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.09709343964568774,
+          "ci95": 0.0007890811290575079,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09715554267803919,
+            0.0970313366133363
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9029065603543124,
+          "ci95": 0.0007890811290573316,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.902844457321961,
+            0.9029686633866638
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0008966504455135806,
+          "ci95": 0.00017383165904854986,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0008829693768020625,
+            0.0009103315142250988
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.91525,
+          "ci95": 0.2572964999999998,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9355,
+            0.895
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.09947533650487336,
+          "ci95": 0.7335128916493702,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.15720498325832608,
+            0.04174568975142064
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.08893493423835303,
+          "ci95": 0.6935872586062756,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1435223148936557,
+            0.034347553583050354
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.08754492712184311,
+          "ci95": 0.005207642143435827,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.08795478405112345,
+            0.0871350701925628
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.911065065761647,
+          "ci95": 0.6935872586062742,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8564776851063445,
+            0.9656524464169496
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.002382660429240053,
+          "ci95": 0.028495077200204874,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.004625307776965921,
+            0.00014001308151418527
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.09166365928684256,
+          "ci95": 0.010631247642228517,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09082694846973029,
+            0.09250037010395483
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9083363407131575,
+          "ci95": 0.010631247642227283,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9091730515302696,
+            0.9074996298960453
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0004470966035662037,
+          "ci95": 0.0030823173134082492,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0006896841459405347,
+            0.0002045090611918727
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.7602499999999999,
+          "ci95": 0.5495345000000008,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8035,
+            0.7169999999999999
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.1259471044370036,
+          "ci95": 0.8204116292799819,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1905159403633362,
+            0.061378268510671
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1140771491975788,
+          "ci95": 0.7788129770594057,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.17537204743930757,
+            0.05278225095585004
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.11866892006640817,
+          "ci95": 0.42682603462014396,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0850764413461072,
+            0.15226139878670913
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8859228508024213,
+          "ci95": 0.778812977059406,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8246279525606925,
+            0.9472177490441501
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.0946305224553302,
+          "ci95": 0.013235281084010718,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.09358886645942191,
+            0.09567217845123849
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9053694775446698,
+          "ci95": 0.013235281084012658,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9064111335405782,
+            0.9043278215487613
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0005914361418156232,
+          "ci95": 0.005408106588999244,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.001017070219337994,
+            0.00016580206429325247
+          ]
+        }
+      }
+    },
+    "QMIX": {
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0015000000000000002,
+          "ci95": 0.019059000000000003,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0030000000000000005
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.23931476091416176,
+          "ci95": 0.11216979068180308,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2481428571428571,
+            0.2304866646854664
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.043420929759248154,
+          "ci95": 0.37717487219327867,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.07310571428571429,
+            0.013736145232782018
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.8196018376472274,
+          "ci95": 1.0455919913845981,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.737310637317887,
+            0.9018930379765677
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.956579070240752,
+          "ci95": 0.3771748721932784,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9268942857142859,
+            0.9862638547672181
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.008075954353147136,
+          "ci95": 0.06561436398891247,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.01324,
+            0.0029119087062942726
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.11084084312676616,
+          "ci95": 0.0002071043741658334,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11085714285714282,
+            0.1108245433963895
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8891591568732339,
+          "ci95": 0.00020710437416565706,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8891428571428572,
+            0.8891754566036105
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.00011646975276403685,
+          "ci95": 0.0005241986252491924,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00015772574404761882,
+            7.521376148045488e-05
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.00025,
+          "ci95": 0.0031765,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0005,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3316001295997358,
+          "ci95": 0.0012498300071490938,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.33169849493950826,
+            0.3315017642599633
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.2206223964315187,
+          "ci95": 0.1830102999950748,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.20621894137130506,
+            0.23502585149173238
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.2891786701537927,
+          "ci95": 0.7710633503219047,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3498636497163541,
+            0.22849369059123134
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.7793776035684812,
+          "ci95": 0.18301029999507423,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7937810586286949,
+            0.7649741485082676
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.022254285714285716,
+          "ci95": 0.2809478114285714,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00014285714285714284,
+            0.044365714285714286
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.10698127250468586,
+          "ci95": 0.03837694118162851,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.10396089306334881,
+            0.1100016519460229
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8930187274953142,
+          "ci95": 0.03837694118162702,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8960391069366511,
+            0.8899983480539773
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0006639420638091824,
+          "ci95": 0.0011585987021778205,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.000755127228469801,
+            0.0005727568991485637
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2843757142857143,
+          "ci95": 1.3801438714285712,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.17575428571428575,
+            0.3929971428571429
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.004998571428571429,
+          "ci95": 0.05999047142857142,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00972,
+            0.0002771428571428572
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.9570284592002634,
+          "ci95": 0.5349422884563537,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9149269096601756,
+            0.999130008740351
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.9950014285714286,
+          "ci95": 0.059990471428571064,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.99028,
+            0.9997228571428571
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 8.571428571428571e-05,
+          "ci95": 0.0010890857142857142,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00017142857142857143,
+            0.0
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.11085714285714282,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11085714285714282,
+            0.11085714285714282
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8891428571428572,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8891428571428572,
+            0.8891428571428572
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 1.8004910714285712e-05,
+          "ci95": 0.0002280292122023809,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            3.595148809523809e-05,
+            5.833333333333333e-08
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.26427428571428574,
+          "ci95": 0.9252509200000004,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.1914542857142857,
+            0.3370942857142858
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.04902857142857142,
+          "ci95": 0.28980570857142857,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.02622,
+            0.07183714285714285
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.8150377889486928,
+          "ci95": 0.2911243177175392,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.837950138839889,
+            0.7921254390574965
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.9509714285714285,
+          "ci95": 0.2898057085714282,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9737799999999999,
+            0.9281628571428571
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0017742857142857144,
+          "ci95": 0.0017788400000000018,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0019142857142857145,
+            0.0016342857142857142
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.11085714285714282,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11085714285714282,
+            0.11085714285714282
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8891428571428572,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8891428571428572,
+            0.8891428571428572
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0001606085565476192,
+          "ci95": 0.00028975446860118897,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00018341309523809527,
+            0.00013780401785714312
+          ]
+        }
+      }
+    }
+  },
+  "stealth_labyrinth": {
+    "MAPPO": {
+      "blind": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.32635203700658894,
+          "ci95": 0.2630832135004029,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.30564660543879396,
+            0.3470574685743839
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.24475911341988896,
+          "ci95": 0.2394385077997354,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.22591459053308466,
+            0.26360363630669326
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.24746868246571782,
+          "ci95": 0.04023781404076464,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2506355181371144,
+            0.24430184679432126
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.755240886580111,
+          "ci95": 0.23943850779973436,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7740854094669153,
+            0.7363963636933069
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.06386255331802834,
+          "ci95": 0.10747126647515577,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.05540424492237623,
+            0.07232086171368046
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.12242400785665514,
+          "ci95": 0.15249343724682085,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11042232068155512,
+            0.13442569503175517
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8775759921433447,
+          "ci95": 0.15249343724681882,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8895776793184446,
+            0.8655743049682448
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.006725680601501504,
+          "ci95": 0.016530483117811374,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.005424682402397823,
+            0.008026678800605185
+          ]
+        }
+      },
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2013474558935578,
+          "ci95": 0.2658326835152053,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.18042563285600033,
+            0.22226927893111528
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.19583420174763494,
+          "ci95": 0.24487482998412682,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.17656182413201027,
+            0.21510657936325958
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.01654999566583138,
+          "ci95": 0.04610674656219326,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.012921257545085808,
+            0.020178733786576957
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8041657982523651,
+          "ci95": 0.24487482998412702,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8234381758679897,
+            0.7848934206367404
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.004252513259303047,
+          "ci95": 0.03603541462856131,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0014164189236693854,
+            0.007088607594936709
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.0010944520806707018,
+          "ci95": 0.004815292829181635,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0007154742096505824,
+            0.001473429951690821
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9989055479193293,
+          "ci95": 0.004815292829181993,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9992845257903494,
+            0.9985265700483091
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.02333190280190336,
+          "ci95": 0.02653568404941219,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.021243465524285528,
+            0.025420340079521195
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.3339588090458206,
+          "ci95": 0.676235165311405,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2807370897548238,
+            0.3871805283368174
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.3099812645514874,
+          "ci95": 0.4784279461299729,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2723275618810976,
+            0.3476349672218772
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.06913988141043712,
+          "ci95": 0.5675988467922425,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.02446816357695352,
+            0.1138115992439207
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.6900187354485126,
+          "ci95": 0.47842794612997214,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7276724381189024,
+            0.6523650327781229
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.014666043620757286,
+          "ci95": 0.004901785978666152,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.014280258481557997,
+            0.015051828759956573
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.005983733182522414,
+          "ci95": 0.002790557520352876,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.005764108003838888,
+            0.006203358361205939
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9940162668174776,
+          "ci95": 0.002790557520352017,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.994235891996161,
+            0.9937966416387941
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.031007174221768494,
+          "ci95": 0.07619100001992682,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.025010715854073953,
+            0.037003632589463036
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.23925472237296863,
+          "ci95": 1.6655169938590064,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.10817358008908648,
+            0.37033586465685076
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.16805562163064394,
+          "ci95": 1.0221139331627516,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.08761221432993942,
+            0.24849902893134845
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.20694569862388246,
+          "ci95": 1.0655025006236474,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.12308748198421242,
+            0.2908039152635525
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8319443783693563,
+          "ci95": 1.0221139331627525,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9123877856700608,
+            0.7515009710686517
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.018260797496120383,
+          "ci95": 0.1890568281016632,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.003381462685663656,
+            0.033140132306577114
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 2.6838432635534085e-06,
+          "ci95": 3.410091250670961e-05,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            5.367686527106817e-06,
+            0.0
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9999973161567365,
+          "ci95": 3.410091250625835e-05,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.999994632313473,
+            1.0
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.00479215242946344,
+          "ci95": 0.016505121675012273,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.003493150251357641,
+            0.006091154607569238
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.25882246345831716,
+          "ci95": 0.03845399925852536,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2557960193170827,
+            0.26184890759955165
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.11690395988113628,
+          "ci95": 0.6308821402489916,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.16655626117572087,
+            0.0672516585865517
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5270915764607034,
+          "ci95": 2.374433877950549,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3402165663906145,
+            0.7139665865307921
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8830960401188639,
+          "ci95": 0.6308821402489931,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8334437388242791,
+            0.9327483414134485
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.010054608293102863,
+          "ci95": 0.03379702307732341,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.012714534554500896,
+            0.007394682031704829
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.05858786842949021,
+          "ci95": 0.7444174562651024,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.11717573685898042
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.9414121315705097,
+          "ci95": 0.7444174562651024,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1.0,
+            0.8828242631410196
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.00812228028108573,
+          "ci95": 0.08369591272379248,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.01470939760548306,
+            0.0015351629566883991
+          ]
+        }
+      }
+    },
+    "QMIX": {
+      "pixel_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.2880368152446288,
+          "ci95": 0.03295768587396107,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2906306831711172,
+            0.28544294731814046
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.15237832920875832,
+          "ci95": 0.4405782904087806,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11770350704530949,
+            0.18705315137220713
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.47376175330151316,
+          "ci95": 1.3631775940053845,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.581047885365529,
+            0.3664756212374974
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8476216707912417,
+          "ci95": 0.44057829040878116,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8822964929546906,
+            0.8129468486277929
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.013948522416966418,
+          "ci95": 0.1427690700521916,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0027121718698082547,
+            0.02518487296412458
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.25284500952508665,
+          "ci95": 0.03905192028252519,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.2559185118297085,
+            0.2497715072204648
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.7471549904749133,
+          "ci95": 0.03905192028252501,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.7440814881702914,
+            0.7502284927795351
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.008306395545748184,
+          "ci95": 0.05594074995441259,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0039036921021457444,
+            0.012709098989350623
+          ]
+        }
+      },
+      "pixel_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.32259454464928006,
+          "ci95": 0.012555716004188065,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.3235827168517189,
+            0.3216063724468412
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.12580577492072773,
+          "ci95": 0.09194715902529473,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.11856925996517172,
+            0.13304228987628375
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.5381027098581324,
+          "ci95": 0.18314794734585735,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.5525169981743496,
+            0.523688421541915
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8741942250792722,
+          "ci95": 0.09194715902529446,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.8814307400348282,
+            0.8669577101237163
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.019498339428539534,
+          "ci95": 0.026025315312266685,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.017450069688867986,
+            0.021546609168211082
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.13518595708392991,
+          "ci95": 0.6801905046206074,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.08165294082227341,
+            0.1887189733455864
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.8648140429160701,
+          "ci95": 0.6801905046206076,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9183470591777266,
+            0.8112810266544136
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.00233829973762667,
+          "ci95": 0.0011840259920614254,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0024314861056466152,
+            0.0022451133696067245
+          ]
+        }
+      },
+      "state_full": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0225,
+          "ci95": 0.28588499999999994,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.045
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.12485910520222686,
+          "ci95": 1.4383320422502925,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.011658094478923497,
+            0.23806011592553022
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.0896832736252661,
+          "ci95": 0.9979963315677493,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.011137993319288655,
+            0.16822855393124353
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.2532133606928767,
+          "ci95": 0.5459390900265731,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.21024633015403105,
+            0.2961803912317224
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.910316726374734,
+          "ci95": 0.9979963315677509,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9888620066807116,
+            0.8317714460687564
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.03316123604819355,
+          "ci95": 0.4213466652283472,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0663224720963871
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.3365733054778447,
+          "ci95": 3.985699259188926,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.02288691643417032,
+            0.6502596945215191
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 0.6634266945221552,
+          "ci95": 3.985699259188926,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9771130835658296,
+            0.3497403054784809
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.0010534413407951965,
+          "ci95": 0.00911495156765443,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.00033606753569095997,
+            0.0017708151458994332
+          ]
+        }
+      },
+      "state_partial": {
+        "seeds": [
+          42,
+          68
+        ],
+        "n_seeds": 2,
+        "episodes_per_seed": {
+          "42": 100,
+          "68": 100
+        },
+        "true_objective": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "teammate_in_frustum_rate": {
+          "mean": 0.17746642852686537,
+          "ci95": 1.6044844397086828,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.05118872982478107,
+            0.30374412722894967
+          ]
+        },
+        "teammate_visible_rate": {
+          "mean": 0.1744914524805939,
+          "ci95": 1.6366658419754496,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.045680981681329766,
+            0.303301923279858
+          ]
+        },
+        "teammate_obscured_rate": {
+          "mean": 0.018994893701182767,
+          "ci95": 0.22286600735355905,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.03653511150014067,
+            0.0014546759022248678
+          ]
+        },
+        "teammate_out_of_view_rate": {
+          "mean": 0.8255085475194063,
+          "ci95": 1.6366658419754496,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.9543190183186704,
+            0.6966980767201422
+          ]
+        },
+        "mutual_visibility_rate": {
+          "mean": 0.0002740289664252798,
+          "ci95": 0.003481812047399604,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0005480579328505596,
+            0.0
+          ]
+        },
+        "target_visible_rate": {
+          "mean": 0.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.0,
+            0.0
+          ]
+        },
+        "target_obscured_rate": {
+          "mean": 1.0,
+          "ci95": 0.0,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            1.0,
+            1.0
+          ]
+        },
+        "mean_teammate_pixel_fraction": {
+          "mean": 0.012558619125266582,
+          "ci95": 0.10864490346369937,
+          "ci_method": "student_t_df1",
+          "t_crit": 12.706,
+          "per_seed": [
+            0.004007942007078374,
+            0.02110929624345479
+          ]
+        }
+      }
+    }
+  }
+}

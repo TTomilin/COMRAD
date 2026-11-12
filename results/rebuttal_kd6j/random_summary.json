@@ -1,0 +1,438 @@
+{
+  "created_at_utc": "2026-11-09T15:15:13.095287+00:00",
+  "episodes_per_wad": 1,
+  "heldout_layout_seeds": [
+    1009,
+    2027,
+    3037,
+    4051,
+    5099
+  ],
+  "mode": "random",
+  "schema_version": 1,
+  "summaries": [
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 150.90331914642564,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 7.603313953417615e-05,
+      "mean_true_objective": 1060.8,
+      "mode": "random",
+      "mutual_visibility_rate": 0.00368362144280428,
+      "num_seeds": 5,
+      "scenario": "ammo_carrier",
+      "seed_means": [
+        961.6,
+        947.2,
+        1145.6,
+        1022.4,
+        1227.2
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 121.55262234933477,
+      "target_obscured_rate": 0.7155699137617673,
+      "target_visible_rate": 0.28312285080623917,
+      "teammate_in_frustum_rate": 0.20301263989691165,
+      "teammate_obscured_rate": 0.6208300030908405,
+      "teammate_out_of_view_rate": 0.9228571628519601,
+      "teammate_visible_rate": 0.07714283714803992
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 1.8719415980246843,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.002184124631712612,
+      "mean_true_objective": -9.10647999999998,
+      "mode": "random",
+      "mutual_visibility_rate": 0.031136151207182897,
+      "num_seeds": 5,
+      "scenario": "armory_siege",
+      "seed_means": [
+        -7.457199999999972,
+        -10.48999999999998,
+        -7.707199999999984,
+        -10.685999999999977,
+        -9.191999999999982
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 1.5078489420363042,
+      "target_obscured_rate": 0.4252790428615513,
+      "target_visible_rate": 0.5736088018374184,
+      "teammate_in_frustum_rate": 0.21868348253066242,
+      "teammate_obscured_rate": 0.224382742710912,
+      "teammate_out_of_view_rate": 0.8374079188040402,
+      "teammate_visible_rate": 0.16259208119595975
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 4.441599999999999,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.005423033963206742,
+      "mean_true_objective": 130.6,
+      "mode": "random",
+      "mutual_visibility_rate": 0.06892246840332499,
+      "num_seeds": 5,
+      "scenario": "coop_health_gathering",
+      "seed_means": [
+        129.0,
+        129.0,
+        129.0,
+        129.0,
+        137.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 3.5777087639996634,
+      "target_obscured_rate": 0.3066,
+      "target_visible_rate": 0.4903600012360558,
+      "teammate_in_frustum_rate": 0.2668675257254102,
+      "teammate_obscured_rate": 0.10205788156591339,
+      "teammate_out_of_view_rate": 0.7668718519205217,
+      "teammate_visible_rate": 0.23312814807947838
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.2077368181136892,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.0030684791666666642,
+      "mean_true_objective": 0.36000000000000004,
+      "mode": "random",
+      "mutual_visibility_rate": 0.019620000000000002,
+      "num_seeds": 5,
+      "scenario": "coop_puzzle",
+      "seed_means": [
+        0.2,
+        0.4,
+        0.6,
+        0.2,
+        0.4
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.1673320053068151,
+      "target_obscured_rate": 1.0,
+      "target_visible_rate": 0.0,
+      "teammate_in_frustum_rate": 0.16472,
+      "teammate_obscured_rate": 0.3419293689062788,
+      "teammate_out_of_view_rate": 0.8887700000000001,
+      "teammate_visible_rate": 0.11123
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.11103999999999999,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.0030468116659851537,
+      "mean_true_objective": 0.04,
+      "mode": "random",
+      "mutual_visibility_rate": 0.019713764088623704,
+      "num_seeds": 5,
+      "scenario": "dumb_enemies",
+      "seed_means": [
+        0.0,
+        0.2,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.08944271909999159,
+      "target_obscured_rate": 0.8044981481481481,
+      "target_visible_rate": 0.19501580920677522,
+      "teammate_in_frustum_rate": 0.2558248720001382,
+      "teammate_obscured_rate": 0.29693768931383935,
+      "teammate_out_of_view_rate": 0.8199674025098916,
+      "teammate_visible_rate": 0.18003259749010844
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 70.88005979302226,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.0020594062442980746,
+      "mean_true_objective": 1969.2800000000002,
+      "mode": "random",
+      "mutual_visibility_rate": 0.0946284837921073,
+      "num_seeds": 5,
+      "scenario": "foraging_commons",
+      "seed_means": [
+        2068.8,
+        1942.4,
+        1928.0,
+        1943.2,
+        1964.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 57.093887588777896,
+      "target_obscured_rate": 0.23979021932308303,
+      "target_visible_rate": 0.7586606884543411,
+      "teammate_in_frustum_rate": 0.29419601665413164,
+      "teammate_obscured_rate": 0.029845478479441537,
+      "teammate_out_of_view_rate": 0.7140339480623542,
+      "teammate_visible_rate": 0.2859660519376456
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.0,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.006013156410906142,
+      "mean_true_objective": 0.0,
+      "mode": "random",
+      "mutual_visibility_rate": 0.0,
+      "num_seeds": 5,
+      "scenario": "lava_maze",
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.0,
+      "target_obscured_rate": 0.3932128708761655,
+      "target_visible_rate": 0.6067871291238345,
+      "teammate_in_frustum_rate": 0.5963615102791552,
+      "teammate_obscured_rate": 0.1239960629136555,
+      "teammate_out_of_view_rate": 0.5118849698111759,
+      "teammate_visible_rate": 0.48811503018882413
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.0,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.011752874162240537,
+      "mean_true_objective": 0.0,
+      "mode": "random",
+      "mutual_visibility_rate": 0.0,
+      "num_seeds": 5,
+      "scenario": "lavapit",
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.0,
+      "target_obscured_rate": 0.9992,
+      "target_visible_rate": 0.0007692307692307692,
+      "teammate_in_frustum_rate": 0.23632131430342693,
+      "teammate_obscured_rate": 0.12723664639454113,
+      "teammate_out_of_view_rate": 0.7948338004094464,
+      "teammate_visible_rate": 0.20516619959055357
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.3237344492018111,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.007142752427876575,
+      "mean_true_objective": 0.43999999999999995,
+      "mode": "random",
+      "mutual_visibility_rate": 0.0,
+      "num_seeds": 5,
+      "scenario": "platform_chain",
+      "seed_means": [
+        0.2,
+        0.8,
+        0.2,
+        0.6,
+        0.4
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.260768096208106,
+      "target_obscured_rate": 0.5756437484084543,
+      "target_visible_rate": 0.3983532328263113,
+      "teammate_in_frustum_rate": 0.4017054571152363,
+      "teammate_obscured_rate": 0.20827283741370428,
+      "teammate_out_of_view_rate": 0.6834026154668235,
+      "teammate_visible_rate": 0.3165973845331767
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.0,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 1.9078485675073288e-05,
+      "mean_true_objective": 0.0,
+      "mode": "random",
+      "mutual_visibility_rate": 0.003651915028358737,
+      "num_seeds": 5,
+      "scenario": "rhythm_sync_dense",
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.0,
+      "target_obscured_rate": 0.8929835320967225,
+      "target_visible_rate": 0.10701646790327743,
+      "teammate_in_frustum_rate": 0.23047483850941547,
+      "teammate_obscured_rate": 0.9360248365413902,
+      "teammate_out_of_view_rate": 0.9887322707107981,
+      "teammate_visible_rate": 0.011267729289201903
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.13599567051932204,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.003071721053409586,
+      "mean_true_objective": 0.08,
+      "mode": "random",
+      "mutual_visibility_rate": 0.042693266832917715,
+      "num_seeds": 5,
+      "scenario": "smart_enemies",
+      "seed_means": [
+        0.0,
+        0.0,
+        0.2,
+        0.2,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.10954451150103323,
+      "target_obscured_rate": 0.8559592592592593,
+      "target_visible_rate": 0.14368374675320936,
+      "teammate_in_frustum_rate": 0.27618839736685996,
+      "teammate_obscured_rate": 0.2559915314755529,
+      "teammate_out_of_view_rate": 0.7886921264966914,
+      "teammate_visible_rate": 0.21130787350330865
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.20773681811368924,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.0038335495370370233,
+      "mean_true_objective": 0.24,
+      "mode": "random",
+      "mutual_visibility_rate": 0.21848888888888887,
+      "num_seeds": 5,
+      "scenario": "stag_hunt_arena",
+      "seed_means": [
+        0.4,
+        0.2,
+        0.4,
+        0.2,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.16733200530681513,
+      "target_obscured_rate": 0.056711111111111115,
+      "target_visible_rate": 0.9432888888888888,
+      "teammate_in_frustum_rate": 0.4757955555555555,
+      "teammate_obscured_rate": 0.026067385526113762,
+      "teammate_out_of_view_rate": 0.5363644444444445,
+      "teammate_visible_rate": 0.4636355555555555
+    },
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 0.0,
+      "episodes_total": 25,
+      "mean_teammate_pixel_fraction": 0.0048157507742283,
+      "mean_true_objective": 0.0,
+      "mode": "random",
+      "mutual_visibility_rate": 0.040888793500754146,
+      "num_seeds": 5,
+      "scenario": "stealth_labyrinth",
+      "seed_means": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 0.0,
+      "target_obscured_rate": 0.9788777572435968,
+      "target_visible_rate": 0.021122242756403155,
+      "teammate_in_frustum_rate": 0.25439630998962864,
+      "teammate_obscured_rate": 0.0861767317156904,
+      "teammate_out_of_view_rate": 0.7714093779331403,
+      "teammate_visible_rate": 0.22859062206685948
+    }
+  ],
+  "train_or_eval_seeds": [
+    42,
+    68,
+    81,
+    97,
+    154
+  ]
+}

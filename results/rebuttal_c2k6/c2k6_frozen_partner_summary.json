@@ -1,0 +1,1552 @@
+{
+  "random_summary": "results/rebuttal_kd6j/random_full/random_summary.json",
+  "protocol": "selected-checkpoint test-time partner replacement without adaptation; checkpoint selected on the same held-out both_learned episodes; CIs over 5 layouts, conditional on the selected checkpoint",
+  "thresholds": {
+    "floor_margin_pp": 2.0,
+    "drop_to_random_retention": 0.15,
+    "partner_insensitive_retention": 0.75
+  },
+  "rows": [
+    {
+      "scenario": "stag_hunt_arena",
+      "name": "Stag Hunt Arena",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_stag_hunt_arena_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000012212_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "d90425667e1550d2cf78cfa3715c20c1129acecb40d678959bd8e0c7df655ab8",
+      "wad_sha256": {
+        "1009": "e0e24d0f9164ea9dfb55a13d9cf317ec4ed64498add78e6db088595b35aa2cb9",
+        "2027": "493e6c1bb5cf77a726cc065b185c3feda5ed497b0b96bffc697afba4075d240c",
+        "3037": "97eb7b98223ae31bded6dce000f993099f8e66011411ed2d282cb6c31413ca5b",
+        "4051": "26043b847d885f3b095e28ce188ac253e3b45ae4f62e57c40200db9d31c8cbd8",
+        "5099": "f762e2dc329be8fb0f0c09d2c1e877ef067f07c222251f44e07f301c59ae5a2b"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [
+        {
+          "wad_seed": 1009,
+          "pass": "noop_seat0",
+          "episode_index": 4,
+          "episode_step": 3997
+        },
+        {
+          "wad_seed": 2027,
+          "pass": "noop_seat0",
+          "episode_index": 3,
+          "episode_step": 3922
+        },
+        {
+          "wad_seed": 3037,
+          "pass": "noop_seat1",
+          "episode_index": 2,
+          "episode_step": 3181
+        },
+        {
+          "wad_seed": 3037,
+          "pass": "random_seat1",
+          "episode_index": 2,
+          "episode_step": 3520
+        },
+        {
+          "wad_seed": 5099,
+          "pass": "noop_seat1",
+          "episode_index": 9,
+          "episode_step": 3365
+        },
+        {
+          "wad_seed": 5099,
+          "pass": "random_seat0",
+          "episode_index": 7,
+          "episode_step": 1746
+        }
+      ],
+      "ceiling": 36,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 26.67,
+        "partner_noop": 6.16,
+        "partner_random": 7.34,
+        "noop_seat0": 5.68,
+        "noop_seat1": 6.64,
+        "random_seat0": 7.46,
+        "random_seat1": 7.22
+      },
+      "raw_ci95": {
+        "both_learned": 0.23473209921099517,
+        "partner_noop": 0.8549449067630028,
+        "partner_random": 0.807429557051264
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 20.509999999999998,
+          "ci95": 0.9630359710831161
+        },
+        "random": {
+          "mean": 19.330000000000002,
+          "ci95": 0.8607838418557823
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 26.55,
+          "2027": 26.4,
+          "3037": 26.8,
+          "4051": 26.75,
+          "5099": 26.85
+        },
+        "noop_seat0": {
+          "1009": 6.1,
+          "2027": 6.2,
+          "3037": 4.3,
+          "4051": 5.3,
+          "5099": 6.5
+        },
+        "noop_seat1": {
+          "1009": 6.6,
+          "2027": 7.0,
+          "3037": 5.8,
+          "4051": 6.7,
+          "5099": 7.1
+        },
+        "random_seat0": {
+          "1009": 7.1,
+          "2027": 7.2,
+          "3037": 8.4,
+          "4051": 8.7,
+          "5099": 5.9
+        },
+        "random_seat1": {
+          "1009": 8.2,
+          "2027": 6.9,
+          "3037": 6.9,
+          "4051": 7.3,
+          "5099": 6.8
+        }
+      },
+      "pct": {
+        "both_learned": 74.08333333333333,
+        "partner_noop": 17.11111111111111,
+        "partner_random": 20.38888888888889,
+        "noop_seat0": 15.777777777777777,
+        "noop_seat1": 18.444444444444443,
+        "random_seat0": 20.72222222222222,
+        "random_seat1": 20.055555555555554
+      },
+      "random_policy_raw": 0.21800000000000003,
+      "random_policy_pct": 0.6055555555555556,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 26.67,
+          "both_learned_pct": 74.08333333333333,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": 0.22463329804929685,
+        "random": 0.26924240133071226
+      }
+    },
+    {
+      "scenario": "rhythm_sync_dense",
+      "name": "Rhythm Sync",
+      "algorithm": "MAPPO",
+      "train_seed": 68,
+      "checkpoint": "train_dir/mode3_comrad_obs_modality_2x2_20261109_170851/obs_modality_2x2/01_MAPPO_pixel_partial_env_rhythm_sync_dense_s.r.alp_0.0_see_68/checkpoint_p0/checkpoint_000012212_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "e512c19b335190e8c378390913350281241d2b9e36161528e0b489be1e1057f1",
+      "wad_sha256": {
+        "1009": "f536d2a6db5219db77c556bca9dd91a03c584a9fd6c57be221c70921cfe3b380",
+        "2027": "8e5904576c9fa0e179e307fe223fd63d048dd6366ac2e24859f65f31aedebecc",
+        "3037": "b6ae474081d92e3196db895dbc4cdc63f9528670db5687c296175802ed3cef5d",
+        "4051": "c63fdb1ffe5e18c71c7f77f9ef578cd8f80904442b84a5578a98e7dc11cd1e11",
+        "5099": "d10f2e0d6806446eb59adcd6a0fe02c761a4d0e0d258580fd9c1f772fd2c7e69"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 1.0,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 0.7465,
+        "partner_noop": 0.0,
+        "partner_random": 0.0035000000000000005,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.006000000000000001,
+        "random_seat1": 0.001
+      },
+      "raw_ci95": {
+        "both_learned": 0.060842865612987025,
+        "partner_noop": 0.0,
+        "partner_random": 0.002776
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 0.7464999999999999,
+          "ci95": 0.060842865612987025
+        },
+        "random": {
+          "mean": 0.7429999999999999,
+          "ci95": 0.06166064047672552
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 0.6849999999999999,
+          "2027": 0.7374999999999999,
+          "3037": 0.7224999999999999,
+          "4051": 0.7749999999999998,
+          "5099": 0.8125
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat0": {
+          "1009": 0.01,
+          "2027": 0.0,
+          "3037": 0.01,
+          "4051": 0.005,
+          "5099": 0.005
+        },
+        "random_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.005,
+          "5099": 0.0
+        }
+      },
+      "pct": {
+        "both_learned": 74.65,
+        "partner_noop": 0.0,
+        "partner_random": 0.35000000000000003,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.6000000000000001,
+        "random_seat1": 0.1
+      },
+      "random_policy_raw": 0.0002,
+      "random_policy_pct": 0.02,
+      "candidates": [
+        {
+          "train_seed": 68,
+          "both_learned_raw": 0.7465,
+          "both_learned_pct": 74.65,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "drops_to_random",
+      "retention": {
+        "noop": -0.00026798874447273214,
+        "random": 0.00442181428380008
+      }
+    },
+    {
+      "scenario": "foraging_commons",
+      "name": "Foraging Commons",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_foraging_commons_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000012212_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "ba3500c777dbb06ddad052776c3ce45350c9e448a3b6e9856ea935bdaec24fc6",
+      "wad_sha256": {
+        "1009": "79085e8cfbdf9a8e12367042ca9a1151ef14a88d9f1121d87ff9ab70f431fcda",
+        "2027": "2de9083860d94cec0e99479e94c7a4e80eb63d88449775aef55d65f032466b4c",
+        "3037": "638f142ed17c6c46f46427d3c385d795a66372ef920eb89debecd85fffef73b7",
+        "4051": "6c0a1327ba5011c52071be5e8a319485151acc1930979596dba28314bfe9f4e7",
+        "5099": "2e78c7f1e09f8cd7451e97ace21d46622177a4e74e1ca500f0c01ca9d8a343b3"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 21000,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 2491.6,
+        "partner_noop": 1824.0,
+        "partner_random": 1922.48,
+        "noop_seat0": 1824.0,
+        "noop_seat1": 1824.0,
+        "random_seat0": 1917.68,
+        "random_seat1": 1927.28
+      },
+      "raw_ci95": {
+        "both_learned": 71.43204149354831,
+        "partner_noop": 0.0,
+        "partner_random": 46.18336349161245
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 667.6000000000001,
+          "ci95": 71.43204149354831
+        },
+        "random": {
+          "mean": 569.1200000000001,
+          "ci95": 69.7004014962784
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 2518.8,
+          "2027": 2411.8,
+          "3037": 2450.2,
+          "4051": 2537.4,
+          "5099": 2539.8
+        },
+        "noop_seat0": {
+          "1009": 1824.0,
+          "2027": 1824.0,
+          "3037": 1824.0,
+          "4051": 1824.0,
+          "5099": 1824.0
+        },
+        "noop_seat1": {
+          "1009": 1824.0,
+          "2027": 1824.0,
+          "3037": 1824.0,
+          "4051": 1824.0,
+          "5099": 1824.0
+        },
+        "random_seat0": {
+          "1009": 1914.8,
+          "2027": 1925.6,
+          "3037": 1890.0,
+          "4051": 2009.6,
+          "5099": 1848.4
+        },
+        "random_seat1": {
+          "1009": 1960.0,
+          "2027": 1887.2,
+          "3037": 1922.0,
+          "4051": 1949.2,
+          "5099": 1918.0
+        }
+      },
+      "pct": {
+        "both_learned": 11.864761904761904,
+        "partner_noop": 8.685714285714285,
+        "partner_random": 9.154666666666667,
+        "noop_seat0": 8.685714285714285,
+        "noop_seat1": 8.685714285714285,
+        "random_seat0": 9.131809523809524,
+        "random_seat1": 9.177523809523809
+      },
+      "random_policy_raw": 1929.0559999999998,
+      "random_policy_pct": 9.185980952380952,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 2491.6,
+          "both_learned_pct": 11.864761904761904,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "drops_to_random",
+      "retention": {
+        "noop": -0.18675161409596402,
+        "random": -0.011689752268266485
+      }
+    },
+    {
+      "scenario": "coop_puzzle",
+      "name": "Co-op Puzzle",
+      "algorithm": "MAPPO",
+      "train_seed": 68,
+      "checkpoint": "train_dir/mode3_comrad_full_obs_clean_20261111_061449/full_obs_clean/00_MAPPO_pixel_partial_env_coop_puzzle_s.r.alp_0.0_see_68/checkpoint_p0/checkpoint_000012212_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "edaef0f01ec4f099419b48e2c2e52f1f9a1dade5849f5e230fda60fc039707ed",
+      "wad_sha256": {
+        "1009": "67d58b0816a04641fbfefdc30b2e93a12b99e526a4616f59ab4376692e1e1c24",
+        "2027": "6e1e97a19ca368102ca2b78ad5ec7d50c554cc9e9d1e890d42a9fbdd70d5041f",
+        "3037": "03a074e9e2abfdad7cb129d9bd71de1de30b51e35b649c6b44830511b2a3d06a",
+        "4051": "b44d093626ca1f4b13aaad36775e9e1c41b4c2456d7b8827bd9a567c8aaed11c",
+        "5099": "2a4a3c4bd70ca1a0f97ef5cdccafe1c531e57b12e07463fe62e3696374010296"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 5,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 2.85,
+        "partner_noop": 0.0,
+        "partner_random": 0.8600000000000001,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.92,
+        "random_seat1": 0.8
+      },
+      "raw_ci95": {
+        "both_learned": 0.13879999999999992,
+        "partner_noop": 0.0,
+        "partner_random": 0.23390991770337569
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 2.8500000000000005,
+          "ci95": 0.13879999999999992
+        },
+        "random": {
+          "mean": 1.9900000000000002,
+          "ci95": 0.34393284460778095
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 2.9,
+          "2027": 3.0,
+          "3037": 2.7,
+          "4051": 2.8,
+          "5099": 2.85
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat0": {
+          "1009": 1.0,
+          "2027": 0.5,
+          "3037": 0.8,
+          "4051": 1.0,
+          "5099": 1.3
+        },
+        "random_seat1": {
+          "1009": 0.7,
+          "2027": 0.6,
+          "3037": 1.0,
+          "4051": 0.9,
+          "5099": 0.8
+        }
+      },
+      "pct": {
+        "both_learned": 57.00000000000001,
+        "partner_noop": 0.0,
+        "partner_random": 17.200000000000003,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 18.4,
+        "random_seat1": 16.0
+      },
+      "random_policy_raw": 0.20600000000000002,
+      "random_policy_pct": 4.12,
+      "candidates": [
+        {
+          "train_seed": 68,
+          "both_learned_raw": 2.85,
+          "both_learned_pct": 57.00000000000001,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": -0.07791225416036307,
+        "random": 0.24735249621785174
+      }
+    },
+    {
+      "scenario": "platform_chain",
+      "name": "Platform Chain",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_platform_chain_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000012202_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "79b2616686be1cbffc50b8c806a9bd13fe6f89ce40a92399b3a9d12ac1be5fb1",
+      "wad_sha256": {
+        "1009": "f78d03748977acc73f3408c2b425eed5644fb1d24e21498485c9d915eb746f5f",
+        "2027": "1092b08d7188fa3679c6aac508fe5bce8b83035e2916695f22088970ddef96c9",
+        "3037": "9e942c07dd550632c8438c152eead3fdf258144a227129d83cc7625ec00f0851",
+        "4051": "e1e3d779597d5abcf73e521f65eab5c406af74a48494a41b01fcc1e2dca7ef45",
+        "5099": "8df70db693aa66f24aca4bd2c4084b913c72acc06f0b373d6ff09ad109dce2e5"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 47,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 1.76,
+        "partner_noop": 0.5,
+        "partner_random": 0.72,
+        "noop_seat0": 0.04,
+        "noop_seat1": 0.96,
+        "random_seat0": 0.5,
+        "random_seat1": 0.94
+      },
+      "raw_ci95": {
+        "both_learned": 0.22552330611269425,
+        "partner_noop": 0.043892413923137114,
+        "partner_random": 0.07077439084866786
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 1.2600000000000002,
+          "ci95": 0.19332602928731557
+        },
+        "random": {
+          "mean": 1.04,
+          "ci95": 0.21232317254600358
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 1.85,
+          "2027": 1.45,
+          "3037": 1.85,
+          "4051": 1.9,
+          "5099": 1.75
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.1,
+          "4051": 0.1,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 1.0,
+          "2027": 0.9,
+          "3037": 1.0,
+          "4051": 0.9,
+          "5099": 1.0
+        },
+        "random_seat0": {
+          "1009": 0.4,
+          "2027": 0.5,
+          "3037": 0.6,
+          "4051": 0.6,
+          "5099": 0.4
+        },
+        "random_seat1": {
+          "1009": 1.1,
+          "2027": 0.9,
+          "3037": 0.7,
+          "4051": 1.0,
+          "5099": 1.0
+        }
+      },
+      "pct": {
+        "both_learned": 3.74468085106383,
+        "partner_noop": 1.0638297872340425,
+        "partner_random": 1.5319148936170213,
+        "noop_seat0": 0.0851063829787234,
+        "noop_seat1": 2.0425531914893615,
+        "random_seat0": 1.0638297872340425,
+        "random_seat1": 2.0
+      },
+      "random_policy_raw": 0.674,
+      "random_policy_pct": 1.4340425531914895,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 1.76,
+          "both_learned_pct": 3.74468085106383,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "drops_to_random",
+      "retention": {
+        "noop": -0.16022099447513824,
+        "random": 0.042357274401473216
+      }
+    },
+    {
+      "scenario": "armory_siege",
+      "name": "Armory Siege",
+      "algorithm": "QMIX",
+      "train_seed": 68,
+      "checkpoint": "train_dir/mode3_comrad_obs_modality_2x2_20261109_170851/obs_modality_2x2/01_QMIX_pixel_partial_env_armory_siege_see_68/checkpoint_p0/checkpoint_000012208_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "b1428dd1ad008acf9ca60d4b16177fee583633967425f2f34b1235ecd0c1dcb1",
+      "wad_sha256": {
+        "1009": "68726071b41e0f76b76efdbd4eb4dff64d5636722c8d17175f570d4fe00d96c9",
+        "2027": "09e73220ddfc0d9e75d3057f48b5b6a8b12edcbd354cac0f75d7f7c9f32f8c0a",
+        "3037": "1801fafebbbb0a7b35733c8d3fafa2f20249f6c383120cc29c415d2878916ba4",
+        "4051": "d8a1af15b2dd7939604ef540aa6ea86f57ff3b79540e774eaabb677b231a39fc",
+        "5099": "e6362fcd4175aed5040ec2b445d7ccf7c8583029d9c1f03d47a1f0776a6ba9d5"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 100,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 13.081020000000006,
+        "partner_noop": 9.197959999999995,
+        "partner_random": 11.705159999999985,
+        "noop_seat0": 9.273740000000016,
+        "noop_seat1": 9.122179999999975,
+        "random_seat0": 14.171999999999992,
+        "random_seat1": 9.238319999999979
+      },
+      "raw_ci95": {
+        "both_learned": 8.027870724677383,
+        "partner_noop": 4.157621382003034,
+        "partner_random": 6.8316286388791845
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 3.8830600000000097,
+          "ci95": 6.555880326533474
+        },
+        "random": {
+          "mean": 1.3758600000000203,
+          "ci95": 10.542960622103896
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 18.16699999999998,
+          "2027": 7.860350000000008,
+          "3037": 21.846999999999973,
+          "4051": 8.614850000000024,
+          "5099": 8.915900000000045
+        },
+        "noop_seat0": {
+          "1009": 7.174599999999957,
+          "2027": 10.812200000000036,
+          "3037": 14.520000000000001,
+          "4051": -0.5921999999999752,
+          "5099": 14.454100000000057
+        },
+        "noop_seat1": {
+          "1009": 10.146599999999998,
+          "2027": 8.666200000000009,
+          "3037": 12.27419999999999,
+          "4051": 8.815999999999907,
+          "5099": 5.707899999999979
+        },
+        "random_seat0": {
+          "1009": 10.920200000000026,
+          "2027": 17.103000000000016,
+          "3037": 18.230599999999964,
+          "4051": 3.911300000000005,
+          "5099": 20.69489999999995
+        },
+        "random_seat1": {
+          "1009": 3.5889000000000406,
+          "2027": 14.094799999999978,
+          "3037": 11.833799999999986,
+          "4051": 4.791399999999944,
+          "5099": 11.882699999999943
+        }
+      },
+      "pct": {
+        "both_learned": 13.081020000000008,
+        "partner_noop": 9.197959999999995,
+        "partner_random": 11.705159999999985,
+        "noop_seat0": 9.273740000000016,
+        "noop_seat1": 9.122179999999975,
+        "random_seat0": 14.171999999999993,
+        "random_seat1": 9.238319999999979
+      },
+      "random_policy_raw": -8.674413999999977,
+      "random_policy_pct": 0.0,
+      "candidates": [
+        {
+          "train_seed": 68,
+          "both_learned_raw": 13.081020000000006,
+          "both_learned_pct": 13.081020000000008,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": 0.7031531180290214,
+        "random": 0.894820128705558
+      }
+    },
+    {
+      "scenario": "coop_health_gathering",
+      "name": "Co-op Health Gathering",
+      "algorithm": "IPPO",
+      "train_seed": 68,
+      "checkpoint": "train_dir/mode3_comrad_frozen_partner_winners_20261112_125503/frozen_partner_winners/01_IPPO_pixel_partial_env_coop_health_gathering_s.r.alp_0.0_see_68/checkpoint_p0/checkpoint_000024415_100024320.pth",
+      "checkpoint_steps": 100024320,
+      "checkpoint_sha256": "26e0e536f8292a28bac532d25d4284c915bdfd39e335e3fc4245fe67443b4a95",
+      "wad_sha256": {
+        "1009": "4c59358792f37e3102141693e8768d3dfe3ddf5ea66d776ec8847a251c4bc196",
+        "2027": "53e14c1650ff1c35e546729d30e2b765b6b90f7a9c76d423ddbe6b43e90c5ea0",
+        "3037": "893fba39f4d1c212dd310ce12dd5208ee51eac6d437d07ba36be994a132296f1",
+        "4051": "f48286deda4c9150ad1f68b95e92fddd9e7070b65c086a57e17aa47cd161056c",
+        "5099": "b010d9a285e6023b321b91e582278259284665dacf9001cef455150d8ee76659"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 2100,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 622.67,
+        "partner_noop": 129.0,
+        "partner_random": 133.88,
+        "noop_seat0": 129.0,
+        "noop_seat1": 129.0,
+        "random_seat0": 135.08,
+        "random_seat1": 132.68
+      },
+      "raw_ci95": {
+        "both_learned": 477.05786675167025,
+        "partner_noop": 88.832,
+        "partner_random": 92.2624136825739
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 493.6700000000001,
+          "ci95": 398.5274865187273
+        },
+        "random": {
+          "mean": 488.7900000000001,
+          "ci95": 396.62866222030095
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 885.95,
+          "2027": 630.75,
+          "3037": 989.45,
+          "4051": 1.0,
+          "5099": 606.2
+        },
+        "noop_seat0": {
+          "1009": 161.0,
+          "2027": 161.0,
+          "3037": 161.0,
+          "4051": 1.0,
+          "5099": 161.0
+        },
+        "noop_seat1": {
+          "1009": 161.0,
+          "2027": 161.0,
+          "3037": 161.0,
+          "4051": 1.0,
+          "5099": 161.0
+        },
+        "random_seat0": {
+          "1009": 162.6,
+          "2027": 173.0,
+          "3037": 164.2,
+          "4051": 1.0,
+          "5099": 174.6
+        },
+        "random_seat1": {
+          "1009": 164.2,
+          "2027": 165.0,
+          "3037": 169.8,
+          "4051": 1.0,
+          "5099": 163.4
+        }
+      },
+      "pct": {
+        "both_learned": 29.65095238095238,
+        "partner_noop": 6.142857142857143,
+        "partner_random": 6.375238095238095,
+        "noop_seat0": 6.142857142857143,
+        "noop_seat1": 6.142857142857143,
+        "random_seat0": 6.432380952380953,
+        "random_seat1": 6.318095238095238
+      },
+      "random_policy_raw": 130.392,
+      "random_policy_pct": 6.209142857142857,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 509.73,
+          "both_learned_pct": 24.272857142857145,
+          "checkpoint_steps": 100024320
+        },
+        {
+          "train_seed": 68,
+          "both_learned_raw": 622.67,
+          "both_learned_pct": 29.65095238095238,
+          "checkpoint_steps": 100024320
+        }
+      ],
+      "category": "drops_to_random",
+      "retention": {
+        "noop": -0.0028276705438796588,
+        "random": 0.007085427339836433
+      }
+    },
+    {
+      "scenario": "lavapit",
+      "name": "Lava Pit",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_lavapit_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000012212_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "fbb0beab87bbd67f92366e805d74f145ce1738cb326e23cd5316e735c91fafac",
+      "wad_sha256": {
+        "1009": "2efe25422c940fe21532d86af7c066ad1a8884b366c6db57e26f5399850c126f",
+        "2027": "92dee58af5cd417ce1e3f77dc82d48648f07c45fe46528b19ecf55973b6cfbd5",
+        "3037": "e9c824b6ab7a73a2333fc7e892f3532ea507ec878780518cd531dcd467a3f48e",
+        "4051": "7f4bf16acca09e35ee413633bb48e3c556ddeb0ad90b9293e8c28e878ffdbb34",
+        "5099": "e7becb219e325f58e43ad8577f574911c6bba0a8d01fc5d1b39f5247ac488b69"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 11,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 0.99,
+        "partner_noop": 0.0,
+        "partner_random": 0.17,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.14,
+        "random_seat1": 0.2
+      },
+      "raw_ci95": {
+        "both_learned": 0.02776000000000002,
+        "partner_noop": 0.0,
+        "partner_random": 0.05552
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 0.99,
+          "ci95": 0.02776000000000002
+        },
+        "random": {
+          "mean": 0.8200000000000001,
+          "ci95": 0.07077439084866785
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 0.95,
+          "2027": 1.0,
+          "3037": 1.0,
+          "4051": 1.0,
+          "5099": 1.0
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat0": {
+          "1009": 0.2,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.2,
+          "5099": 0.3
+        },
+        "random_seat1": {
+          "1009": 0.2,
+          "2027": 0.2,
+          "3037": 0.4,
+          "4051": 0.1,
+          "5099": 0.1
+        }
+      },
+      "pct": {
+        "both_learned": 9.0,
+        "partner_noop": 0.0,
+        "partner_random": 1.5454545454545454,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 1.2727272727272727,
+        "random_seat1": 1.8181818181818183
+      },
+      "random_policy_raw": 0.042,
+      "random_policy_pct": 0.38181818181818183,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 0.99,
+          "both_learned_pct": 9.0,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "drops_to_random",
+      "retention": {
+        "noop": -0.04430379746835444,
+        "random": 0.13502109704641352
+      }
+    },
+    {
+      "scenario": "smart_enemies",
+      "name": "Smart Enemies",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_smart_enemies_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000012204_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "8fbaecde7fbd8cd5671d54750c1f36eeb674f7837551d87c7a351b390fd9de44",
+      "wad_sha256": {
+        "1009": "adae52be50622a9796f7c2e821c4d39df28c41fc9c6c91e5441cecf96e76cfc2",
+        "2027": "cc3476ef5a11f30ee19cc9dd0d0ea221067a0ef943f3e7b07985dcf2e37a22ee",
+        "3037": "654f755efcdbf8caaae9d975b8a48dcd906ed7848f79c5efa0f91b8360e1980e",
+        "4051": "543afb4fde8e56453db8b1f6b6bc553c5c1c27b01ad33af763b7764ce5ff9bf3",
+        "5099": "8e4ee23a02128046926c06dbf47119fe794ec8af6f6e82ba828d3614b9de8660"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 84,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 9.79,
+        "partner_noop": 4.869999999999999,
+        "partner_random": 4.04,
+        "noop_seat0": 4.64,
+        "noop_seat1": 5.1,
+        "random_seat0": 3.7,
+        "random_seat1": 4.38
+      },
+      "raw_ci95": {
+        "both_learned": 1.9884765288028923,
+        "partner_noop": 2.6577934890431196,
+        "partner_random": 1.6111565366530962
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 4.919999999999999,
+          "ci95": 1.225534047833841
+        },
+        "random": {
+          "mean": 5.749999999999999,
+          "ci95": 0.9310987058309121
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 9.2,
+          "2027": 7.95,
+          "3037": 9.2,
+          "4051": 10.4,
+          "5099": 12.2
+        },
+        "noop_seat0": {
+          "1009": 3.4,
+          "2027": 2.6,
+          "3037": 3.5,
+          "4051": 7.5,
+          "5099": 6.2
+        },
+        "noop_seat1": {
+          "1009": 4.1,
+          "2027": 2.8,
+          "3037": 3.6,
+          "4051": 6.9,
+          "5099": 8.1
+        },
+        "random_seat0": {
+          "1009": 3.1,
+          "2027": 2.4,
+          "3037": 2.6,
+          "4051": 5.2,
+          "5099": 5.2
+        },
+        "random_seat1": {
+          "1009": 4.7,
+          "2027": 2.3,
+          "3037": 4.0,
+          "4051": 5.6,
+          "5099": 5.3
+        }
+      },
+      "pct": {
+        "both_learned": 11.654761904761903,
+        "partner_noop": 5.797619047619047,
+        "partner_random": 4.809523809523809,
+        "noop_seat0": 5.523809523809523,
+        "noop_seat1": 6.07142857142857,
+        "random_seat0": 4.404761904761905,
+        "random_seat1": 5.214285714285714
+      },
+      "random_policy_raw": 0.06000000000000001,
+      "random_policy_pct": 0.07142857142857144,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 9.79,
+          "both_learned_pct": 11.654761904761903,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": 0.49434737923946553,
+        "random": 0.40904419321685515
+      }
+    },
+    {
+      "scenario": "dumb_enemies",
+      "name": "Dumb Enemies",
+      "algorithm": "IPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_frozen_partner_winners_20261112_125503/frozen_partner_winners/00_IPPO_pixel_partial_env_dumb_enemies_s.r.alp_0.0_see_42/checkpoint_p0/checkpoint_000024418_100024320.pth",
+      "checkpoint_steps": 100024320,
+      "checkpoint_sha256": "aad58e29b00cd0493d1815d2f7924a7bf7e46275d24d0c999c0cc6d266c8e51a",
+      "wad_sha256": {
+        "1009": "4e587c2d48d3abbdd703472c724286b0d4ec34622018ad88f4ef13797d69115f",
+        "2027": "ef19ea4445fcd2b09b6ef0c331791eaa4f3f3da6261c4810a4d9e6b355322df4",
+        "3037": "7b5c5032c26ebd367fc4f0ee436bca5154558b69f0a8a9132001232c998a2e32",
+        "4051": "7ca86c6e7cbb4df05f60e902b8059a7e62c4a548844ad515c0038b1ca7741657",
+        "5099": "e382959d07a7e8465249aa2950df818efb3ac86503e84e0ea17881abf11d56cb"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 90,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 6.93,
+        "partner_noop": 1.27,
+        "partner_random": 2.0300000000000002,
+        "noop_seat0": 1.26,
+        "noop_seat1": 1.28,
+        "random_seat0": 1.94,
+        "random_seat1": 2.12
+      },
+      "raw_ci95": {
+        "both_learned": 4.2256793203460195,
+        "partner_noop": 0.7735532085125107,
+        "partner_random": 0.49967999999999996
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 5.66,
+          "ci95": 4.170102727943281
+        },
+        "random": {
+          "mean": 4.9,
+          "ci95": 3.9564087250940085
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 7.75,
+          "2027": 2.6,
+          "3037": 6.15,
+          "4051": 12.0,
+          "5099": 6.15
+        },
+        "noop_seat0": {
+          "1009": 2.0,
+          "2027": 0.8,
+          "3037": 0.7,
+          "4051": 1.0,
+          "5099": 1.8
+        },
+        "noop_seat1": {
+          "1009": 2.3,
+          "2027": 0.7,
+          "3037": 0.9,
+          "4051": 0.9,
+          "5099": 1.6
+        },
+        "random_seat0": {
+          "1009": 1.6,
+          "2027": 1.7,
+          "3037": 1.6,
+          "4051": 2.4,
+          "5099": 2.4
+        },
+        "random_seat1": {
+          "1009": 3.3,
+          "2027": 2.0,
+          "3037": 1.3,
+          "4051": 2.3,
+          "5099": 1.7
+        }
+      },
+      "pct": {
+        "both_learned": 7.7,
+        "partner_noop": 1.411111111111111,
+        "partner_random": 2.255555555555556,
+        "noop_seat0": 1.4000000000000001,
+        "noop_seat1": 1.4222222222222223,
+        "random_seat0": 2.1555555555555554,
+        "random_seat1": 2.3555555555555556
+      },
+      "random_policy_raw": 0.052000000000000005,
+      "random_policy_pct": 0.05777777777777779,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 6.93,
+          "both_learned_pct": 7.7,
+          "checkpoint_steps": 100024320
+        },
+        {
+          "train_seed": 68,
+          "both_learned_raw": 5.73,
+          "both_learned_pct": 6.366666666666668,
+          "checkpoint_steps": 100024320
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": 0.17708636231462635,
+        "random": 0.28758359988368715
+      }
+    },
+    {
+      "scenario": "ammo_carrier",
+      "name": "Ammo Carrier",
+      "algorithm": "IPPO",
+      "train_seed": 68,
+      "checkpoint": "train_dir/mode3_comrad_frozen_partner_winners_20261112_125503/frozen_partner_winners/01_IPPO_pixel_partial_env_ammo_carrier_s.r.alp_0.0_see_68/checkpoint_p0/checkpoint_000024416_100024320.pth",
+      "checkpoint_steps": 100024320,
+      "checkpoint_sha256": "6f9bf20d6acb6d45dbc5452bb9537eb635f3f3c817a51340fd4c08ac6b8fa7d1",
+      "wad_sha256": {
+        "1009": "f4282626e720d2b593b9201b11d89331197f9b8a287a842e6ce542e45e662cee",
+        "2027": "1815080ce426ae26053ead24bd76f88bbb19b6f011fb0507e73bbe1b15fcbe9c",
+        "3037": "9f194756cc5f12dfc91dfcb23b02342e7bd8ed010f20fcf0c24f4bc41e019774",
+        "4051": "8d320130dcac9d79b82c4773506ccf59c248f2340e4fa01e196b2b786cf94a78",
+        "5099": "d9f1e32910cc458232d98dccaff9b0cf69752dd4597700fd38df8d1e46a97f17"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [
+        {
+          "wad_seed": 4051,
+          "pass": "random_seat0",
+          "episode_index": 2,
+          "episode_step": 595
+        },
+        {
+          "wad_seed": 5099,
+          "pass": "both_learned",
+          "episode_index": 14,
+          "episode_step": 1482
+        }
+      ],
+      "ceiling": 8400,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 1723.08,
+        "partner_noop": 1044.68,
+        "partner_random": 1319.52,
+        "noop_seat0": 1160.88,
+        "noop_seat1": 928.48,
+        "random_seat0": 1464.96,
+        "random_seat1": 1174.08
+      },
+      "raw_ci95": {
+        "both_learned": 661.441536548849,
+        "partner_noop": 57.33272739514841,
+        "partner_random": 344.387190117319
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 678.4,
+          "ci95": 638.4718167823415
+        },
+        "random": {
+          "mean": 403.56,
+          "ci95": 459.84355454676273
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 1465.4,
+          "2027": 1940.0,
+          "3037": 1300.0,
+          "4051": 1348.6,
+          "5099": 2561.4
+        },
+        "noop_seat0": {
+          "1009": 1136.8,
+          "2027": 1132.4,
+          "3037": 1196.8,
+          "4051": 1048.8,
+          "5099": 1289.6
+        },
+        "noop_seat1": {
+          "1009": 979.6,
+          "2027": 832.8,
+          "3037": 896.8,
+          "4051": 1004.4,
+          "5099": 928.8
+        },
+        "random_seat0": {
+          "1009": 1828.8,
+          "2027": 1321.2,
+          "3037": 1146.4,
+          "4051": 1252.0,
+          "5099": 1776.4
+        },
+        "random_seat1": {
+          "1009": 1008.0,
+          "2027": 1078.8,
+          "3037": 801.6,
+          "4051": 1312.0,
+          "5099": 1670.0
+        }
+      },
+      "pct": {
+        "both_learned": 20.51285714285714,
+        "partner_noop": 12.436666666666667,
+        "partner_random": 15.708571428571428,
+        "noop_seat0": 13.820000000000002,
+        "noop_seat1": 11.053333333333333,
+        "random_seat0": 17.44,
+        "random_seat1": 13.977142857142857
+      },
+      "random_policy_raw": 1109.024,
+      "random_policy_pct": 13.202666666666666,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 1652.16,
+          "both_learned_pct": 19.66857142857143,
+          "checkpoint_steps": 100024320
+        },
+        {
+          "train_seed": 68,
+          "both_learned_raw": 1723.08,
+          "both_learned_pct": 20.51285714285714,
+          "checkpoint_steps": 100024320
+        }
+      ],
+      "category": "partner_dependent",
+      "retention": {
+        "noop": -0.10478523131440759,
+        "random": 0.34279609677293293
+      }
+    },
+    {
+      "scenario": "stealth_labyrinth",
+      "name": "Stealth Labyrinth",
+      "algorithm": "QMIX",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_frozen_partner_winners_20261112_125503/frozen_partner_winners/00_QMIX_pixel_partial_env_stealth_labyrinth_see_42/checkpoint_p0/checkpoint_000024416_100024320.pth",
+      "checkpoint_steps": 100024320,
+      "checkpoint_sha256": "6a1aba889b75c827ec07b298e622aa8519d7463221b800063e33379d4ff2d357",
+      "wad_sha256": {
+        "1009": "054ab90578f364fc92908d101e8612f7c85ecd2c5c2ed82f815dff914896bdf8",
+        "2027": "e72d1ed9f14d6dffa7800f0a7c74679cdcad12342ef305006bf7725b4a880e18",
+        "3037": "fb486e52ba142426d817dd7859162457e2173b868a4199e60f9a61d0e5adaf08",
+        "4051": "fe6015b3b28bfdf085fd39d04d8c9a568914c8c8e2c5d38e3ffdf91f7391636c",
+        "5099": "f1c02c95716bd755107096b4d12afd4412b1aa603552a034e3366331f079ad96"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 1.0,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.0,
+        "random_seat1": 0.0
+      },
+      "raw_ci95": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 0.0,
+          "ci95": 0.0
+        },
+        "random": {
+          "mean": 0.0,
+          "ci95": 0.0
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        }
+      },
+      "pct": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.0,
+        "random_seat1": 0.0
+      },
+      "random_policy_raw": 0.0,
+      "random_policy_pct": 0.0,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 0.0,
+          "both_learned_pct": 0.0,
+          "checkpoint_steps": 100024320
+        },
+        {
+          "train_seed": 68,
+          "both_learned_raw": 0.0,
+          "both_learned_pct": 0.0,
+          "checkpoint_steps": 100024320
+        },
+        {
+          "train_seed": 81,
+          "both_learned_raw": 0.0,
+          "both_learned_pct": 0.0,
+          "checkpoint_steps": 100024320
+        }
+      ],
+      "category": "near_floor",
+      "retention": null
+    },
+    {
+      "scenario": "lava_maze",
+      "name": "Lava Maze",
+      "algorithm": "MAPPO",
+      "train_seed": 42,
+      "checkpoint": "train_dir/mode3_comrad_visibility_telemetry_20261109_171317/visibility_telemetry/00_MAPPO_pixel_partial_env_lava_maze_s.r.alp_1.0_see_42/checkpoint_p0/checkpoint_000012199_50020352.pth",
+      "checkpoint_steps": 50020352,
+      "checkpoint_sha256": "0fb98e3cf39e2feb93f2167557e4f9da57b6dfd372a4e9e206ff2338acd0e025",
+      "wad_sha256": {
+        "1009": "028de39d803a1891503d7fbdbc60b1ceeaba0c713b99e4c72b3a4e7f929cabe3",
+        "2027": "6a1e012070f1ff555091f86ae8d1eaf91dfc661f93442544ab89796d31310d50",
+        "3037": "b913c78d7bcef2b6f7a0c85b566d3744c74f461d6005c839cf127ae23bb19843",
+        "4051": "b07d6355427efccae34130bfc2d612dd8d2f761c2c2142ed4914357f1eb2f5fa",
+        "5099": "4f5dc7014fc53afcb6179fba55cef6508cfc3f83b20fed9dcbdc8ed943c6a2e2"
+      },
+      "hidden_resets": [],
+      "crashed_episodes": [],
+      "ceiling": 4,
+      "episodes": {
+        "both_learned": 100,
+        "noop_seat0": 50,
+        "noop_seat1": 50,
+        "random_seat0": 50,
+        "random_seat1": 50
+      },
+      "raw": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.0,
+        "random_seat1": 0.0
+      },
+      "raw_ci95": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0
+      },
+      "paired_drop_raw": {
+        "noop": {
+          "mean": 0.0,
+          "ci95": 0.0
+        },
+        "random": {
+          "mean": 0.0,
+          "ci95": 0.0
+        }
+      },
+      "layout_means_raw": {
+        "both_learned": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "noop_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat0": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        },
+        "random_seat1": {
+          "1009": 0.0,
+          "2027": 0.0,
+          "3037": 0.0,
+          "4051": 0.0,
+          "5099": 0.0
+        }
+      },
+      "pct": {
+        "both_learned": 0.0,
+        "partner_noop": 0.0,
+        "partner_random": 0.0,
+        "noop_seat0": 0.0,
+        "noop_seat1": 0.0,
+        "random_seat0": 0.0,
+        "random_seat1": 0.0
+      },
+      "random_policy_raw": 0.0,
+      "random_policy_pct": 0.0,
+      "candidates": [
+        {
+          "train_seed": 42,
+          "both_learned_raw": 0.0,
+          "both_learned_pct": 0.0,
+          "checkpoint_steps": 50020352
+        }
+      ],
+      "category": "near_floor",
+      "retention": null
+    }
+  ],
+  "categories": {
+    "near_floor": [
+      "Stealth Labyrinth",
+      "Lava Maze"
+    ],
+    "drops_to_random": [
+      "Rhythm Sync",
+      "Foraging Commons",
+      "Platform Chain",
+      "Co-op Health Gathering",
+      "Lava Pit"
+    ],
+    "partner_dependent": [
+      "Stag Hunt Arena",
+      "Co-op Puzzle",
+      "Armory Siege",
+      "Smart Enemies",
+      "Dumb Enemies",
+      "Ammo Carrier"
+    ],
+    "partner_insensitive": []
+  },
+  "missing": [],
+  "problems": []
+}

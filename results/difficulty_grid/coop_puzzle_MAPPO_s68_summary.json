@@ -1,0 +1,197 @@
+{
+  "policy": {
+    "scenario": "coop_puzzle",
+    "algorithm": "MAPPO",
+    "run_dir": "train_dir/kd6j_snellius_copy/00_MAPPO_pixel_partial_env_coop_puzzle_s.r.alp_0.0_see_68",
+    "checkpoint": "train_dir/kd6j_snellius_copy/00_MAPPO_pixel_partial_env_coop_puzzle_s.r.alp_0.0_see_68/checkpoint_p0/checkpoint_000012212_50020352.pth",
+    "checkpoint_steps": 50020352,
+    "config_sha256": "33a4c3cc411aa5163c0036497c7f1b2873245dc8b83be8727be5fa8fbb171c59",
+    "checkpoint_sha256": "edaef0f01ec4f099419b48e2c2e52f1f9a1dade5849f5e230fda60fc039707ed",
+    "train_seed": 68
+  },
+  "grid": {
+    "ceiling": 5.0,
+    "spatial": {
+      "easy": {},
+      "medium": {
+        "zone_length": 512,
+        "lane_height": 320,
+        "plate_size": 60,
+        "plates_per_side": 3
+      },
+      "hard": {
+        "zone_length": 640,
+        "lane_height": 400,
+        "plate_size": 48,
+        "plates_per_side": 4
+      }
+    },
+    "mechanical": {
+      "easy": {
+        "and_frequency_pairs": 5
+      },
+      "medium": {},
+      "hard": {
+        "and_frequency_pairs": 1
+      }
+    },
+    "labels": {
+      "spatial": {
+        "easy": "training rooms, 2 plates",
+        "medium": "512-unit rooms, 3 plates",
+        "hard": "640-unit rooms, 4 small plates"
+      },
+      "mechanical": {
+        "easy": "0 sync rooms",
+        "medium": "1 sync room (default)",
+        "hard": "4 sync rooms"
+      }
+    }
+  },
+  "seeds": [
+    1009,
+    2027,
+    3037,
+    4051,
+    5099
+  ],
+  "episodes_per_wad": 10,
+  "deterministic": false,
+  "cells": {
+    "easy/easy": {
+      "mean": 3.6,
+      "ci95_layouts": 0.2771858582251266,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 72.0,
+      "ci95_pct": 5.543717164502532,
+      "layout_means": [
+        3.2,
+        3.8,
+        4.0,
+        3.6,
+        3.4
+      ]
+    },
+    "easy/medium": {
+      "mean": 2.82,
+      "ci95_layouts": 0.11428665713896782,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 56.4,
+      "ci95_pct": 2.2857331427793564,
+      "layout_means": [
+        2.7,
+        2.9,
+        3.0,
+        2.7,
+        2.8
+      ]
+    },
+    "easy/hard": {
+      "mean": 1.22,
+      "ci95_layouts": 0.11428665713896782,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 24.4,
+      "ci95_pct": 2.2857331427793564,
+      "layout_means": [
+        1.2,
+        1.4,
+        1.1,
+        1.1,
+        1.3
+      ]
+    },
+    "medium/easy": {
+      "mean": 1.66,
+      "ci95_layouts": 0.1920399958342011,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 33.2,
+      "ci95_pct": 3.840799916684022,
+      "layout_means": [
+        1.7,
+        1.7,
+        1.7,
+        1.9,
+        1.3
+      ]
+    },
+    "medium/medium": {
+      "mean": 1.52,
+      "ci95_layouts": 0.3061617872955408,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 30.4,
+      "ci95_pct": 6.123235745910816,
+      "layout_means": [
+        1.7,
+        1.9,
+        1.7,
+        1.2,
+        1.1
+      ]
+    },
+    "medium/hard": {
+      "mean": 0.92,
+      "ci95_layouts": 0.1142866571389679,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 18.4,
+      "ci95_pct": 2.285733142779358,
+      "layout_means": [
+        1.0,
+        0.9,
+        1.0,
+        1.0,
+        0.7
+      ]
+    },
+    "hard/easy": {
+      "mean": 0.52,
+      "ci95_layouts": 0.14402999687565085,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 10.4,
+      "ci95_pct": 2.880599937513017,
+      "layout_means": [
+        0.3,
+        0.4,
+        0.6,
+        0.6,
+        0.7
+      ]
+    },
+    "hard/medium": {
+      "mean": 0.36,
+      "ci95_layouts": 0.14667296956153852,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 7.2,
+      "ci95_pct": 2.9334593912307705,
+      "layout_means": [
+        0.5,
+        0.4,
+        0.1,
+        0.3,
+        0.5
+      ]
+    },
+    "hard/hard": {
+      "mean": 0.42,
+      "ci95_layouts": 0.11428665713896788,
+      "episodes": 50,
+      "layouts": 5,
+      "mean_pct": 8.4,
+      "ci95_pct": 2.2857331427793577,
+      "layout_means": [
+        0.3,
+        0.5,
+        0.6,
+        0.3,
+        0.4
+      ]
+    }
+  }
+}
