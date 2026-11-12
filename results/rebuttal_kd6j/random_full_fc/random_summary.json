@@ -1,0 +1,54 @@
+{
+  "created_at_utc": "2026-11-11T06:13:18.951239+00:00",
+  "episodes_per_wad": 20,
+  "heldout_layout_seeds": [
+    1009,
+    2027,
+    3037,
+    4051,
+    5099
+  ],
+  "mode": "random",
+  "schema_version": 1,
+  "summaries": [
+    {
+      "algorithm": "Random",
+      "ci95_half_width": 10.883358892624189,
+      "episodes_total": 500,
+      "mean_teammate_pixel_fraction": 0.0020875494822560885,
+      "mean_true_objective": 1917.952,
+      "mode": "random",
+      "mutual_visibility_rate": 0.06177645569980902,
+      "num_seeds": 5,
+      "scenario": "foraging_commons",
+      "seed_means": [
+        1911.44,
+        1925.24,
+        1906.88,
+        1927.36,
+        1918.84
+      ],
+      "seeds": [
+        42,
+        68,
+        81,
+        97,
+        154
+      ],
+      "std_over_seeds": 8.7665454997963,
+      "target_obscured_rate": 0.25366523490266113,
+      "target_visible_rate": 0.7447749866157218,
+      "teammate_in_frustum_rate": 0.26703529159462835,
+      "teammate_obscured_rate": 0.02728426837895694,
+      "teammate_out_of_view_rate": 0.7389453151123383,
+      "teammate_visible_rate": 0.26105468488766165
+    }
+  ],
+  "train_or_eval_seeds": [
+    42,
+    68,
+    81,
+    97,
+    154
+  ]
+}
