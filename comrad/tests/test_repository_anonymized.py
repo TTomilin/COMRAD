@@ -11,6 +11,7 @@ MODULE_PATH = REPO_ROOT / "scripts" / "anonymize_results.py"
 SPEC = importlib.util.spec_from_file_location("anonymize_results", MODULE_PATH)
 anonymize_results = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(anonymize_results)
+RULE_FILES = {str(MODULE_PATH.relative_to(REPO_ROOT)), str(Path(__file__).resolve().relative_to(REPO_ROOT))}
 
 
 @pytest.mark.parametrize(
@@ -54,7 +55,7 @@ def _tracked_text_files() -> list[tuple[str, str]]:
     files = []
     for name in listing.decode().split("\0"):
         path = REPO_ROOT / name
-        if not name or not path.is_file():
+        if not name or name in RULE_FILES or not path.is_file():
             continue
         data = path.read_bytes()
         if b"\0" not in data[:8192]:
