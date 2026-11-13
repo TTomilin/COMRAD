@@ -23,6 +23,7 @@ Scripts that turn benchmark outputs into paper figures, tables and diagnostics. 
   - `download_baseline_results.sh`
   - `run_armory_siege.sh`
   - `record_ammo_carrier_nav_heatmaps.sh`
+  - `anonymize_results.py`: makes paths in result logs and JSON repo-relative and masks logins and node names
 - Analysis or ablation utilities:
   - `qmix_lr_sensitivity.py`
   - `categories.py`
@@ -33,3 +34,4 @@ Scripts that turn benchmark outputs into paper figures, tables and diagnostics. 
 - Many scripts assume the repo root is the current working directory
 - The DoomGen scripts need the separate `DoomGen/` environment, because `doomgen` is not a COMRAD dependency
 - Most scripts expect existing results under `results/` or `train_dir/`, and write into `results/` or `paper/figure/`
+- Run `python scripts/anonymize_results.py results/<dir>` before committing new artifacts; `comrad/tests/test_repository_anonymized.py` fails on personal paths in any tracked file
