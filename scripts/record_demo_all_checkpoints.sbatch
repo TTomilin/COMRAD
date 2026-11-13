@@ -5,12 +5,12 @@
 #SBATCH --cpus-per-task=18
 #SBATCH --mem=120G
 #SBATCH --time=12:12:00
-#SBATCH --output=/home/knguyen2/ViZDoom/train_dir/record_demo_all_checkpoints_%j.out
-#SBATCH --error=/home/knguyen2/ViZDoom/train_dir/record_demo_all_checkpoints_%j.err
+#SBATCH --output=train_dir/record_demo_all_checkpoints_%j.out
+#SBATCH --error=train_dir/record_demo_all_checkpoints_%j.err
 
 set -euo pipefail
 
-PROJECT_DIR="${PROJECT_DIR:-/home/knguyen2/ViZDoom}"
+PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$PWD}}"
 RUN_DIR="${PROJECT_DIR}/train_dir/record_demo_all_checkpoints_j${SLURM_JOB_ID}"
 mkdir -p "${RUN_DIR}"
 

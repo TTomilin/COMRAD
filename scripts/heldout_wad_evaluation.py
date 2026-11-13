@@ -47,7 +47,7 @@ from sample_factory.model.model_utils import get_rnn_size  # noqa: E402
 
 
 HELDOUT_SEEDS = (1009, 2027, 3037, 4051, 5099)
-DEFAULT_ARCHIVE_ROOT = "/home/knguyen2/ViZDoom/train_dir/mode3_comrad_benchmark_20260503_134649"
+DEFAULT_ARCHIVE_ROOT = "train_dir/mode3_comrad_benchmark_20260503_134649"
 DEFAULT_SCENARIOS = ("ammo_carrier", "armory_siege", "coop_puzzle")
 DEFAULT_ALGORITHMS = ("IPPO", "MAPPO", "HAPPO", "QMIX", "QPLEX-D")
 DEFAULT_TARGET_STEPS = 100_000_000

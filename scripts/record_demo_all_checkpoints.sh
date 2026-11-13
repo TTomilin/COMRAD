@@ -3,11 +3,11 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
 benchmark_name="mode3_comrad_benchmark_20260503_134649"
-snellius_root="/home/knguyen2/ViZDoom/train_dir/${benchmark_name}"
+train_dir_root="${repo_root}/train_dir/${benchmark_name}"
 local_root="${repo_root}/results/${benchmark_name}"
 
-if [[ -d "${snellius_root}" ]]; then
-  default_train_root="${snellius_root}"
+if [[ -d "${train_dir_root}" ]]; then
+  default_train_root="${train_dir_root}"
 else
   default_train_root="${local_root}"
 fi

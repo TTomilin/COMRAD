@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TRAIN_ROOT="${TRAIN_ROOT:-/home/20231193/ViZDoom/train_dir/mode3_comrad_benchmark_20260503_134649}"
+TRAIN_ROOT="${TRAIN_ROOT:-train_dir/mode3_comrad_benchmark_20260503_134649}"
 ENV_NAME="${ENV_NAME:-ammo_carrier}"
 TRAIN_DIR="${TRAIN_ROOT}/${ENV_NAME}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-results/videos/${ENV_NAME}_navigation_heatmap}"
