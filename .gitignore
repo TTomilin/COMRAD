@@ -61,3 +61,6 @@ results/human_baseline/
 
 .hscripts
 _vizdoom/
+
+# local rendered demo videos
+results/**/*.mp4
