@@ -360,7 +360,7 @@ def test_frozen_partner_winners_profile(monkeypatch):
 
     runs = importlib.reload(runs)
     assert runs.BENCHMARK_NAME == "comrad_frozen_partner_winners"
-    cmds = [c for c, *_ in runs.RUN_DESCRIPTION.generate_experiments("/scratch-shared/x", makedirs=False)]
+    cmds = [c for c, *_ in runs.RUN_DESCRIPTION.generate_experiments("TRAIN_DIR_ROOT", makedirs=False)]
     assert len(cmds) == runs.TOTAL_RUNS == 9
     combos = sorted(
         (next(t.split("=")[1] for t in c.split() if t.startswith("--env=")),
@@ -375,7 +375,7 @@ def test_frozen_partner_winners_profile(monkeypatch):
     for c in cmds:
         assert "--train_for_env_steps=100000000" in c and "--with_wandb=False" in c
         assert "--obs_modality=pixel" in c and "--full_observability=False" in c
-        assert "--train_dir=/scratch-shared/x/" in c and "frozen_partner_winners" in c
+        assert "--train_dir=TRAIN_DIR_ROOT/" in c and "frozen_partner_winners" in c
         if "--algo=IPPO" in c:
             assert "--shared_reward_alpha=0.0" in c
         else:
