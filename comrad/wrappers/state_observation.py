@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from typing import Optional
 
 import gymnasium as gym
 import numpy as np
@@ -32,10 +33,26 @@ def ego_pose_vitals(info: dict | None) -> tuple[float, float, float, float, floa
     return x, y, z, yaw_deg, health, ammo
 
 
+EGO_DIM = 8
 TASK_EXTRA_DIM = 10
 STATE_ENCODINGS = ("ego", "entity")
 # 5 ego + 6 partner + 12 x (4 + 16) entities + 16 rays + 10 task values (see EntityStateWrapper)
 ENTITY_STATE_DIM = 277
+
+
+def ego_state_dim(meas_dim: int) -> int:
+    """Length of the `ego` state vector `[ego | scaled measurements | task extras]`."""
+    return EGO_DIM + meas_dim + TASK_EXTRA_DIM
+
+
+def ego_state_measurement_slice(meas_dim: int) -> slice:
+    """Where the scaled scenario `measurements` sit inside the `ego` state vector."""
+    return slice(EGO_DIM, EGO_DIM + meas_dim)
+
+
+def measurement_scale(measurements_space: gym.spaces.Box) -> np.ndarray:
+    """Per-slot divisor applied to `measurements` when they are folded into the `ego` state vector."""
+    return np.maximum(np.abs(measurements_space.high), 1.0).astype(np.float32)
 
 
 def rhythm_sync_target_keys(pid: int) -> tuple[str, str]:
@@ -112,6 +129,13 @@ def task_extra_features(
     return vec
 
 
+def clock_horizon(horizon) -> float:
+    """Validated horizon of an observation clock `min(1, joint env steps / horizon)`."""
+    if horizon is None or not float(horizon) > 0:
+        raise ValueError(f"Observation clock horizon must be a positive number of joint env steps, got {horizon!r}")
+    return float(horizon)
+
+
 class StateObservationWrapper(gym.Wrapper):
     """
     Replaces 3D RGB `obs_space['obs']` with a 1D `float32` compact state vector for MLP encoding.
@@ -124,11 +148,13 @@ class StateObservationWrapper(gym.Wrapper):
          progress counters, and local cue indicators), removing the separate `"measurements"` key so the entire
          compact state vector is encoded once by `MlpEncoder`.
 
+    `step` counts joint env steps: frames skipped inside a multi-agent env return no observation and do not count.
+
     With `state_encoding="entity"` the wrapper only declares the `ENTITY_STATE_DIM` space and emits zeros; the joint
     `EntityStateWrapper` fills the vector, since it needs the partner's and the host's `info`.
     """
 
-    EGO_DIM = 8
+    EGO_DIM = EGO_DIM
     TASK_EXTRA_DIM = TASK_EXTRA_DIM
 
     def __init__(
@@ -136,17 +162,17 @@ class StateObservationWrapper(gym.Wrapper):
         env: gym.Env,
         scenario_name: str = "",
         include_global_state: bool = False,
-        horizon: int = 4500,
+        horizon: Optional[float] = None,
         state_encoding: str = "ego",
     ) -> None:
         super().__init__(env)
         self.scenario_name = str(scenario_name or "")
         self.include_global_state = bool(include_global_state)
-        self.horizon = max(1, int(horizon))
         self._step_count = 0
         self.state_encoding = str(state_encoding or "ego").lower()
         if self.state_encoding not in STATE_ENCODINGS:
             raise ValueError(f"Unknown state_encoding {state_encoding!r}, expected one of {STATE_ENCODINGS}")
+        self.horizon = None if self.state_encoding == "entity" else clock_horizon(horizon)
 
         orig_space = env.observation_space
         self._input_is_dict = isinstance(orig_space, gym.spaces.Dict)
@@ -154,7 +180,7 @@ class StateObservationWrapper(gym.Wrapper):
         if self._has_measurements:
             m_space = orig_space["measurements"]
             self._meas_dim = int(m_space.shape[0])
-            self._meas_scale = np.maximum(np.abs(m_space.high), 1.0).astype(np.float32)
+            self._meas_scale = measurement_scale(m_space)
         else:
             self._meas_dim = 0
             self._meas_scale = np.ones((0,), dtype=np.float32)
@@ -162,7 +188,7 @@ class StateObservationWrapper(gym.Wrapper):
         if self.state_encoding == "entity":
             self.state_dim = ENTITY_STATE_DIM
         else:
-            self.state_dim = self.EGO_DIM + self._meas_dim + self.TASK_EXTRA_DIM
+            self.state_dim = ego_state_dim(self._meas_dim)
         state_box = gym.spaces.Box(
             low=-5.0,
             high=5.0,
@@ -185,7 +211,7 @@ class StateObservationWrapper(gym.Wrapper):
     def _ego_features(self, info: dict | None) -> np.ndarray:
         x, y, z, yaw_deg, health, ammo = ego_pose_vitals(info)
         yaw_rad = math.radians(yaw_deg)
-        progress = min(1.0, float(self._step_count) / float(self.horizon))
+        progress = min(1.0, self._step_count / self.horizon)
 
         return np.array(
             [
@@ -236,8 +262,9 @@ class StateObservationWrapper(gym.Wrapper):
         return self._build_obs(obs, info), info
 
     def step(self, action):
-        self._step_count += 1
         obs, reward, terminated, truncated, info = self.env.step(action)
+        if obs is not None:
+            self._step_count += 1
         return self._build_obs(obs, info), reward, terminated, truncated, info
 
 
@@ -246,16 +273,17 @@ class BlindObservationWrapper(gym.Wrapper):
     Zeroes out 3D RGB frames (`obs = 0`) and injects the normalized timestep `t / H` into the first pixel
     to test SMACv2-style blind / open-loop temporal memorization policies while keeping the observation space
     shape and dtype unchanged for both zero-shot checkpoint evaluation and blind training from scratch.
+    `t` counts joint env steps, like `StateObservationWrapper`.
     """
 
-    def __init__(self, env: gym.Env, horizon: int = 4500) -> None:
+    def __init__(self, env: gym.Env, horizon: float) -> None:
         super().__init__(env)
-        self.horizon = max(1, int(horizon))
+        self.horizon = clock_horizon(horizon)
         self._step_count = 0
 
     def _blind_frame(self, img: np.ndarray) -> np.ndarray:
         zeroed = np.zeros_like(img)
-        progress = min(1.0, float(self._step_count) / float(self.horizon))
+        progress = min(1.0, self._step_count / self.horizon)
         if zeroed.size > 0:
             if np.issubdtype(zeroed.dtype, np.integer):
                 zeroed.flat[0] = int(round(progress * 255.0))
@@ -279,6 +307,7 @@ class BlindObservationWrapper(gym.Wrapper):
         return self._transform(obs), info
 
     def step(self, action):
-        self._step_count += 1
         obs, reward, terminated, truncated, info = self.env.step(action)
+        if obs is not None:
+            self._step_count += 1
         return self._transform(obs), reward, terminated, truncated, info

@@ -7,7 +7,8 @@ import gymnasium as gym
 import numpy as np
 
 from comrad.envs.doom_gym import GLOBAL_STATE_INFO_KEYS
-from comrad.wrappers.state_observation import ego_pose_vitals, safe_float
+from comrad.wrappers.episode_boundary import joint_new_episode
+from comrad.wrappers.state_observation import clock_horizon, ego_pose_vitals, safe_float
 
 # game variables already covered by the agents block (or irrelevant to the task)
 POSE_VARIABLES = frozenset(
@@ -108,7 +109,7 @@ class GlobalStateWrapper(gym.Wrapper):
     def __init__(
         self,
         env: gym.Env,
-        horizon: int,
+        horizon: float,
         game_variables: Sequence[str] = (),
         max_objects: int = 48,
         grid_size: int = 16,
@@ -124,7 +125,7 @@ class GlobalStateWrapper(gym.Wrapper):
         self.task_clip = TASK_SYMLOG_CLIP[self.version]
         self.num_agents = int(getattr(env, "num_agents", 1))
         self.is_multiagent = True
-        self.horizon = max(1, int(horizon))
+        self.horizon = clock_horizon(horizon)
         self.task_keys = task_variable_keys(game_variables)[:task_dim]
         self.max_objects = int(max_objects)
         self.grid_size = int(grid_size)
@@ -301,30 +302,16 @@ class GlobalStateWrapper(gym.Wrapper):
     def step(self, actions):
         obs, rewards, terminated, truncated, infos = self.env.step(actions)
         state_infos = infos
-        # On an auto-reset step `obs` is already the next episode's first frame while `infos` still describe the
-        # terminal frame; build the state from the new episode's `reset_info`.
-        if (
-            isinstance(infos, (list, tuple))
-            and all(bool(t) or bool(tr) for t, tr in zip(terminated, truncated))
-            and all(isinstance(i, dict) and isinstance(i.get("reset_info"), dict) for i in infos)
-        ):
-            state_infos = [i["reset_info"] for i in infos]
-            self._step_count = 0
+        new_episode = joint_new_episode(terminated, truncated, infos)
+        if new_episode is not None and (new_episode.steps == 0 or self.version >= 2):
+            state_infos = new_episode.infos
+            self._step_count = new_episode.steps
             self._reset_layout()
-        elif (
-            self.version >= 2
-            and isinstance(infos, (list, tuple))
-            and infos
-            and isinstance(infos[0], dict)
-            and infos[0].get("_hidden_reset_count")
-        ):
-            # crash recovery restarted the game underneath us and `obs` is already one step into the new episode:
-            # restart the clock and take the layout from the hidden reset (later infos may omit the lines)
-            self._step_count = 1
-            self._reset_layout()
-            hidden_reset_info = infos[0].get("reset_info")
-            if isinstance(hidden_reset_info, dict):
-                self._update_layout(hidden_reset_info)
+            if new_episode.steps > 0:
+                # later infos may omit the lines: take the layout from the hidden reset
+                hidden_reset_info = infos[0].get("reset_info")
+                if isinstance(hidden_reset_info, dict):
+                    self._update_layout(hidden_reset_info)
         else:
             self._step_count += 1
         info0 = state_infos[0] if isinstance(state_infos, (list, tuple)) and state_infos else None

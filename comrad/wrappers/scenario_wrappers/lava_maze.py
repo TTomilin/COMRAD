@@ -7,6 +7,13 @@ from comrad.wrappers.scenario_wrappers.lava_maze_grid import (
     next_step_from_info,
     safe_int,
 )
+from comrad.wrappers.state_observation import ego_state_dim, ego_state_measurement_slice, measurement_scale
+
+LAVA_MAZE_MEASUREMENTS_SPACE = gym.spaces.Box(
+    low=np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    high=np.array([200., 1., 1., 1., 1., 1., 1.], dtype=np.float32),
+    dtype=np.float32,
+)
 
 
 class LavaMazeRewardShaping(gym.Wrapper):
@@ -227,15 +234,12 @@ class LavaMazeAdditionalInput(gym.Wrapper):
         super().__init__(env)
         current_obs_space = self.observation_space
 
-        low = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float32)
-        high = np.array([200., 1., 1., 1., 1., 1., 1.], dtype=np.float32)
-
         self.observation_space = gym.spaces.Dict({
             "obs": current_obs_space,
-            "measurements": gym.spaces.Box(low=low, high=high, dtype=np.float32),
+            "measurements": LAVA_MAZE_MEASUREMENTS_SPACE,
         })
 
-        self.measurements_vec = np.zeros(7, dtype=np.float32)
+        self.measurements_vec = np.zeros(LAVA_MAZE_MEASUREMENTS_SPACE.shape, dtype=np.float32)
 
     def _parse_info(self, obs, info):
         obs_dict = {"obs": obs, "measurements": self.measurements_vec}
@@ -321,6 +325,9 @@ class LavaMazeOracleMessageWrapper(gym.Wrapper):
     navigator's measurements[1:6] at step t+1 (no weapon-fire latency, flash timer or signal penalty).
     Requires LavaMazeAdditionalInput on the per-player stack; the observer's ATTACK should be masked so the ACS
     flash never fires (LAVA_MAZE_ORACLE_MSG_ACTION_MASK).
+
+    The channel is the `measurements` key (pixel/blind modality) or, with --obs_modality=state, the measurement block
+    StateObservationWrapper folded into the `ego` state vector. Without either the constructor raises.
     """
 
     def __init__(self, env, navigator_index=0, observer_index=1, message_head=3):
@@ -330,13 +337,27 @@ class LavaMazeOracleMessageWrapper(gym.Wrapper):
         self.navigator_index = navigator_index
         self.observer_index = observer_index
         self.message_head = message_head
+        self._channel_key, self._channel_slice, self._channel_scale = self._message_channel(env.observation_space)
+
+    @staticmethod
+    def _message_channel(observation_space):
+        spaces = observation_space.spaces if isinstance(observation_space, gym.spaces.Dict) else {}
+        meas_dim = LAVA_MAZE_MEASUREMENTS_SPACE.shape[0]
+        if "measurements" in spaces and spaces["measurements"].shape == LAVA_MAZE_MEASUREMENTS_SPACE.shape:
+            return "measurements", slice(0, meas_dim), np.ones(meas_dim, dtype=np.float32)
+        if "measurements" not in spaces and "obs" in spaces and spaces["obs"].shape == (ego_state_dim(meas_dim),):
+            return "obs", ego_state_measurement_slice(meas_dim), measurement_scale(LAVA_MAZE_MEASUREMENTS_SPACE)
+        raise ValueError(
+            f"LavaMazeOracleMessageWrapper has no message channel in observation space {observation_space}: needs "
+            f"LavaMazeAdditionalInput measurements (pixel) or the ego state vector built from them (state)"
+        )
 
     def _write_message(self, obs, message):
-        nav_obs = obs[self.navigator_index] if obs is not None else None
-        if not isinstance(nav_obs, dict) or "measurements" not in nav_obs:
-            return obs
-        nav_obs = dict(nav_obs)
-        nav_obs["measurements"] = _set_direction_one_hot(np.array(nav_obs["measurements"], dtype=np.float32, copy=True), message)
+        nav_obs = dict(obs[self.navigator_index])
+        vec = np.array(nav_obs[self._channel_key], dtype=np.float32, copy=True)
+        raw = vec[self._channel_slice] * self._channel_scale
+        vec[self._channel_slice] = _set_direction_one_hot(raw, message) / self._channel_scale
+        nav_obs[self._channel_key] = vec
         obs = list(obs)
         obs[self.navigator_index] = nav_obs
         return obs

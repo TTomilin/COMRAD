@@ -8,7 +8,7 @@ from typing import Optional
 from sample_factory.algo.utils.context import global_model_factory
 from sample_factory.algo.utils.misc import ExperimentStatus
 from sample_factory.cfg.arguments import maybe_load_from_checkpoint, parse_full_cfg, parse_sf_args
-from sample_factory.envs.env_utils import register_env
+from sample_factory.envs.env_utils import register_archived_cfg_resolver, register_env
 from sample_factory.train import make_runner
 
 from comrad.curriculum.observer import CurriculumObserver, restore_curriculum_state
@@ -17,10 +17,13 @@ from comrad.envs.doom_params import add_doom_env_args, add_doom_env_eval_args, d
 from comrad.utils.doom_utils import (
     DOOM_ENVS,
     DoomBatchSpec,
+    batch_base_env_name,
     make_doom_env_from_spec,
     make_doom_env_from_batch,
     doom_env_by_name,
     get_num_agents,
+    get_num_players,
+    resolve_archived_cfg,
     restrict_global_state_input_normalization,
 )
 from comrad.utils.video_uploader import upload_video
@@ -32,17 +35,7 @@ def register_vizdoom_envs():
     for env_spec in DOOM_ENVS:
         make_env_func = functools.partial(make_doom_env_from_spec, env_spec)
         register_env(env_spec.name, make_env_func)
-
-
-def batch_base_env_name(cfg) -> str:
-    base_env = getattr(cfg, "_batch_base_env", None)
-    if base_env:
-        return base_env
-
-    env_name = str(cfg.env)
-    if env_name.endswith("_batch"):
-        return env_name[: -len("_batch")]
-    return env_name
+    register_archived_cfg_resolver("comrad", resolve_archived_cfg)
 
 
 def register_batch_env(cfg) -> str:
@@ -141,7 +134,7 @@ def register_model_factory(cfg):
     """
     model registration facotry
     """
-    if getattr(cfg, 'num_agents', 1) > 1:
+    if get_num_players(cfg, batch_base_env_name(cfg)) > 1:
         if str(getattr(cfg, 'algo', 'APPO')).upper() in ('QMIX', 'VDN', 'QPLEX'):
             global_model_factory().register_actor_critic_factory(make_qmix_actor_critic)
         elif str(getattr(cfg, 'algo', 'APPO')).upper() == 'HAPPO':
@@ -198,8 +191,7 @@ def main():
     register_vizdoom_components()
     cfg = prepare_cfg_for_training(parse_args())
 
-    if cfg.num_agents > 1:
-        register_model_factory(cfg)
+    register_model_factory(cfg)
     curriculum = getattr(cfg, "_curriculum", None)
     if isinstance(cfg, dict):
         cfg.pop("_curriculum", None)  # remove from cfg to avoid JSON serialization errors

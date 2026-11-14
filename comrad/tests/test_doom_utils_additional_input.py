@@ -88,12 +88,12 @@ def test_rhythm_sync_full_feature_set_only_in_shared_vision_mode():
         assert w_kwargs.get("feature_set") == (expected or spec.additional_input_wrapper[1].get("feature_set"))
 
 
-def test_global_state_horizon_uses_engine_timeout_and_frameskip():
+def test_global_state_horizon_is_the_episode_horizon():
     cfg = default_doom_cfg(env="coop_puzzle")
     cfg.env_frameskip = 4
     spec = doom_env_by_name("coop_puzzle")
-    tics = min(2000, int((cfg.timelimit or spec.timelimit) * 60 * 35))
-    assert doom_utils.global_state_horizon_steps(spec, cfg) == -(-tics // 4)
+    engine_steps = -(-int((cfg.timelimit or spec.timelimit) * 60 * 35) // 4)
+    assert doom_utils.observation_clock_horizon(spec, cfg, doom_utils.CLOCK_JOINT) == min(2000, engine_steps)
 
 
 def test_state_encoding_flags_default_to_ego_and_archived_configs_resolve_to_ego():

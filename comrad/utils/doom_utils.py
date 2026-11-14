@@ -14,6 +14,7 @@ from sample_factory.envs.env_wrappers import (
     RewardScalingWrapper,
     TimeLimitWrapper,
 )
+from sample_factory.utils.attr_dict import AttrDict
 from sample_factory.utils.utils import debug_log_every_n, ensure_dir_exists, experiment_dir, log
 from comrad.envs.action_space import (
     doom_action_space_coop_puzzle,
@@ -48,7 +49,11 @@ from comrad.wrappers.entity_state import EntityStateWrapper
 from comrad.wrappers.global_state import GlobalStateWrapper
 from comrad.wrappers.shared_vision import SharedVisionWrapper
 from comrad.wrappers.state_observation import BlindObservationWrapper, StateObservationWrapper
-from comrad.wrappers.visibility_diagnostics import VisibilityDiagnosticsWrapper
+from comrad.wrappers.visibility_diagnostics import (
+    CUE_LAYOUT_NO_CUE_CHANNEL,
+    CUE_LAYOUT_SCENARIO_MEASUREMENTS,
+    VisibilityDiagnosticsWrapper,
+)
 from comrad.scripted.lava_maze_navigator import LavaMazeNavigatorPolicy
 from comrad.scripted.lava_maze_observer import LavaMazeObserverPolicy
 from comrad.wrappers.video_recorder import VideoLoggerWrapper
@@ -84,8 +89,12 @@ class DoomSpec:
         self.reward_scaling = reward_scaling
         self.default_timeout = default_timeout
 
-        # 1 for singleplayer, >1 otherwise
-        self.num_agents = num_agents
+        # players in the ViZDoom game: 1 for singleplayer, >1 otherwise
+        self.num_players = num_agents
+        # players driven by a scripted policy inside a joint wrapper, hidden from the learner
+        self.num_scripted_players = sum(getattr(w_cls, "scripted_players", 0) for w_cls, _ in (joint_wrappers or []))
+        # learner agents exposed by the final wrapped env (what the models and the centralized critic see)
+        self.num_agents = self.num_players - self.num_scripted_players
 
         self.num_bots = num_bots
 
@@ -536,9 +545,25 @@ def doom_env_by_name(name):
             return cfg
     raise RuntimeError("Unknown Doom env")
 
+def batch_base_env_name(cfg) -> str:
+    base_env = getattr(cfg, "_batch_base_env", None)
+    if base_env:
+        return base_env
+
+    env_name = str(cfg.env)
+    if env_name.endswith("_batch"):
+        return env_name[: -len("_batch")]
+    return env_name
+
+
 def get_num_agents(cfg, env_name):
     spec = doom_env_by_name(env_name)
     return spec.num_agents if cfg.num_agents <= 0 else cfg.num_agents
+
+
+def get_num_players(cfg, env_name) -> int:
+    """Players in the ViZDoom game: the learner agents plus the scenario's scripted players."""
+    return get_num_agents(cfg, env_name) + doom_env_by_name(env_name).num_scripted_players
 
 def get_alpha(cfg, doom_spec) -> float:
     override = getattr(cfg, "shared_reward_alpha", None)
@@ -606,23 +631,118 @@ def uses_entity_state_encoding(cfg) -> bool:
     return obs_modality == "state" and get_state_encoding(cfg) == STATE_ENCODING_ENTITY
 
 
-def global_state_horizon_steps(doom_spec, cfg) -> int:
-    """Episode length in joint env steps: the engine timeout (cfg episode_timeout, capped by timelimit) / frameskip."""
-    tics = []
-    try:
-        with open(doom_spec_config_path(doom_spec), "r") as f:
-            for raw in f:
-                line = raw.split("#", 1)[0].strip()
-                if "=" in line and line.split("=", 1)[0].strip().lower().replace("_", "") == "episodetimeout":
-                    tics.append(int(float(line.split("=", 1)[1].strip())))
-    except (OSError, ValueError):
-        pass
-    timelimit = cfg.timelimit if getattr(cfg, "timelimit", None) is not None else doom_spec.timelimit
-    if timelimit and timelimit > 0:
-        tics.append(int(timelimit * 60 * 35))
+DOOM_TICRATE = 35
+CLOCK_EGO = "ego"
+CLOCK_JOINT = "joint"
+OBSERVATION_CLOCKS = (CLOCK_EGO, CLOCK_JOINT)
+
+
+def get_observation_clock_version(cfg) -> int:
+    """Observation clock version (see doom_params; archived runs are resolved by resolve_archived_cfg)."""
+    version = getattr(cfg, "observation_clock_version", None)
+    if version is None:
+        raise ValueError(
+            "cfg has no observation_clock_version: build it with the comrad parser, or load archived configs through "
+            "load_from_checkpoint so resolve_archived_cfg can pin their clock"
+        )
+    return int(version)
+
+
+def uses_multiplayer_game(doom_spec) -> bool:
+    """Whether the env runs a ViZDoom multiplayer game (host + joiners) rather than a singleplayer game."""
+    return doom_spec.num_players > 1 or doom_spec.num_bots > 0
+
+
+def scenario_cfg_episode_timeout(doom_spec) -> int:
+    """`episode_timeout` (tics) of the scenario cfg file; 0 when the file sets none."""
+    timeout = 0
+    with open(doom_spec_config_path(doom_spec), "r") as f:
+        for raw in f:
+            line = raw.split("#", 1)[0].strip()
+            if "=" in line and line.split("=", 1)[0].strip().lower().replace("_", "") == "episodetimeout":
+                timeout = int(float(line.split("=", 1)[1].strip()))
+    return timeout
+
+
+def _timelimit_minutes(doom_spec, cfg) -> float:
+    return cfg.timelimit if getattr(cfg, "timelimit", None) is not None else doom_spec.timelimit
+
+
+def _frameskip(cfg) -> int:
+    frameskip = int(cfg.env_frameskip)
+    if frameskip < 1:
+        raise ValueError(f"env_frameskip must be >= 1, got {frameskip}")
+    return frameskip
+
+
+def episode_horizon_steps(doom_spec, cfg) -> int:
+    """Joint env steps after which an env built with `cfg` truncates the episode.
+
+    The earlier of the TimeLimitWrapper limit (`default_timeout` joint steps) and the engine timeout in tics over
+    the frameskip. Multiplayer games replace the scenario cfg `episode_timeout` with `timelimit` minutes
+    (VizdoomEnvMultiplayer); singleplayer games keep the cfg value.
+    """
+    limits = []
+    if doom_spec.default_timeout > 0:
+        limits.append(int(doom_spec.default_timeout))
+    if uses_multiplayer_game(doom_spec):
+        engine_tics = int(_timelimit_minutes(doom_spec, cfg) * 60 * DOOM_TICRATE)
+    else:
+        engine_tics = scenario_cfg_episode_timeout(doom_spec)
+    if engine_tics > 0:
+        limits.append(-(-engine_tics // _frameskip(cfg)))
+    if not limits:
+        raise ValueError(f"{doom_spec.name}: episodes have neither a step limit nor an engine timeout")
+    return min(limits)
+
+
+def _clock_horizon_v1(doom_spec, cfg, clock: str) -> float:
+    frameskip = _frameskip(cfg)
+    if clock == CLOCK_EGO:
+        if doom_spec.default_timeout <= 0:
+            raise ValueError(f"{doom_spec.name}: observation clock version 1 needs a step limit (default_timeout)")
+        num_agents = doom_spec.num_agents if cfg.num_agents <= 0 else cfg.num_agents
+        # the per-player wrappers counted every frame the multi-agent wrapper skips
+        frames_per_step = frameskip if num_agents + doom_spec.num_scripted_players > 1 else 1
+        return doom_spec.default_timeout / frames_per_step
+    tics = [scenario_cfg_episode_timeout(doom_spec), int(_timelimit_minutes(doom_spec, cfg) * 60 * DOOM_TICRATE)]
     tics = [t for t in tics if t > 0]
-    frameskip = max(1, int(getattr(cfg, "env_frameskip", 1) or 1))
-    return max(1, -(-min(tics) // frameskip)) if tics else 4500
+    if not tics:
+        raise ValueError(f"{doom_spec.name}: observation clock version 1 needs an episode_timeout or a timelimit")
+    return float(-(-min(tics) // frameskip))
+
+
+def observation_clock_horizon(doom_spec, cfg, clock: str) -> float:
+    """Joint env steps at which an observation clock `min(1, step / horizon)` reaches 1.
+
+    `clock` is CLOCK_EGO (StateObservationWrapper, BlindObservationWrapper) or CLOCK_JOINT (GlobalStateWrapper,
+    EntityStateWrapper). Version 2 clocks run on `episode_horizon_steps`; version 1 reproduces the clocks archived
+    checkpoints were trained with.
+    """
+    if clock not in OBSERVATION_CLOCKS:
+        raise ValueError(f"Unknown observation clock {clock!r}, expected one of {OBSERVATION_CLOCKS}")
+    version = get_observation_clock_version(cfg)
+    if version == 2:
+        return float(episode_horizon_steps(doom_spec, cfg))
+    if version == 1:
+        return _clock_horizon_v1(doom_spec, cfg, clock)
+    raise ValueError(f"Unknown observation_clock_version {version}")
+
+
+def cue_observation_layout(cfg, doom_spec) -> str:
+    """Layout of the per-agent observation the partner-cue masking of VisibilityDiagnosticsWrapper acts on.
+
+    Pixel and blind observations of a single agent carry partner cues only in the scenario `measurements` (or none
+    without them); global-state, state and shared-vision observations re-encode them under another layout.
+    """
+    obs_modality = str(getattr(cfg, "obs_modality", "pixel") or "pixel").lower()
+    full_obs_mode = get_full_obs_mode(cfg)
+    if any(issubclass(w_cls, SharedVisionWrapper) for w_cls, _ in (doom_spec.joint_wrappers or [])):
+        full_obs_mode = FULL_OBS_SHARED_VISION
+    has_scenario_measurements = doom_spec.additional_input_wrapper is not None and get_use_additional_input(cfg, doom_spec)
+    if obs_modality in ("pixel", "blind") and full_obs_mode is None:
+        return CUE_LAYOUT_SCENARIO_MEASUREMENTS if has_scenario_measurements else CUE_LAYOUT_NO_CUE_CHANNEL
+    return f"obs_modality={obs_modality}, full_obs_mode={full_obs_mode}, scenario_measurements={has_scenario_measurements}"
 
 
 def doom_spec_config_path(doom_spec) -> str:
@@ -645,6 +765,32 @@ def resolve_archived_use_additional_input(archived_cfg: dict):
     if bool(archived_cfg.get("full_observability", False)):
         return True
     return None
+
+
+def resolve_archived_num_agents(archived_cfg: dict):
+    """Value of --num_agents (learner agents) that reproduces an archived run.
+
+    Runs of scripted-partner scenarios trained before learner and physical player counts were separated stored the
+    physical player count; it is resolved to the learner count. Any other value is returned unchanged.
+    """
+    num_agents = archived_cfg.get("num_agents")
+    if "env" not in archived_cfg:
+        return num_agents
+    env_name = batch_base_env_name(AttrDict(archived_cfg))
+    spec = next((s for s in DOOM_ENVS if s.name == env_name), None)
+    if spec is not None and spec.num_scripted_players > 0 and num_agents == spec.num_players:
+        return spec.num_agents
+    return num_agents
+
+
+def resolve_archived_cfg(archived_cfg: dict) -> dict:
+    """Archived config.json resolved to the current config semantics (applied by load_from_checkpoint)."""
+    resolved = dict(archived_cfg)
+    if "num_agents" in resolved:
+        resolved["num_agents"] = resolve_archived_num_agents(archived_cfg)
+    if resolved.get("observation_clock_version") is None:
+        resolved["observation_clock_version"] = 1
+    return resolved
 
 
 def get_extra_wrappers(cfg, doom_spec):
@@ -676,7 +822,6 @@ def make_doom_env_impl(
     cfg=None,
     env_config=None,
     skip_frames=None,
-    episode_horizon=None,
     player_id=None,
     num_agents=None,
     max_num_players=None,
@@ -775,12 +920,9 @@ def make_doom_env_impl(
     debug_log_every_n(50, "Doom resolution: %s, resize resolution: %r", resolution, (cfg.res_w, cfg.res_h))
 
     # randomly vary episode duration to somewhat decorrelate the experience
-    timeout = doom_spec.default_timeout
-    if episode_horizon is not None and episode_horizon > 0:
-        timeout = episode_horizon
-    if timeout > 0:
+    if doom_spec.default_timeout > 0:
         #TODO: for TimeLimitWrapper, random_variation_steps may be set to a proper value
-        env = TimeLimitWrapper(env, limit=timeout, random_variation_steps=0)
+        env = TimeLimitWrapper(env, limit=doom_spec.default_timeout, random_variation_steps=0)
 
     pixel_format = cfg.pixel_format if "pixel_format" in cfg else "HWC"
     if pixel_format == "CHW":
@@ -790,17 +932,17 @@ def make_doom_env_impl(
         env = wrapper_cls(env, **wrapper_kwargs)
 
     obs_modality = str(getattr(cfg, "obs_modality", "pixel") or "pixel").lower()
-    horizon_steps = timeout if timeout and timeout > 0 else 4500
     if obs_modality == "state":
+        state_encoding = get_state_encoding(cfg)
         env = StateObservationWrapper(
             env,
             scenario_name=doom_spec.name,
             include_global_state=bool(getattr(cfg, "full_observability", False)),
-            horizon=horizon_steps,
-            state_encoding=get_state_encoding(cfg),
+            horizon=None if state_encoding == STATE_ENCODING_ENTITY else observation_clock_horizon(doom_spec, cfg, CLOCK_EGO),
+            state_encoding=state_encoding,
         )
     elif obs_modality == "blind":
-        env = BlindObservationWrapper(env, horizon=horizon_steps)
+        env = BlindObservationWrapper(env, horizon=observation_clock_horizon(doom_spec, cfg, CLOCK_EGO))
 
     if doom_spec.reward_scaling != 1.0:
         env = RewardScalingWrapper(env, doom_spec.reward_scaling)
@@ -851,16 +993,17 @@ def make_doom_multiplayer_env(
         num_bots = cfg.num_bots
 
     num_agents = doom_spec.num_agents if cfg.num_agents <= 0 else cfg.num_agents
-    max_num_players = num_agents + cfg.num_humans
+    num_players = num_agents + doom_spec.num_scripted_players
+    max_num_players = num_players + cfg.num_humans
 
-    is_multiagent = num_agents > 1
+    is_multiagent = num_players > 1
 
     def make_env_func(player_id):
         return make_doom_env_impl(
             doom_spec,
             cfg=cfg,
             player_id=player_id,
-            num_agents=num_agents,
+            num_agents=num_players,
             max_num_players=max_num_players,
             num_bots=num_bots,
             skip_frames=1 if is_multiagent else skip_frames,  # multi-agent skipped frames are handled by the wrapper
@@ -875,7 +1018,7 @@ def make_doom_multiplayer_env(
         from comrad.envs.multiagent.doom_multiagent_wrapper import MultiAgentEnv
 
         env = MultiAgentEnv(
-            num_agents=num_agents,
+            num_agents=num_players,
             make_env_func=make_env_func,
             env_config=env_config,
             skip_frames=skip_frames,
@@ -889,13 +1032,17 @@ def make_doom_multiplayer_env(
         shared_reward_applied = False
 
         for wrapper_cls, wrapper_kwargs in (doom_spec.joint_wrappers or []):
-            if getattr(wrapper_cls, "hides_agents", False) and use_shared_reward and not shared_reward_applied:
+            if getattr(wrapper_cls, "scripted_players", 0) > 0 and use_shared_reward and not shared_reward_applied:
                 # blend rewards while every player is still visible, so a single learner behind a scripted partner
                 # receives exactly the benchmark reward (team reward for on-policy algos)
                 env = SharedRewardWrapper(env, alpha=shared_reward_alpha, scalarisation=shared_reward_scalarisation)
                 shared_reward_applied = True
             env = wrapper_cls(env, **wrapper_kwargs)
-        wrapped_num_agents = getattr(env, "num_agents", num_agents)
+        if env.num_agents != num_agents:
+            raise ValueError(
+                f"{doom_spec.name}: the wrapped env exposes {env.num_agents} learner agents but the config expects "
+                f"{num_agents}; --num_agents counts learner agents only (scripted players: {doom_spec.num_scripted_players})"
+            )
 
         has_spec_shared_vision = any(
             issubclass(w_cls, SharedVisionWrapper) for w_cls, _ in (doom_spec.joint_wrappers or [])
@@ -907,17 +1054,17 @@ def make_doom_multiplayer_env(
             env = EntityStateWrapper(
                 env,
                 scenario_name=doom_spec.name,
-                horizon=global_state_horizon_steps(doom_spec, cfg),
+                horizon=observation_clock_horizon(doom_spec, cfg, CLOCK_JOINT),
                 sight_range=float(getattr(cfg, "state_sight_range", 512.0) or 512.0),
             )
         if full_obs_mode == FULL_OBS_GLOBAL_STATE:
             env = GlobalStateWrapper(
                 env,
-                horizon=global_state_horizon_steps(doom_spec, cfg),
+                horizon=observation_clock_horizon(doom_spec, cfg, CLOCK_JOINT),
                 game_variables=VizdoomEnv._parse_variable_indices(doom_spec_config_path(doom_spec)).keys(),
                 version=get_global_state_version(cfg),
             )
-        elif full_obs_mode == FULL_OBS_SHARED_VISION and not has_spec_shared_vision and wrapped_num_agents == 2:
+        elif full_obs_mode == FULL_OBS_SHARED_VISION and not has_spec_shared_vision and num_agents == 2:
             env = SharedVisionWrapper(
                 env,
                 stack_measurements=True,
@@ -925,11 +1072,12 @@ def make_doom_multiplayer_env(
             )
 
         partner_occlusion_mode = str(getattr(cfg, "partner_occlusion_mode", "none") or "none").lower()
-        if (bool(getattr(cfg, "enable_labels_buffer", False)) or partner_occlusion_mode != "none") and wrapped_num_agents == 2:
+        if (bool(getattr(cfg, "enable_labels_buffer", False)) or partner_occlusion_mode != "none") and num_agents == 2:
             env = VisibilityDiagnosticsWrapper(
                 env,
                 scenario_name=doom_spec.name,
                 partner_occlusion_mode=partner_occlusion_mode,
+                cue_layout=cue_observation_layout(cfg, doom_spec),
             )
 
         # For HAPPO, obs_space with temp env (player_id=-1) doesn't get AgentIDWrapper, so MultiAgentEnv.observation_space is missing 'agent_id'
@@ -939,10 +1087,10 @@ def make_doom_multiplayer_env(
             import gymnasium as gym
             import numpy as np
             spaces = dict(env.observation_space.spaces) if isinstance(env.observation_space, gym.spaces.Dict) else {'obs': env.observation_space}
-            spaces['agent_id'] = gym.spaces.Box(low=0.0, high=1.0, shape=(num_agents,), dtype=np.float32)
+            spaces['agent_id'] = gym.spaces.Box(low=0.0, high=1.0, shape=(num_players,), dtype=np.float32)
             env.observation_space = gym.spaces.Dict(spaces)
 
-        if use_shared_reward and not shared_reward_applied and wrapped_num_agents > 1:
+        if use_shared_reward and not shared_reward_applied and num_agents > 1:
             env = SharedRewardWrapper(
                 env,
                 alpha=shared_reward_alpha,
@@ -1003,7 +1151,7 @@ def make_doom_env_from_spec(spec, _env_name, cfg, env_config, render_mode: Optio
     else:
         cfg.record_to = None
 
-    if spec.num_agents > 1 or spec.num_bots > 0:
+    if uses_multiplayer_game(spec):
         # requires multiplayer setup (e.g. at least a host, not a singleplayer game)
         return make_doom_multiplayer_env(spec, cfg=cfg, env_config=env_config, render_mode=render_mode, **kwargs)
     else:

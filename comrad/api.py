@@ -30,7 +30,7 @@ def list_scenarios() -> List[ScenarioInfo]:
     scenarios = []
     for spec in DOOM_ENVS:
         description, score = SCENARIO_METADATA.get(spec.name, ("", "true_objective"))
-        scenarios.append(ScenarioInfo(spec.name, spec.num_agents, description, score))
+        scenarios.append(ScenarioInfo(spec.name, spec.num_players, description, score))
     return scenarios
 
 
@@ -58,8 +58,11 @@ def _build_cfg(
 
     if num_agents is None:
         num_agents = spec.num_agents
-    if int(num_agents) < 2:
-        raise ValueError(f"COMRAD scenarios are multi-agent, num_agents must be >= 2 (got {num_agents})")
+    if int(num_agents) + spec.num_scripted_players < 2:
+        raise ValueError(
+            f"COMRAD scenarios are multi-player, num_agents + {spec.num_scripted_players} scripted players must be >= 2 "
+            f"(got num_agents={num_agents})"
+        )
     if int(frameskip) < 1:
         raise ValueError(f"frameskip must be >= 1 (got {frameskip})")
     if len(resolution) != 2 or min(resolution) < 1:

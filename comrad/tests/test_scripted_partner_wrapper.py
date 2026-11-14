@@ -227,3 +227,108 @@ def test_happo_agent_id_patch_applied_after_joint_wrapper(monkeypatch):
     env = _make_multiplayer(monkeypatch, [(_Marker, {"tag": "x"})], algo="HAPPO")
     assert isinstance(env.observation_space, gym.spaces.Dict)
     assert env.observation_space["agent_id"].shape == (2,)
+
+
+SCRIPTED_SCENARIOS = [spec.name for spec in doom_utils.DOOM_ENVS if spec.num_scripted_players > 0]
+
+
+def _make_scenario(monkeypatch, scenario, algo="MAPPO", num_agents=-1):
+    """Real config + env factory path for a registered scenario; only the ViZDoom MultiAgentEnv is faked."""
+    import comrad.envs.multiagent.doom_multiagent_wrapper as mae_module
+    from comrad.train import configure_batch_env_and_agents
+
+    spawned = {}
+
+    def fake_multi_agent_env(**kwargs):
+        spawned["num_players"] = kwargs["num_agents"]
+        inner = FakeMultiAgentEnv()
+        inner.num_agents = kwargs["num_agents"]
+        return inner
+
+    monkeypatch.setattr(mae_module, "MultiAgentEnv", fake_multi_agent_env)
+    cfg = default_doom_cfg(algo=algo, env=scenario)
+    cfg.num_agents = num_agents
+    cfg.num_bots = 0
+    cfg.num_humans = 0
+    cfg.wandb_record_every = 0
+    configure_batch_env_and_agents(cfg)
+    env = doom_utils.make_doom_multiplayer_env(doom_utils.doom_env_by_name(scenario), cfg=cfg, env_config=None)
+    return cfg, env, spawned["num_players"]
+
+
+def test_scripted_variants_declare_their_scripted_player():
+    assert set(SCRIPTED_SCENARIOS) == {
+        "lava_maze_scripted_observer",
+        "lava_maze_scripted_navigator",
+        "stealth_labyrinth_scripted_scout",
+        "stealth_labyrinth_scripted_gunner",
+    }
+    for name in SCRIPTED_SCENARIOS:
+        spec = doom_utils.doom_env_by_name(name)
+        assert (spec.num_players, spec.num_scripted_players, spec.num_agents) == (2, 1, 1)
+
+
+@pytest.mark.parametrize("scenario", SCRIPTED_SCENARIOS)
+def test_scripted_variant_spawns_both_players_but_exposes_one_learner(monkeypatch, scenario):
+    cfg, env, num_players = _make_scenario(monkeypatch, scenario)
+    assert num_players == 2
+    assert cfg.num_agents == env.num_agents == 1
+
+
+@pytest.mark.parametrize("scenario", ["lava_maze", "stealth_labyrinth", "stag_hunt_arena"])
+def test_benchmark_scenarios_keep_two_learners(monkeypatch, scenario):
+    cfg, env, num_players = _make_scenario(monkeypatch, scenario)
+    assert num_players == cfg.num_agents == env.num_agents == 2
+
+
+def test_explicit_learner_count_mismatch_raises(monkeypatch):
+    with pytest.raises(ValueError, match="num_agents"):
+        _make_scenario(monkeypatch, "lava_maze_scripted_observer", num_agents=2)
+
+
+@pytest.mark.parametrize("scenario", SCRIPTED_SCENARIOS)
+def test_mappo_centralized_critic_matches_wrapped_learner_count(monkeypatch, scenario):
+    import torch
+    from comrad.models.mappo_model import MAPPOActorCritic
+    from comrad.train import register_model_factory, register_vizdoom_models
+    from sample_factory.algo.utils.context import global_model_factory
+    from sample_factory.model.actor_critic import create_actor_critic
+    from sample_factory.model.model_utils import get_rnn_size
+
+    factory = global_model_factory()
+    monkeypatch.setattr(factory, "make_actor_critic_func", factory.make_actor_critic_func)
+    monkeypatch.setattr(factory, "make_model_encoder_func", factory.make_model_encoder_func)
+
+    cfg, env, _ = _make_scenario(monkeypatch, scenario, algo="MAPPO")
+    register_vizdoom_models()
+    register_model_factory(cfg)
+    obs_space = gym.spaces.Dict({"obs": gym.spaces.Box(0, 255, (3, cfg.res_h, cfg.res_w), np.uint8)})
+    model = create_actor_critic(cfg, obs_space, doom_utils.doom_env_by_name(scenario).action_space)
+
+    assert isinstance(model, MAPPOActorCritic) and model.use_centralized_critic
+    assert model.n_agents == env.num_agents == 1
+    for batch in (1, 3):
+        obs = {"obs": torch.zeros(batch, 3, cfg.res_h, cfg.res_w)}
+        result = model(obs, torch.zeros(batch, get_rnn_size(cfg)))
+        assert result["values"].shape == (batch,)
+
+
+def test_mappo_centralized_critic_rejects_partial_agent_groups(monkeypatch):
+    import torch
+    from comrad.train import register_model_factory, register_vizdoom_models
+    from sample_factory.algo.utils.context import global_model_factory
+    from sample_factory.model.actor_critic import create_actor_critic
+    from sample_factory.model.model_utils import get_rnn_size
+
+    factory = global_model_factory()
+    monkeypatch.setattr(factory, "make_actor_critic_func", factory.make_actor_critic_func)
+    monkeypatch.setattr(factory, "make_model_encoder_func", factory.make_model_encoder_func)
+
+    cfg = default_doom_cfg(algo="MAPPO", env="lava_maze")
+    cfg.num_agents = 2
+    register_vizdoom_models()
+    register_model_factory(cfg)
+    obs_space = gym.spaces.Dict({"obs": gym.spaces.Box(0, 255, (3, cfg.res_h, cfg.res_w), np.uint8)})
+    model = create_actor_critic(cfg, obs_space, doom_utils.doom_env_by_name("lava_maze").action_space)
+    with pytest.raises(ValueError, match="not a multiple"):
+        model({"obs": torch.zeros(3, 3, cfg.res_h, cfg.res_w)}, torch.zeros(3, get_rnn_size(cfg)))
