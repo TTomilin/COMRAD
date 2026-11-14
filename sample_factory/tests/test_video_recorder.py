@@ -371,6 +371,7 @@ def test_make_doom_multiplayer_env_uses_any_done_mode_for_on_policy_only(monkeyp
 
     doom_spec = SimpleNamespace(
         num_agents=2,
+        num_scripted_players=0,
         num_bots=0,
         shared_reward_alpha=0.0,
         shared_reward_scalarisation="sum",

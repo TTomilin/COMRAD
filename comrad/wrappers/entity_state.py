@@ -6,9 +6,11 @@ import gymnasium as gym
 import numpy as np
 
 from comrad.envs.doom_gym import DEPTH_ROW_INFO_KEY, GLOBAL_STATE_INFO_KEYS
+from comrad.wrappers.episode_boundary import joint_new_episode
 from comrad.wrappers.state_observation import (
     ENTITY_STATE_DIM,
     TASK_EXTRA_DIM,
+    clock_horizon,
     ego_pose_vitals,
     rhythm_sync_target_keys,
     safe_float,
@@ -16,6 +18,38 @@ from comrad.wrappers.state_observation import (
 )
 
 ENTITY_INFO_KEYS = GLOBAL_STATE_INFO_KEYS + (DEPTH_ROW_INFO_KEY,)
+
+# Scenarios whose task block is the shared task extractor plus the radius gating of EntityStateWrapper._task.
+ENTITY_SHARED_TASK_SCENARIOS = frozenset(
+    {"armory_siege", "ammo_carrier", "rhythm_sync", "rhythm_sync_dense", "stealth_labyrinth", "stealth_labyrinth_lit",
+     "stealth_labyrinth_shared_vision"}
+)
+_LAVA_MAZE_PUBLIC = ("USER11", "USER16", "USER17", "USER22")  # grid size, broadcast colour cue and flash, levels
+_COOP_PUZZLE_PARTIAL = ("USER1", "USER2", "USER3", "USER4", "USER5", "USER6")
+# For every other scenario, per role: the USER variables (task slots 4-9, / 100) after the role id and the agent's own
+# KILLCOUNT / HITCOUNT / DAMAGECOUNT. Only own statistics, team progress and cues shown to that role are listed: goals,
+# positions, global enemy counters and partner-private variables never enter the partial observation.
+ENTITY_USER_FEATURES = {
+    "lavapit": ((), ()),
+    "platform_chain": ((), ()),
+    "platform_chain_easy": ((), ()),
+    "coop_puzzle": (_COOP_PUZZLE_PARTIAL, _COOP_PUZZLE_PARTIAL),
+    "lava_maze": (_LAVA_MAZE_PUBLIC, _LAVA_MAZE_PUBLIC),
+    "lava_maze_simple": (_LAVA_MAZE_PUBLIC, _LAVA_MAZE_PUBLIC),
+    "lava_maze_oracle_msg": (_LAVA_MAZE_PUBLIC, _LAVA_MAZE_PUBLIC),
+    "lava_maze_oracle_hint": (_LAVA_MAZE_PUBLIC, _LAVA_MAZE_PUBLIC),
+    "smart_enemies": ((), ()),
+    "dumb_enemies": ((), ()),
+    "stag_hunt_arena": (("USER56",), ("USER57",)),
+    "stag_hunt_arena_continuous": (("USER56",), ("USER57",)),
+    "stag_hunt_arena_continuous_full": (("USER56",), ("USER57",)),
+    "foraging_commons": (("USER4", "USER8"), ("USER5", "USER9")),
+    "coop_health_gathering": ((), ()),
+}
+
+
+def has_entity_task_schema(scenario_name: str) -> bool:
+    return scenario_name in ENTITY_SHARED_TASK_SCENARIOS or scenario_name in ENTITY_USER_FEATURES
 
 
 class EntityStateWrapper(gym.Wrapper):
@@ -43,7 +77,7 @@ class EntityStateWrapper(gym.Wrapper):
         self,
         env: gym.Env,
         scenario_name: str,
-        horizon: int,
+        horizon: float,
         sight_range: float = 512.0,
         max_entities: int = 12,
         num_rays: int = 16,
@@ -56,7 +90,13 @@ class EntityStateWrapper(gym.Wrapper):
             raise ValueError("EntityStateWrapper (--state_encoding=entity) needs a multi-agent env with >= 2 agents")
         self.is_multiagent = True
         self.scenario_name = str(scenario_name or "")
-        self.horizon = max(1, int(horizon))
+        if not has_entity_task_schema(self.scenario_name):
+            raise ValueError(f"No entity-state task schema for scenario {self.scenario_name!r} (see ENTITY_USER_FEATURES)")
+        self._user_features = ENTITY_USER_FEATURES.get(self.scenario_name)
+        if self._user_features is not None and len(self._user_features) < self.num_agents:
+            raise ValueError(f"Entity-state task schema of {self.scenario_name!r} covers {len(self._user_features)} roles, "
+                             f"the env has {self.num_agents} agents")
+        self.horizon = clock_horizon(horizon)
         self.sight_range = float(sight_range)
         if self.sight_range <= 0:
             raise ValueError(f"sight_range must be positive, got {sight_range}")
@@ -143,7 +183,19 @@ class EntityStateWrapper(gym.Wrapper):
             return np.zeros(self.num_rays, dtype=np.float32)
         return np.array([s.min() for s in np.array_split(row, self.num_rays)], dtype=np.float32) / 255.0
 
+    def _own_task(self, i: int, info: dict) -> np.ndarray:
+        vec = np.zeros(TASK_EXTRA_DIM, dtype=np.float32)
+        vec[0] = float(i)
+        vec[1] = np.clip(safe_float(info, "KILLCOUNT", 0.0) / 50.0, 0.0, 5.0)
+        vec[2] = np.clip(safe_float(info, "HITCOUNT", 0.0) / 100.0, 0.0, 5.0)
+        vec[3] = np.clip(safe_float(info, "DAMAGECOUNT", 0.0) / 500.0, 0.0, 5.0)
+        for slot, key in enumerate(self._user_features[i], start=4):
+            vec[slot] = np.clip(safe_float(info, key, 0.0) / 100.0, -5.0, 5.0)
+        return vec
+
     def _task(self, i: int, info: dict, x: float, y: float, yaw: float, partner_in_range: bool) -> np.ndarray:
+        if self._user_features is not None:
+            return self._own_task(i, info)
         vec = task_extra_features(info, self.scenario_name, i, include_global_state=False)
         name = self.scenario_name
         if "rhythm_sync" in name:
@@ -215,15 +267,10 @@ class EntityStateWrapper(gym.Wrapper):
     def step(self, actions):
         obs, rewards, terminated, truncated, infos = self.env.step(actions)
         state_infos = infos
-        # On an auto-reset step `obs` is already the next episode's first frame while `infos` still describe the
-        # terminal frame; build the state from the new episode's `reset_info`.
-        if (
-            isinstance(infos, (list, tuple))
-            and all(bool(t) or bool(tr) for t, tr in zip(terminated, truncated))
-            and all(isinstance(i, dict) and isinstance(i.get("reset_info"), dict) for i in infos)
-        ):
-            state_infos = [i["reset_info"] for i in infos]
-            self._step_count = 0
+        new_episode = joint_new_episode(terminated, truncated, infos)
+        if new_episode is not None:
+            state_infos = new_episode.infos
+            self._step_count = new_episode.steps
         else:
             self._step_count += 1
         out = self._build(obs, state_infos)

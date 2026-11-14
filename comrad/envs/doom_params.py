@@ -39,6 +39,16 @@ def add_doom_env_args(parser):
         "key were trained with version 1.",
     )
     p.add_argument(
+        "--observation_clock_version",
+        default=2,
+        type=int,
+        choices=[1, 2],
+        help="Episode clock (step / horizon) of the state, blind, global-state and entity observations. 2: joint env "
+        "steps over the episode length at which the env truncates. 1: original clocks (state/blind counted skipped "
+        "frames against the step limit, global/entity used the scenario cfg episode_timeout / frameskip). Archived "
+        "configs without the key are resolved to version 1 when loaded from a checkpoint.",
+    )
+    p.add_argument(
         "--obs_modality",
         default="pixel",
         type=str,

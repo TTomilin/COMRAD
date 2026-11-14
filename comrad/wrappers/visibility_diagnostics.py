@@ -22,6 +22,57 @@ _NON_TARGET_OBJECTS = {
     "playerspawn",
 }
 
+# Observation layouts in which partner cues can be masked: the scenario's own additional-input `measurements`, or
+# per-agent pixels without any measurement vector (no encoded cue channel, nothing to mask beyond the image).
+CUE_LAYOUT_SCENARIO_MEASUREMENTS = "scenario_measurements"
+CUE_LAYOUT_NO_CUE_CHANNEL = "no_cue_channel"
+ALL_SLOTS = slice(None)
+NO_CUE_SLOTS = ((), ())
+# Partner-transmitted cue slots of the scenario `measurements`, keyed by scenario family and measurement length,
+# per role (agent 0, agent 1).
+CUE_MEASUREMENT_SLOTS = {
+    # RhythmSyncAdditionalInput "partial": cue visible, cue owner
+    # RhythmSyncAdditionalInput "full": cue visible, own pending, partner pending, cue owner
+    "rhythm_sync": {7: ((3, 4), (3, 4)), 9: ((3, 4, 5, 6), (3, 4, 5, 6))},
+    # AmmoCarrierAdditionalInput: shooter ammo, shortage ratio and low-ammo alert, sent to the runner
+    "ammo_carrier": {10: ((), (3, 4, 5))},
+    # ArmorySiegeAdditionalInput: own vitals, weapons and kills, shared core health
+    "armory_siege": {9: NO_CUE_SLOTS},
+    # ForagingCommonsAdditionalInput: own vitals and harvests, shared resource and cleanup counters
+    "foraging_commons": {8: NO_CUE_SLOTS},
+    # LavapitAdditionalInput: frontier bridge raised
+    "lavapit": {1: NO_CUE_SLOTS},
+}
+# Lava Maze: the observer's colour signal and flash channels make up the whole measurement vector.
+LAVA_MAZE_CUE_SLOTS = (ALL_SLOTS, ())
+
+
+def cue_measurement_slots(scenario_name: str, cue_layout: str, measurement_dim: int | None) -> tuple:
+    """Per-role cue slots of the observation `measurements`; raises where cues cannot be masked by name."""
+    if cue_layout == CUE_LAYOUT_NO_CUE_CHANNEL:
+        if measurement_dim is not None:
+            raise ValueError(f"{scenario_name!r}: layout {cue_layout!r} but the observation has {measurement_dim} measurements")
+        return NO_CUE_SLOTS
+    if cue_layout != CUE_LAYOUT_SCENARIO_MEASUREMENTS:
+        raise ValueError(
+            f"Cue masking is defined for the {CUE_LAYOUT_SCENARIO_MEASUREMENTS!r} and {CUE_LAYOUT_NO_CUE_CHANNEL!r} "
+            f"layouts only, not {cue_layout!r} (global-state, state and shared-vision observations encode the cues elsewhere)"
+        )
+    if measurement_dim is None:
+        raise ValueError(f"Cue masking needs the scenario measurements of {scenario_name!r}, the observation has none")
+    if "lava_maze" in scenario_name:
+        return LAVA_MAZE_CUE_SLOTS
+    family = next((f for f in CUE_MEASUREMENT_SLOTS if f in scenario_name), None)
+    if family is None:
+        raise ValueError(f"No partner-cue schema for scenario {scenario_name!r}")
+    slots = CUE_MEASUREMENT_SLOTS[family].get(int(measurement_dim))
+    if slots is None:
+        raise ValueError(
+            f"{scenario_name!r}: no cue schema for {measurement_dim} measurements "
+            f"(known layouts: {sorted(CUE_MEASUREMENT_SLOTS[family])})"
+        )
+    return slots
+
 
 @dataclass
 class EpisodeVisibilityStats:
@@ -168,6 +219,7 @@ class VisibilityDiagnosticsWrapper(gym.Wrapper):
         env: gym.Env,
         scenario_name: str = "",
         partner_occlusion_mode: str = "none",
+        cue_layout: str | None = None,
         hfov_deg: float = 90.0,
         vfov_deg: float = 72.0,
         strip_raw_buffers: bool = True,
@@ -180,12 +232,24 @@ class VisibilityDiagnosticsWrapper(gym.Wrapper):
         self.hfov_deg = float(hfov_deg)
         self.vfov_deg = float(vfov_deg)
         self.strip_raw_buffers = bool(strip_raw_buffers)
+        self._cue_layout = cue_layout
+        self._cue_slots = None
+        if partner_occlusion_mode in ("cues", "both"):
+            self._resolve_cue_slots()
 
         self.num_agents = getattr(env, "num_agents", 2)
         self.is_multiagent = getattr(env, "is_multiagent", True)
         self.current_stats = EpisodeVisibilityStats()
         self.last_episode_stats: EpisodeVisibilityStats | None = None
         self._pixel_fraction_sum = 0.0
+
+    def _resolve_cue_slots(self) -> tuple:
+        if self._cue_slots is None:
+            space = self.env.observation_space
+            has_measurements = isinstance(space, gym.spaces.Dict) and "measurements" in space.spaces
+            measurement_dim = int(space["measurements"].shape[0]) if has_measurements else None
+            self._cue_slots = cue_measurement_slots(self.scenario_name, self._cue_layout, measurement_dim)
+        return self._cue_slots
 
     def _reset_stats(self) -> None:
         self.current_stats = EpisodeVisibilityStats()
@@ -325,23 +389,12 @@ class VisibilityDiagnosticsWrapper(gym.Wrapper):
         if obs_i is None:
             return None
         name = self.scenario_name
+        slots = self._resolve_cue_slots()[agent_idx]
         if isinstance(obs_i, dict):
             out = dict(obs_i)
-            if "measurements" in out and out["measurements"] is not None:
+            if self._cue_layout == CUE_LAYOUT_SCENARIO_MEASUREMENTS:
                 m = np.asarray(out["measurements"], dtype=np.float32).copy()
-                if "rhythm_sync" in name and m.shape[0] >= 7:
-                    # Zero cue visibility and cue owner / partner pending flags
-                    m[3] = 0.0
-                    m[4] = 0.0
-                    if m.shape[0] >= 9:
-                        m[5] = 0.0
-                        m[6] = 0.0
-                elif "ammo_carrier" in name and agent_idx == 1 and m.shape[0] >= 6:
-                    # Mask defender ammo / shortage / low-alert signals from runner
-                    m[3:6] = 0.0
-                elif "lava_maze" in name and agent_idx == 0 and m.shape[0] >= 2:
-                    # Mask oracle/partner hint channels if present
-                    m[:] = 0.0
+                m[slots if isinstance(slots, slice) else list(slots)] = 0.0
                 out["measurements"] = m
             if "lava_maze" in name and agent_idx == 0 and "obs" in out and isinstance(info_i, dict):
                 # When observer fires colour flash (USER16 > 0), neutralize chroma difference across RGB channels

@@ -210,3 +210,63 @@ def test_requires_multi_agent_and_entity_placeholder_space():
     env.observation_space = gym.spaces.Dict({"obs": gym.spaces.Box(-5, 5, shape=(18,), dtype=np.float32)})
     with pytest.raises(ValueError):
         _wrap(env)
+
+
+def _lava_maze_infos(goal_x, goal_y, navigator_x, navigator_y, partner_x):
+    hidden = dict(USER13=goal_x, USER18=goal_y, USER14=navigator_x, USER15=navigator_y, USER19=3, USER20=1, USER21=2)
+    public = dict(USER11=8, USER16=2, USER17=1, USER22=1)
+    return [_info(0, 0, **hidden, **public), _info(partner_x, 0, **hidden, **public)]
+
+
+@pytest.mark.parametrize("scenario", ["lava_maze", "lava_maze_simple", "lava_maze_oracle_msg", "lava_maze_oracle_hint"])
+def test_lava_maze_partial_observation_ignores_goal_navigator_cell_and_far_partner(scenario):
+    def observe(*hidden_state):
+        return [o["obs"] for o in _wrap(FakeEntityJointEnv(_lava_maze_infos(*hidden_state)), scenario).reset()[0]]
+
+    base = observe(3, 4, 1, 1, 900)
+    for changed in (observe(7, 6, 1, 1, 900), observe(3, 4, 5, 2, 900), observe(3, 4, 1, 1, 1500)):
+        for agent in range(2):
+            assert np.array_equal(changed[agent], base[agent])
+    # what is legitimately observable is still there: grid size, broadcast cue and flash, levels completed
+    assert base[0][TASK0 + 4:TASK0 + 8] == pytest.approx([0.08, 0.02, 0.01, 0.01])
+
+
+@pytest.mark.parametrize("scenario, key, partner_key", [("stag_hunt_arena", "USER56", "USER57"),
+                                                        ("foraging_commons", "USER4", "USER5")])
+def test_partner_private_counters_do_not_reach_the_other_role(scenario, key, partner_key):
+    def observe(partner_value):
+        infos = [_info(0, 0, **{key: 2.0, partner_key: partner_value}), _info(900, 0, **{key: 2.0, partner_key: partner_value})]
+        return _wrap(FakeEntityJointEnv(infos), scenario).reset()[0][0]["obs"]
+
+    assert np.array_equal(observe(1.0), observe(9.0))
+    assert observe(1.0)[TASK0 + 4] == pytest.approx(0.02)
+
+
+def test_every_scenario_usable_with_the_entity_encoding_has_an_explicit_schema():
+    from comrad.utils.doom_utils import DOOM_ENVS
+    from comrad.wrappers.entity_state import has_entity_task_schema
+
+    usable = [spec.name for spec in DOOM_ENVS if spec.num_agents >= 2]
+    assert usable and [name for name in usable if not has_entity_task_schema(name)] == []
+    with pytest.raises(ValueError, match="No entity-state task schema"):
+        _wrap(FakeEntityJointEnv([_info(0, 0), _info(1, 0)]), scenario="unknown_scenario")
+
+
+def test_hidden_crash_reset_restarts_the_entity_clock():
+    inner = FakeEntityJointEnv([_info(0, 0), _info(100, 0)])
+    env = _wrap(inner)
+    env.reset()
+    for _ in range(5):
+        env.step([0, 0])
+    real_step = inner.step
+
+    def crashed_step(actions):
+        obs, rewards, terminated, truncated, infos = real_step(actions)
+        for info in infos:
+            info["_hidden_reset_count"] = 1
+            info["reset_info"] = dict(info)
+        return obs, rewards, terminated, truncated, infos
+
+    inner.step = crashed_step
+    obs, *_ = env.step([0, 0])
+    assert obs[0]["obs"][4] == pytest.approx(1 / 100)

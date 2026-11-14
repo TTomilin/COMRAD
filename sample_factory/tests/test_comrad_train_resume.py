@@ -117,6 +117,7 @@ def test_main_removes_curriculum_from_attrdict_cfg(monkeypatch):
         restart_behavior="restart",
         serial_mode=True,
         with_pbt=False,
+        env="lava_maze",
         num_agents=1,
         with_wandb=False,
         wandb_record_every=0,
