@@ -46,6 +46,11 @@ class MAPPOActorCritic(ActorCriticSharedWeights):
 
         if self.use_centralized_critic:
             # decoder_output.shape [batch_size * n_agents, decoder_out_size]
+            if decoder_output.shape[0] % self.n_agents != 0:
+                raise ValueError(
+                    f"MAPPO centralized critic got {decoder_output.shape[0]} agent rows, not a multiple of "
+                    f"cfg.num_agents={self.n_agents}: cfg.num_agents must equal the env's learner agent count"
+                )
             batch_size = decoder_output.shape[0] // self.n_agents
 
             # [batch_size, n_agents, decoder_out_size]
