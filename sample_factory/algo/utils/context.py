@@ -1,13 +1,16 @@
-from typing import Dict
+from typing import Callable, Dict
 
 from sample_factory.model.model_factory import ModelFactory
 from sample_factory.utils.typing import CreateEnvFunc
+
+ArchivedCfgResolver = Callable[[Dict], Dict]
 
 
 class SampleFactoryContext:
     def __init__(self):
         self.env_registry = dict()
         self.model_factory = ModelFactory()
+        self.archived_cfg_resolvers: Dict[str, ArchivedCfgResolver] = dict()
 
 
 GLOBAL_CONTEXT = None
@@ -40,6 +43,13 @@ def global_env_registry() -> Dict[str, CreateEnvFunc]:
     :rtype: EnvRegistry
     """
     return sf_global_context().env_registry
+
+
+def global_archived_cfg_resolvers() -> Dict[str, ArchivedCfgResolver]:
+    """
+    :return: resolvers applied by load_from_checkpoint to every archived config.json before command line overrides
+    """
+    return sf_global_context().archived_cfg_resolvers
 
 
 def global_model_factory() -> ModelFactory:

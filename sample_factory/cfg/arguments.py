@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple
 
 import numpy as np
 
+from sample_factory.algo.utils.context import global_archived_cfg_resolvers
 from sample_factory.algo.utils.env_info import EnvInfo
 from sample_factory.algo.utils.rl_utils import total_num_agents
 from sample_factory.cfg.cfg import (
@@ -566,6 +567,9 @@ def load_from_checkpoint(cfg: Config) -> AttrDict:
         json_params = json.load(json_file)
         log.warning("Loading existing experiment configuration from %s", cfg_filename)
         loaded_cfg = AttrDict(json_params)
+
+    for resolve_archived_cfg in global_archived_cfg_resolvers().values():
+        loaded_cfg = AttrDict(resolve_archived_cfg(loaded_cfg))
 
     # override the parameters in config file with values passed from command line
     for key, value in cfg.cli_args.items():

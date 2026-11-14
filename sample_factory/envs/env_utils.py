@@ -4,7 +4,7 @@ from functools import wraps
 from time import sleep
 from typing import Any, Dict, Optional
 
-from sample_factory.algo.utils.context import global_env_registry
+from sample_factory.algo.utils.context import ArchivedCfgResolver, global_archived_cfg_resolvers, global_env_registry
 from sample_factory.utils.typing import CreateEnvFunc
 from sample_factory.utils.utils import is_module_available, log
 
@@ -29,6 +29,16 @@ def register_env(env_name: str, make_env_func: CreateEnvFunc) -> None:
     assert callable(make_env_func), f"{make_env_func=} must be callable"
 
     env_registry[env_name] = make_env_func
+
+
+def register_archived_cfg_resolver(name: str, resolve_func: ArchivedCfgResolver) -> None:
+    """
+    Register a callable that maps an archived config.json dict to the config the current code expects.
+    load_from_checkpoint applies every registered resolver before the command line overrides, so all checkpoint
+    loading paths (training resume, evaluation, recording) see the same resolved config.
+    """
+    assert callable(resolve_func), f"{resolve_func=} must be callable"
+    global_archived_cfg_resolvers()[name] = resolve_func
 
 
 class EnvCriticalError(Exception):
