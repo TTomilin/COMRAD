@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=record_demo_all
-#SBATCH --partition=gpu_a100
+#SBATCH --partition=gpu_mig
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=18
-#SBATCH --mem=120G
+#SBATCH --cpus-per-task=9
+#SBATCH --mem=60G
 #SBATCH --time=12:12:00
 #SBATCH --output=train_dir/record_demo_all_checkpoints_%j.out
 #SBATCH --error=train_dir/record_demo_all_checkpoints_%j.err
@@ -11,8 +11,6 @@
 set -euo pipefail
 
 PROJECT_DIR="${PROJECT_DIR:-${SLURM_SUBMIT_DIR:-$PWD}}"
-RUN_DIR="${PROJECT_DIR}/train_dir/record_demo_all_checkpoints_j${SLURM_JOB_ID}"
-mkdir -p "${RUN_DIR}"
 
 module purge
 if ! command -v uv &>/dev/null; then
@@ -28,7 +26,7 @@ export MPLCONFIGDIR="${MPLCONFIGDIR:-/tmp/matplotlib}"
 PORT_SLOT_COUNT=4
 PORT_SLOT_SIZE=13000
 PORT_BASE_START=12000
-PORT_SLOT=$((SLURM_JOB_ID % PORT_SLOT_COUNT))
+PORT_SLOT=$((${SLURM_JOB_ID:-0} % PORT_SLOT_COUNT))
 export DOOM_DEFAULT_UDP_PORT=$((PORT_BASE_START + PORT_SLOT * PORT_SLOT_SIZE))
 echo "DOOM_DEFAULT_UDP_PORT=${DOOM_DEFAULT_UDP_PORT}"
 

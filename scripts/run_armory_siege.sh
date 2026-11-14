@@ -1,10 +1,12 @@
 #!/bin/bash
+set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 # Use a job-unique UDP base so co-located VizDoom jobs do not all use same default multiplayer port window.
 PORT_SLOT_COUNT=4
 PORT_SLOT_SIZE=13000
 PORT_BASE_START=12000
-PORT_SLOT=$((SLURM_JOB_ID % PORT_SLOT_COUNT))
+PORT_SLOT=$((${SLURM_JOB_ID:-0} % PORT_SLOT_COUNT))
 export DOOM_DEFAULT_UDP_PORT=$((PORT_BASE_START + PORT_SLOT * PORT_SLOT_SIZE))
 if [ "$DOOM_DEFAULT_UDP_PORT" -lt 1024 ]; then
     echo "Invalid DOOM_DEFAULT_UDP_PORT=$DOOM_DEFAULT_UDP_PORT"
@@ -30,9 +32,11 @@ for algo in "${methods[@]}"; do
             # Create an SBATCH script
             cat <<EOF | sbatch
 #!/bin/bash
-#SBATCH -p gpu_h100
+#SBATCH --partition=gpu_mig
 #SBATCH --nodes 1
 #SBATCH --ntasks 1
+#SBATCH --cpus-per-task=9
+#SBATCH --mem=60G
 #SBATCH --time 05:00:00
 #SBATCH --gres gpu:1
 #SBATCH --output=~/slurm/%j_"${algo}"_"${env}"_$(date +%Y-%m-%d-%H-%M-%S).out
