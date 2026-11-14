@@ -174,6 +174,40 @@ def test_crash_recovery_respawns_on_the_swapped_scenario():
         env.close()
 
 
+class _EpisodePolicy:
+    """Scripted partner that counts the steps it acted in the current episode."""
+
+    def __init__(self, action_space):
+        self.steps = 0
+
+    def reset(self):
+        self.steps = 0
+
+    def act(self, obs, info):
+        self.steps += 1
+        return 0
+
+
+def test_scripted_partner_restarts_its_policy_on_crash_recovery_reset():
+    from comrad.wrappers.scripted_partner import ScriptedPartnerWrapper
+
+    env = ScriptedPartnerWrapper(_make(auto_reset=True), learner_index=0, partner_policy=_EpisodePolicy)
+    try:
+        env.reset()
+        env.step([0])
+        CRASH_ONCE.update(step=2, player=1)
+        obs, _, terminated, truncated, infos = env.step([0])
+        assert not CRASH_ONCE, "the simulated crash must have fired"
+        assert terminated == [False] and truncated == [False]
+        assert infos[0]["_hidden_reset_count"] == 1
+        assert int(obs[0][0, 0, 0]) == 1, "the observation is one step into the restarted episode"
+        assert env.partner.steps == 0, "per-episode policy state must not survive the hidden reset"
+        env.step([0])
+        assert env.partner.steps == 1
+    finally:
+        env.close()
+
+
 def test_auto_reset_crash_recovery_keeps_done_flags():
     # Sample Factory path: the hidden reset is only surfaced via info, done flags stay untouched.
     env = _make(auto_reset=True)

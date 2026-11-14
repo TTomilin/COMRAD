@@ -9,6 +9,7 @@ import gymnasium as gym
 
 from comrad.envs.wad_catalog import WadBatch, WadInfo
 from comrad.utils.wad_utils import patch_wad_path
+from comrad.wrappers.episode_boundary import hidden_reset_count
 
 
 class MultiWADEnv(gym.Wrapper):
@@ -51,6 +52,8 @@ class MultiWADEnv(gym.Wrapper):
             for d in info:
                 if isinstance(d, dict):
                     d["task_idx"] = self._current_task_idx
+        if hidden_reset_count(info) > 0:
+            self._episode_reward = 0.0
         r = float(np.mean(reward)) if isinstance(reward, (list, tuple)) else float(reward)
         self._episode_reward += r
 
