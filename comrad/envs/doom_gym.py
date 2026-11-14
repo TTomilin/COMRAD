@@ -386,7 +386,7 @@ class VizdoomEnv(gym.Env):
         for variable, idx in self.variable_indices.items():
             if idx < len(game_variables):
                 variables[variable] = game_variables[idx]
-        if self.game is not None:
+        if self.game is not None and self.game.is_running():
             for var_name, gv in (
                 ("POSITION_X", GameVariable.POSITION_X),
                 ("POSITION_Y", GameVariable.POSITION_Y),
@@ -396,10 +396,7 @@ class VizdoomEnv(gym.Env):
                 ("HEALTH", GameVariable.HEALTH),
             ):
                 if var_name not in variables:
-                    try:
-                        variables[var_name] = float(self.game.get_game_variable(gv))
-                    except Exception:
-                        pass
+                    variables[var_name] = float(self.game.get_game_variable(gv))
         return variables
 
     def _attach_labels_info(self, state, info: Dict) -> None:
@@ -557,12 +554,9 @@ class VizdoomEnv(gym.Env):
 
         reset_info = {}
         if self.state is not None:
-            try:
-                game_variables = self._game_variables_dict(self.state)
-                reset_info.update(self.get_info(game_variables))
-                self._attach_labels_info(self.state, reset_info)
-            except Exception:
-                pass
+            game_variables = self._game_variables_dict(self.state)
+            reset_info.update(self.get_info(game_variables))
+            self._attach_labels_info(self.state, reset_info)
             try:
                 self._attach_global_state_info(self.state, reset_info, force_layout=True)
             except Exception as exc:

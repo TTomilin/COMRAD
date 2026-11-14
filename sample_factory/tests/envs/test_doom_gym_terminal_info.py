@@ -3,6 +3,8 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
+from vizdoom.vizdoom import ViZDoomErrorException
 
 from comrad.envs.doom_gym import VizdoomEnv
 
@@ -54,3 +56,45 @@ def test_process_game_step_done_without_prev_info_does_not_crash():
     assert info["episode_time_tics"] == 176
     assert info["episode_timeout_tics"] == 5250
     assert info["player_dead"] is True
+
+
+class _VariableGame:
+    def __init__(self, running, error=None):
+        self.running = running
+        self.error = error
+        self.reads = []
+
+    def is_running(self):
+        return self.running
+
+    def get_game_variable(self, variable):
+        self.reads.append(variable)
+        if self.error is not None:
+            raise self.error
+        return 7.0
+
+
+def _variables_env(game):
+    env = object.__new__(VizdoomEnv)
+    env.game = game
+    env.variable_indices = {"HEALTH": 0}
+    return env
+
+
+def test_game_variables_dict_propagates_engine_errors():
+    env = _variables_env(_VariableGame(running=True, error=ViZDoomErrorException("engine failure")))
+
+    with pytest.raises(ViZDoomErrorException):
+        VizdoomEnv._game_variables_dict(env, SimpleNamespace(game_variables=[50.0]))
+
+
+def test_game_variables_dict_reads_engine_variables_only_while_running():
+    running = _variables_env(_VariableGame(running=True))
+    variables = VizdoomEnv._game_variables_dict(running, SimpleNamespace(game_variables=[50.0]))
+    assert variables["HEALTH"] == 50.0
+    assert variables["POSITION_X"] == 7.0
+
+    stopped_game = _VariableGame(running=False)
+    variables = VizdoomEnv._game_variables_dict(_variables_env(stopped_game), SimpleNamespace(game_variables=[50.0]))
+    assert variables == {"HEALTH": 50.0}
+    assert stopped_game.reads == []
