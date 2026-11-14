@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
 TRAIN_ROOT="${TRAIN_ROOT:-train_dir/mode3_comrad_benchmark_20260503_134649}"
 ENV_NAME="${ENV_NAME:-ammo_carrier}"
