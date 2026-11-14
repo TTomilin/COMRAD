@@ -5,6 +5,8 @@ from typing import Any, Callable, Optional
 import gymnasium as gym
 import numpy as np
 
+from comrad.wrappers.episode_boundary import joint_new_episode
+
 
 def zero_action(action_space: gym.Space):
     """No-op action: 0th action of every discrete head, zeros for continuous heads."""
@@ -39,11 +41,12 @@ class ScriptedPartnerWrapper(gym.Wrapper):
     `partner_policy` is a factory (class or callable) invoked with `action_space=` so every env copy gets its own
     stateful policy instance.
 
-    `hides_agents=True` tells make_doom_multiplayer_env to apply SharedRewardWrapper (on-policy algos) *before* this
-    wrapper, so the learner is trained on the same team/individual reward as in the two-learner benchmark.
+    `scripted_players` is read by DoomSpec: the game runs learner agents + scripted players, while models and
+    --num_agents count learners only. make_doom_multiplayer_env applies SharedRewardWrapper (on-policy algos) *before*
+    this wrapper, so the learner is trained on the same team/individual reward as in the two-learner benchmark.
     """
 
-    hides_agents = True
+    scripted_players = 1
 
     def __init__(
         self,
@@ -83,6 +86,7 @@ class ScriptedPartnerWrapper(gym.Wrapper):
         joint_actions[self.partner_index] = self.partner.act(self._partner_obs, self._partner_info)
 
         obs, rewards, terminated, truncated, infos = self.env.step(joint_actions)
+        new_episode = joint_new_episode(terminated, truncated, infos)
 
         l, p = self.learner_index, self.partner_index
         learner_done = bool(terminated[l] or truncated[l])
@@ -100,7 +104,7 @@ class ScriptedPartnerWrapper(gym.Wrapper):
         else:
             partner_info = infos[p]
 
-        if partner_done:
+        if partner_done or new_episode is not None:
             self.partner.reset()
 
         self._partner_obs = obs[p]

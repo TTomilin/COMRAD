@@ -9,6 +9,8 @@ from typing import Sequence
 import gymnasium as gym
 import numpy as np
 
+from comrad.wrappers.episode_boundary import hidden_reset_count as episode_hidden_reset_count
+
 def _as_bool_sequence(value):
     if isinstance(value, (list, tuple)):
         return list(value)
@@ -115,25 +117,6 @@ def _multi_info_scalars(infos):
 
     return scalars
 
-
-def _hidden_reset_count(info) -> int:
-    if isinstance(info, list):
-        counts = []
-        for item in info:
-            if isinstance(item, dict):
-                try:
-                    counts.append(int(item.get("_hidden_reset_count", 0)))
-                except (TypeError, ValueError):
-                    continue
-        return max(counts, default=0)
-
-    if isinstance(info, dict):
-        try:
-            return int(info.get("_hidden_reset_count", 0))
-        except (TypeError, ValueError):
-            return 0
-
-    return 0
 
 #==================================================
 
@@ -270,7 +253,7 @@ class VideoLoggerWrapper(gym.Wrapper):
         elif isinstance(info, dict):
             reset_boundary = "reset_info" in info
 
-        hidden_reset_count = _hidden_reset_count(info)
+        hidden_reset_count = episode_hidden_reset_count(info)
         if hidden_reset_count > 0:
             self._recording = False
             self._frames.clear()

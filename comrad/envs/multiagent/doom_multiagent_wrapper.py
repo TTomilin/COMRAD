@@ -20,6 +20,7 @@ from sample_factory.utils.utils import log
 from comrad.envs.doom_gym import doom_lock_file
 from comrad.utils.doom_render import concat_grid
 from comrad.envs.multiagent.doom_multiagent import DEFAULT_UDP_PORT, find_available_port, reserve_available_port
+from comrad.wrappers.episode_boundary import HIDDEN_RESET_COUNT_KEY
 
 _CRASHED = object() # await_tasks() checks for this to check if the whole game group is dead
 class _GameGroupCrashError(Exception):
@@ -494,7 +495,7 @@ class MultiAgentEnv(gym.Env, RewardShapingInterface):
 
         for info, reset_info in zip(infos, pending_reset_infos):
             if isinstance(info, dict):
-                info["_hidden_reset_count"] = pending_reset_count
+                info[HIDDEN_RESET_COUNT_KEY] = pending_reset_count
                 if "reset_info" not in info:
                     info["reset_info"] = reset_info
 
