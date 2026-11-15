@@ -27,6 +27,8 @@ import statistics
 from pathlib import Path
 from typing import Any
 
+from comrad.utils.confidence import t_critical_95
+
 SCENARIOS = (
     ("stag_hunt_arena", "Stag Hunt Arena"),
     ("rhythm_sync_dense", "Rhythm Sync"),
@@ -70,7 +72,6 @@ TABLE3 = {
 # Table 3 are not archived locally, so the Full-vs-Partial comparison uses these summary statistics).
 TABLE3_MAPPO_CI = {"rhythm_sync_dense": 0.04, "coop_puzzle": 0.11, "armory_siege": 2.45}
 TABLE3_N_SEEDS = 5
-T_CRIT_95_DF4 = 2.776
 # Scenarios whose two viewpoints play different roles; the both-agent mean hides the asymmetry, so they are broken down
 # per agent (agent index -> role). Lava Maze's observer camera is scripted to track the navigator.
 ASYMMETRIC_ROLES = {"lava_maze": ("Navigator", "Observer")}
@@ -258,7 +259,7 @@ def full_obs_global_v2_table(v2: dict) -> tuple[list[str], list[str]]:
         else:
             delta = f"{norm(scen, full[0]) - norm(scen, partial[0]):+.1f}"
             sd_full = statistics.stdev(cell["true_objective"]["per_seed"]) if n > 1 else 0.0
-            sd_partial = partial[1] * TABLE3_N_SEEDS ** 0.5 / T_CRIT_95_DF4
+            sd_partial = partial[1] * TABLE3_N_SEEDS ** 0.5 / t_critical_95(TABLE3_N_SEEDS)
             p = _welch_p(full[0], sd_full, n, partial[0], sd_partial, TABLE3_N_SEEDS) if n > 1 else None
             p_s = "—" if p is None else (f"{p:.3f}" if p >= 0.001 else "<0.001")
         cells = [fmt_pct(scen, partial), fmt_pct(scen, full)]
