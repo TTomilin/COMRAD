@@ -1,9 +1,12 @@
-"""Baseline learning curves with 95% CI bands across seeds, overlaid with Table 3 held-out scores.
+"""Baseline learning curves with 95% CI bands across seeds, overlaid with the paper's held-out scores.
 
 Curves are the measured training-layout ``policy_stats/avg_true_objective`` of every seed,
 interpolated onto a shared 0-100M grid. The band is the mean +- Student-t 95% CI half-width
 across seeds (the same statistic Table 3 reports). At 100M each algorithm also gets a marker
-with error bar for its held-out zero-shot score, parsed from Table 3 of the paper.
+with error bar for its held-out zero-shot score, parsed from the raw baseline table of the paper (scripts/paper_tables.py).
+
+A seed whose logs stop before 95% of the budget would bias the 100M statistics and cut every seed's curve short, so
+the script refuses to run with such seeds; --allow-incomplete drops them (listed in the summary JSON) instead.
 
 The curves are never rescaled or shifted toward the held-out values: training-layout and
 held-out scores are different measurements, and any remaining gap is reported (printed and
@@ -19,7 +22,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 from collections import defaultdict
 from pathlib import Path
 
@@ -28,29 +30,25 @@ import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, FuncFormatter, MaxNLocator
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from baseline_results import (  # noqa: E402
+from comrad.utils.confidence import ci95_half_width
+from baseline_results import (
     ALGORITHM_LABELS,
     ALGORITHM_ORDER,
     ALGORITHM_STYLES,
     BUDGET_STEPS,
     SCENARIO_LABELS,
     SCENARIO_ORDER,
+    TEX_PATH,
     moving_average,
     parse_event_file,
+    parse_heldout_table,
 )
 
-
-TEX_PATH = "paper/iclr2027/iclr2027_conference.tex"
-TABLE_LABEL = r"\label{tab:baseline_results}"
 GRID_POINTS = 201
+COMPLETE_FRACTION = 0.95
 SMOOTH_WINDOW = 7
-# Two-sided 95% Student-t critical values, keyed by degrees of freedom.
-T_975 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
-MEANCI_RE = re.compile(r"\\b?meanci\{(-?[\d.]+)\}\{(-?[\d.]+)\}")
 SEED_RE = re.compile(r"_see_(\d+)")
 ALGO_RE = re.compile(r"^(?:\d+_)?(" + "|".join(sorted(ALGORITHM_ORDER, key=len, reverse=True)) + r")_")
-LABEL_TO_SCENARIO = {label: key for key, label in SCENARIO_LABELS.items()}
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,35 +58,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--figure-dir", default="paper/figure")
     parser.add_argument("--figure-name", default="baseline_learning_curves")
     parser.add_argument("--min-seeds", type=int, default=2, help="Minimum seeds needed to draw a CI band")
+    parser.add_argument("--allow-incomplete", action="store_true",
+                        help="Drop seeds whose logs stop before 95%% of the budget instead of failing")
     return parser.parse_args()
-
-
-def t_critical(n: int) -> float:
-    return T_975.get(n - 1, 1.96)
-
-
-def ci_half_width(values: np.ndarray, axis: int = 0) -> np.ndarray:
-    n = values.shape[axis]
-    if n < 2:
-        return np.zeros(values.shape[1 - axis] if values.ndim == 2 else 1)
-    return t_critical(n) * values.std(axis=axis, ddof=1) / np.sqrt(n)
-
-
-def parse_heldout_table(tex_path: Path) -> dict[str, dict[str, tuple[float, float]]]:
-    text = tex_path.read_text()
-    start = text.index(TABLE_LABEL)
-    body = text[text.index(r"\midrule", start) + len(r"\midrule"): text.index(r"\bottomrule", start)]
-    table: dict[str, dict[str, tuple[float, float]]] = {}
-    for raw_row in body.split(r"\\"):
-        row = " ".join(raw_row.split())
-        if not row:
-            continue
-        label = row.split("&", 1)[0].strip()
-        entries = [(float(m), float(c)) for m, c in MEANCI_RE.findall(row)]
-        if len(entries) != len(ALGORITHM_ORDER):
-            raise ValueError(f"Expected {len(ALGORITHM_ORDER)} entries for {label!r}, got {len(entries)}")
-        table[LABEL_TO_SCENARIO[label]] = dict(zip(ALGORITHM_ORDER, entries, strict=True))
-    return table
 
 
 def identify_run(run_dir_name: str) -> tuple[str, str, str] | None:
@@ -116,9 +88,6 @@ def load_seed_curves(logs_root: Path, grid: np.ndarray) -> dict[str, dict[str, d
         xs, ys = parse_event_file(event_path)
         order = np.argsort(xs, kind="stable")
         xs, ys = xs[order], ys[order]
-        if xs[-1] < 0.95 * BUDGET_STEPS:
-            print(f"warning: {scenario}/{algo}/seed{seed} stops at {xs[-1] / 1e6:.1f}M (< 100M); "
-                  "curve is truncated, not stretched", flush=True)
         values = np.interp(grid, xs, moving_average(ys, SMOOTH_WINDOW), right=np.nan)
         if seed in curves[scenario][algo]:
             # Several event files for one run (restarts): keep the newest values where defined.
@@ -129,7 +98,22 @@ def load_seed_curves(logs_root: Path, grid: np.ndarray) -> dict[str, dict[str, d
     return curves
 
 
-def summarize(curves, heldout, min_seeds: int) -> dict[str, dict[str, dict[str, object]]]:
+def split_incomplete(curves, grid: np.ndarray):
+    """Remove seeds whose (merged) curve ends before COMPLETE_FRACTION of the budget; returns (complete, incomplete)."""
+    complete: dict[str, dict[str, dict[str, np.ndarray]]] = defaultdict(lambda: defaultdict(dict))
+    incomplete: dict[str, dict[str, dict[str, float]]] = defaultdict(lambda: defaultdict(dict))
+    for scenario, algos in curves.items():
+        for algo, seeds in algos.items():
+            for seed, values in seeds.items():
+                last_step = float(grid[~np.isnan(values)][-1])
+                if last_step < COMPLETE_FRACTION * BUDGET_STEPS:
+                    incomplete[scenario][algo][seed] = last_step
+                else:
+                    complete[scenario][algo][seed] = values
+    return complete, incomplete
+
+
+def summarize(curves, heldout, min_seeds: int, incomplete=None) -> dict[str, dict[str, dict[str, object]]]:
     summary: dict[str, dict[str, dict[str, object]]] = {}
     for scenario in SCENARIO_ORDER:
         summary[scenario] = {}
@@ -137,10 +121,13 @@ def summarize(curves, heldout, min_seeds: int) -> dict[str, dict[str, dict[str, 
             seeds = curves.get(scenario, {}).get(algo, {})
             entry: dict[str, object] = {"seeds": sorted(seeds), "heldout_mean": heldout[scenario][algo][0],
                                         "heldout_ci95": heldout[scenario][algo][1]}
+            dropped = (incomplete or {}).get(scenario, {}).get(algo, {})
+            if dropped:
+                entry["dropped_incomplete_seeds"] = {seed: step for seed, step in sorted(dropped.items())}
             if seeds:
                 final = np.asarray([v[~np.isnan(v)][-1] for v in seeds.values()])
                 entry["train_final_mean"] = float(final.mean())
-                entry["train_final_ci95"] = float(ci_half_width(final[:, None])[0]) if len(final) >= min_seeds else None
+                entry["train_final_ci95"] = ci95_half_width(final) if len(final) >= min_seeds else None
                 entry["train_minus_heldout"] = float(final.mean() - heldout[scenario][algo][0])
             summary[scenario][algo] = entry
     return summary
@@ -167,7 +154,7 @@ def plot(curves, heldout, grid: np.ndarray, min_seeds: int, output_pdf: Path, ou
                 mean = stack[:, valid].mean(axis=0)
                 ax.plot(grid[valid], mean, **style)
                 if stack.shape[0] >= min_seeds:
-                    half = ci_half_width(stack[:, valid])
+                    half = ci95_half_width(stack[:, valid])
                     ax.fill_between(grid[valid], mean - half, mean + half, color=style["color"],
                                     alpha=0.15, linewidth=0.0)
             h_mean, h_ci = heldout[scenario][algo]
@@ -221,8 +208,16 @@ def main() -> None:
     curves = load_seed_curves(logs_root, grid)
     if not curves:
         raise RuntimeError(f"No recognisable per-seed event files under {logs_root}")
+    curves, incomplete = split_incomplete(curves, grid)
+    stopped = [f"{s}/{a}/seed{seed} stops at {step / 1e6:.1f}M" for s, algos in incomplete.items()
+               for a, seeds in algos.items() for seed, step in seeds.items()]
+    for line in stopped:
+        print(f"incomplete: {line}", flush=True)
+    if stopped and not args.allow_incomplete:
+        raise RuntimeError(f"{len(stopped)} seeds stop before {COMPLETE_FRACTION:.0%} of the budget; "
+                           "pass --allow-incomplete to drop them")
 
-    summary = summarize(curves, heldout, args.min_seeds)
+    summary = summarize(curves, heldout, args.min_seeds, incomplete)
     print(f"\n{'Scenario':<24}{'Algo':<19}{'seeds':>5}{'train@100M':>18}{'held-out':>18}{'gap':>10}")
     for scenario, algos in summary.items():
         for algo, e in algos.items():

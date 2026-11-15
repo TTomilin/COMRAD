@@ -1,4 +1,4 @@
-"""Regenerate Figure 4 (baseline_policy_family_gap) directly from Table 3 of the paper.
+"""Regenerate Figure 4 (baseline_policy_family_gap) directly from the raw baseline table of the paper.
 
 The table rows are parsed from the LaTeX source so the figure cannot drift from the
 reported numbers. Normalization follows the caption: s~ = clip(s / s_max, 0, 1), with
@@ -8,29 +8,23 @@ s_max = 4 completed mazes for Lava Maze (no finite ceiling).
 from __future__ import annotations
 
 import argparse
-import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
 
+from paper_tables import ALGORITHM_COLUMNS, TEX_PATH, BaselineRow, parse_baseline_results
 
-TEX_PATH = "paper/iclr2027/iclr2027_conference.tex"
 FIGURE_DIR = "paper/figure"
 FIGURE_NAME = "baseline_policy_family_gap"
-TABLE_LABEL = r"\label{tab:baseline_results}"
-ALGORITHMS = ["IPPO", "MAPPO", "HAPPO", "IDQN", "VDN", "QMIX", "QPLEX-D", "QPLEX-Q"]
 ON_POLICY = ["IPPO", "MAPPO", "HAPPO"]
 OFF_POLICY = ["IDQN", "VDN", "QMIX", "QPLEX-D", "QPLEX-Q"]
-FALLBACK_CEILINGS = {"Lava Maze": 4.0}
 ON_COLOR = "#c44e52"
 OFF_COLOR = "#1f9ac0"
 ON_TEXT = "#5a1a1d"
 OFF_TEXT = "#0b4a5e"
 INSIDE_LABEL_MIN = 0.25
-
-MEANCI_RE = re.compile(r"\\b?meanci\{(-?[\d.]+)\}\{(-?[\d.]+)\}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -41,39 +35,19 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def parse_table(tex_path: Path) -> list[tuple[str, dict[str, float], float]]:
-    text = tex_path.read_text()
-    start = text.index(TABLE_LABEL)
-    body = text[text.index(r"\midrule", start) + len(r"\midrule"): text.index(r"\bottomrule", start)]
-
-    rows: list[tuple[str, dict[str, float], float]] = []
-    for raw_row in body.split(r"\\"):
-        row = " ".join(raw_row.split())
-        if not row:
-            continue
-        scenario = row.split("&", 1)[0].strip()
-        means = [float(m) for m, _ in MEANCI_RE.findall(row)]
-        if len(means) != len(ALGORITHMS):
-            raise ValueError(f"Expected {len(ALGORITHMS)} entries for {scenario!r}, got {len(means)}")
-        ceiling_cell = row.rsplit("&", 1)[1].strip()
-        ceiling = FALLBACK_CEILINGS[scenario] if ceiling_cell == "--" else float(ceiling_cell)
-        rows.append((scenario, dict(zip(ALGORITHMS, means, strict=True)), ceiling))
-    return rows
-
-
 def best_of(family: list[str], normalized: dict[str, float]) -> tuple[str, float]:
     # Ties resolve to the first algorithm in table order.
     best = max(family, key=lambda algo: (normalized[algo], -family.index(algo)))
     return best, normalized[best]
 
 
-def compute_gaps(rows):
+def compute_gaps(rows: list[BaselineRow]):
     results = []
-    for scenario, means, ceiling in rows:
-        normalized = {algo: float(np.clip(value / ceiling, 0.0, 1.0)) for algo, value in means.items()}
+    for row in rows:
+        normalized = dict(zip(ALGORITHM_COLUMNS, map(float, row.normalized()), strict=True))
         on_algo, on_val = best_of(ON_POLICY, normalized)
         off_algo, off_val = best_of(OFF_POLICY, normalized)
-        results.append((scenario, on_algo, on_val, off_algo, off_val, on_val - off_val))
+        results.append((row.scenario, on_algo, on_val, off_algo, off_val, on_val - off_val))
     return results
 
 
@@ -132,7 +106,7 @@ def plot(results, output_pdf: Path, output_png: Path) -> None:
 
 def main() -> None:
     args = parse_args()
-    results = compute_gaps(parse_table(Path(args.tex)))
+    results = compute_gaps(parse_baseline_results(Path(args.tex)))
 
     print(f"{'Scenario':<24}{'On':>9}{'s~':>7}{'Off':>10}{'s~':>7}{'Gap':>8}")
     for scenario, on_algo, on_val, off_algo, off_val, gap in results:
