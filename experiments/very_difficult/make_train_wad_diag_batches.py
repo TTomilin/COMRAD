@@ -3,7 +3,7 @@ Diagnostic batches that replay each very-difficult variant's *training* WAD thro
 (train-vs-held-out generalisation gap). Five manifest entries point at the same training WAD so the evaluator's
 five-seed protocol check passes; the maze / room order still varies per episode through ACS runtime randomness.
 
-  uv run python experiments/very_difficult/make_train_wad_diag_batches.py --output-root results/diag_train_wad_batches
+  uv run python -m experiments.very_difficult.make_train_wad_diag_batches --output-root results/diag_train_wad_batches
 """
 from __future__ import annotations
 

@@ -10,35 +10,32 @@ and episode count as the learned-role evaluation (scripts/heldout_wad_evaluation
   `lava_maze_scripted_navigator` (Python colour-convention navigator), on the scripted-navigator held-out WADs.
 
 Run from the repo root:
-  python experiments/very_difficult/fully_scripted_reference_eval.py --scenario lava_maze --wad-index 0
-  python experiments/very_difficult/fully_scripted_reference_eval.py --summarize
+  python -m experiments.very_difficult.fully_scripted_reference_eval --scenario lava_maze --wad-index 0
+  python -m experiments.very_difficult.fully_scripted_reference_eval --summarize
 """
 from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO_ROOT))
-sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from heldout_wad_evaluation import (  # noqa: E402
+from comrad.envs.doom_params import default_doom_cfg
+from comrad.scripted.lava_maze_observer import LavaMazeObserverPolicy
+from comrad.train import configure_batch_env_and_agents
+from comrad.utils.confidence import ci95_half_width
+from sample_factory.envs.create_env import create_env
+from sample_factory.utils.attr_dict import AttrDict
+from scripts.heldout_wad_evaluation import (
     HELDOUT_SEEDS,
     GoalRelocationCounter,
     generate_heldout_batch,
     load_manifest,
     singleton_batch_dir,
 )
-
-from comrad.envs.doom_params import default_doom_cfg  # noqa: E402
-from comrad.scripted.lava_maze_observer import LavaMazeObserverPolicy  # noqa: E402
-from comrad.train import configure_batch_env_and_agents  # noqa: E402
-from sample_factory.envs.create_env import create_env  # noqa: E402
-from sample_factory.utils.attr_dict import AttrDict  # noqa: E402
 
 BATCH_ROOT = REPO_ROOT / "results" / "heldout_wad_batches"
 OUT_ROOT = REPO_ROOT / "results" / "heldout_very_difficult" / "fully_scripted"
@@ -146,7 +143,7 @@ def summarize() -> dict:
             "episodes": len(records),
             "layouts": len(layout_means),
             "mean": float(np.mean([float(r[key]) for r in records])),
-            "layout_mean_ci95": float(1.96 * np.std(vals, ddof=1) / np.sqrt(len(vals))) if len(vals) > 1 else 0.0,
+            "layout_mean_ci95": ci95_half_width(vals),
             "layout_means": layout_means,
             "mean_true_objective": float(np.mean([r["true_objective"] for r in records])),
         }

@@ -4,18 +4,14 @@ optionally overriding resource/budget flags. Algorithm hyper-parameters are neve
 via --set.
 
 Example:
-  python experiments/very_difficult/very_difficult_cmd.py --env lava_maze_oracle_msg --algo QMIX \
+  python -m experiments.very_difficult.very_difficult_cmd --env lava_maze_oracle_msg --algo QMIX \
       --set num_workers=1 --set num_envs_per_worker=2 --set device=cpu
 """
 import argparse
 import shlex
-import sys
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-
-from comrad.train_all import ALGORITHMS, BENCHMARK_SCENARIOS  # noqa: E402
-from experiments.very_difficult.profiles import (  # noqa: E402
+from comrad.train_all import ALGORITHMS, BENCHMARK_SCENARIOS
+from experiments.very_difficult.profiles import (
     VERY_DIFFICULT_CONVERSE_SCENARIOS,
     VERY_DIFFICULT_EXTRA_ARGS,
     VERY_DIFFICULT_ORACLE_SCENARIOS,

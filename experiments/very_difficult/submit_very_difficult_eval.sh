@@ -4,7 +4,7 @@
 #   experiments/very_difficult/submit_very_difficult_eval.sh                 # all 12 env x algo combos, seeds from SEEDS_<...> overrides
 #   experiments/very_difficult/submit_very_difficult_eval.sh env:ALGO:seeds  # explicit specs (e.g. reruns)
 #   experiments/very_difficult/submit_very_difficult_eval.sh converse        # the 4 converse combos (scripted gunner / navigator)
-set -eu
+set -euo pipefail
 cd "$(dirname "$0")/../.."
 mkdir -p train_dir/vd_eval_logs
 ALL_SEEDS=42,68,81,97,154
