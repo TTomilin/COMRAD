@@ -17,11 +17,9 @@ Zero-shot evaluations for Reviewer kd6J rebuttal experiments on the five held-ou
 from __future__ import annotations
 
 import argparse
-from datetime import datetime, timezone
 import json
-import math
+from datetime import datetime, timezone
 from pathlib import Path
-import sys
 from typing import Any, Iterable
 
 import gymnasium as gym
@@ -29,18 +27,27 @@ import numpy as np
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-for _path in (REPO_ROOT, REPO_ROOT / "scripts"):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
 
-from comrad.envs.doom_params import default_doom_cfg  # noqa: E402
-from comrad.train import (  # noqa: E402
+from comrad.envs.doom_params import default_doom_cfg
+from comrad.train import (
     configure_batch_env_and_agents,
     register_model_factory,
     register_vizdoom_components,
 )
-from comrad.utils.recording_actions import reshape_deterministic_actions  # noqa: E402
-from heldout_wad_evaluation import (  # noqa: E402
+from comrad.utils.confidence import ci95_half_width
+from comrad.utils.recording_actions import reshape_deterministic_actions
+from sample_factory.algo.learning.learner import Learner
+from sample_factory.algo.sampling.batched_sampling import preprocess_actions
+from sample_factory.algo.utils.action_distributions import argmax_actions
+from sample_factory.algo.utils.env_info import extract_env_info
+from sample_factory.algo.utils.rl_utils import make_dones, prepare_and_normalize_obs
+from sample_factory.algo.utils.tensor_utils import unsqueeze_tensor
+from sample_factory.enjoy import make_env as make_eval_env
+from sample_factory.envs.create_env import create_env
+from sample_factory.model.actor_critic import create_actor_critic
+from sample_factory.model.model_utils import get_rnn_size
+from sample_factory.utils.attr_dict import AttrDict
+from scripts.heldout_wad_evaluation import (
     DEFAULT_ARCHIVE_ROOT,
     DEFAULT_TARGET_STEPS,
     GOAL_TRACKED_SCENARIOS,
@@ -62,18 +69,6 @@ from heldout_wad_evaluation import (  # noqa: E402
     singleton_batch_dir,
     write_raw_csv,
 )
-from sample_factory.algo.learning.learner import Learner  # noqa: E402
-from sample_factory.algo.sampling.batched_sampling import preprocess_actions  # noqa: E402
-from sample_factory.algo.utils.action_distributions import argmax_actions  # noqa: E402
-from sample_factory.algo.utils.env_info import extract_env_info  # noqa: E402
-from sample_factory.algo.utils.rl_utils import make_dones, prepare_and_normalize_obs  # noqa: E402
-from sample_factory.algo.utils.tensor_utils import unsqueeze_tensor  # noqa: E402
-from sample_factory.enjoy import make_env as make_eval_env  # noqa: E402
-from sample_factory.envs.create_env import create_env  # noqa: E402
-from sample_factory.model.actor_critic import create_actor_critic  # noqa: E402
-from sample_factory.model.model_utils import get_rnn_size  # noqa: E402
-from sample_factory.utils.attr_dict import AttrDict  # noqa: E402
-
 
 ALL_13_SCENARIOS = (
     "stag_hunt_arena",
@@ -91,7 +86,6 @@ ALL_13_SCENARIOS = (
     "lava_maze",
 )
 DEFAULT_TRAIN_SEEDS = (42, 68, 81, 97, 154)
-STUDENT_T_95 = {1: 0.0, 2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776}
 
 VISIBILITY_KEYS = (
     "teammate_in_frustum_rate",
@@ -110,15 +104,6 @@ VISIBILITY_KEYS = (
     "agent1_teammate_visible_rate",
     "agent1_teammate_obscured_rate",
 )
-
-
-def student_t_ci95_half_width(values: Iterable[float]) -> float:
-    arr = np.asarray(list(values), dtype=float)
-    n = len(arr)
-    if n <= 1:
-        return 0.0
-    t_crit = STUDENT_T_95.get(n, 1.96)
-    return float(t_crit * np.std(arr, ddof=1) / math.sqrt(n))
 
 
 def ensure_heldout_batch(scenario: str, batch_root: Path, seeds: tuple[int, ...] = HELDOUT_SEEDS) -> list[WadManifestEntry]:
@@ -187,20 +172,14 @@ def make_random_eval_env(
     return create_env(cfg.env, cfg=cfg, env_config=AttrDict({"worker_index": 0, "vector_index": 0, "env_id": 0}))
 
 
-def _extract_visibility_from_infos(infos: Any, env: Any) -> dict[str, float]:
+def _extract_visibility_from_infos(infos: Any) -> dict[str, float]:
+    """Visibility rates of the episode that just ended; rates the wrapper did not measure are left out, not zeroed."""
     if isinstance(infos, (list, tuple)) and infos:
         for info in infos:
             if isinstance(info, dict) and "episode_visibility_stats" in info:
                 stats = info["episode_visibility_stats"]
-                return {k: float(stats.get(k, 0.0)) for k in VISIBILITY_KEYS}
-    # Fallback if episode was truncated early by max_steps_per_episode
-    cur = env
-    while cur is not None:
-        if "current_stats" in getattr(cur, "__dict__", {}) and hasattr(cur.current_stats, "to_dict"):
-            d = cur.current_stats.to_dict()
-            return {k: float(d.get(k, 0.0)) for k in VISIBILITY_KEYS}
-        cur = getattr(cur, "env", None)
-    return {k: 0.0 for k in VISIBILITY_KEYS}
+                return {k: float(stats[k]) for k in VISIBILITY_KEYS if stats.get(k) is not None}
+    return {}
 
 
 def evaluate_random_on_wad(
@@ -210,7 +189,6 @@ def evaluate_random_on_wad(
     eval_seeds: int | Iterable[int],
     episodes: int,
     enable_labels_buffer: bool = True,
-    max_steps_per_episode: int = 0,
 ) -> list[dict[str, Any]]:
     seed_list = [int(eval_seeds)] if isinstance(eval_seeds, int) else [int(s) for s in eval_seeds]
     track_goals = any(scenario.startswith(prefix) for prefix in GOAL_TRACKED_SCENARIOS)
@@ -229,7 +207,6 @@ def evaluate_random_on_wad(
             for eval_seed in seed_list:
                 rng = np.random.default_rng(int(eval_seed) * 100_003 + int(entry.seed))
                 step_in_ep = 0
-                ep_reward_sum = np.zeros(num_agents, dtype=np.float64)
                 ep_idx = 0
 
                 while ep_idx < episodes:
@@ -241,34 +218,11 @@ def evaluate_random_on_wad(
 
                     obs, rewards, terminated, truncated, infos = env.step(actions)
                     step_in_ep += 1
-                    if rewards is not None:
-                        ep_reward_sum += np.asarray(rewards, dtype=np.float64)
 
-                    force_done = max_steps_per_episode > 0 and step_in_ep >= max_steps_per_episode
-                    dones = [bool(t) or bool(tr) or force_done for t, tr in zip(terminated, truncated)]
-                    if all(dones):
+                    if all(bool(t) or bool(tr) for t, tr in zip(terminated, truncated)):
                         goals.observe(infos)
-                        vis_stats = _extract_visibility_from_infos(infos, env)
-                        if isinstance(infos, (list, tuple)) and any(
-                            isinstance(inf, dict) and "true_objective" in inf for inf in infos
-                        ):
-                            true_obj = float(
-                                np.mean(
-                                    [
-                                        float(inf["true_objective"])
-                                        for inf in infos
-                                        if isinstance(inf, dict) and "true_objective" in inf
-                                    ]
-                                )
-                            )
-                        elif scenario in ("foraging_commons", "ammo_carrier"):
-                            true_obj = float(step_in_ep * 4)
-                        elif scenario == "coop_health_gathering":
-                            true_obj = float(step_in_ep)
-                        else:
-                            true_obj = float(np.mean(ep_reward_sum))
-                        if track_goals:
-                            true_obj = float(goals.count)
+                        vis_stats = _extract_visibility_from_infos(infos)
+                        true_obj = float(goals.count) if track_goals else joint_true_objective(infos)
 
                         record: dict[str, Any] = {
                             "scenario": scenario,
@@ -288,14 +242,7 @@ def evaluate_random_on_wad(
                         ep_idx += 1
                         goals.reset()
                         step_in_ep = 0
-                        ep_reward_sum.fill(0.0)
-                        if force_done and not all(
-                            bool(t) or bool(tr) for t, tr in zip(terminated, truncated)
-                        ):
-                            obs, infos = env.reset()
-                            goals.observe(infos)
-                        else:
-                            goals.observe(fresh_episode_infos(infos))
+                        goals.observe(fresh_episode_infos(infos))
                     else:
                         goals.observe(infos)
         finally:
@@ -374,8 +321,8 @@ def evaluate_checkpoint_diagnostic_on_wad(
                             rnn_states[agent_idx].zero_()
                     if np.all(dones):
                         goals.observe(infos)
-                        vis_stats = _extract_visibility_from_infos(infos, env)
-                        true_obj = float(goals.count) if track_goals else joint_true_objective(infos, rewards)
+                        vis_stats = _extract_visibility_from_infos(infos)
+                        true_obj = float(goals.count) if track_goals else joint_true_objective(infos)
                         record: dict[str, Any] = {
                             "scenario": policy.scenario,
                             "algorithm": policy.algorithm,
@@ -410,13 +357,13 @@ def aggregate_records_by_scenario_and_algo(records: list[dict[str, Any]]) -> lis
     for (scenario, algorithm, mode), recs in sorted(grouped.items()):
         by_seed: dict[int, list[float]] = {}
         for r in recs:
-            s = int(r.get("train_seed") if r.get("train_seed") is not None else 0)
-            by_seed.setdefault(s, []).append(float(r["true_objective"]))
+            by_seed.setdefault(int(r["train_seed"]), []).append(float(r["true_objective"]))
         seed_means = [float(np.mean(vals)) for _, vals in sorted(by_seed.items())]
-        vis_agg = {
-            vk: float(np.mean([float(r.get(vk, 0.0)) for r in recs]))
-            for vk in VISIBILITY_KEYS
-        }
+        vis_agg = {}
+        for vk in VISIBILITY_KEYS:
+            measured = [float(r[vk]) for r in recs if r.get(vk) is not None]
+            if measured:
+                vis_agg[vk] = float(np.mean(measured))
         summaries.append(
             {
                 "scenario": scenario,
@@ -428,11 +375,28 @@ def aggregate_records_by_scenario_and_algo(records: list[dict[str, Any]]) -> lis
                 "seed_means": seed_means,
                 "mean_true_objective": float(np.mean(seed_means)) if seed_means else 0.0,
                 "std_over_seeds": float(np.std(seed_means, ddof=1)) if len(seed_means) > 1 else 0.0,
-                "ci95_half_width": student_t_ci95_half_width(seed_means),
+                "ci95_half_width": ci95_half_width(seed_means),
                 **vis_agg,
             }
         )
     return summaries
+
+
+def random_cache_mismatch(
+    records: list[dict[str, Any]], entries: list[WadManifestEntry], seeds: Iterable[int], episodes: int
+) -> str | None:
+    """Why cached random-policy records do not match the requested protocol, or None when they do."""
+    expected = {(entry.wad_id, int(seed)) for entry in entries for seed in seeds}
+    counts: dict[tuple[str, int], int] = {}
+    for rec in records:
+        key = (str(rec["wad_id"]), int(rec["train_seed"]))
+        counts[key] = counts.get(key, 0) + 1
+    if set(counts) != expected:
+        return f"covers {sorted(counts)} instead of {sorted(expected)}"
+    wrong = {key: n for key, n in counts.items() if n != int(episodes)}
+    if wrong:
+        return f"episodes per (wad, seed) {wrong} != {episodes}"
+    return None
 
 
 def parse_cli() -> argparse.Namespace:
@@ -448,9 +412,9 @@ def parse_cli() -> argparse.Namespace:
     parser.add_argument("--scenarios", default=",".join(ALL_13_SCENARIOS))
     parser.add_argument("--algorithms", default="MAPPO,QMIX")
     parser.add_argument("--seeds", default=",".join(map(str, HELDOUT_SEEDS)))
-    parser.add_argument("--train-seeds", default=",".join(map(str, DEFAULT_TRAIN_SEEDS)))
+    parser.add_argument("--train-seeds", default=",".join(map(str, DEFAULT_TRAIN_SEEDS)),
+                        help="Training seeds of a multi-seed archive (random mode: action seeds); '' = single-seed archive")
     parser.add_argument("--episodes-per-wad", type=int, default=20)
-    parser.add_argument("--max-steps-per-episode", type=int, default=0)
     parser.add_argument("--target-steps", type=int, default=DEFAULT_TARGET_STEPS)
     parser.add_argument("--partner-occlusion-mode", choices=("sprite", "cues", "both"), default="both")
     parser.add_argument("--device", default="cpu")
@@ -496,6 +460,9 @@ def main() -> None:
             cache_file = cache_dir / f"random_{scenario}.json"
             if cache_file.is_file() and not args.overwrite:
                 cached = json.loads(cache_file.read_text(encoding="utf-8"))
+                mismatch = random_cache_mismatch(cached, manifests[scenario], train_seeds, int(args.episodes_per_wad))
+                if mismatch is not None:
+                    raise RuntimeError(f"{cache_file} {mismatch}; pass --overwrite to re-evaluate")
                 all_records.extend(cached)
                 print(f"[cached] {scenario}: {len(cached)} episodes", flush=True)
                 continue
@@ -508,7 +475,6 @@ def main() -> None:
                     eval_seeds=train_seeds,
                     episodes=int(args.episodes_per_wad),
                     enable_labels_buffer=True,
-                    max_steps_per_episode=int(args.max_steps_per_episode),
                 )
                 scen_records.extend(recs)
             cache_file.write_text(json.dumps(scen_records, indent=2) + "\n", encoding="utf-8")
@@ -517,11 +483,11 @@ def main() -> None:
     else:
         algorithms = parse_csv_argument(args.algorithms)
         archive_root = Path(args.archive_root)
-        try:
+        if args.train_seeds:
             policies = discover_seeded_policy_specs(
                 archive_root, scenarios, algorithms, train_seeds, int(args.target_steps)
             )
-        except FileNotFoundError:
+        else:
             policies = discover_policy_specs(archive_root, scenarios, algorithms, int(args.target_steps))
 
         enable_labels = args.mode in ("visibility", "partner_occlusion")

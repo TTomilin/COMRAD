@@ -1,15 +1,11 @@
-import sys
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-for _path in (REPO_ROOT / "scripts", REPO_ROOT / "experiments" / "iclr2027_rebuttal"):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
 
-import heldout_wad_evaluation as heldout  # noqa: E402
-import rebuttal_kd6j_eval as kd6j  # noqa: E402
+import experiments.iclr2027_rebuttal.rebuttal_kd6j_eval as kd6j
+import scripts.heldout_wad_evaluation as heldout
 
 
 def test_all_13_benchmark_scenarios_registered_and_random_evaluator_aggregates() -> None:

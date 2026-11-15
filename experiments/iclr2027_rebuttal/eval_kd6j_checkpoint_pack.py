@@ -2,60 +2,49 @@
 Evaluate a trained COMRAD checkpoint directory on the 5 held-out WADs (`HELDOUT_SEEDS`)
 and optionally also run Partner-Occlusion (`--partner_occlusion_mode=both`) and Zero-Shot Blind
 (`--obs_modality=blind`) interventions inside the same live `MultiAgentEnv` per WAD.
+
+Every pass goes through `eval_frozen_partner.run_pass`: the intervention is configured before the pass's explicit
+`env.reset()` (so step 0 is already masked or unmasked as intended), RNN state and goal counter start from zero, the
+RNG is seeded by (wad_seed, pass index), and episodes hit by a hidden crash-recovery reset are discarded.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
-import sys
 from typing import Any
 
-import numpy as np
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-for _p in (REPO_ROOT, REPO_ROOT / "scripts"):
-    if str(_p) not in sys.path:
-        sys.path.insert(0, str(_p))
 
-from comrad.train import (  # noqa: E402
+from comrad.train import (
     configure_batch_env_and_agents,
     register_model_factory,
     register_vizdoom_components,
 )
-from comrad.utils.recording_actions import reshape_deterministic_actions  # noqa: E402
-from heldout_wad_evaluation import (  # noqa: E402
-    GOAL_TRACKED_SCENARIOS,
+from comrad.utils.doom_utils import CLOCK_EGO, batch_base_env_name, doom_env_by_name, observation_clock_horizon
+from experiments.iclr2027_rebuttal.eval_frozen_partner import pass_rng_seed, run_pass
+from experiments.iclr2027_rebuttal.kd6j_protocol import KD6J_PACK_PROTOCOL_VERSION
+from experiments.iclr2027_rebuttal.rebuttal_kd6j_eval import (
+    _extract_visibility_from_infos,
+    ensure_heldout_batch,
+)
+from sample_factory.algo.learning.learner import Learner
+from sample_factory.algo.utils.env_info import extract_env_info
+from sample_factory.enjoy import make_env as make_eval_env
+from sample_factory.model.actor_critic import create_actor_critic
+from scripts.heldout_wad_evaluation import (
     HELDOUT_SEEDS,
-    VALUE_BASED_ALGOS,
-    GoalRelocationCounter,
     PolicySpec,
     WadManifestEntry,
-    action_head_sizes,
     build_eval_cfg,
-    fresh_episode_infos,
-    greedy_q_actions,
-    joint_true_objective,
     select_checkpoint,
     sha256_file,
     singleton_batch_dir,
 )
-from rebuttal_kd6j_eval import (  # noqa: E402
-    _extract_visibility_from_infos,
-    ensure_heldout_batch,
-)
-from sample_factory.algo.learning.learner import Learner  # noqa: E402
-from sample_factory.algo.sampling.batched_sampling import preprocess_actions  # noqa: E402
-from sample_factory.algo.utils.action_distributions import argmax_actions  # noqa: E402
-from sample_factory.algo.utils.env_info import extract_env_info  # noqa: E402
-from sample_factory.algo.utils.rl_utils import make_dones, prepare_and_normalize_obs  # noqa: E402
-from sample_factory.algo.utils.tensor_utils import unsqueeze_tensor  # noqa: E402
-from sample_factory.enjoy import make_env as make_eval_env  # noqa: E402
-from sample_factory.model.actor_critic import create_actor_critic  # noqa: E402
-from sample_factory.model.model_utils import get_rnn_size  # noqa: E402
-
 
 def _find_visibility_wrapper(env: Any) -> Any:
     cur = env
@@ -63,10 +52,24 @@ def _find_visibility_wrapper(env: Any) -> Any:
         if "partner_occlusion_mode" in getattr(cur, "__dict__", {}):
             return cur
         cur = getattr(cur, "env", None)
-    return None
+    raise RuntimeError("no VisibilityDiagnosticsWrapper in the env stack; build the env with enable_labels_buffer=True")
 
 
-def _run_episodes_in_live_env(
+def blind_observation(horizon: float) -> Any:
+    """Zero-shot blind intervention: what `BlindObservationWrapper` feeds a blind-trained policy (black frame whose
+    first pixel encodes the episode progress step / horizon)."""
+
+    def transform(obs: dict[str, torch.Tensor], episode_step: int) -> dict[str, torch.Tensor]:
+        zeroed = torch.zeros_like(obs["obs"])
+        progress = min(1.0, float(episode_step) / float(horizon))
+        flat = zeroed.view(zeroed.shape[0], -1)
+        flat[:, 0] = int(round(progress * 255.0)) if zeroed.dtype == torch.uint8 else float(progress)
+        return {**obs, "obs": zeroed}
+
+    return transform
+
+
+def run_mode(
     env: Any,
     actor_critic: Any,
     env_info: Any,
@@ -76,91 +79,18 @@ def _run_episodes_in_live_env(
     episodes: int,
     torch_device: torch.device,
     *,
-    obs: dict[str, torch.Tensor],
-    infos: Any,
     mode: str,
-    partner_occlusion_mode: str = "none",
-    blind_override: bool = False,
-) -> tuple[list[dict[str, Any]], dict[str, torch.Tensor], Any]:
-    vis_wrapper = _find_visibility_wrapper(env)
-    if vis_wrapper is not None:
-        vis_wrapper.partner_occlusion_mode = partner_occlusion_mode
-
-    value_based = str(cfg.algo).upper() in VALUE_BASED_ALGOS
-    head_sizes = action_head_sizes(env_info.action_space) if value_based else []
-    track_goals = any(policy.scenario.startswith(prefix) for prefix in GOAL_TRACKED_SCENARIOS)
-    goals = GoalRelocationCounter()
-    # When a previous mode just ended, `infos` belong to its terminal step (old episode's goal) while the env has
-    # already auto-reset; seed from the new episode's reset_info instead, else a fake relocation is counted.
-    goals.observe(fresh_episode_infos(infos))
-
-    rnn_states = torch.zeros([env.num_agents, get_rnn_size(cfg)], dtype=torch.float32, device=torch_device)
-    episode_records: list[dict[str, Any]] = []
-    step_in_ep = 0
-    horizon = 4500
-
-    with torch.no_grad():
-        while len(episode_records) < episodes:
-            obs_step = dict(obs)
-            action_mask = obs_step.pop("action_mask").to(torch_device) if "action_mask" in obs_step else None
-            if blind_override and "obs" in obs_step:
-                zeroed = torch.zeros_like(obs_step["obs"])
-                progress = min(1.0, float(step_in_ep) / float(horizon))
-                if zeroed.numel() > 0:
-                    if zeroed.dtype == torch.uint8:
-                        zeroed.view(zeroed.shape[0], -1)[:, 0] = int(round(progress * 255.0))
-                    else:
-                        zeroed.view(zeroed.shape[0], -1)[:, 0] = float(progress)
-                obs_step["obs"] = zeroed
-
-            normalized_obs = prepare_and_normalize_obs(actor_critic, obs_step)
-            policy_outputs = actor_critic(
-                normalized_obs, rnn_states, action_mask=action_mask, sample_actions=not value_based
-            )
-            if value_based:
-                actions = greedy_q_actions(policy_outputs["action_logits"], head_sizes)
-            else:
-                actions = policy_outputs["actions"]
-                if cfg.eval_deterministic:
-                    actions = reshape_deterministic_actions(
-                        actions, argmax_actions(actor_critic.action_distribution())
-                    )
-            if actions.ndim == 1:
-                actions = unsqueeze_tensor(actions, dim=-1)
-            actions = preprocess_actions(env_info, actions)
-            rnn_states = policy_outputs["new_rnn_states"]
-            obs, rewards, terminated, truncated, infos = env.step(actions)
-            step_in_ep += 1
-            dones = make_dones(terminated, truncated).cpu().numpy()
-            for agent_idx, done in enumerate(dones):
-                if done:
-                    rnn_states[agent_idx].zero_()
-            if np.all(dones):
-                goals.observe(infos)
-                vis_stats = _extract_visibility_from_infos(infos, env)
-                true_obj = float(goals.count) if track_goals else joint_true_objective(infos, rewards)
-                record: dict[str, Any] = {
-                    "scenario": policy.scenario,
-                    "algorithm": policy.algorithm,
-                    "mode": mode,
-                    "train_seed": policy.train_seed,
-                    "checkpoint": policy.checkpoint,
-                    "wad_id": entry.wad_id,
-                    "wad_seed": entry.seed,
-                    "episode_index": len(episode_records),
-                    "true_objective": true_obj,
-                    **vis_stats,
-                }
-                if track_goals:
-                    record["goals_reached"] = int(goals.count)
-                episode_records.append(record)
-                goals.reset()
-                goals.observe(fresh_episode_infos(infos))
-                step_in_ep = 0
-            else:
-                goals.observe(infos)
-
-    return episode_records, obs, infos
+    pass_index: int,
+    partner_occlusion_mode: str,
+    blind_horizon: float | None,
+) -> list[dict[str, Any]]:
+    _find_visibility_wrapper(env).partner_occlusion_mode = partner_occlusion_mode
+    return run_pass(
+        env, actor_critic, env_info, cfg, policy, entry, episodes, torch_device,
+        pass_name=mode, partner_policy="learned", partner_idx=None, rng_seed=pass_rng_seed(entry.seed, pass_index),
+        obs_transform=None if blind_horizon is None else blind_observation(blind_horizon),
+        record_extras=lambda infos: {"mode": mode, "checkpoint": policy.checkpoint, **_extract_visibility_from_infos(infos)},
+    )
 
 
 def parse_args() -> argparse.Namespace:
@@ -228,62 +158,25 @@ def main() -> None:
                 actor_critic.model_to_device(torch_device)
                 actor_critic.load_state_dict(checkpoint_dict["model"])
 
-                obs, infos = env.reset()
-                recs, obs, infos = _run_episodes_in_live_env(
-                    env,
-                    actor_critic,
-                    env_info,
-                    cfg,
-                    policy,
-                    entry,
-                    int(args.episodes_per_wad),
-                    torch_device,
-                    obs=obs,
-                    infos=infos,
-                    mode=args.cell_tag,
-                    partner_occlusion_mode="none",
-                    blind_override=False,
+                common = (env, actor_critic, env_info, cfg, policy, entry, int(args.episodes_per_wad), torch_device)
+                normal_records.extend(
+                    run_mode(*common, mode=args.cell_tag, pass_index=0, partner_occlusion_mode="none", blind_horizon=None)
                 )
-                normal_records.extend(recs)
-
                 if args.run_interventions:
-                    recs_occ, obs, infos = _run_episodes_in_live_env(
-                        env,
-                        actor_critic,
-                        env_info,
-                        cfg,
-                        policy,
-                        entry,
-                        int(args.episodes_per_wad),
-                        torch_device,
-                        obs=obs,
-                        infos=infos,
-                        mode="partner_occlusion",
-                        partner_occlusion_mode="both",
-                        blind_override=False,
+                    occ_records.extend(
+                        run_mode(*common, mode="partner_occlusion", pass_index=1, partner_occlusion_mode="both",
+                                 blind_horizon=None)
                     )
-                    occ_records.extend(recs_occ)
-
-                    recs_blind, obs, infos = _run_episodes_in_live_env(
-                        env,
-                        actor_critic,
-                        env_info,
-                        cfg,
-                        policy,
-                        entry,
-                        int(args.episodes_per_wad),
-                        torch_device,
-                        obs=obs,
-                        infos=infos,
-                        mode="blind_eval",
-                        partner_occlusion_mode="none",
-                        blind_override=True,
+                    blind_records.extend(
+                        run_mode(*common, mode="blind_eval", pass_index=2, partner_occlusion_mode="none",
+                                 blind_horizon=observation_clock_horizon(
+                                     doom_env_by_name(batch_base_env_name(cfg)), cfg, CLOCK_EGO))
                     )
-                    blind_records.extend(recs_blind)
             finally:
                 env.close()
 
     result: dict[str, Any] = {
+        "protocol_version": KD6J_PACK_PROTOCOL_VERSION,
         "scenario": args.scenario,
         "algorithm": args.algorithm,
         "cell_tag": args.cell_tag,
@@ -301,7 +194,9 @@ def main() -> None:
 
     out_path = Path(args.output_json)
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    tmp_path = out_path.with_name(f".{out_path.name}.tmp")
+    tmp_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp_path, out_path)
     print(f"Saved {out_path} ({len(normal_records)} normal eps)")
 
 
