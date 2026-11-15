@@ -23,7 +23,9 @@ budget and IDQN epsilon horizon are halved.
 3. Fully scripted upper references: `fully_scripted_reference_eval.py`.
 4. Train-layout diagnostic (generalisation gap): `make_train_wad_diag_batches.py`, then evaluate those batches.
 5. Aggregate into the paper table: `very_difficult_reference_table.py` writes
-   `results/very_difficult_reference_summary.json` and `results/very_difficult_reference_rows.tex`.
+   `results/very_difficult_reference_summary.json` and `results/very_difficult_reference_rows.tex`
+   (`--row-set scripted_partner` builds the scripted-partner rows instead). It stops if a row of the chosen row set
+   lacks any of the five training seeds; `--allow-incomplete` writes the available rows.
 6. Optional videos: `record_scripted_partner_videos.sh` (mp4 files are not tracked).
 
 `very_difficult_cmd.py` prints the exact benchmark command of any scenario and algorithm, with optional resource

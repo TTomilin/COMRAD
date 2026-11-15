@@ -6,21 +6,27 @@ Each input is a summary.json written by scripts/heldout_wad_evaluation.py --trai
 score is the mean held-out true objective of that seed's frozen checkpoint (5 layouts x episodes); rows report
 mean +- 95% CI half-width over training seeds with Student-t t_{0.975, n-1} (n=5 -> 2.776), matching Table 2.
 
-  uv run python experiments/very_difficult/very_difficult_reference_table.py \
-      --summaries results/heldout_very_difficult_scripted/summary.json,results/heldout_very_difficult_oracle/summary.json
+Every (env, algorithm) row of the chosen --row-set must be present with all EXPECTED_SEEDS, and the inputs may not
+contain policies outside it; --allow-incomplete writes the table anyway (missing rows are listed on stderr).
+
+  uv run python -m experiments.very_difficult.very_difficult_reference_table --summary-roots \
+      results/very_difficult_eval/heldout_very_difficult,results/very_difficult_eval/heldout_very_difficult_rerun
+  uv run python -m experiments.very_difficult.very_difficult_reference_table --row-set scripted_partner \
+      --summary-roots results/heldout_very_difficult \
+      --output-json results/very_difficult_converse_summary.json --output-tex results/very_difficult_converse_rows.tex
 """
 from __future__ import annotations
 
 import argparse
 import json
-import math
+import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-# Student-t 97.5% quantiles by degrees of freedom (n_seeds - 1)
-T_975 = {1: 12.706204736174698, 2: 4.302652729749464, 3: 3.182446305284263, 4: 2.7764451051977987}
+from comrad.utils.confidence import ci95_half_width
+
 EXPECTED_SEEDS = (42, 68, 81, 97, 154)
 LAVA_TASK = "Lava Maze"
 
@@ -46,13 +52,22 @@ ROWS = [
     ("Oracle direction hint", "lava_maze_oracle_hint", "MAPPO", "Lava Maze", None),
     ("Oracle direction hint", "lava_maze_oracle_hint", "QMIX", "Lava Maze", None),
 ]
+# Envs of each published table: the reference table (scripted followers + oracle variants) and the scripted-partner
+# table (both roles scripted in turn).
+ROW_SETS = {
+    "reference": (
+        "stealth_labyrinth_scripted_scout", "stealth_labyrinth_lit", "stealth_labyrinth_shared_vision",
+        "lava_maze_scripted_observer", "lava_maze_oracle_msg", "lava_maze_oracle_hint",
+    ),
+    "scripted_partner": (
+        "stealth_labyrinth_scripted_scout", "stealth_labyrinth_scripted_gunner",
+        "lava_maze_scripted_observer", "lava_maze_scripted_navigator",
+    ),
+}
 
 
-def ci_half_width(values: list[float]) -> float:
-    n = len(values)
-    if n < 2:
-        return 0.0
-    return T_975[n - 1] * float(np.std(values, ddof=1)) / math.sqrt(n)
+class IncompleteResultsError(ValueError):
+    """The summaries do not cover exactly the rows and seeds of the requested table."""
 
 
 def collect_seed_scores(summaries: list[dict[str, Any]]) -> dict[tuple[str, str], dict[int, dict[str, Any]]]:
@@ -79,16 +94,23 @@ def collect_seed_scores(summaries: list[dict[str, Any]]) -> dict[tuple[str, str]
     return scores
 
 
-def aggregate(summaries: list[dict[str, Any]], require_all_seeds: bool = True) -> list[dict[str, Any]]:
+def aggregate(
+    summaries: list[dict[str, Any]], row_set: str = "reference", allow_incomplete: bool = False
+) -> list[dict[str, Any]]:
     seed_scores = collect_seed_scores(summaries)
+    selected = [row for row in ROWS if row[1] in ROW_SETS[row_set]]
+    problems = [f"unexpected policy {env}/{algo}" for env, algo in sorted(set(seed_scores) - {(r[1], r[2]) for r in selected})]
     rows = []
-    for label, env, algorithm, task, ceiling in ROWS:
+    for label, env, algorithm, task, ceiling in selected:
         per_seed = seed_scores.get((env, algorithm))
         if not per_seed:
+            problems.append(f"{env}/{algorithm}: no summaries")
             continue
         seeds = tuple(sorted(per_seed))
-        if require_all_seeds and seeds != tuple(sorted(EXPECTED_SEEDS)):
-            raise ValueError(f"{env}/{algorithm}: expected seeds {EXPECTED_SEEDS}, got {seeds}")
+        if seeds != tuple(sorted(EXPECTED_SEEDS)):
+            problems.append(f"{env}/{algorithm}: expected seeds {EXPECTED_SEEDS}, got {seeds}")
+            if not allow_incomplete:
+                continue
         raw = [per_seed[s]["mean_true_objective"] for s in seeds]
         goals = [per_seed[s]["mean_goals_reached"] for s in seeds]
         if task == LAVA_TASK:
@@ -106,7 +128,7 @@ def aggregate(summaries: list[dict[str, Any]], require_all_seeds: bool = True) -
             "seeds": list(seeds),
             "seed_means": values,
             "mean": float(np.mean(values)),
-            "ci95_half_width": ci_half_width(values),
+            "ci95_half_width": ci95_half_width(values),
             "checkpoint_steps": sorted({per_seed[s]["checkpoint_steps"] for s in seeds}),
             "episodes_per_seed": sorted({per_seed[s]["episodes"] for s in seeds}),
         }
@@ -114,8 +136,12 @@ def aggregate(summaries: list[dict[str, Any]], require_all_seeds: bool = True) -
             row["metric"] = "mazes completed per episode (goal relocations)"
             row["seed_raw_counter_means"] = raw
             row["raw_counter_mean"] = float(np.mean(raw))
-            row["raw_counter_ci95_half_width"] = ci_half_width(raw)
+            row["raw_counter_ci95_half_width"] = ci95_half_width(raw)
         rows.append(row)
+    for problem in problems:
+        print(f"[incomplete] {problem}", file=sys.stderr)
+    if problems and not allow_incomplete:
+        raise IncompleteResultsError(f"{len(problems)} coverage problems for row set {row_set!r} (see stderr)")
     return rows
 
 
@@ -133,13 +159,15 @@ def render_rows(rows: list[dict[str, Any]]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def discover_summaries(roots: list[Path]) -> list[Path]:
-    """Per-seed summaries under <root>/<env>/<algo>/seed_<s>/summary.json; later roots override earlier ones (reruns)."""
+def discover_summaries(roots: list[Path], envs: tuple[str, ...]) -> list[Path]:
+    """Per-seed summaries of `envs` under <root>/<env>/<algo>/seed_<s>/summary.json; later roots override earlier ones
+    (reruns)."""
     chosen: dict[tuple[str, str, str], Path] = {}
     for root in roots:
         for path in sorted(root.glob("*/*/seed_*/summary.json")):
             env, algo, seed_dir = path.parent.parent.parent.name, path.parent.parent.name, path.parent.name
-            chosen[(env, algo, seed_dir)] = path
+            if env in envs:
+                chosen[(env, algo, seed_dir)] = path
     return [chosen[key] for key in sorted(chosen)]
 
 
@@ -153,15 +181,16 @@ def main() -> None:
     )
     parser.add_argument("--output-json", default="results/very_difficult_reference_summary.json")
     parser.add_argument("--output-tex", default="results/very_difficult_reference_rows.tex")
-    parser.add_argument("--allow-missing-seeds", action="store_true")
+    parser.add_argument("--row-set", choices=sorted(ROW_SETS), default="reference")
+    parser.add_argument("--allow-incomplete", action="store_true")
     args = parser.parse_args()
 
     paths = [Path(p) for p in args.summaries.split(",") if p.strip()]
-    paths += discover_summaries([Path(p) for p in args.summary_roots.split(",") if p.strip()])
+    paths += discover_summaries([Path(p) for p in args.summary_roots.split(",") if p.strip()], ROW_SETS[args.row_set])
     if not paths:
         parser.error("pass --summaries and/or --summary-roots")
     summaries = [json.loads(p.read_text(encoding="utf-8")) for p in paths]
-    rows = aggregate(summaries, require_all_seeds=not args.allow_missing_seeds)
+    rows = aggregate(summaries, row_set=args.row_set, allow_incomplete=args.allow_incomplete)
     payload = {
         "schema_version": 1,
         "inputs": [str(p) for p in paths],
