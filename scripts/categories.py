@@ -80,71 +80,76 @@ border_color = '#A9B4C2'
 text_color = '#111827'
 plt.rcParams['font.family'] = 'sans-serif'
 
-fig, ax = plt.subplots(figsize=(12,8))
-ax.axis('off')
+def main():
+    fig, ax = plt.subplots(figsize=(12,8))
+    ax.axis('off')
 
-# Grid siz
-cell_w = 0.2
-cell_h = 0.35
-prop_col_w = 1.75
-cat_col_w = 0.75
-num_cols = len(scenarios)
-num_rows = len(properties_data)
+    # Grid siz
+    cell_w = 0.2
+    cell_h = 0.35
+    prop_col_w = 1.75
+    cat_col_w = 0.75
+    num_cols = len(scenarios)
+    num_rows = len(properties_data)
 
-total_width = cat_col_w + prop_col_w + (num_cols * cell_w)
-total_height = num_rows * cell_h
+    total_width = cat_col_w + prop_col_w + (num_cols * cell_w)
+    total_height = num_rows * cell_h
 
-current_cat = None
-cat_start_y = 0
+    current_cat = None
+    cat_start_y = 0
 
-# Draw from top to bottom
-for i, (cat, prop, marks) in enumerate(properties_data):
-    y = total_height - (i + 1) * cell_h
-    bg_color = colors.get(cat, "#ffffff")
-    ordered_marks = [marks[scenario_to_index[scenario]] for scenario in scenario_order]
+    # Draw from top to bottom
+    for i, (cat, prop, marks) in enumerate(properties_data):
+        y = total_height - (i + 1) * cell_h
+        bg_color = colors.get(cat, "#ffffff")
+        ordered_marks = [marks[scenario_to_index[scenario]] for scenario in scenario_order]
 
-    # Draw property name
-    rect = patches.Rectangle((cat_col_w, y), prop_col_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
-    ax.add_patch(rect)
-    ax.text(cat_col_w + 0.05, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color=text_color)
-
-    # Draw checkmark
-    for j, mark in enumerate(ordered_marks):
-        x = cat_col_w + prop_col_w + j * cell_w
-        rect = patches.Rectangle((x, y), cell_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
+        # Draw property name
+        rect = patches.Rectangle((cat_col_w, y), prop_col_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
         ax.add_patch(rect)
-        if mark.strip():
-            ax.text(x + cell_w/2, y + cell_h/2, 'x', va='center', ha='center', fontsize=11, weight='bold', color=text_color)
+        ax.text(cat_col_w + 0.05, y + cell_h/2, prop, va='center', ha='left', fontsize=10, color=text_color)
 
-    # Category box on the left
-    if cat != current_cat:
-        if current_cat is not None:
-            # Draw last cat. box
-            h = cat_start_y - (y + cell_h)
-            rect = patches.Rectangle((0, y + cell_h), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
+        # Draw checkmark
+        for j, mark in enumerate(ordered_marks):
+            x = cat_col_w + prop_col_w + j * cell_w
+            rect = patches.Rectangle((x, y), cell_w, cell_h, linewidth=0.5, edgecolor=border_color, facecolor=bg_color)
             ax.add_patch(rect)
-            ax.text(cat_col_w/2, y + cell_h + h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color=text_color)
-        current_cat = cat
-        cat_start_y = y + cell_h
+            if mark.strip():
+                ax.text(x + cell_w/2, y + cell_h/2, 'x', va='center', ha='center', fontsize=11, weight='bold', color=text_color)
 
-# Draw the last category box
-h = cat_start_y - 0
-rect = patches.Rectangle((0, 0), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
-ax.add_patch(rect)
-ax.text(cat_col_w / 2, h / 2, current_cat,
-        va='center', ha='center', fontsize=10, weight='bold', color=text_color)
+        # Category box on the left
+        if cat != current_cat:
+            if current_cat is not None:
+                # Draw last cat. box
+                h = cat_start_y - (y + cell_h)
+                rect = patches.Rectangle((0, y + cell_h), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
+                ax.add_patch(rect)
+                ax.text(cat_col_w/2, y + cell_h + h/2, current_cat, va='center', ha='center', fontsize=10, weight='bold', color=text_color)
+            current_cat = cat
+            cat_start_y = y + cell_h
 
-# column headers
-header_y = total_height + 0.03
-for j, scenario in enumerate(scenario_order):
-    x = cat_col_w + prop_col_w + j * cell_w + (cell_w / 2)
-    ax.text(x, header_y, scenario,
-            rotation=-45, va='bottom', ha='right', rotation_mode='anchor',
-            fontsize=11, color=text_color)
+    # Draw the last category box
+    h = cat_start_y - 0
+    rect = patches.Rectangle((0, 0), cat_col_w, h, linewidth=0.5, edgecolor=border_color, facecolor='#ffffff')
+    ax.add_patch(rect)
+    ax.text(cat_col_w / 2, h / 2, current_cat,
+            va='center', ha='center', fontsize=10, weight='bold', color=text_color)
 
-ax.set_xlim(0, total_width)
-ax.set_ylim(-0.3, total_height + 3)
+    # column headers
+    header_y = total_height + 0.03
+    for j, scenario in enumerate(scenario_order):
+        x = cat_col_w + prop_col_w + j * cell_w + (cell_w / 2)
+        ax.text(x, header_y, scenario,
+                rotation=-45, va='bottom', ha='right', rotation_mode='anchor',
+                fontsize=11, color=text_color)
 
-fig.subplots_adjust(left=0.01, right=0.995, top=0.995, bottom=0.01)
-plt.savefig("results/categories.png", dpi=300, bbox_inches='tight', pad_inches=0.02)
-plt.show()
+    ax.set_xlim(0, total_width)
+    ax.set_ylim(-0.3, total_height + 3)
+
+    fig.subplots_adjust(left=0.01, right=0.995, top=0.995, bottom=0.01)
+    plt.savefig("results/categories.png", dpi=300, bbox_inches='tight', pad_inches=0.02)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

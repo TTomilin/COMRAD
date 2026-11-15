@@ -10,25 +10,21 @@ in the top "Overall score" row, bold marks the highest mean normalized score.
 from __future__ import annotations
 
 import argparse
-import re
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors
 
+from paper_tables import ALGORITHM_COLUMNS as ALGORITHMS
+from paper_tables import TEX_PATH, BaselineRow, parse_baseline_results
 
-TEX_PATH = "paper/iclr2027/iclr2027_conference.tex"
+
 FIGURE_DIR = "paper/figure"
 FIGURE_NAME = "baseline_results_heatmap"
-TABLE_LABEL = r"\label{tab:baseline_results_raw}"
-ALGORITHMS = ["IPPO", "MAPPO", "HAPPO", "IDQN", "VDN", "QMIX", "QPLEX-D", "QPLEX-Q"]
-FALLBACK_CEILINGS = {"Lava Maze": 4.0}
 CMAP = "RdYlBu_r"
 DARK_TEXT = "#1a1a1a"
 LIGHT_TEXT = "white"
-
-MEANCI_RE = re.compile(r"\\(b?)meanci\{(-?[\d.]+)\}\{(-?[\d.]+)\}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -40,32 +36,10 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def parse_table(tex_path: Path) -> list[tuple[str, list[float], list[bool], float]]:
-    text = tex_path.read_text()
-    start = text.index(TABLE_LABEL)
-    body = text[text.index(r"\midrule", start) + len(r"\midrule"): text.index(r"\bottomrule", start)]
-
-    rows: list[tuple[str, list[float], list[bool], float]] = []
-    for raw_row in body.split(r"\\"):
-        row = " ".join(raw_row.split())
-        if not row:
-            continue
-        scenario = row.split("&", 1)[0].strip()
-        cells = MEANCI_RE.findall(row)
-        if len(cells) != len(ALGORITHMS):
-            raise ValueError(f"Expected {len(ALGORITHMS)} entries for {scenario!r}, got {len(cells)}")
-        means = [float(mean) for _, mean, _ in cells]
-        bold = [flag == "b" for flag, _, _ in cells]
-        ceiling_cell = row.rsplit("&", 1)[1].strip()
-        ceiling = FALLBACK_CEILINGS[scenario] if ceiling_cell == "--" else float(ceiling_cell)
-        rows.append((scenario, means, bold, ceiling))
-    return rows
-
-
-def normalize(rows) -> tuple[list[str], np.ndarray, np.ndarray]:
-    scenarios = [scenario for scenario, _, _, _ in rows]
-    scores = np.asarray([np.clip(np.asarray(means) / ceiling, 0.0, 1.0) for _, means, _, ceiling in rows])
-    bold = np.asarray([flags for _, _, flags, _ in rows], dtype=bool)
+def normalize(rows: list[BaselineRow]) -> tuple[list[str], np.ndarray, np.ndarray]:
+    scenarios = [row.scenario for row in rows]
+    scores = np.asarray([row.normalized() for row in rows])
+    bold = np.asarray([row.best for row in rows], dtype=bool)
     return scenarios, scores, bold
 
 
@@ -124,7 +98,7 @@ def plot(scenarios: list[str], scores: np.ndarray, bold: np.ndarray, output_pdf:
 
 def main() -> None:
     args = parse_args()
-    scenarios, scores, bold = normalize(parse_table(Path(args.tex)))
+    scenarios, scores, bold = normalize(parse_baseline_results(Path(args.tex)))
 
     print(f"{'Scenario':<24}" + "".join(f"{algo:>9}" for algo in ALGORITHMS))
     print(f"{'Overall score':<24}" + "".join(f"{value:>9.3f}" for value in scores.mean(axis=0)))

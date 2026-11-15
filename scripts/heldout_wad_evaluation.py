@@ -32,6 +32,7 @@ from comrad.train import (  # noqa: E402
     register_model_factory,
     register_vizdoom_components,
 )
+from comrad.utils.confidence import ci95_half_width  # noqa: E402
 from comrad.utils.doom_utils import resolve_archived_use_additional_input  # noqa: E402
 from comrad.utils.recording_actions import reshape_deterministic_actions  # noqa: E402
 from sample_factory.algo.learning.learner import Learner  # noqa: E402
@@ -263,6 +264,10 @@ def resolve_generator(scenario: str) -> tuple[str, dict[str, Any]]:
 
 
 def generate_heldout_batch(scenario: str, output_dir: Path, seeds: Iterable[int]) -> list[WadManifestEntry]:
+    return generate_layout_batch(scenario, output_dir, seeds, split="heldout")
+
+
+def generate_layout_batch(scenario: str, output_dir: Path, seeds: Iterable[int], split: str) -> list[WadManifestEntry]:
     """Generate only layout changes: each WAD uses the scenario's default config (plus variant overrides) and a new seed."""
     generator, overrides = resolve_generator(scenario)
     module_name, class_name = SCENARIO_CLASSES[generator]
@@ -271,8 +276,8 @@ def generate_heldout_batch(scenario: str, output_dir: Path, seeds: Iterable[int]
     output_dir.mkdir(parents=True, exist_ok=True)
 
     entries: list[WadManifestEntry] = []
-    for index, seed in enumerate(seeds):
-        wad_id = f"{scenario}_heldout_seed_{seed}"
+    for seed in seeds:
+        wad_id = f"{scenario}_{split}_seed_{seed}"
         filename = f"{wad_id}.wad"
         wad_path = output_dir / filename
         generated = scenario_cls({**overrides, "seed": int(seed)}, name=wad_id)
@@ -288,16 +293,28 @@ def generate_heldout_batch(scenario: str, output_dir: Path, seeds: Iterable[int]
             )
         )
 
-    manifest_path = output_dir / "batch_registry.json"
-    manifest_payload = [asdict(entry) for entry in entries]
-    manifest_path.write_text(json.dumps(manifest_payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    write_manifest(output_dir, entries)
     return entries
+
+
+def write_manifest(batch_dir: Path, entries: Iterable[WadManifestEntry]) -> None:
+    """Write a manifest readable by both `load_manifest` and `comrad.envs.wad_catalog.WadBatch` (which keys on `id`)."""
+    payload = [{"id": entry.wad_id, **asdict(entry)} for entry in entries]
+    (batch_dir / "batch_registry.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _manifest_entry(item: dict[str, Any]) -> WadManifestEntry:
+    fields = dict(item)
+    wad_id = fields.pop("id", fields.get("wad_id"))
+    if wad_id != fields.get("wad_id"):
+        raise ValueError(f"manifest entry id {wad_id!r} != wad_id {fields.get('wad_id')!r}")
+    return WadManifestEntry(**fields)
 
 
 def load_manifest(batch_dir: Path) -> list[WadManifestEntry]:
     manifest_path = batch_dir / "batch_registry.json"
     payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    entries = [WadManifestEntry(**item) for item in payload]
+    entries = [_manifest_entry(item) for item in payload]
     for entry in entries:
         wad_path = batch_dir / entry.filename
         actual_sha = sha256_file(wad_path)
@@ -460,14 +477,16 @@ def build_eval_cfg(policy: PolicySpec, wad_batch: Path, device: str, determinist
     return cfg
 
 
-def joint_true_objective(infos: Any, rewards: torch.Tensor) -> float:
+def joint_true_objective(infos: Any) -> float:
+    """Benchmark score J of the episode that just ended: every scenario wrapper writes `true_objective` into the
+    terminal infos, so its absence means the episode boundary or the wrapper stack is wrong."""
     if isinstance(infos, dict) and "true_objective" in infos:
         return float(infos["true_objective"])
     if isinstance(infos, (list, tuple)):
         values = [float(info["true_objective"]) for info in infos if isinstance(info, dict) and "true_objective" in info]
         if values:
             return float(np.mean(values))
-    return float(torch.mean(rewards).item())
+    raise KeyError("terminal infos carry no 'true_objective'")
 
 
 def evaluate_policy_on_wad(policy: PolicySpec, batch_dir: Path, entry: WadManifestEntry, episodes: int, device: str, deterministic: bool) -> list[dict[str, Any]]:
@@ -531,7 +550,7 @@ def evaluate_policy_on_wad(policy: PolicySpec, batch_dir: Path, entry: WadManife
                             "wad_seed": entry.seed,
                             "wad_sha256": entry.sha256,
                             "episode_index": len(episode_records),
-                            "true_objective": joint_true_objective(infos, rewards),
+                            "true_objective": joint_true_objective(infos),
                         }
                         if track_goals:
                             record["goals_reached"] = goals.count
@@ -552,7 +571,7 @@ def summarize_policy(records: list[dict[str, Any]], policy: PolicySpec) -> dict[
         layout_scores.setdefault(str(record["wad_id"]), []).append(float(record["true_objective"]))
     layout_means = {wad_id: float(np.mean(values)) for wad_id, values in sorted(layout_scores.items())}
     layout_values = np.asarray(list(layout_means.values()), dtype=float)
-    ci95 = float(1.96 * np.std(layout_values, ddof=1) / np.sqrt(len(layout_values))) if len(layout_values) > 1 else 0.0
+    ci95 = ci95_half_width(layout_values)
     summary = {
         **asdict(policy),
         "episodes": int(len(records)),

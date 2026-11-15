@@ -14,12 +14,9 @@ from __future__ import annotations
 
 import argparse
 import os
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from platform_chain_curriculum_protocol import VARIANT_LABELS, VARIANT_ORDER, VARIANT_STYLES  # noqa: E402
+from platform_chain_curriculum_protocol import VARIANT_LABELS, VARIANT_ORDER, VARIANT_STYLES
 
 
 TEX_PATH = "paper/iclr2027/iclr2027_conference.tex"
