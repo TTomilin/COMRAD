@@ -16,9 +16,10 @@
 # Each checkpoint: 5 held-out WADs x (20 both-learned + 4 x 10 seat-replaced) episodes in one live env per WAD.
 # All outputs/logs go to /scratch-shared (home is at quota). Snellius gives every job a private TMPDIR, so the ViZDoom
 # port reservation locks are moved to a node-keyed scratch dir (DOOM_PORT_LOCK_DIR) shared with the training jobs;
-# each task additionally starts in its own 3000-port window above the training bases. Task i processes manifest
-# lines i, i+N, ... A task exits non-zero if any evaluation failed; JSONs are written atomically and a cached JSON is
-# only reused if it matches the protocol version, checkpoint run dir, WAD list and episode counts.
+# each task additionally starts in its own 3000-port window above the training bases. The task of rank r in an N-task
+# array job (array_task_rank.sh) processes manifest lines r, r+N, ... A task exits non-zero if any evaluation failed;
+# JSONs are written atomically and a cached JSON is only reused if it matches the protocol version, checkpoint run
+# dir, WAD list and episode counts.
 #
 # Usage (on Snellius, after the frozen_partner_winners training finished):
 #   mkdir -p /scratch-shared/$USER/ViZDoom/results/rebuttal_c2k6/logs
@@ -38,7 +39,8 @@ BOTH_EPS="${BOTH_EPS:-20}"
 SEAT_EPS="${SEAT_EPS:-10}"
 INCLUDE_NEW="${INCLUDE_NEW:-1}"
 TASK_ID="${SLURM_ARRAY_TASK_ID:-0}"
-NUM_TASKS="${NUM_TASKS:-${SLURM_ARRAY_TASK_COUNT:-1}}"
+TASK_SPLIT="$(bash "$REPO_DIR/experiments/iclr2027_rebuttal/array_task_rank.sh")"
+read -r TASK_RANK NUM_TASKS <<< "$TASK_SPLIT"
 PARALLEL="${PARALLEL:-6}"
 
 mkdir -p "$OUT_DIR" "$LOG_DIR" "$BATCH_ROOT"
@@ -60,7 +62,7 @@ mkdir -p "$DOOM_PORT_LOCK_DIR"
 
 # valid_json <json> <run_dir> <target_steps>: same checks as generate_c2k6_frozen_partner_table.validate_run.
 valid_json() {
-    python experiments/iclr2027_rebuttal/generate_c2k6_frozen_partner_table.py --validate-json "$1" --expect-run-dir "$2" \
+    python -m experiments.iclr2027_rebuttal.generate_c2k6_frozen_partner_table --validate-json "$1" --expect-run-dir "$2" \
         --expect-steps "$3" --both-episodes-per-wad "$BOTH_EPS" --seat-episodes-per-wad "$SEAT_EPS" > /dev/null 2>&1
 }
 
@@ -122,7 +124,7 @@ collect_slot() {
     SLOT_PIDS[$1]=""
 }
 while IFS=$'\t' read -r run_dir scenario algo seed target_steps; do
-    if [ $((i % NUM_TASKS)) -eq "$TASK_ID" ]; then
+    if [ $((i % NUM_TASKS)) -eq "$TASK_RANK" ]; then
         out_json="$OUT_DIR/${scenario}_${algo}_s${seed}.json"
         log_file="$LOG_DIR/${scenario}_${algo}_s${seed}.log"
         if [ -f "$out_json" ] && valid_json "$out_json" "$run_dir" "$target_steps"; then
@@ -139,7 +141,7 @@ while IFS=$'\t' read -r run_dir scenario algo seed target_steps; do
             echo "[$(date +%T)] EVAL slot=$slot $run_dir -> $out_json"
             (
                 export DOOM_DEFAULT_UDP_PORT=$((PORT_BASE + slot * PORT_STRIDE))
-                python experiments/iclr2027_rebuttal/eval_frozen_partner.py \
+                python -m experiments.iclr2027_rebuttal.eval_frozen_partner \
                     --run-dir "$run_dir" --scenario "$scenario" --algorithm "$algo" --train-seed "$seed" \
                     --target-steps "$target_steps" --batch-root "$BATCH_ROOT" \
                     --both-episodes-per-wad "$BOTH_EPS" --seat-episodes-per-wad "$SEAT_EPS" \
@@ -154,5 +156,5 @@ while IFS=$'\t' read -r run_dir scenario algo seed target_steps; do
     i=$((i + 1))
 done < "$MANIFEST"
 for s in $(seq 0 $((PARALLEL - 1))); do collect_slot "$s"; done
-echo "[$(date +%T)] task $TASK_ID/$NUM_TASKS done ($i runs in manifest, $FAILED failed)"
+echo "[$(date +%T)] task $TASK_ID (rank $TASK_RANK/$NUM_TASKS) done ($i runs in manifest, $FAILED failed)"
 [ "$FAILED" -eq 0 ]
