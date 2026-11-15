@@ -204,7 +204,7 @@
       "checkpoint_steps": 50001920,
       "config_sha256": "34c6fea4147ae4a49bab0d25ab1a17737be4510bedf79908c1358ceec8563930",
       "episodes": 100,
-      "layout_mean_ci95": 0.13111506397054457,
+      "layout_mean_ci95": 0.1857315191728133,
       "layout_means": {
         "stealth_labyrinth_scripted_scout_heldout_seed_1009": 0.475,
         "stealth_labyrinth_scripted_scout_heldout_seed_2027": 0.075,

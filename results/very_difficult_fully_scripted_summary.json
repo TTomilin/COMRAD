@@ -4,7 +4,7 @@
     "episodes": 100,
     "layouts": 5,
     "mean": 0.6,
-    "layout_mean_ci95": 0.02683840531775316,
+    "layout_mean_ci95": 0.038018040344790914,
     "layout_means": {
       "stealth_labyrinth_scripted_both_heldout_seed_1009": 0.6,
       "stealth_labyrinth_scripted_both_heldout_seed_2027": 0.6,
@@ -19,7 +19,7 @@
     "episodes": 100,
     "layouts": 5,
     "mean": 28.97,
-    "layout_mean_ci95": 0.0908814612558579,
+    "layout_mean_ci95": 0.12873846339645387,
     "layout_means": {
       "lava_maze_scripted_navigator_heldout_seed_1009": 28.8,
       "lava_maze_scripted_navigator_heldout_seed_2027": 29.05,
