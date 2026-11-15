@@ -76,10 +76,12 @@ run_train_and_eval() {
         )
     fi
 
-    local cmd
-    cmd=$(python experiments/very_difficult/very_difficult_cmd.py --env "$env_name" --algo "$algo" "${extra_flags[@]}")
+    local cmd_line
+    local -a cmd
+    cmd_line=$(python -m experiments.very_difficult.very_difficult_cmd --env "$env_name" --algo "$algo" "${extra_flags[@]}")
+    read -r -a cmd <<< "$cmd_line"
     echo "[$(date +%T)] TRAIN $exp_name"
-    timeout --kill-after=20 $((TRAIN_SECONDS + 120)) $cmd > "$TRAIN_ROOT/${exp_name}_train.log" 2>&1 || true
+    timeout --kill-after=20 $((TRAIN_SECONDS + 120)) "${cmd[@]}" > "$TRAIN_ROOT/${exp_name}_train.log" 2>&1 || true
 
     if ! ls "$exp_dir"/checkpoint_p0/*.pth >/dev/null 2>&1; then
         echo "[WARN] No checkpoint found in $exp_dir/checkpoint_p0, tailing log:"
@@ -102,7 +104,7 @@ run_train_and_eval() {
     fi
 
     echo "[$(date +%T)] EVAL $exp_name -> $out_json"
-    python experiments/iclr2027_rebuttal/eval_kd6j_checkpoint_pack.py "${eval_flags[@]}" > "$TRAIN_ROOT/${exp_name}_eval.log" 2>&1
+    python -m experiments.iclr2027_rebuttal.eval_kd6j_checkpoint_pack "${eval_flags[@]}" > "$TRAIN_ROOT/${exp_name}_eval.log" 2>&1
 }
 
 IFS=',' read -r -a SEEDS <<< "$SEEDS_STR"

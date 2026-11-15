@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=kd6j_eval
-#SBATCH --partition=gpu_a100
+#SBATCH --partition=gpu_mig
 #SBATCH --gres=gpu:1
-#SBATCH --cpus-per-task=18
-#SBATCH --mem=120G
+#SBATCH --cpus-per-task=9
+#SBATCH --mem=60G
 #SBATCH --time=05:00:00
 #SBATCH --output=train_dir/kd6j_eval_logs/heldout_%A_%a.out
 #SBATCH --error=train_dir/kd6j_eval_logs/heldout_%A_%a.err
@@ -11,10 +11,11 @@
 # Held-out evaluation of the Reviewer kd6J minimal design (81 runs = 2 seeds {42,68}, 50M steps):
 #   - every run: 5 held-out WADs x EPISODES_PER_WAD (default 20 -> 100 episodes)
 #   - Pixel-Partial runs additionally get partner-occlusion + zero-shot blind interventions.
-# Only GPU budget is available; inference is light and evals are CPU-bound (ViZDoom), so each task takes
-# one A100 with its default 18-CPU / 120G share (billed at the GPU rate, no CPU surcharge) and runs
-# PARALLEL evals concurrently. Only unfinished runs enter the manifest (heaviest Pixel-Partial runs first);
-# task i processes manifest lines i, i+N, ...
+# Inference is light and evals are CPU-bound (ViZDoom), so each task takes one gpu_mig slice (9 CPUs / 60G) and
+# runs PARALLEL evals concurrently. Only unfinished runs enter the manifest (heaviest Pixel-Partial runs first);
+# the task of rank r in an N-task array job (array_task_rank.sh) processes manifest lines r, r+N, ...
+# A JSON only counts as done if it is complete and written by the current protocol (kd6j_protocol.py).
+# A task exits non-zero if any evaluation failed or wrote an incomplete JSON.
 #
 # Usage (on Snellius, after training finished):
 #   sbatch --array=0-3 experiments/iclr2027_rebuttal/kd6j_heldout_eval_array.sh
@@ -22,7 +23,7 @@
 #   sbatch --partition=gpu_mig --cpus-per-task=9 --mem=60G --array=0-1 \
 #       --export=ALL,KD6J_SEEDS=42:68:81,KD6J_PROFILES=full_obs_clean:visibility_telemetry,PARALLEL=6 \
 #       experiments/iclr2027_rebuttal/kd6j_heldout_eval_array.sh
-#   python experiments/iclr2027_rebuttal/aggregate_kd6j_results.py --runs-dir results/rebuttal_kd6j/heldout_runs --min-steps 45000000
+#   python -m experiments.iclr2027_rebuttal.aggregate_kd6j_results --runs-dir results/rebuttal_kd6j/heldout_runs --min-steps 45000000
 # True full observability (global state, 3 seeds):
 #   sbatch --partition=gpu_mig --cpus-per-task=9 --mem=60G --array=0 \
 #       --export=ALL,KD6J_SEEDS=42:68:81,KD6J_PROFILES=full_obs_global,PARALLEL=6 experiments/iclr2027_rebuttal/kd6j_heldout_eval_array.sh
@@ -32,7 +33,7 @@
 #   sbatch --partition=gpu_mig --cpus-per-task=9 --mem=60G --array=0-2 \
 #       --export=ALL,KD6J_SEEDS=42:68:81:97:154,KD6J_PROFILES=full_obs_global_v2,TARGET_STEPS=100000000,PARALLEL=5,TRAIN_ROOT=/scratch-shared/$USER/ViZDoom/train_dir \
 #       experiments/iclr2027_rebuttal/kd6j_heldout_eval_array.sh
-#   python experiments/iclr2027_rebuttal/aggregate_kd6j_results.py --runs-dir results/rebuttal_kd6j/heldout_runs --min-steps 95000000
+#   python -m experiments.iclr2027_rebuttal.aggregate_kd6j_results --runs-dir results/rebuttal_kd6j/heldout_runs --min-steps 95000000
 # Entity state vs Pixel-Partial (Table tab:po_state). A separate OUT_DIR, since its seed-81 Pixel-Partial runs share
 # output names with the full_obs_clean ones; interventions are not needed for this table:
 #   sbatch --partition=gpu_mig --cpus-per-task=9 --mem=60G --array=0 \
@@ -48,9 +49,9 @@ EPISODES_PER_WAD="${EPISODES_PER_WAD:-20}"
 TARGET_STEPS="${TARGET_STEPS:-50000000}"
 OUT_DIR="${OUT_DIR:-$REPO_DIR/results/rebuttal_kd6j/heldout_runs}"
 TASK_ID="${SLURM_ARRAY_TASK_ID:-0}"
-# Override when resubmitting a subset of tasks (e.g. --array=1-7 with NUM_TASKS=8) to keep the same split.
-NUM_TASKS="${NUM_TASKS:-${SLURM_ARRAY_TASK_COUNT:-1}}"
-PARALLEL="${PARALLEL:-12}"
+TASK_SPLIT="$(bash "$REPO_DIR/experiments/iclr2027_rebuttal/array_task_rank.sh")"
+read -r TASK_RANK NUM_TASKS <<< "$TASK_SPLIT"
+PARALLEL="${PARALLEL:-6}"
 RUN_INTERVENTIONS="${RUN_INTERVENTIONS:-1}"
 STALE_LOG_MIN="${STALE_LOG_MIN:-15}"
 KD6J_SEEDS="${KD6J_SEEDS:-42,68}"
@@ -76,6 +77,7 @@ MANIFEST_TMP="$(mktemp "$OUT_DIR/.manifest_tmp_XXXXXX")"
 python - "$TRAIN_ROOT" "$KD6J_SEEDS" "$OUT_DIR" "$KD6J_PROFILES" > "$MANIFEST_TMP" <<'EOF'
 import re, sys
 from pathlib import Path
+from experiments.iclr2027_rebuttal.kd6j_protocol import is_current_result_file
 root = Path(sys.argv[1])
 seeds = {s.strip() for s in sys.argv[2].split(",") if s.strip()}
 out_dir = Path(sys.argv[3])
@@ -86,7 +88,7 @@ for prof in [p.strip() for p in sys.argv[4].split(",") if p.strip()]:
     for workdir in sorted(root.glob(f"mode3_comrad_{prof}_2*")):
         for run_dir in sorted(p for p in workdir.rglob("*") if p.is_dir() and pat.match(p.name)):
             m = pat.match(run_dir.name)
-            done = (out_dir / f"{m.group(3)}_{m.group(1)}_{m.group(2)}_s{m.group(4)}.json").exists()
+            done = is_current_result_file(out_dir / f"{m.group(3)}_{m.group(1)}_{m.group(2)}_s{m.group(4)}.json")
             if m.group(4) in seeds and (run_dir / "checkpoint_p0").is_dir() and not done:
                 rows.append([str(run_dir), m.group(3), m.group(1), m.group(2), m.group(4)])
 # Pixel-Partial runs also do 2 interventions (3x episodes): schedule them first to shorten the tail.
@@ -98,13 +100,29 @@ EOF
 ln "$MANIFEST_TMP" "$MANIFEST" 2>/dev/null || true
 rm -f "$MANIFEST_TMP"
 
+result_is_current() {
+    python -m experiments.iclr2027_rebuttal.kd6j_protocol "$1"
+}
+
 i=0
+FAILED=0
 declare -a SLOT_PIDS=()
+declare -A PID_RUN=()
+collect_slot() {
+    local pid="${SLOT_PIDS[$1]:-}" status=0
+    [ -z "$pid" ] && return 0
+    wait "$pid" || status=$?
+    if [ "$status" -ne 0 ]; then
+        echo "[FAIL] ${PID_RUN[$pid]:-pid $pid} (exit $status)"
+        FAILED=$((FAILED + 1))
+    fi
+    SLOT_PIDS[$1]=""
+}
 while IFS=$'\t' read -r run_dir scenario algo cell seed; do
-    if [ $((i % NUM_TASKS)) -eq "$TASK_ID" ]; then
+    if [ $((i % NUM_TASKS)) -eq "$TASK_RANK" ]; then
         out_json="$OUT_DIR/${scenario}_${algo}_${cell}_s${seed}.json"
         log_file="$OUT_DIR/${scenario}_${algo}_${cell}_s${seed}.log"
-        if [ -f "$out_json" ]; then
+        if result_is_current "$out_json"; then
             echo "[skip] $out_json"
         elif [ -n "$(find "$log_file" -mmin -"$STALE_LOG_MIN" 2>/dev/null)" ]; then
             # Log written recently but no JSON yet: another task is still evaluating this run.
@@ -119,24 +137,26 @@ while IFS=$'\t' read -r run_dir scenario algo cell seed; do
             while [ "$slot" -lt 0 ]; do
                 for s in $(seq 0 $((PARALLEL - 1))); do
                     pid="${SLOT_PIDS[$s]:-}"
-                    if [ -z "$pid" ] || ! kill -0 "$pid" 2>/dev/null; then slot=$s; break; fi
+                    if [ -z "$pid" ] || ! kill -0 "$pid" 2>/dev/null; then collect_slot "$s"; slot=$s; break; fi
                 done
-                [ "$slot" -lt 0 ] && { wait -n || true; }
+                if [ "$slot" -lt 0 ]; then sleep 5; fi
             done
             echo "[$(date +%T)] EVAL slot=$slot $run_dir -> $out_json"
             (
                 export DOOM_DEFAULT_UDP_PORT=$((PORT_BASE + slot * PORT_STRIDE))
-                python experiments/iclr2027_rebuttal/eval_kd6j_checkpoint_pack.py \
+                python -m experiments.iclr2027_rebuttal.eval_kd6j_checkpoint_pack \
                     --run-dir "$run_dir" --scenario "$scenario" --algorithm "$algo" --cell-tag "$cell" \
                     --train-seed "$seed" --episodes-per-wad "$EPISODES_PER_WAD" --target-steps "$TARGET_STEPS" \
                     --output-json "$out_json" --device gpu "${flags[@]}" \
-                    > "$log_file" 2>&1 \
-                    || echo "[FAIL] $run_dir"
+                    > "$log_file" 2>&1
+                result_is_current "$out_json"
             ) &
             SLOT_PIDS[$slot]=$!
+            PID_RUN[$!]="$run_dir (see $log_file)"
         fi
     fi
     i=$((i + 1))
 done < "$MANIFEST"
-wait
-echo "[$(date +%T)] task $TASK_ID/$NUM_TASKS done ($i runs in manifest)"
+for s in $(seq 0 $((PARALLEL - 1))); do collect_slot "$s"; done
+echo "[$(date +%T)] task $TASK_ID (rank $TASK_RANK/$NUM_TASKS) done ($i runs in manifest, $FAILED failed)"
+[ "$FAILED" -eq 0 ]

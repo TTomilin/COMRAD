@@ -43,7 +43,7 @@ run_mode() {
     local eval_mode="$1"
     local device_arg="$2"
     echo "[$(date +%T)] Running mode=$eval_mode on device=$device_arg (port=$DOOM_DEFAULT_UDP_PORT)"
-    python experiments/iclr2027_rebuttal/rebuttal_kd6j_eval.py \
+    python -m experiments.iclr2027_rebuttal.rebuttal_kd6j_eval \
         --mode "$eval_mode" \
         --archive-root "$ARCHIVE_ROOT" \
         --batch-root "$BATCH_ROOT" \
