@@ -5,7 +5,7 @@ Each cell keeps the scenario's default config and changes only the overrides of 
 (easy spatial, medium mechanical) cell is the default config, i.e. the training distribution. Every cell uses the same held-out
 layout seeds, so the layout graph is the only thing besides the axis overrides that changes across seeds.
 
-uv run python experiments/iclr2027_rebuttal/difficulty_grid_eval.py --scenario coop_puzzle \
+uv run python -m experiments.iclr2027_rebuttal.difficulty_grid_eval --scenario coop_puzzle \
     --run_dir train_dir/kd6j_snellius_copy/00_MAPPO_pixel_partial_env_coop_puzzle_s.r.alp_0.0_see_68
 """
 
@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from typing import Any
@@ -21,12 +20,9 @@ from typing import Any
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-if str(REPO_ROOT / "scripts") not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-import heldout_wad_evaluation as hw  # noqa: E402
+import scripts.heldout_wad_evaluation as hw
+from comrad.utils.confidence import ci95_half_width
 
 LEVELS = ("easy", "medium", "hard")
 
@@ -79,8 +75,7 @@ def generate_cell(scenario: str, spatial: str, mechanical: str, seeds: list[int]
             scenario=scenario, wad_id=wad_id, seed=int(seed), filename=f"{wad_id}.wad",
             sha256=hw.sha256_file(out_dir / f"{wad_id}.wad"), config=dict(generated.config),
         ))
-    (out_dir / "batch_registry.json").write_text(
-        json.dumps([hw.asdict(e) for e in entries], indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    hw.write_manifest(out_dir, entries)
     return entries
 
 
@@ -116,7 +111,7 @@ def summarize(records: list[dict[str, Any]], scenario: str) -> dict[str, Any]:
             # CI over layouts: episodes on one layout are not independent draws of the layout distribution
             layout_means = np.asarray([np.mean([r["true_objective"] for r in rows if r["wad_id"] == w])
                                        for w in sorted({r["wad_id"] for r in rows})])
-            ci = 1.96 * layout_means.std(ddof=1) / np.sqrt(len(layout_means)) if len(layout_means) > 1 else 0.0
+            ci = ci95_half_width(layout_means)
             cells[f"{spatial}/{mechanical}"] = {
                 "mean": float(scores.mean()), "ci95_layouts": float(ci), "episodes": int(len(scores)),
                 "layouts": int(len(layout_means)), "mean_pct": float(100 * scores.mean() / ceiling),

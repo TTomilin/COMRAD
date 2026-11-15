@@ -3,27 +3,16 @@
 Every WAD uses the scenario's default generator config (plus variant overrides, see heldout_wad_evaluation) and only
 changes the layout seed, exactly like `generate_heldout_batch`. Training seeds must be disjoint from HELDOUT_SEEDS.
 
-    python experiments/iclr2027_rebuttal/generate_layout_training_batch.py --scenario coop_puzzle --num-layouts 64
-        -> comrad/scenarios/batch_coop_puzzle_layouts/{batch_registry.json, coop_puzzle_train_seed_*.wad}
+    python -m experiments.iclr2027_rebuttal.generate_layout_training_batch --scenario coop_puzzle --num-layouts 64
+        -> experiments/iclr2027_rebuttal/layouts/batch_coop_puzzle_layouts/{batch_registry.json, *.wad}
 """
 from __future__ import annotations
 
 import argparse
-import json
-import sys
-from dataclasses import asdict
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-
-from heldout_wad_evaluation import (  # noqa: E402
-    HELDOUT_SEEDS,
-    REPO_ROOT,
-    SCENARIO_CLASSES,
-    WadManifestEntry,
-    resolve_generator,
-    sha256_file,
-)
+from experiments.iclr2027_rebuttal.profiles import layout_batch_dir
+from scripts.heldout_wad_evaluation import HELDOUT_SEEDS, REPO_ROOT, WadManifestEntry, generate_layout_batch
 
 TRAIN_SEED_START = 100_000
 
@@ -37,34 +26,11 @@ def training_seeds(num_layouts: int, start: int = TRAIN_SEED_START) -> list[int]
 
 
 def default_batch_dir(scenario: str) -> Path:
-    return REPO_ROOT / "comrad" / "scenarios" / f"batch_{scenario}_layouts"
+    return REPO_ROOT / layout_batch_dir(scenario)
 
 
 def generate_training_batch(scenario: str, output_dir: Path, seeds: list[int]) -> list[WadManifestEntry]:
-    generator, overrides = resolve_generator(scenario)
-    module_name, class_name = SCENARIO_CLASSES[generator]
-    scenario_cls = getattr(__import__(module_name, fromlist=[class_name]), class_name)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    entries = []
-    for seed in seeds:
-        wad_id = f"{scenario}_train_seed_{seed}"
-        wad_path = output_dir / f"{wad_id}.wad"
-        generated = scenario_cls({**overrides, "seed": int(seed)}, name=wad_id)
-        generated.generate(str(wad_path))
-        entries.append(
-            WadManifestEntry(
-                scenario=scenario,
-                wad_id=wad_id,
-                seed=int(seed),
-                filename=wad_path.name,
-                sha256=sha256_file(wad_path),
-                config=dict(generated.config),
-            )
-        )
-    # comrad.envs.wad_catalog.WadBatch reads `id` and `filename`; the remaining keys are kept as metadata
-    payload = [{"id": e.wad_id, **asdict(e)} for e in entries]
-    (output_dir / "batch_registry.json").write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    return entries
+    return generate_layout_batch(scenario, output_dir, seeds, split="train")
 
 
 def main() -> None:
