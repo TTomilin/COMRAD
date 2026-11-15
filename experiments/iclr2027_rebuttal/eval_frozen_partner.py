@@ -14,7 +14,6 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Any, Callable
 
@@ -23,13 +22,16 @@ import numpy as np
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-for _p in (REPO_ROOT, REPO_ROOT / "scripts"):
-    if str(_p) not in sys.path:
-        sys.path.insert(0, str(_p))
 
-from comrad.utils.recording_actions import reshape_deterministic_actions  # noqa: E402
-from comrad.wrappers.scripted_partner import zero_action  # noqa: E402
-from heldout_wad_evaluation import (  # noqa: E402
+from comrad.utils.recording_actions import reshape_deterministic_actions
+from comrad.wrappers.scripted_partner import zero_action
+from experiments.iclr2027_rebuttal.rebuttal_kd6j_eval import sample_uniform_random_action
+from sample_factory.algo.sampling.batched_sampling import preprocess_actions
+from sample_factory.algo.utils.action_distributions import argmax_actions
+from sample_factory.algo.utils.rl_utils import make_dones, prepare_and_normalize_obs
+from sample_factory.algo.utils.tensor_utils import unsqueeze_tensor
+from sample_factory.model.model_utils import get_rnn_size
+from scripts.heldout_wad_evaluation import (
     GOAL_TRACKED_SCENARIOS,
     HELDOUT_SEEDS,
     VALUE_BASED_ALGOS,
@@ -42,12 +44,6 @@ from heldout_wad_evaluation import (  # noqa: E402
     joint_true_objective,
     sha256_file,
 )
-from rebuttal_kd6j_eval import sample_uniform_random_action  # noqa: E402
-from sample_factory.algo.sampling.batched_sampling import preprocess_actions  # noqa: E402
-from sample_factory.algo.utils.action_distributions import argmax_actions  # noqa: E402
-from sample_factory.algo.utils.rl_utils import make_dones, prepare_and_normalize_obs  # noqa: E402
-from sample_factory.algo.utils.tensor_utils import unsqueeze_tensor  # noqa: E402
-from sample_factory.model.model_utils import get_rnn_size  # noqa: E402
 
 # (pass name, partner policy, partner seat). Seat k replaced => agent 1-k is the frozen learner.
 PASS_SPECS: tuple[tuple[str, str, int | None], ...] = (
@@ -138,7 +134,11 @@ def run_pass(
     preprocess: Callable[[Any, torch.Tensor], Any] = preprocess_actions,
     max_crashed_episodes: int = MAX_CRASHED_EPISODES_PER_PASS,
     crash_log: list[dict[str, Any]] | None = None,
+    obs_transform: Callable[[dict[str, torch.Tensor], int], dict[str, torch.Tensor]] | None = None,
+    record_extras: Callable[[Any], dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
+    """`obs_transform(obs, episode_step)` edits what the policy sees (e.g. a blind intervention); `record_extras(infos)`
+    adds fields from the terminal infos to each episode record."""
     if partner_policy not in PARTNER_POLICIES:
         raise ValueError(f"Unsupported partner policy {partner_policy!r}")
     num_agents = int(env.num_agents)
@@ -167,6 +167,8 @@ def run_pass(
         while len(records) < episodes:
             obs_step = dict(obs)
             action_mask = obs_step.pop("action_mask").to(torch_device) if "action_mask" in obs_step else None
+            if obs_transform is not None:
+                obs_step = obs_transform(obs_step, episode_step)
             actions, rnn_states = _policy_actions(
                 actor_critic, obs_step, rnn_states, action_mask, value_based, head_sizes, deterministic
             )
@@ -204,7 +206,7 @@ def run_pass(
             if np.all(dones):
                 episode_step = 0
                 goals.observe(infos)
-                true_obj = float(goals.count) if track_goals else joint_true_objective(infos, rewards)
+                true_obj = float(goals.count) if track_goals else joint_true_objective(infos)
                 record: dict[str, Any] = {
                     "scenario": policy.scenario,
                     "algorithm": policy.algorithm,
@@ -217,6 +219,7 @@ def run_pass(
                     "wad_seed": entry.seed,
                     "episode_index": len(records),
                     "true_objective": true_obj,
+                    **(record_extras(infos) if record_extras is not None else {}),
                 }
                 if track_goals:
                     record["goals_reached"] = int(goals.count)
@@ -273,12 +276,12 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     from comrad.train import register_vizdoom_components
-    from heldout_wad_evaluation import build_eval_cfg, select_checkpoint, singleton_batch_dir
-    from rebuttal_kd6j_eval import ensure_heldout_batch
+    from experiments.iclr2027_rebuttal.rebuttal_kd6j_eval import ensure_heldout_batch
     from sample_factory.algo.learning.learner import Learner
     from sample_factory.algo.utils.env_info import extract_env_info
     from sample_factory.enjoy import make_env as make_eval_env
     from sample_factory.model.actor_critic import create_actor_critic
+    from scripts.heldout_wad_evaluation import build_eval_cfg, select_checkpoint, singleton_batch_dir
 
     args = parse_args()
     # Several evals share one MIG slice (9 CPUs); keep each to one intra-op thread.

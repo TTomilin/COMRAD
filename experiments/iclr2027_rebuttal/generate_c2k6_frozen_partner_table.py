@@ -26,14 +26,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from generate_kd6j_tables import CEILING, NAMES, SCENARIOS, load_random, norm  # noqa: E402
+from comrad.utils.confidence import ci95_half_width
+from experiments.iclr2027_rebuttal.generate_kd6j_tables import CEILING, NAMES, SCENARIOS, load_random, norm
 
 # Table 3 winning method per scenario (MAPPO/QMIX ties on Foraging Commons and Armory Siege per rebuttal W1).
 WINNERS = {
@@ -75,7 +74,6 @@ BOTH_EPISODES_PER_WAD = 20
 SEAT_EPISODES_PER_WAD = 10
 SEAT_PASSES = {"noop": ("noop_seat0", "noop_seat1"), "random": ("random_seat0", "random_seat1")}
 ALL_PASSES = ("both_learned", *SEAT_PASSES["noop"], *SEAT_PASSES["random"])
-T_CRIT_95 = {1: 12.706, 2: 4.303, 3: 3.182, 4: 2.776, 5: 2.571, 6: 2.447, 7: 2.365, 8: 2.306, 9: 2.262}
 FLOOR_MARGIN_PP = 2.0
 DROP_TO_RANDOM_RETENTION = 0.15
 PARTNER_INSENSITIVE_RETENTION = 0.75
@@ -103,10 +101,7 @@ def wad_means(records: list[dict[str, Any]]) -> dict[int, float]:
 
 def t_ci95(values: list[float]) -> float:
     """Student-t 95% CI half-width over layout-level values (df = n_layouts - 1)."""
-    arr = np.asarray(values, dtype=float)
-    if len(arr) < 2:
-        return 0.0
-    return float(T_CRIT_95[len(arr) - 1] * np.std(arr, ddof=1) / np.sqrt(len(arr)))
+    return ci95_half_width(values)
 
 
 def layout_ci95(records: list[dict[str, Any]]) -> float:
