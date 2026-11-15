@@ -1,7 +1,13 @@
+import re
+from pathlib import Path
+
 import numpy as np
 import pytest
 
 from comrad.utils.confidence import ci95_half_width, t_critical_95
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+HAND_ROLLED_CI = re.compile(r"1\.96\s*\*|\*\s*1\.96|,\s*1\.96\)|:\s*12\.706|=\s*2\.776\b")
 
 
 @pytest.mark.parametrize("n, expected", [(2, 12.706), (3, 4.303), (5, 2.776), (30, 2.045)])
@@ -31,3 +37,15 @@ def test_ci_is_zero_below_two_samples():
 def test_ci_along_axis_matches_per_column_ci():
     stack = np.arange(15, dtype=float).reshape(5, 3) ** 1.5
     np.testing.assert_allclose(ci95_half_width(stack), [ci95_half_width(stack[:, j]) for j in range(3)])
+
+
+def test_no_hand_rolled_confidence_intervals_in_experiments_or_scripts():
+    offenders = [
+        f"{path.relative_to(REPO_ROOT)}:{lineno}"
+        for folder in ("experiments", "scripts")
+        for path in (REPO_ROOT / folder).rglob("*.py")
+        if "wad2image" not in path.parts and "tests" not in path.parts
+        for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1)
+        if HAND_ROLLED_CI.search(line.split("#", 1)[0])
+    ]
+    assert offenders == [], "use comrad.utils.confidence.ci95_half_width / t_critical_95"
