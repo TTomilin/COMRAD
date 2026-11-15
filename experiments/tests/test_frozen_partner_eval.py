@@ -1,6 +1,5 @@
 import importlib
 import json
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -10,16 +9,13 @@ import pytest
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-for _path in (REPO_ROOT / "scripts", REPO_ROOT / "experiments" / "iclr2027_rebuttal"):
-    if str(_path) not in sys.path:
-        sys.path.insert(0, str(_path))
 
-import eval_frozen_partner as efp  # noqa: E402
-import generate_c2k6_frozen_partner_table as gen  # noqa: E402
-from comrad.utils.doom_utils import doom_env_by_name  # noqa: E402
-from experiments.common import CANONICAL_STEALTH_QMIX_REPLAY_BUFFER  # noqa: E402
-from generate_kd6j_tables import SCENARIOS  # noqa: E402
-from heldout_wad_evaluation import PolicySpec, WadManifestEntry  # noqa: E402
+import experiments.iclr2027_rebuttal.eval_frozen_partner as efp
+import experiments.iclr2027_rebuttal.generate_c2k6_frozen_partner_table as gen
+from comrad.utils.doom_utils import doom_env_by_name
+from experiments.common import CANONICAL_STEALTH_QMIX_REPLAY_BUFFER
+from experiments.iclr2027_rebuttal.generate_kd6j_tables import SCENARIOS
+from scripts.heldout_wad_evaluation import PolicySpec, WadManifestEntry
 
 SCENARIO_NAMES = [scen for scen, _ in SCENARIOS]
 
@@ -316,7 +312,7 @@ def test_table_ties_and_classification_bands():
 
 def test_student_t_ci_and_paired_drop():
     recs = [{"true_objective": v, "wad_seed": w} for w, v in zip(range(5), (1.0, 2.0, 3.0, 4.0, 5.0))]
-    assert gen.layout_ci95(recs) == pytest.approx(2.776 * np.std([1, 2, 3, 4, 5], ddof=1) / np.sqrt(5))
+    assert gen.layout_ci95(recs) == pytest.approx(2.7764451051977987 * np.std([1, 2, 3, 4, 5], ddof=1) / np.sqrt(5))
     partner = [{"true_objective": r["true_objective"] - 1.0, "wad_seed": r["wad_seed"]} for r in recs]
     assert gen.paired_drop(recs, partner) == pytest.approx((1.0, 0.0))
 
