@@ -85,7 +85,7 @@
         0.18
       ],
       "mean": 0.16299999999999998,
-      "ci95_half_width": 0.04424925361215612,
+      "ci95_half_width": 0.044249253612156036,
       "checkpoint_steps": [
         50020352
       ],
@@ -114,7 +114,7 @@
         0.31
       ],
       "mean": 0.27599999999999997,
-      "ci95_half_width": 0.03085478822871478,
+      "ci95_half_width": 0.030854788228714725,
       "checkpoint_steps": [
         50001920,
         50002944
@@ -144,7 +144,7 @@
         0.005
       ],
       "mean": 0.001,
-      "ci95_half_width": 0.002776445105197798,
+      "ci95_half_width": 0.002776445105197793,
       "checkpoint_steps": [
         100024320
       ],
@@ -173,7 +173,7 @@
         0.05
       ],
       "mean": 0.01,
-      "ci95_half_width": 0.027764451051977987,
+      "ci95_half_width": 0.02776445105197793,
       "checkpoint_steps": [
         100040704
       ],
@@ -231,7 +231,7 @@
         0.0
       ],
       "mean": 0.001,
-      "ci95_half_width": 0.002776445105197799,
+      "ci95_half_width": 0.0027764451051977934,
       "checkpoint_steps": [
         100040704
       ],
@@ -260,7 +260,7 @@
         1.1
       ],
       "mean": 0.966,
-      "ci95_half_width": 0.12121337379459832,
+      "ci95_half_width": 0.1212133737945981,
       "checkpoint_steps": [
         50020352
       ],
@@ -276,7 +276,7 @@
         2.2
       ],
       "raw_counter_mean": 1.9299999999999997,
-      "raw_counter_ci95_half_width": 0.24552316151724413
+      "raw_counter_ci95_half_width": 0.24552316151724365
     },
     {
       "label": "Scripted observer $\\rightarrow$ learned navigator",
@@ -299,7 +299,7 @@
         0.0
       ],
       "mean": 0.064,
-      "ci95_half_width": 0.05662859107929098,
+      "ci95_half_width": 0.05662859107929087,
       "checkpoint_steps": [
         50001920,
         50002944
@@ -316,7 +316,7 @@
         0.0
       ],
       "raw_counter_mean": 0.128,
-      "raw_counter_ci95_half_width": 0.11325718215858196
+      "raw_counter_ci95_half_width": 0.11325718215858174
     },
     {
       "label": "Oracle message head",
@@ -339,7 +339,7 @@
         0.02
       ],
       "mean": 0.019999999999999997,
-      "ci95_half_width": 0.02911960192790158,
+      "ci95_half_width": 0.029119601927901525,
       "checkpoint_steps": [
         100007936,
         100024320
@@ -356,7 +356,7 @@
         0.04
       ],
       "raw_counter_mean": 0.038,
-      "raw_counter_ci95_half_width": 0.05297119652860751
+      "raw_counter_ci95_half_width": 0.052971196528607406
     },
     {
       "label": "Oracle message head",
@@ -379,7 +379,7 @@
         0.0
       ],
       "mean": 0.004,
-      "ci95_half_width": 0.011105780420791196,
+      "ci95_half_width": 0.011105780420791174,
       "checkpoint_steps": [
         100024320
       ],
@@ -395,7 +395,7 @@
         0.0
       ],
       "raw_counter_mean": 0.008,
-      "raw_counter_ci95_half_width": 0.022211560841582392
+      "raw_counter_ci95_half_width": 0.022211560841582347
     },
     {
       "label": "Oracle direction hint",
@@ -418,7 +418,7 @@
         39.29
       ],
       "mean": 35.827999999999996,
-      "ci95_half_width": 16.27677392156111,
+      "ci95_half_width": 16.276773921561077,
       "checkpoint_steps": [
         100024320
       ],
@@ -434,7 +434,7 @@
         78.57
       ],
       "raw_counter_mean": 71.648,
-      "raw_counter_ci95_half_width": 32.56709205924283
+      "raw_counter_ci95_half_width": 32.56709205924277
     },
     {
       "label": "Oracle direction hint",
@@ -457,7 +457,7 @@
         2.15
       ],
       "mean": 1.5259999999999998,
-      "ci95_half_width": 1.4818155700414872,
+      "ci95_half_width": 1.4818155700414841,
       "checkpoint_steps": [
         100024320,
         100040704
@@ -474,7 +474,7 @@
         4.29
       ],
       "raw_counter_mean": 3.0479999999999996,
-      "raw_counter_ci95_half_width": 2.958802198953697
+      "raw_counter_ci95_half_width": 2.9588021989536912
     }
   ]
 }

@@ -109,7 +109,7 @@
       "checkpoint_steps": 50020352,
       "config_sha256": "98118134dc88229854b8a3f98f0b860b030b95b7b63ba249d2649b447dc38c43",
       "episodes": 100,
-      "layout_mean_ci95": 0.3428599714169037,
+      "layout_mean_ci95": 0.4856795354126111,
       "layout_means": {
         "lava_maze_scripted_observer_heldout_seed_1009": 1.5,
         "lava_maze_scripted_observer_heldout_seed_2027": 2.1,

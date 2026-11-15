@@ -60,11 +60,11 @@
   "cells": {
     "easy/easy": {
       "mean": 3.6,
-      "ci95_layouts": 0.2771858582251266,
+      "ci95_layouts": 0.39264863229551134,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 72.0,
-      "ci95_pct": 5.543717164502532,
+      "ci95_pct": 7.852972645910226,
       "layout_means": [
         3.2,
         3.8,
@@ -75,11 +75,11 @@
     },
     "easy/medium": {
       "mean": 2.82,
-      "ci95_layouts": 0.11428665713896782,
+      "ci95_layouts": 0.16189317847087023,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 56.4,
-      "ci95_pct": 2.2857331427793564,
+      "ci95_pct": 3.2378635694174043,
       "layout_means": [
         2.7,
         2.9,
@@ -90,11 +90,11 @@
     },
     "easy/hard": {
       "mean": 1.22,
-      "ci95_layouts": 0.11428665713896782,
+      "ci95_layouts": 0.16189317847087023,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 24.4,
-      "ci95_pct": 2.2857331427793564,
+      "ci95_pct": 3.2378635694174043,
       "layout_means": [
         1.2,
         1.4,
@@ -105,11 +105,11 @@
     },
     "medium/easy": {
       "mean": 1.66,
-      "ci95_layouts": 0.1920399958342011,
+      "ci95_layouts": 0.2720349522633022,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 33.2,
-      "ci95_pct": 3.840799916684022,
+      "ci95_pct": 5.440699045266045,
       "layout_means": [
         1.7,
         1.7,
@@ -120,11 +120,11 @@
     },
     "medium/medium": {
       "mean": 1.52,
-      "ci95_layouts": 0.3061617872955408,
+      "ci95_layouts": 0.43369458966087354,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 30.4,
-      "ci95_pct": 6.123235745910816,
+      "ci95_pct": 8.673891793217472,
       "layout_means": [
         1.7,
         1.9,
@@ -135,11 +135,11 @@
     },
     "medium/hard": {
       "mean": 0.92,
-      "ci95_layouts": 0.1142866571389679,
+      "ci95_layouts": 0.16189317847087034,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 18.4,
-      "ci95_pct": 2.285733142779358,
+      "ci95_pct": 3.2378635694174065,
       "layout_means": [
         1.0,
         0.9,
@@ -150,11 +150,11 @@
     },
     "hard/easy": {
       "mean": 0.52,
-      "ci95_layouts": 0.14402999687565085,
+      "ci95_layouts": 0.20402621419747666,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 10.4,
-      "ci95_pct": 2.880599937513017,
+      "ci95_pct": 4.080524283949533,
       "layout_means": [
         0.3,
         0.4,
@@ -165,11 +165,11 @@
     },
     "hard/medium": {
       "mean": 0.36,
-      "ci95_layouts": 0.14667296956153852,
+      "ci95_layouts": 0.20777012673671355,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 7.2,
-      "ci95_pct": 2.9334593912307705,
+      "ci95_pct": 4.155402534734271,
       "layout_means": [
         0.5,
         0.4,
@@ -180,11 +180,11 @@
     },
     "hard/hard": {
       "mean": 0.42,
-      "ci95_layouts": 0.11428665713896788,
+      "ci95_layouts": 0.1618931784708703,
       "episodes": 50,
       "layouts": 5,
       "mean_pct": 8.4,
-      "ci95_pct": 2.2857331427793577,
+      "ci95_pct": 3.2378635694174065,
       "layout_means": [
         0.3,
         0.5,
