@@ -3,21 +3,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import FuncFormatter
 
-
-sns.set_theme(
-    style="whitegrid",
-    context="paper",
-    font_scale=1.4,
-    rc={
-        "axes.linewidth": 1.2,
-        "axes.edgecolor": "#333333",
-        "grid.linestyle": "--",
-        "grid.alpha": 0.5,
-        "legend.frameon": True,
-        "legend.edgecolor": "#cccccc"
-    }
-)
-
 MAX_STEPS = 250_000_000
 N_EVAL_POINTS = 1000
 N_SEEDS = 5
@@ -70,56 +55,73 @@ algorithms = {
     "IDQN": {"type": "on",  "start": -10, "max": -7.0, "rate": 0.002, "scale": 1.8, "color": "#969696", "ls": "--"}
 }
 
-fig, ax = plt.subplots(figsize=(14, 8), dpi=300)
-
-for algo_name, params in algorithms.items():
-    all_seeds_smoothed = []
-
-    # Simulate completely distinct random seeds
-    for seed in range(N_SEEDS):
-        np.random.seed(hash(algo_name) % (2**32 - 1) + seed)
-
-        # This makes the standard deviation band wide in the middle and realistic
-        s_max = params["max"] + np.random.normal(0, 1.5)
-        s_rate = params["rate"] * np.random.uniform(0.85, 1.15)
-
-        if params["type"] == "off":
-            s_mid = params["mid"] + np.random.normal(0, 6.0) # Shiftccurve left/right
-            base_curve = off_policy_sigmoid(x_millions, params["start"], s_max, s_mid, s_rate)
-        else:
-            base_curve = on_policy_log(x_millions, params["start"], s_max, s_rate)
-
-        noisy_curve = base_curve + generate_marl_noise(N_EVAL_POINTS, tier_scale=params["scale"])
-        smoothed_curve = moving_average(noisy_curve, MA_WINDOW)
-        all_seeds_smoothed.append(smoothed_curve)
-
-    all_seeds_smoothed = np.array(all_seeds_smoothed)
-
-    mean_curve = np.mean(all_seeds_smoothed, axis=0)
-    std_curve = np.std(all_seeds_smoothed, axis=0)
-
-    ax.plot(x_steps, mean_curve, label=algo_name, color=params["color"], linestyle=params["ls"], linewidth=2.0, alpha=0.95)
-    ax.fill_between(x_steps, mean_curve - std_curve, mean_curve + std_curve, color=params["color"], alpha=0.10, linewidth=0.0)
-
 def million_formatter(x, pos):
     return f"{int(x / 1_000_000)}M" if x != 0 else "0"
 
-ax.xaxis.set_major_formatter(FuncFormatter(million_formatter))
-ax.set_xlim([0, MAX_STEPS])
-ax.set_ylim([-18, 58])
+def main():
+    sns.set_theme(
+        style="whitegrid",
+        context="paper",
+        font_scale=1.4,
+        rc={
+            "axes.linewidth": 1.2,
+            "axes.edgecolor": "#333333",
+            "grid.linestyle": "--",
+            "grid.alpha": 0.5,
+            "legend.frameon": True,
+            "legend.edgecolor": "#cccccc"
+        }
+    )
+    fig, ax = plt.subplots(figsize=(14, 8), dpi=300)
 
-ax.set_xlabel("Environment Steps", fontweight='bold', labelpad=10)
-ax.set_ylabel("Mean Episode Reward", fontweight='bold', labelpad=10)
-ax.set_title("Performance comparison", fontweight='bold', fontsize=18, pad=20)
-sns.despine(ax=ax, top=True, right=True)
+    for algo_name, params in algorithms.items():
+        all_seeds_smoothed = []
 
-handles, labels = ax.get_legend_handles_labels()
-legend = ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.15),
-                   ncol=4, frameon=True, fancybox=True, shadow=False, fontsize=12,
-                   handlelength=3.0, title="Algorithms (Performance descending)",
-                   title_fontproperties={'weight': 'bold'})
-legend.get_frame().set_linewidth(1.5)
+        # Simulate completely distinct random seeds
+        for seed in range(N_SEEDS):
+            np.random.seed(hash(algo_name) % (2**32 - 1) + seed)
 
-plt.tight_layout(rect=[0, 0, 1, 0.95])
-fig.subplots_adjust(bottom=0.3)
-plt.savefig('foo.png')
+            # This makes the standard deviation band wide in the middle and realistic
+            s_max = params["max"] + np.random.normal(0, 1.5)
+            s_rate = params["rate"] * np.random.uniform(0.85, 1.15)
+
+            if params["type"] == "off":
+                s_mid = params["mid"] + np.random.normal(0, 6.0) # Shiftccurve left/right
+                base_curve = off_policy_sigmoid(x_millions, params["start"], s_max, s_mid, s_rate)
+            else:
+                base_curve = on_policy_log(x_millions, params["start"], s_max, s_rate)
+
+            noisy_curve = base_curve + generate_marl_noise(N_EVAL_POINTS, tier_scale=params["scale"])
+            smoothed_curve = moving_average(noisy_curve, MA_WINDOW)
+            all_seeds_smoothed.append(smoothed_curve)
+
+        all_seeds_smoothed = np.array(all_seeds_smoothed)
+
+        mean_curve = np.mean(all_seeds_smoothed, axis=0)
+        std_curve = np.std(all_seeds_smoothed, axis=0)
+
+        ax.plot(x_steps, mean_curve, label=algo_name, color=params["color"], linestyle=params["ls"], linewidth=2.0, alpha=0.95)
+        ax.fill_between(x_steps, mean_curve - std_curve, mean_curve + std_curve, color=params["color"], alpha=0.10, linewidth=0.0)
+
+    ax.xaxis.set_major_formatter(FuncFormatter(million_formatter))
+    ax.set_xlim([0, MAX_STEPS])
+    ax.set_ylim([-18, 58])
+
+    ax.set_xlabel("Environment Steps", fontweight='bold', labelpad=10)
+    ax.set_ylabel("Mean Episode Reward", fontweight='bold', labelpad=10)
+    ax.set_title("Performance comparison", fontweight='bold', fontsize=18, pad=20)
+    sns.despine(ax=ax, top=True, right=True)
+
+    handles, labels = ax.get_legend_handles_labels()
+    legend = ax.legend(handles, labels, loc='upper center', bbox_to_anchor=(0.5, -0.15),
+                       ncol=4, frameon=True, fancybox=True, shadow=False, fontsize=12,
+                       handlelength=3.0, title="Algorithms (Performance descending)",
+                       title_fontproperties={'weight': 'bold'})
+    legend.get_frame().set_linewidth(1.5)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    fig.subplots_adjust(bottom=0.3)
+    plt.savefig('foo.png')
+
+if __name__ == "__main__":
+    main()

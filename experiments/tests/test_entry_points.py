@@ -33,28 +33,30 @@ print(json.dumps(failures))
 """
 
 
-def _import_failures(modules: list[str], sys_path_0: Path) -> dict[str, str]:
+def _import_failures(modules: list[str], sys_path_0: Path, cwd: Path) -> dict[str, str]:
     probe = f"import sys; sys.path[0] = {str(sys_path_0)!r}; exec({_PROBE!r})"
     result = subprocess.run(
         [sys.executable, "-c", probe, *modules],
-        cwd=REPO_ROOT,
+        cwd=cwd,
         env={**os.environ, "MPLBACKEND": "Agg", "COMRAD_EXPERIMENT_PROFILE": "full_obs_clean"},
         capture_output=True,
         text=True,
         timeout=600,
     )
     assert result.returncode == 0, result.stderr[-2000:]
+    written = sorted(p.name for p in cwd.iterdir())
+    assert written == [], f"importing a module wrote {written} into the working directory; move it under main()"
     return json.loads(result.stdout.strip().splitlines()[-1])
 
 
-def test_experiment_modules_import_as_launched_with_python_dash_m() -> None:
+def test_experiment_modules_import_as_launched_with_python_dash_m(tmp_path: Path) -> None:
     assert EXPERIMENT_MODULES
-    assert _import_failures(EXPERIMENT_MODULES, REPO_ROOT) == {}
+    assert _import_failures(EXPERIMENT_MODULES, REPO_ROOT, tmp_path) == {}
 
 
-def test_scripts_import_as_launched_from_their_file() -> None:
+def test_scripts_import_as_launched_from_their_file(tmp_path: Path) -> None:
     assert SCRIPT_MODULES
-    assert _import_failures(SCRIPT_MODULES, REPO_ROOT / "scripts") == {}
+    assert _import_failures(SCRIPT_MODULES, REPO_ROOT / "scripts", tmp_path) == {}
 
 
 def test_experiments_do_not_edit_sys_path() -> None:
