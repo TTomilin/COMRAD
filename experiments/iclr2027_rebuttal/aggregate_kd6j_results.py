@@ -17,7 +17,9 @@ The entity-state rerun (`--state_encoding=entity`, Table tab:po_state) is writte
 
 Every summary is checked against the cells and seeds its training profiles produce (see `expected_*`): a duplicate,
 missing or unexpected (scenario, algorithm, cell, seed) aborts the aggregation unless `--allow-incomplete` is given.
-Held-out JSONs from an older checkpoint-pack protocol (see kd6j_protocol.py) are never aggregated.
+Held-out JSONs from an older checkpoint-pack protocol (see kd6j_protocol.py), evaluated on a held-out batch other than
+the committed `results/heldout_wad_batches/<scenario>/batch_registry.json`, or with a pass that is not exactly
+`HELDOUT_LAYOUTS` x `EPISODES_PER_WAD` episodes (e.g. a smoke test) are never aggregated.
 """
 
 from __future__ import annotations
@@ -39,6 +41,13 @@ from experiments.iclr2027_rebuttal.profiles import (
     REBUTTAL_KD6J_ALGORITHMS,
     VISIBILITY_TELEMETRY_SEEDS,
 )
+from scripts.heldout_wad_evaluation import sha256_file
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_BATCH_ROOT = REPO_ROOT / "results" / "heldout_wad_batches"
+HELDOUT_LAYOUTS = 5
+EPISODES_PER_WAD = 20
+RECORD_KEYS = ("normal_records", "partner_occlusion_records", "blind_eval_records")
 
 DEFAULT_SEEDS = "42,68"
 VISIBILITY_KEYS = (
@@ -177,13 +186,46 @@ def summarize_cell(per_seed: dict[int, list[dict[str, Any]]]) -> dict[str, Any]:
     return out
 
 
-def load_runs(runs_dir: Path, min_steps: int, seeds: set[int] | None = None) -> list[dict[str, Any]]:
+def result_problems(payload: dict[str, Any], batch_root: Path, episodes_per_wad: int = EPISODES_PER_WAD) -> list[str]:
+    """Why a current-protocol JSON cannot be aggregated: a different held-out batch, or a pass that is not exactly
+    `HELDOUT_LAYOUTS` layouts x `episodes_per_wad` episodes."""
+    problems = []
+    registry = batch_root / str(payload.get("scenario")) / "batch_registry.json"
+    if not registry.is_file():
+        problems.append(f"no held-out batch registry {registry}")
+    elif payload.get("heldout_batch_registry_sha256") != sha256_file(registry):
+        problems.append(f"held-out batch registry sha256 differs from {registry}")
+    if not payload.get("normal_records"):
+        problems.append("no normal_records")
+    for key in RECORD_KEYS:
+        records = payload.get(key)
+        if records is None:
+            continue
+        per_wad: dict[str, int] = defaultdict(int)
+        for record in records:
+            per_wad[str(record.get("wad_id"))] += 1
+        if len(per_wad) != HELDOUT_LAYOUTS or set(per_wad.values()) != {episodes_per_wad}:
+            problems.append(
+                f"{key} has {dict(sorted(per_wad.items()))} episodes per layout, "
+                f"expected {HELDOUT_LAYOUTS} layouts x {episodes_per_wad}"
+            )
+    return problems
+
+
+def load_runs(
+    runs_dir: Path, min_steps: int, seeds: set[int] | None = None, batch_root: Path = DEFAULT_BATCH_ROOT,
+    episodes_per_wad: int = EPISODES_PER_WAD,
+) -> list[dict[str, Any]]:
     runs = []
     stale = []
     for path in sorted(runs_dir.glob("*.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
         if not is_current_result(payload):
             stale.append(f"{path.name} (protocol_version={payload.get('protocol_version')!r})")
+            continue
+        problems = result_problems(payload, batch_root, episodes_per_wad)
+        if problems:
+            stale.append(f"{path.name} ({'; '.join(problems)})")
             continue
         if seeds is not None and int(payload.get("train_seed", -1)) not in seeds:
             print(f"[skip] {path.name}: train_seed={payload.get('train_seed')} not in {sorted(seeds)}")
@@ -194,8 +236,9 @@ def load_runs(runs_dir: Path, min_steps: int, seeds: set[int] | None = None) -> 
         runs.append(payload)
     if stale:
         raise IncompleteResultsError(
-            f"{len(stale)} held-out JSONs in {runs_dir} are not protocol {KD6J_PACK_PROTOCOL_VERSION!r}; re-evaluate "
-            f"them with eval_kd6j_checkpoint_pack.py: {', '.join(stale[:5])}{' ...' if len(stale) > 5 else ''}"
+            f"{len(stale)} held-out JSONs in {runs_dir} are not complete protocol {KD6J_PACK_PROTOCOL_VERSION!r} "
+            f"evaluations on the committed held-out batch; re-evaluate them with eval_kd6j_checkpoint_pack.py: "
+            f"{', '.join(stale[:5])}{' ...' if len(stale) > 5 else ''}"
         )
     return runs
 

@@ -155,19 +155,73 @@ def test_kd6j_metric_measured_on_fewer_seeds_than_its_cell_is_reported():
     ]
 
 
+def _current_run(batch_root, seed=42, episodes=agg.EPISODES_PER_WAD, keys=("normal_records",)):
+    from experiments.iclr2027_rebuttal.kd6j_protocol import KD6J_PACK_PROTOCOL_VERSION
+    from scripts.heldout_wad_evaluation import sha256_file
+
+    registry = batch_root / "coop_puzzle" / "batch_registry.json"
+    if not registry.is_file():
+        registry.parent.mkdir(parents=True)
+        registry.write_text('{"wads": []}')
+    records = [{"wad_id": f"w{w}", "true_objective": 1.0} for w in range(agg.HELDOUT_LAYOUTS) for _ in range(episodes)]
+    return {
+        **_run("coop_puzzle", "MAPPO", "pixel_partial", seed), "protocol_version": KD6J_PACK_PROTOCOL_VERSION,
+        "heldout_batch_registry_sha256": sha256_file(registry), **{k: list(records) for k in keys},
+    }
+
+
 def test_kd6j_results_from_an_older_protocol_are_never_aggregated(tmp_path):
-    from experiments.iclr2027_rebuttal.kd6j_protocol import KD6J_PACK_PROTOCOL_VERSION, is_current_result_file
+    from experiments.iclr2027_rebuttal.kd6j_protocol import is_current_result_file
 
-    current = {**_run("coop_puzzle", "MAPPO", "pixel_partial", 42), "protocol_version": KD6J_PACK_PROTOCOL_VERSION}
-    (tmp_path / "current.json").write_text(json.dumps(current))
-    assert agg.load_runs(tmp_path, min_steps=1) == [current]
-    assert is_current_result_file(tmp_path / "current.json")
+    batch_root = tmp_path / "batches"
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    current = _current_run(batch_root)
+    (runs_dir / "current.json").write_text(json.dumps(current))
+    assert agg.load_runs(runs_dir, min_steps=1, batch_root=batch_root) == [current]
+    assert is_current_result_file(runs_dir / "current.json")
 
-    (tmp_path / "legacy.json").write_text(json.dumps(_run("coop_puzzle", "MAPPO", "pixel_partial", 68)))
-    (tmp_path / "partial.json").write_text('{"protocol_version": "kd6j')
-    assert not is_current_result_file(tmp_path / "legacy.json")
-    assert not is_current_result_file(tmp_path / "partial.json")
-    assert not is_current_result_file(tmp_path / "missing.json")
-    (tmp_path / "partial.json").unlink()
+    (runs_dir / "legacy.json").write_text(json.dumps(_run("coop_puzzle", "MAPPO", "pixel_partial", 68)))
+    (runs_dir / "partial.json").write_text('{"protocol_version": "kd6j')
+    assert not is_current_result_file(runs_dir / "legacy.json")
+    assert not is_current_result_file(runs_dir / "partial.json")
+    assert not is_current_result_file(runs_dir / "missing.json")
+    (runs_dir / "partial.json").unlink()
     with pytest.raises(agg.IncompleteResultsError, match="legacy.json"):
-        agg.load_runs(tmp_path, min_steps=1)
+        agg.load_runs(runs_dir, min_steps=1, batch_root=batch_root)
+
+
+def test_kd6j_results_on_another_heldout_batch_are_never_aggregated(tmp_path):
+    batch_root = tmp_path / "batches"
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    (runs_dir / "r.json").write_text(json.dumps(_current_run(batch_root)))
+    (batch_root / "coop_puzzle" / "batch_registry.json").write_text('{"wads": ["regenerated"]}')
+    with pytest.raises(agg.IncompleteResultsError, match="registry sha256 differs"):
+        agg.load_runs(runs_dir, min_steps=1, batch_root=batch_root)
+    with pytest.raises(agg.IncompleteResultsError, match="no held-out batch registry"):
+        agg.load_runs(runs_dir, min_steps=1, batch_root=tmp_path / "elsewhere")
+
+
+@pytest.mark.parametrize("episodes,keys", [
+    (1, ("normal_records",)),
+    (agg.EPISODES_PER_WAD - 1, ("normal_records", "partner_occlusion_records", "blind_eval_records")),
+])
+def test_kd6j_smoke_or_short_results_are_never_aggregated(tmp_path, episodes, keys):
+    batch_root = tmp_path / "batches"
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    (runs_dir / "r.json").write_text(json.dumps(_current_run(batch_root, episodes=episodes, keys=keys)))
+    with pytest.raises(agg.IncompleteResultsError, match="episodes per layout"):
+        agg.load_runs(runs_dir, min_steps=1, batch_root=batch_root)
+
+
+def test_kd6j_intervention_pass_must_be_complete_too(tmp_path):
+    batch_root = tmp_path / "batches"
+    runs_dir = tmp_path / "runs"
+    runs_dir.mkdir()
+    run = _current_run(batch_root, keys=("normal_records", "partner_occlusion_records"))
+    run["partner_occlusion_records"] = [r for r in run["partner_occlusion_records"] if r["wad_id"] != "w0"]
+    (runs_dir / "r.json").write_text(json.dumps(run))
+    with pytest.raises(agg.IncompleteResultsError, match="partner_occlusion_records"):
+        agg.load_runs(runs_dir, min_steps=1, batch_root=batch_root)
