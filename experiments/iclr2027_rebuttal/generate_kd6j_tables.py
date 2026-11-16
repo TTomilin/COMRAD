@@ -15,6 +15,8 @@ Outputs:
   results/rebuttal_kd6j/kd6j_tables.md             Markdown tables for paper/iclr2027/rebuttal.md
   results/rebuttal_kd6j/kd6j_table3_normalized.tex LaTeX rows for the ceiling-normalized Table 3
   results/rebuttal_kd6j/kd6j_full_obs_global_v2.tex LaTeX rows: Full (global state v2) vs MAPPO Partial (Table 3)
+  results/rebuttal_kd6j/kd6j_visibility.tex        LaTeX rows of tab:po_visibility
+  results/rebuttal_kd6j/kd6j_vision_controls.tex   LaTeX rows of tab:po_vision (50M Pixel-Partial checkpoints, per method)
 
 Normalization follows Figure 4 of the paper: s~ = clip(s / s_max, 0, 1), with s_max = 4 mazes for Lava Maze.
 """
@@ -138,22 +140,27 @@ def load_random(path: Path) -> dict[str, dict[str, Any]]:
     return {row["scenario"]: row for row in payload["summaries"]}
 
 
-def visibility_table(inter: dict, rand: dict) -> list[str]:
+def visibility_table(inter: dict, rand: dict) -> tuple[list[str], list[str]]:
+    """Markdown table and the tab:po_visibility LaTeX rows (the paper omits the out-of-view column)."""
     lines = [
         "| Scenario | Teammate in FOV cone (%) | Teammate visible (%) | In-cone but occluded (%) | Teammate out of view (%) | Mutual visibility (%) | Teammate visible, random policy (%) |",
         "|---|---|---|---|---|---|---|",
     ]
+    tex = []
     for scen, name in SCENARIOS:
         c = (inter["normal"].get(scen) or {}).get("MAPPO")
         r = rand.get(scen, {})
         r_vis = f"{100.0 * r['teammate_visible_rate']:.0f}" if "teammate_visible_rate" in r else "—"
+        in_cone, visible = rate(c, "teammate_in_frustum_rate"), rate(c, "teammate_visible_rate")
+        occluded = occluded_rate(c, "teammate_in_frustum_rate", "teammate_visible_rate")
+        mutual = rate(c, "mutual_visibility_rate")
         lines.append(
-            f"| {name} | {rate(c, 'teammate_in_frustum_rate')} | {rate(c, 'teammate_visible_rate')} | "
-            f"{occluded_rate(c, 'teammate_in_frustum_rate', 'teammate_visible_rate')} | "
-            f"{rate(c, 'teammate_out_of_view_rate')} | "
-            f"{rate(c, 'mutual_visibility_rate')} | {r_vis} |"
+            f"| {name} | {in_cone} | {visible} | {occluded} | {rate(c, 'teammate_out_of_view_rate')} | {mutual} | {r_vis} |"
         )
-    return lines
+        tex.append(
+            f"    {name} & " + " & ".join(v.replace("—", "--") for v in (in_cone, visible, occluded, mutual, r_vis)) + " \\\\"
+        )
+    return lines, tex
 
 
 def per_agent_visibility_table(inter: dict, rand: dict) -> list[str]:
@@ -272,11 +279,17 @@ def full_obs_global_v2_table(v2: dict) -> tuple[list[str], list[str]]:
     return md, tex
 
 
-def intervention_table(inter: dict, two: dict, rand: dict) -> list[str]:
+def intervention_table(inter: dict, two: dict, rand: dict) -> tuple[list[str], list[str]]:
+    """Markdown table and the tab:po_vision LaTeX rows: per method, the Normal, partner-masked and zero-shot blind
+    passes of the same Pixel-Partial checkpoints, the trained-blind runs, and the random team (% of ceiling).
+
+    Every number in a row comes from the seeds listed in its Seeds column, so no caption has to state a seed count.
+    """
     lines = [
         "| Scenario | Seeds | Normal RGB | Partner sprite masked | Zero-shot blind | Trained blind (t/H only) | Random |",
         "|---|---|---|---|---|---|---|",
     ]
+    tex = []
     for scen, name in SCENARIOS:
         for algo in ("MAPPO", "QMIX"):
             normal = (inter["normal"].get(scen) or {}).get(algo)
@@ -288,12 +301,19 @@ def intervention_table(inter: dict, two: dict, rand: dict) -> list[str]:
             r = rand.get(scen)
             r_m = (r["mean_true_objective"], r["ci95_half_width"]) if r else None
             label = name if algo == "MAPPO" else f"{name} (QMIX)"
+            seeds = ", ".join(str(s) for s in normal["seeds"])
+            if (occ or {}).get("seeds") != normal["seeds"] or (blind or {}).get("seeds") != normal["seeds"]:
+                raise ValueError(f"{scen}/{algo}: intervention passes do not cover the Normal seeds {normal['seeds']}")
+            cells = [_metric(c, "true_objective") for c in (normal, occ, blind, trained)]
             lines.append(
-                f"| {label} | {normal['n_seeds']} | {fmt_pct(scen, _metric(normal, 'true_objective'))} | "
-                f"{fmt_pct(scen, _metric(occ, 'true_objective'))} | {fmt_pct(scen, _metric(blind, 'true_objective'))} | "
-                f"{fmt_pct(scen, _metric(trained, 'true_objective'))} | {fmt_pct(scen, r_m)} |"
+                f"| {label} | {normal['n_seeds']} | " + " | ".join(fmt_pct(scen, m) for m in cells)
+                + f" | {fmt_pct(scen, r_m)} |"
             )
-    return lines
+            tex.append(
+                f"    {name} & {algo} & {seeds} & "
+                + " & ".join(fmt_pct(scen, m, with_ci=False).replace("—", "--") for m in cells + [r_m]) + " \\\\"
+            )
+    return lines, tex
 
 
 def two_by_two_table(two: dict) -> list[str]:
@@ -357,7 +377,7 @@ def state_entity_table(summary: dict) -> tuple[list[str], list[str]]:
         )
         tex_cells = [fmt_pct(scen, m).replace("±", "$\\pm$").replace("—", "--") for m in metrics]
         tex.append(
-            f"    \\textit{{{NAMES[scen]}}} & {algo} & {n} & " + " & ".join(tex_cells)
+            f"    \\textit{{{NAMES[scen]}}} & {algo} & " + " & ".join(tex_cells)
             + f" & {delta.replace('—', '--')} & {per[0].replace('—', '--')} & {per[1].replace('—', '--')} \\\\"
         )
     return md, tex
@@ -387,15 +407,17 @@ def main() -> None:
     md_clean, tex_clean = full_obs_clean_table(clean)
     md_entity, tex_entity = state_entity_table(entity)
     md_v2, tex_v2 = full_obs_global_v2_table(v2)
+    md_vis, tex_vis = visibility_table(inter, rand_fov)
+    md_vision, tex_vision = intervention_table(inter, two, rand)
     sections = [
         ("Placeholder 1: visibility telemetry (MAPPO Pixel-Partial, held-out maps; mean of both agents' viewpoints)",
-         visibility_table(inter, rand_fov)),
+         md_vis),
         ("Placeholder 1b: per-agent visibility for asymmetric roles", per_agent_visibility_table(inter, rand_fov)),
         ("Q1: Partial vs. Shared vision vs. Full (global state) observability (MAPPO, % of ceiling, mean ± 95% CI)",
          md_clean),
         ("Full (own RGB + global state v2, layout pool, 100M) vs. MAPPO Partial from Table 3 (% of ceiling, mean ± 95% CI)",
          md_v2),
-        ("Placeholder 2: partner occlusion and blind policies (% of ceiling)", intervention_table(inter, two, rand)),
+        ("Placeholder 2: partner occlusion and blind policies (% of ceiling)", md_vision),
         ("Placeholder 3: State vs. Pixel x Partial vs. Full (raw score, mean ± 95% CI; * = Full also adds task scalars)", two_by_two_table(two)),
         ("Placeholder 4: ceiling-normalized Table 3 (% of ceiling)", md_t3),
         ("State (entity encoding) vs. Pixel, Partial observability (% of ceiling, mean ± 95% CI)", md_entity),
@@ -408,6 +430,8 @@ def main() -> None:
     (d / "kd6j_full_obs_clean.tex").write_text("\n".join(tex_clean) + "\n", encoding="utf-8")
     (d / "kd6j_state_entity.tex").write_text("\n".join(tex_entity) + "\n", encoding="utf-8")
     (d / "kd6j_full_obs_global_v2.tex").write_text("\n".join(tex_v2) + "\n", encoding="utf-8")
+    (d / "kd6j_visibility.tex").write_text("\n".join(tex_vis) + "\n", encoding="utf-8")
+    (d / "kd6j_vision_controls.tex").write_text("\n".join(tex_vision) + "\n", encoding="utf-8")
     print("\n".join(out))
     print(f"Wrote {d / 'kd6j_tables.md'} and {d / 'kd6j_table3_normalized.tex'}")
 

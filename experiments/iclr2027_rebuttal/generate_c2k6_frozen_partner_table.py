@@ -267,13 +267,13 @@ def scenario_row(scen: str, run: dict[str, Any], floor_raw: float, candidates: l
 
 def render(rows: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
     md = [
-        "| Scenario | Best method | Both learned (%) | Partner no-op (%) | Partner random (%) |",
-        "|---|---|---|---|---|",
+        "| Scenario | Best method | Both learned (%) | Partner no-op (%) | Partner random (%) | Random policy (%) |",
+        "|---|---|---|---|---|---|",
     ]
     tex = []
     for row in rows:
         p = row["pct"]
-        cells = [f"{p['both_learned']:.1f}", f"{p['partner_noop']:.1f}", f"{p['partner_random']:.1f}"]
+        cells = [f"{v:.1f}" for v in (p["both_learned"], p["partner_noop"], p["partner_random"], row["random_policy_pct"])]
         md.append(f"| {row['name']} | {row['algorithm']} | " + " | ".join(cells) + " |")
         tex.append(f"    {row['name']} & {row['algorithm']} & " + " & ".join(cells) + " \\\\")
     return md, tex
