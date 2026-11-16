@@ -13,7 +13,7 @@
   "summaries": [
     {
       "algorithm": "Random",
-      "ci95_half_width": 150.90331914642564,
+      "ci95_half_width": 150.92751505842722,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 7.603313953417615e-05,
       "mean_true_objective": 1060.8,
@@ -45,7 +45,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 1.8719415980246843,
+      "ci95_half_width": 1.8722417460561132,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.002184124631712612,
       "mean_true_objective": -9.10647999999998,
@@ -77,7 +77,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 4.441599999999999,
+      "ci95_half_width": 4.442312168316469,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.005423033963206742,
       "mean_true_objective": 130.6,
@@ -109,7 +109,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 0.2077368181136892,
+      "ci95_half_width": 0.20777012673671352,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.0030684791666666642,
       "mean_true_objective": 0.36000000000000004,
@@ -141,7 +141,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 0.11103999999999999,
+      "ci95_half_width": 0.11105780420791173,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.0030468116659851537,
       "mean_true_objective": 0.04,
@@ -173,7 +173,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 70.88005979302226,
+      "ci95_half_width": 70.89142473647823,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.0020594062442980746,
       "mean_true_objective": 1969.2800000000002,
@@ -269,7 +269,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 0.3237344492018111,
+      "ci95_half_width": 0.3237863569417407,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.007142752427876575,
       "mean_true_objective": 0.43999999999999995,
@@ -333,7 +333,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 0.13599567051932204,
+      "ci95_half_width": 0.13601747613165113,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.003071721053409586,
       "mean_true_objective": 0.08,
@@ -365,7 +365,7 @@
     },
     {
       "algorithm": "Random",
-      "ci95_half_width": 0.20773681811368924,
+      "ci95_half_width": 0.20777012673671355,
       "episodes_total": 25,
       "mean_teammate_pixel_fraction": 0.0038335495370370233,
       "mean_true_objective": 0.24,
